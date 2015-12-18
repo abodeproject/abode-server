@@ -1,0 +1,111 @@
+<html ng-app="abodeMonitor">
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/abode.css">
+<link rel="stylesheet" type="text/css" href="css/statuses.css">
+<link rel="stylesheet" type="text/css" href="css/weather.css">
+<link rel="stylesheet" type="text/css" href="css/background.css">
+<script src="./scripts/abodeMonitor.js"></script>
+<script src="./scripts/datetime.js"></script>
+<script src="./scripts/background.js"></script>
+<script src="./scripts/weather.js"></script>
+<script src="./scripts/statuses.js"></script>
+<script language="Javascript">
+
+</script>
+<style>
+  body {
+    background-color: #000;
+    font-family: Helvetica;
+    font-size: .7em;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  #time {
+    width: 100%;
+      height: 1.5em;
+      position: absolute;
+      top:0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      align-items: center;
+
+      margin: auto;
+      font-size: 18em;
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 0 0 .1em black;
+  }
+
+  #date {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    text-align: right;
+    font-size: 3em;
+    padding-right: .25em;
+    color: #ffffff;
+    text-shadow: 0 0 .1em black;
+  }
+
+  #weather_temp {
+    position: absolute;
+    bottom: .25em;
+    left: 2.5em;
+    font-size: 3em;
+    text-shadow: 0 0 .2em black;
+  }
+
+  #weather_icon {
+    position: absolute;
+    width: 8em;
+    height: 8em;
+    bottom: -.5em;
+    left: -.5em;
+    background-size: 400% 500%;
+  }
+
+  #statuses {
+    position: absolute;
+    bottom: 1em;
+    left: 0em;
+    right: 0em;
+    height: 5em;
+    text-align: center;
+  }
+  #statuses div {
+    background-size: contain;
+    width: 5em;
+    height: 5em;
+    display: inline-block;
+    margin: 0em 1.5em;
+  }
+
+  #shade {
+    background-color: #000;
+    opacity: .7;
+    position: absolute;
+    top: 0em;
+    bottom: 0em;
+    left: 0em;
+    right: 0em;
+  }
+</style>
+</head>
+<body  ng-controller="main as main">
+<background></background>
+<content>
+  <datetime format="EEE, MMM d" id="date"></datetime>
+  <weather id="weather_temp" device="Weather" type="value" value="current.temp">{{current.temp}}&deg;F</weather>
+  <weather id="weather_icon" device="Weather" type="icon" value="current"></weather>
+  <statuses id="statuses">
+    <status room="All" icon="doors" state="doors_open"></status>
+    <status room="All" icon="windows" state="windows_open"></status>
+    <status room="All" icon="motion" state="motion_on"></status>
+  </statuses>
+  <datetime format="h:mm" id="time"></datetime>
+</content>
+</body>
+</html>
