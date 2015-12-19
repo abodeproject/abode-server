@@ -44,7 +44,7 @@ Radiothermostat.get = function (address) {
   var data = '',
     defer = q.defer();
 
-  var uri = '/tstat'
+  var uri = '/tstat';
   var options = {
     host: address,
     path: uri,
@@ -95,7 +95,7 @@ Radiothermostat.load = function () {
     'HEAT',
     'COOL',
     'AUTO'
-  ]
+  ];
 
   if (devices.length === 0) {
     log.info('No Radiothermostat Devices to Query');
