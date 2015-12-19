@@ -12,6 +12,7 @@ var Insteon = function () {
 
   //Set our configuration options
   Insteon.config = abode.config.insteon || {};
+  Insteon.config.enabled = (Insteon.config.enabled === false) ? false : true;
   Insteon.config.serial_device = Insteon.config.serial_device || '/dev/ttyUSB0';
   Insteon.config.serial_baudrate = Insteon.config.serial_baudrate || 19200;
   Insteon.config.serial_databits = Insteon.config.serial_databits || 8;
@@ -38,22 +39,27 @@ var Insteon = function () {
   Insteon.actions = require('./actions')(undefined, Insteon);
   Insteon.modem = require('./modem');
 
-  //Initialize the Insteon Modem
-  Insteon.modem(Insteon).then(function () {
+  if (Insteon.config.enabled === true) {
+    //Initialize the Insteon Modem
+    Insteon.modem(Insteon).then(function () {
 
-    //Start our queue handler
-    Insteon.queueInterval = setInterval(Insteon.queue_handler, 100);
+      //Start our queue handler
+      Insteon.queueInterval = setInterval(Insteon.queue_handler, 100);
 
-    //Resolve the provider defer
-    log.debug('Insteon provider initialized');
+      //Resolve the provider defer
+      log.debug('Insteon provider initialized');
+      defer.resolve();
+
+    }, function (err) {
+      //Reject our provider defer with the error
+      log.error('Insteon provider failed to initialize');
+      defer.reject(err);
+
+    });
+  } else {
+    log.warn('Not starting Insteon.  Not enabled');
     defer.resolve();
-
-  }, function (err) {
-    //Reject our provider defer with the error
-    log.error('Insteon provider failed to initialize');
-    defer.reject(err);
-
-  });
+  }
 
   return defer.promise;
 };

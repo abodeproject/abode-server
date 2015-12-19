@@ -17,7 +17,7 @@ Wunderground = function () {
   routes = require('./routes');
 
   config = abode.config.wunderground || {};
-  config.enabled = config.enabled || true;
+  config.enabled = (config.enabled === false) ? false : true;
   config.server = config.server || 'api.wunderground.com';
   config.interval = config.interval || 5;
   config.temp_units = config.temp_units || 'f';
