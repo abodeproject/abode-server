@@ -79,7 +79,7 @@ angular.module('statuses', ['ui.bootstrap'])
       state: '@',
       interval: '@'
     },
-    controller: function ($scope, $interval, status) {
+    controller: function ($scope, $interval, $uibModal, status) {
       status.add_room($scope.room);
 
       $scope.interval = $scope.interval || 2;
@@ -88,6 +88,27 @@ angular.module('statuses', ['ui.bootstrap'])
       $scope.popup_template = 'roomDevices.html';
       $scope.devices = [];
 
+
+      $scope.openDetails = function () {
+        $uibModal.open({
+          animation: $scope.animationsEnabled,
+          templateUrl: 'roomDevices.html',
+          size: 'lg',
+          controller: function ($scope, $uibModalInstance, devices) {
+            $scope.devices = devices;
+
+            $scope.ok = function () {
+              $uibModalInstance.close();
+            };
+
+          },
+          resolve: {
+            devices: function () {
+              return $scope.devices;
+            }
+          }
+        });
+      };
 
 
       var secondsToString = function (seconds) {
@@ -139,7 +160,7 @@ angular.module('statuses', ['ui.bootstrap'])
 
       $interval(parseRoom, (1000));
     },
-    template: '<button class="status {{icon}}" popover-placement="top" uib-popover-template="popup_template"><span class="status_badge" ng-class="{status_alert: alert}">{{alerting}}</span></button>',
+    template: '<button class="status {{icon}}" ng-click="openDetails()"><span class="status_badge" ng-class="{status_alert: alert}">{{alerting}}</span></button>',
     replace: true,
   };
 
