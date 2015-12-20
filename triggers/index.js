@@ -312,8 +312,7 @@ Triggers.add_listeners = function () {
 };
 
 TriggersSchema.methods.enable = function () {
-  var self = this,
-    defer = q.defer();
+  var self = this;
 
   self.enabled = true;
 
@@ -321,8 +320,7 @@ TriggersSchema.methods.enable = function () {
 };
 
 TriggersSchema.methods.disable = function () {
-  var self = this,
-    defer = q.defer();
+  var self = this;
 
   self.enabled = false;
 
