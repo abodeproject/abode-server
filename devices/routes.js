@@ -98,7 +98,7 @@ router.post('/:id/rooms', web.isJson, function (req, res) {
     return;
   }
 
-  var room = rooms.get(req.body._id);
+  var room = rooms.get(req.body._id || req.body.name);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Room not found'});
     return;

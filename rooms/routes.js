@@ -48,7 +48,7 @@ router.post('/:id/devices', web.isJson, function (req, res) {
     return;
   }
 
-  var device = devices.get(req.body._id);
+  var device = devices.get(req.body._id || req.body.name);
   if (!device) {
     res.status(404).send({'status': 'failed', 'message': 'Device not found'});
     return;
