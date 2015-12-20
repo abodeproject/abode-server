@@ -61,4 +61,30 @@ router.delete('/:id', function (req, res) {
   });
 });
 
+router.post('/:id/enable', function (req, res) {
+  var trigger = triggers.get(req.params.id);
+  if (!trigger) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  trigger.enable().then(function (response) {
+    res.status(200).send(response);
+  }, function (err) {
+    res.status(422).send(err);
+  });
+});
+
+router.post('/:id/disable', function (req, res) {
+  var trigger = triggers.get(req.params.id);
+  if (!trigger) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  trigger.disable().then(function (response) {
+    res.status(200).send(response);
+  }, function (err) {
+    res.status(422).send(err);
+  });
+});
+
 module.exports = router;

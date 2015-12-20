@@ -38,6 +38,7 @@ var TriggersSchema = mongoose.Schema({
     'unique': true,
     'index': true
   },
+  'enabled': {'type': Boolean, 'default': true},
   'match': String,
   'actions': [
     {
@@ -244,6 +245,13 @@ Triggers.fire_trigger = function (config) {
       return false;
     }
 
+    //If the trigger is disable, skip
+    if (config.enabled === false) {
+      log.info('Conditions met but disabled, skipping:', config.name);
+
+      return false;
+    }
+
     //If a delay was specified, trigger it here
     if (config.delay && config.delay.time) {
       setTimeout(delay_handler, config.delay.time * 1000);
@@ -301,6 +309,24 @@ Triggers.add_listeners = function () {
     log.debug('Registering event handler for trigger: %s', trigger.name);
     abode.events.on(trigger.name, Triggers.type_handler(trigger.name));
   });
+};
+
+TriggersSchema.methods.enable = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.enabled = true;
+
+  return self._save();
+};
+
+TriggersSchema.methods.disable = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.enabled = false;
+
+  return self._save();
 };
 
 // Define a save function that returns an promise instead of using a callback
