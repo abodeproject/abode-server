@@ -88,6 +88,26 @@ angular.module('statuses', ['ui.bootstrap'])
       $scope.popup_template = 'roomDevices.html';
       $scope.devices = [];
 
+
+
+      var secondsToString = function (seconds) {
+        var numyears = Math.floor(seconds / 31536000);
+        var numdays = Math.floor((seconds % 31536000) / 86400);
+        var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+        var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+        var numseconds = Math.floor((((seconds % 31536000) % 86400) % 3600) % 60);
+        numyears = (numyears === 0) ? '' : numyears + ' years ';
+        numdays = (numdays === 0) ? '' : numdays + ' days ';
+        numhours = (numhours === 0) ? '' : numhours + ' hours ';
+        numminutes = (numminutes === 0) ? '' : numminutes + ' min ';
+        numseconds = (numseconds === 0) ? '' : numseconds + ' sec ';
+
+        return numyears + numdays + numhours + numminutes + numseconds;
+
+      };
+
+
+
       var parseRoom = function () {
         var data = status.get($scope.room) || [];
 
@@ -96,9 +116,20 @@ angular.module('statuses', ['ui.bootstrap'])
 
         data.forEach(function (room) {
           if (room[$scope.state] === true) {
+            room.age = new Date() - new Date(room.last_on);
             alert = true;
             alerting += 1;
+          } else {
+            room.age = new Date() - new Date(room.last_off);
           }
+
+          if (!isNaN(room.age)) {
+            room.age = room.age / 1000;
+          } else {
+            room.age = 0;
+          }
+
+          room.age = secondsToString(room.age);
         });
 
         $scope.alert = alert;
