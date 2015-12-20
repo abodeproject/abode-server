@@ -1,10 +1,12 @@
 <html ng-app="abodeMonitor">
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="./scripts/ui-bootstrap-tpls-0.14.3.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/abode.css">
 <link rel="stylesheet" type="text/css" href="css/statuses.css">
 <link rel="stylesheet" type="text/css" href="css/weather.css">
 <link rel="stylesheet" type="text/css" href="css/background.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 <script src="./scripts/abodeMonitor.js"></script>
 <script src="./scripts/datetime.js"></script>
 <script src="./scripts/background.js"></script>
@@ -75,13 +77,15 @@
     height: 5em;
     text-align: center;
   }
-  #statuses div {
+  #statuses button {
     position: relative;
     background-size: contain;
     width: 5em;
     height: 5em;
     display: inline-block;
     margin: 0em 1.5em;
+    border: 0px;
+    background-color: transparent;
   }
 
   #shade {

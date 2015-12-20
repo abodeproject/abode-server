@@ -1,0 +1,5 @@
+<div>Devices</div>
+<div class="form-group" style="height: 20em; overflow: auto;">
+  <ul class="list-group">
+    <li class="list-group-item" ng-repeat="device in devices | orderBy: '_on'" ng-class="{'list-group-item-success': '!device._on', 'list-group-item-danger': device._on}">{{device.name}}</li>
+</div>

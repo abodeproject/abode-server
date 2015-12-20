@@ -12,7 +12,7 @@
   background-image: url('../images/motion.png');
 }
 
-.badge {
+.status_badge {
   position: absolute;
   bottom: 0px;
   right: 0px;
@@ -22,6 +22,12 @@
   font-weight: bold;
 }
 
-.alert {
+.status_alert {
   background-color: #ff0000;
+}
+
+.status_list {
+  background-color: #000;
+  position: absolute;
+  left: ;
 }

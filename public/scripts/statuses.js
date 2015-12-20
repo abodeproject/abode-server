@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('statuses', [])
+angular.module('statuses', ['ui.bootstrap'])
 .service('status', function ($interval, $timeout, $http) {
   var rooms = {};
   var loader;
@@ -85,6 +85,8 @@ angular.module('statuses', [])
       $scope.interval = $scope.interval || 2;
       $scope.state = $scope.state || '_on';
       $scope.alerting = 0;
+      $scope.popup_template = 'roomDevices.html';
+      $scope.devices = [];
 
       var parseRoom = function () {
         var data = status.get($scope.room) || [];
@@ -101,11 +103,12 @@ angular.module('statuses', [])
 
         $scope.alert = alert;
         $scope.alerting = alerting;
+        $scope.devices = data;
       };
 
       $interval(parseRoom, (1000));
     },
-    template: '<div class="status {{icon}}"><span class="badge" ng-class="{alert: alert}">{{alerting}}</span></div>',
+    template: '<button class="status {{icon}}" popover-placement="top" uib-popover-template="popup_template"><span class="status_badge" ng-class="{status_alert: alert}">{{alerting}}</span></button>',
     replace: true,
   };
 
