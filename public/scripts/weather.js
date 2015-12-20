@@ -31,8 +31,7 @@ angular.module('weather', ['datetime'])
     Object.keys(devices).forEach(getWeather);
   };
 
-  $interval(load, 10000);
-
+  $interval(load, 1000 * 60);
 
   return {
     add_device: function (device) {
@@ -45,7 +44,7 @@ angular.module('weather', ['datetime'])
         $timeout.cancel(loader);
       }
 
-      loader = $timeout(load, 2000);
+      loader = $timeout(load, 500);
     },
     get: function (device) {
       return devices[device];
@@ -138,7 +137,7 @@ angular.module('weather', ['datetime'])
 
         if ($scope.type === 'icon') {
           var day = parseValue($scope.value, $scope);
-          
+
           if (day.icon === undefined) {
             $scope.icon_class = 'day_unknown';
             $element[0].className = 'day_unknown';
@@ -160,7 +159,7 @@ angular.module('weather', ['datetime'])
         $scope.parsed = parseValue($scope.value, $scope.weather);
       };
 
-      $interval(parseWeather, ($scope.interval * 1000));
+      $interval(parseWeather, (1000));
       $transclude($scope, function(transEl) {
         $element.append(transEl);
       });

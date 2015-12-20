@@ -21,7 +21,7 @@ angular.module('datetime', [])
   updateTime();
   getDetails();
 
-  $interval(updateTime, 1000);
+  $interval(updateTime, 200);
   $interval(getDetails, 1000 * 60);
 
   return {
