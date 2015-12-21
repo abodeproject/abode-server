@@ -1,7 +1,8 @@
-<html ng-app="abodeMonitor">
+<!DOCTYPE html>
+<html lang="en" ng-app="abodeMonitor">
 <head>
 <title>Abode</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="./scripts/ui-bootstrap-tpls-0.14.3.min.js"></script>
 <script src="./scripts/angular-ui-router.min.js"></script>
@@ -23,13 +24,29 @@
   body {
     background-color: #000;
     font-family: Helvetica;
-    font-size: 14px;
     color: #fff;
     overflow: hidden;
+    transition: 1s;
   }
 html, body, .container-table {
     height: 100%;
 }
+@media (max-width: 320px) {
+  body {
+    font-size: 5px;
+  }
+}
+@media (min-width: 480px) {
+  body {
+    font-size: 7px;
+  }
+}
+@media (min-width: 768px) {
+  body {
+    font-size: 11px;
+  }
+}
+
 .container-table {
     display: table;
 }

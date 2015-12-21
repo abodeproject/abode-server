@@ -1,7 +1,7 @@
 
 <background></background>
 <content>
-  <settings ng-click="goSettings()" class="btn btn-primary">Settings</settings>
+  <button ng-click="goSettings()" style="background-color: transparent; text-shadow: 0px 0px .1em #000; font-size: 5em; margin: 0em; padding: 0em; border: 0px; margin-top: .3em; margin-left: .3em;">&#9776;</button>
   <datetime format="EEE, MMM d" id="date"></datetime>
   <weather id="weather_temp" device="Weather" type="value" value="current.temp">{{current.temp}}&deg;F</weather>
   <weather id="weather_icon" device="Weather" type="icon" value="current"></weather>
