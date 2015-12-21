@@ -88,7 +88,6 @@ Web.init = function () {
     var ip = (abode.config.ip_header) ? req.headers[abode.config.ip_header] : req.ip;
 
     if (Web.check_auth(ip, req.path, req.session.auth)) {
-      req.session.auth = true;
       next();
     } else {
       res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
