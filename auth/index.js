@@ -72,7 +72,7 @@ Auth.list = function (conditions) {
   conditions = conditions || {};
 
   Auth.model.find(conditions, function (err, users) {
-    if (err) { defer.reject(err); }
+    if (err) { defer.reject(err); return; }
 
     defer.resolve(users);
   });
