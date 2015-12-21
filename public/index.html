@@ -1,14 +1,17 @@
 <html ng-app="abodeMonitor">
 <head>
+<title>Abode</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="./scripts/ui-bootstrap-tpls-0.14.3.min.js"></script>
+<script src="./scripts/angular-ui-router.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/abode.css">
 <link rel="stylesheet" type="text/css" href="css/statuses.css">
 <link rel="stylesheet" type="text/css" href="css/weather.css">
 <link rel="stylesheet" type="text/css" href="css/background.css">
 <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 <script src="./scripts/abodeMonitor.js"></script>
+<script src="./scripts/auth.js"></script>
 <script src="./scripts/datetime.js"></script>
 <script src="./scripts/background.js"></script>
 <script src="./scripts/weather.js"></script>
@@ -20,11 +23,20 @@
   body {
     background-color: #000;
     font-family: Helvetica;
-    font-size: .7em;
+    font-size: 14px;
     color: #fff;
     overflow: hidden;
   }
-
+html, body, .container-table {
+    height: 100%;
+}
+.container-table {
+    display: table;
+}
+.vertical-center-row {
+    display: table-cell;
+    vertical-align: middle;
+}
   #time {
     width: 100%;
       height: 1.5em;
@@ -100,18 +112,6 @@
   }
 </style>
 </head>
-<body  ng-controller="main as main">
-<background></background>
-<content>
-  <datetime format="EEE, MMM d" id="date"></datetime>
-  <weather id="weather_temp" device="Weather" type="value" value="current.temp">{{current.temp}}&deg;F</weather>
-  <weather id="weather_icon" device="Weather" type="icon" value="current"></weather>
-  <statuses id="statuses">
-    <status room="All Doors" icon="doors"></status>
-    <status room="All Windows" icon="windows"></status>
-    <status room="All Motion" icon="motion"></status>
-  </statuses>
-  <datetime format="h:mm" id="time"></datetime>
-</content>
+<body  ui-view>
 </body>
 </html>

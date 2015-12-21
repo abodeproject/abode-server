@@ -1,0 +1,18 @@
+<div class="container container-table">
+  <div class="row vertical-center-row">
+    <div class="col-md-4 col-md-offset-4" style="background-color: #333; padding: 20px; border-radius: 10px;">
+      <form name="loginFrm">
+        <div class="form-group">
+          <label for="user">User Name</label>
+          <input type="text" class="form-control" id="user" placeholder="User Name" ng-model="user.user" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" placeholder="Password" ng-model="user.password" required>
+        </div>
+        <uib-alert class="alert alert-danger" role="alert" ng-show="error">{{error.message || error}}</uib-alert>
+        <button type="submit" class="btn btn-primary btn-sm" ng-click="login()" ng-disabled="loginFrm.$invalid">Login</button>
+      </form>
+    </div>
+  </div>
+</div>

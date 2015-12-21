@@ -1,9 +1,10 @@
 'use strict';
 
 angular.module('weather', ['datetime'])
-.service('weather', function ($interval, $timeout, $http) {
+.service('weather', function ($interval, $timeout, $http, $state) {
   var devices = {};
   var loader;
+  var updater;
 
   var errorResponse = function (device) {
 
@@ -28,10 +29,16 @@ angular.module('weather', ['datetime'])
   };
 
   var load = function () {
+
+    if ($state.current.name !== 'home') {
+      $interval.cancel(updater);
+      return;
+    }
+
     Object.keys(devices).forEach(getWeather);
   };
 
-  $interval(load, 1000 * 60);
+  updater = $interval(load, 1000 * 60);
 
   return {
     add_device: function (device) {

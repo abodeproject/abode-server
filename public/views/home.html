@@ -1,0 +1,14 @@
+
+<background></background>
+<content>
+  <settings ng-click="goSettings()" class="btn btn-primary">Settings</settings>
+  <datetime format="EEE, MMM d" id="date"></datetime>
+  <weather id="weather_temp" device="Weather" type="value" value="current.temp">{{current.temp}}&deg;F</weather>
+  <weather id="weather_icon" device="Weather" type="icon" value="current"></weather>
+  <statuses id="statuses">
+    <status room="All Doors" icon="doors"></status>
+    <status room="All Windows" icon="windows"></status>
+    <status room="All Motion" icon="motion"></status>
+  </statuses>
+  <datetime format="h:mm" id="time"></datetime>
+</content>

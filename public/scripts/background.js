@@ -12,7 +12,9 @@ angular.module('background', [])
       bgB: '@',
       interval: '@'
     },
-    controller: function ($scope, $interval, $timeout) {
+    controller: function ($scope, $interval, $timeout, $state) {
+
+      var updater;
 
       $scope.interval = $scope.interval || 60;
       $scope.bgA = {};
@@ -27,6 +29,10 @@ angular.module('background', [])
       var previous = 0;
 
       var updateBackground = function () {
+        if ($state.current.name !== 'home') {
+          $interval.cancel(updater);
+          return;
+        }
 
         next = (next === 0) ? 1 : 0;
         previous = (next === 0) ? 1 : 0;
@@ -48,7 +54,7 @@ angular.module('background', [])
 
       };
 
-      $interval(updateBackground, (1000 * $scope.interval));
+      updater = $interval(updateBackground, (1000 * $scope.interval));
       updateBackground();
 
     },

@@ -2,9 +2,13 @@
 
 var abode,
   q = require('q'),
+  addr = require('netaddr').Addr,
   logger = require('log4js'),
   log = logger.getLogger('abode.web'),
   bodyParser = require('body-parser'),
+  session = require('express-session'),
+  MongoStore = require('connect-mongo')(session),
+  pathspec = require('pathspec').Mask,
   express = require('express');
 
 var Web = function () {
@@ -37,30 +41,59 @@ var Web = function () {
 
 };
 
-Web.check_auth = function (ip, uri) {
-  if (abode.config.allow_networks.indexOf(ip) > -1) {
+Web.check_auth = function (ip, uri, auth) {
+  var allowed = false;
+
+  if (auth) {
     return true;
   }
 
-  if (abode.config.allow_uris.indexOf(uri) > -1) {
-    return true;
-  }
+  abode.config.allow_networks.forEach(function (net) {
 
-  return false;
+    allowed = (addr(net).contains(addr(ip))) ? true : allowed;
+
+  });
+
+  abode.config.allow_uris.forEach(function (matcher) {
+
+    allowed = (pathspec.parse(matcher).matches(uri)) ? true : allowed;
+
+  });
+
+  return allowed;
 };
 
 Web.init = function () {
+
+  //Get abode
+  abode = require('../abode');
+
+  var store_config = {
+    mongooseConnection: abode.db,
+  };
+
 
   //Create an express instance
   Web.server = express();
   Web.server.use(logger.connectLogger(log));
   Web.server.use(bodyParser.json());
+  Web.server.use(session({
+    name: 'abode-auth',
+    saveUninitialized: true,
+    resave: true,
+    secret: abode.config.secret || 'XAj2XTOQ5TA#ybgNxl#cw6pcyDn%bKeh',
+    store: new MongoStore(store_config)
+  }));
   Web.server.use(function (req, res, next) {
-    if (Web.check_auth(req.ip, req.path)) {
+    var ip = (abode.config.ip_header) ? req.headers[abode.config.ip_header] : req.ip;
+
+    if (Web.check_auth(ip, req.path, req.session.auth)) {
+      req.session.auth = true;
       next();
     } else {
       res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
     }
+
   });
   Web.server.use('/', express.static(__dirname + '/../public'));
   Web.server.use(function (req, res, next) {

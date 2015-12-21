@@ -19,6 +19,7 @@ Abode.init = function (config) {
   config.path = config.path || './config.ini';
   config.read_config = config.read_config || true;
   config.allow_networks = config.allow_networks || ['127.0.0.1'];
+  config.ip_header = config.ip_header;
   config.allow_uris = config.allow_uris || ['/', '/auth/*', '/scripts/*', '/css/*', '/images/*'];
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
@@ -78,6 +79,7 @@ Abode.init = function (config) {
   var start = function() {
     //Load out modules
     Abode.providers = require('../providers');
+    Abode.auth = require('../auth');
     Abode.rooms = require('../rooms');
     Abode.devices = require('../devices');
     Abode.triggers = require('../triggers');
@@ -88,6 +90,7 @@ Abode.init = function (config) {
     //Start initializing our modules
     loadModule('providers')(Abode.config.providers)
     .then(loadModule('web'))
+    .then(loadModule('auth'))
     .then(loadModule('rooms'))
     .then(loadModule('devices'))
     .then(loadModule('triggers'))

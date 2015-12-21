@@ -1,9 +1,10 @@
 'use strict';
 
 angular.module('statuses', ['ui.bootstrap'])
-.service('status', function ($interval, $timeout, $http) {
+.service('status', function ($interval, $timeout, $http, $state) {
   var rooms = {};
   var loader;
+  var updater;
 
   console.log('statuses');
 
@@ -30,10 +31,16 @@ angular.module('statuses', ['ui.bootstrap'])
   };
 
   var load = function () {
+    if ($state.current.name !== 'home') {
+      $interval.cancel(updater);
+      return;
+    }
+
     Object.keys(rooms).forEach(getRoom);
+
   };
 
-  $interval(load, 10000);
+  updater = $interval(load, 10000);
 
   return {
     add_room: function (room) {
