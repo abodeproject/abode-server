@@ -6,11 +6,11 @@
   <datetime format="EEE, MMM d" id="date"></datetime>
   <datetime format="h:mm" id="time"></datetime>
 
-  <weather bottom=".25" left="2.5" size="3" align="right" width="2" device="Weather" type="value">
+  <weather bottom=".6" left="2.5" size="3" align="right" width="3.2" device="Weather" type="value">
     {{current.temp}}&deg;F
   </weather>
 
-  <weather size="2" bottom=".25" left="7" type="value" device="Weather" ng-show="current.rain_total > 0">
+  <weather size="1.6" bottom=".25" left="5" type="value" device="Weather">
     <img src="./images/rain_gauge.png" style="height: 1em;"> {{current.rain_total}}in
   </weather>
 

@@ -204,8 +204,8 @@ angular.module('weather', ['datetime'])
             return;
           }
 
-          $element[0].className = tod + '_' + icon;
-          $scope.icon_class = 'weather weather-icon ' + tod + '_' + icon;
+          $element[0].className = 'weather weather-icon ' + tod + '_' + icon;
+          $scope.icon_class = tod + '_' + icon;
           return;
         }
 
