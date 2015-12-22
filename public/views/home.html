@@ -2,13 +2,23 @@
 <background></background>
 <content>
   <button ng-click="goSettings()" style="background-color: transparent; text-shadow: 0px 0px .1em #000; font-size: 5em; margin: 0em; padding: 0em; border: 0px; margin-top: .3em; margin-left: .3em;">&#9776;</button>
+
   <datetime format="EEE, MMM d" id="date"></datetime>
-  <weather id="weather_temp" device="Weather" type="value" value="current.temp">{{current.temp}}&deg;F</weather>
-  <weather id="weather_icon" device="Weather" type="icon" value="current"></weather>
+  <datetime format="h:mm" id="time"></datetime>
+
+  <weather bottom=".25" left="2.5" size="3" align="right" width="2" device="Weather" type="value">
+    {{current.temp}}&deg;F
+  </weather>
+
+  <weather size="2" bottom=".25" left="7" type="value" device="Weather" ng-show="current.rain_total > 0">
+    <img src="./images/rain_gauge.png" style="height: 1em;"> {{current.rain_total}}in
+  </weather>
+
+  <weather width="8" height="8" bottom="-.5" left="-.5" device="Weather" type="icon" value="current"></weather>
+
   <statuses id="statuses">
     <status room="All Doors" icon="doors"></status>
     <status room="All Windows" icon="windows"></status>
     <status room="All Motion" icon="motion"></status>
   </statuses>
-  <datetime format="h:mm" id="time"></datetime>
 </content>

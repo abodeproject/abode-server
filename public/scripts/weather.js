@@ -69,6 +69,14 @@ angular.module('weather', ['datetime'])
       value: '@',
       device: '@',
       interval: '@',
+      left: '@',
+      right: '@',
+      top: '@',
+      bottom: '@',
+      width: '@',
+      height: '@',
+      size: '@',
+      align: '@',
     },
     controllerAs: 'weather',
     controller: function ($scope, $interval, $timeout, $http, $element, $transclude, weather, datetime) {
@@ -78,8 +86,42 @@ angular.module('weather', ['datetime'])
       $scope.weather = {
         current: {},
         forecast: {},
-      }
+      };
       weather.add_device($scope.device);
+
+      if ($scope.left !== undefined) {
+        $element[0].style.left = $scope.left + 'em';
+      }
+
+      if ($scope.right !== undefined) {
+        $element[0].style.right = $scope.right + 'em';
+      }
+
+      if ($scope.top !== undefined) {
+        $element[0].style.top = $scope.top + 'em';
+      }
+
+      if ($scope.bottom !== undefined) {
+        $element[0].style.bottom = $scope.bottom + 'em';
+      }
+
+      if ($scope.width !== undefined) {
+        $element[0].style.width = $scope.width + 'em';
+      }
+
+      if ($scope.height !== undefined) {
+        $element[0].style.height = $scope.height + 'em';
+      }
+
+      if ($scope.size !== undefined) {
+        $element[0].style.fontSize = $scope.size + 'em';
+      }
+
+      if ($scope.align !== undefined) {
+        $element[0].style.textAlign = $scope.align;
+      }
+
+      $element[0].className = 'weather';
 
       $scope.icons = {
         'chanceflurries': 'snow',
@@ -105,6 +147,10 @@ angular.module('weather', ['datetime'])
       };
 
       var parseValue = function (value, data) {
+
+        if (value === undefined) {
+          return '?';
+        }
 
         var split = value.split('.'),
           obj = data;
@@ -147,19 +193,19 @@ angular.module('weather', ['datetime'])
 
           if (day.icon === undefined) {
             $scope.icon_class = 'day_unknown';
-            $element[0].className = 'day_unknown';
+            $element[0].className = 'weather weather-icon day_unknown';
             return;
           }
 
           var icon = $scope.icons[day.icon];
           if (icon === undefined) {
-            $element[0].className = 'day_unknown';
+            $element[0].className = 'weather weather-icon day_unknown';
             $scope.icon_class = 'day_unknown';
             return;
           }
 
           $element[0].className = tod + '_' + icon;
-          $scope.icon_class = tod + '_' + icon;
+          $scope.icon_class = 'weather weather-icon ' + tod + '_' + icon;
           return;
         }
 

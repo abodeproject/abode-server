@@ -1,4 +1,14 @@
 
+
+.weather {
+  position: absolute;
+  text-shadow: 0 0 .2em black;
+}
+
+.weather-icon {
+  background-size: 400% 500%;
+}
+
 .day_unknown, .night_unknown {
   background-image: url('../images/weather.png');
   background-position: 100% 75%;
