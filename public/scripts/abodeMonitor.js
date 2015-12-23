@@ -119,7 +119,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       responseError: function (rejection) {
         if (rejection.status === 401 && rejection.config.url !== './auth') {
           $rootScope.authorized = false;
-        } else if (rejection.status === -1) {
+        } else if ( [-1, 503].indexOf(rejection.status) >= 0 ) {
           $rootScope.http_error = true;
         }
         $rootScope.http_processing = false;
@@ -138,5 +138,5 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       template: '<div class="content" ng-transclude></div>',
       replace: true,
     };
-  })
+  });
 
