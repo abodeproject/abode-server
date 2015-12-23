@@ -15,6 +15,9 @@
     <span ng-show="current.rain_total > 0">
     <i class="wi wi-umbrella"></i> {{current.rain_total}}in
     </span>
+    <span ng-show="current.rain_total == 0">
+    <i class="wi wi-humidity"></i> {{current.humidity}}
+    </span>
   </weather>
 
   <weather width="8" height="8" bottom="-.5" left="-.5" device="Weather" type="icon" value="current"></weather>
