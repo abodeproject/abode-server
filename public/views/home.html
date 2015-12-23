@@ -6,8 +6,12 @@
   <datetime format="EEE, MMM d" id="date"></datetime>
   <datetime format="h:mm" id="time"></datetime>
 
-  <weather bottom=".6" left="2.5" size="3" width="3.2" device="Weather" type="value">
+  <weather bottom=".6" left="2.5" size="3" width="5.2" device="Weather" type="value">
     {{current.temp}}&deg;F
+    <span style="font-size: .35em; display: inline-block;">
+      <div>{{forecast[0].temp_high}}</div>
+      <div>{{forecast[0].temp_low}}</div>
+    </span>
   </weather>
 
   <weather size="1.6" bottom=".25" left="4.8" type="value" device="Weather">
