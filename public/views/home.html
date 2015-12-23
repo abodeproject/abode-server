@@ -10,9 +10,11 @@
     {{current.temp}}&deg;F
   </weather>
 
-  <weather size="1.6" bottom=".25" left="5" type="value" device="Weather">
-    <i class="wi wi-strong-wind wi-fw"></i> {{current.wind}}mph
+  <weather size="1.6" bottom=".25" left="4.8" type="value" device="Weather">
+    <i class="wi wi-wind wi-towards-n" style="transform: rotate({{current.wind_degrees}}deg); transition: 1s;"></i> {{current.wind}}mph
+    <span ng-show="current.rain_total > 0">
     <i class="wi wi-umbrella"></i> {{current.rain_total}}in
+    </span>
   </weather>
 
   <weather width="8" height="8" bottom="-.5" left="-.5" device="Weather" type="icon" value="current"></weather>
