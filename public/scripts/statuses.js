@@ -11,7 +11,8 @@ angular.module('statuses', ['ui.bootstrap'])
   var errorResponse = function (room) {
 
     return function (response) {
-      console.log('Error getting devices for room %s: %s', room, response);
+      //console.log('Error getting devices for room %s: %s', room, response);
+      return;
     };
 
   };

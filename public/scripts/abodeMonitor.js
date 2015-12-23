@@ -1,8 +1,9 @@
 'use strict';
 
 angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'ui.router'])
-  .config(function($stateProvider, $urlRouterProvider) {
+  .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
+    $httpProvider.interceptors.push('abodeHttpInterceptor');
     $urlRouterProvider.otherwise('/home');
 
     $stateProvider
@@ -84,8 +85,47 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       }
     });
   })
-  .controller('main', function(devices) {
-    devices.start();
+  .controller('main', function($rootScope, $http, $interval) {
+    var connection_checker = function () {
+      if ($rootScope.http_error) {
+        $http.get('./auth').then(function () {
+          return;
+        });
+      }
+    };
+
+    $interval(connection_checker, 1000 * 5);
+  })
+  .factory('abodeHttpInterceptor', function ($rootScope, $q, $interval) {
+    $rootScope.http_error = false;
+
+    return {
+      request: function (request) {
+        if (request.url !== './auth' && $rootScope.http_error) {
+          return $q.reject(request);
+        }
+        $rootScope.http_processing = true;
+        return request;
+      },
+      requestError: function (rejection) {
+        $rootScope.http_processing = false;
+        return $q.reject(rejection);
+      },
+      response: function (response) {
+        $rootScope.http_processing = false;
+        $rootScope.http_error = false;
+        return response;
+      },
+      responseError: function (rejection) {
+        if (rejection.status === 401 && rejection.config.url !== './auth') {
+          $rootScope.authorized = false;
+        } else if (rejection.status === -1) {
+          $rootScope.http_error = true;
+        }
+        $rootScope.http_processing = false;
+        return $q.reject(rejection);
+      }
+    };
   })
   .directive('content', function () {
     return {
@@ -99,35 +139,4 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       replace: true,
     };
   })
-  .provider('devices', function () {
-    var weather = {'foo': true};
-    var time = {};
-    var rooms = {};
-
-    this.config = {};
-
-    var parseWeather = function (response) {
-      weather = response.data;
-    };
-
-    var parseTime = function (response) {
-      time = response.data;
-    };
-
-    this.$get = function ($interval, $http) {
-
-      return {
-        'weather': function () { return weather; },
-        'time': function () { return time; },
-        'rooms': function () {return rooms;},
-        'start': function () {
-        },
-        'add_rooms': function () {
-
-        }
-      };
-
-    };
-
-  });
 
