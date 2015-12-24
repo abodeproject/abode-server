@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'ui.router'])
+angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'ui.router','ngTouch'])
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
@@ -85,7 +85,20 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       }
     });
   })
-  .controller('main', function($rootScope, $http, $interval) {
+  .controller('main', function($rootScope, $scope, $http, $interval) {
+    $scope.anav_visible = false;
+
+    $scope.anav_hide = function () {
+      $scope.anav_visible = false;
+    };
+    $scope.anav_show = function () {
+      $scope.anav_visible = true;
+    };
+
+    $rootScope.$on('$stateChangeStart', function () {
+      $scope.anav_hide();
+    });
+
     var connection_checker = function () {
       if ($rootScope.http_error) {
         $http.get('./auth').then(function () {

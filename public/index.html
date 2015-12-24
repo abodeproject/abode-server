@@ -4,6 +4,7 @@
 <title>Abode</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-touch.min.js"></script>
 <script src="./scripts/ui-bootstrap-tpls-0.14.3.min.js"></script>
 <script src="./scripts/angular-ui-router.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/abode.css">
@@ -33,19 +34,43 @@
 html, body, .container-table {
     height: 100%;
 }
+  .anav-drawer {
+    font-size: 13px;
+  }
+  .anav-opener {
+    font-size: 40px;
+  }
 @media (min-width: 360px) {
   body {
     font-size: 6px;
+  }
+  .anav-drawer {
+    font-size: 12px;
+  }
+  .anav-opener {
+    font-size: 45px;
   }
 }
 @media (min-width: 480px) {
   body {
     font-size: 8px;
   }
+  .anav-drawer {
+    font-size: 11px;
+  }
+  .anav-opener {
+    font-size: 50px;
+  }
 }
 @media (min-width: 768px) {
   body {
     font-size: 11px;
+  }
+  .anav-drawer {
+    font-size: 10px;
+  }
+  .anav-opener {
+    font-size: 60px;
   }
 }
 
@@ -112,9 +137,141 @@ html, body, .container-table {
     left: 0em;
     right: 0em;
   }
+  .content {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    z-index: 1;
+  }
+  .anav-drawer {
+    position: absolute;
+    width: 20em;
+    top: 0em;
+    bottom: 0em;
+    left: -22em;
+    background-color: #333;
+    z-index: 9999;
+    box-shadow: 0em 0em 1em #000;
+    transition: left .25s ease-out;
+  }
+
+  .anav-top {
+    position: absolute;
+    padding: 1em;
+    height: 7em;
+    top: 0em;
+    left: 0em;
+    right: 0em;
+  }
+  .anav-mid {
+    position: absolute;
+    bottom: 4em;
+    top: 7em;
+    left: 0em;
+    right: 0em;
+    overflow-y: auto;
+    background-color: #444;
+  }
+  .anav-mid ul {
+    list-style: none;
+    padding: 0px;
+  }
+  .anav-mid ul li {
+    font-size: 1.3em;
+    padding: 1em;
+    cursor: pointer;
+  }
+  .anav-mid ul li:hover {
+    background-color: #555;
+  }
+  .anav-bottom {
+    background-color: #333;
+    position: absolute;
+    bottom: 0em;
+    height: 4em;
+    left: 0em;
+    right: 0em;
+  }
+  .anav-bottom ul {
+    list-style: none;
+    padding: 0px;
+  }
+  .anav-bottom ul li {
+    display: inline-block;
+    width: 7.55em;
+    font-size: 1.3em;
+    padding: 1em;
+    cursor: pointer;
+    text-align: center;
+  }
+  .anav-bottom ul li:hover {
+    background-color: #222;
+  }
+  .anav-shade {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    opacity: .7;
+    background-color: #000;
+    z-index: 9998;
+  }
+  .anav-visible {
+    left: 0em;
+  }
+  .anav-opener {
+    background-color: transparent;
+    text-shadow: 0px 0px .1em #000;
+    margin: 0em;
+    padding: 0em;
+    border: 0px;
+    margin-top: 0em;
+    margin-left: .3em;
+    z-index: 99999;
+  }
+  .anav {
+    position: absolute;
+    top: 0em;
+    bottom: 0em;
+    left: 0em;
+    right: 0em;
+    z-index: 9999;
+    background: transparent;
+  }
 </style>
 </head>
-<body ng-controller="main" ui-view>
-<i class="glyphicon glyphicon-refresh"></i>
+<body ng-controller="main" ng-swipe-right="anav_show()" ng-swipe-left="anav_hide()">
+  <div class="content" ui-view>
+    <i class="glyphicon glyphicon-refresh"></i> Loading...
+  </div>
+  <div class="anav-shade" ng-click="anav_hide()" ng-show="anav_visible"></div>
+  <div class="anav-drawer" ng-class="{'anav-visible': anav_visible}">
+    <div class="anav-opener">
+
+    </div>
+    <div class="anav-top">
+    <img src="./images/home.png" style="height: 5em;">
+    </div>
+    <div class="anav-mid">
+      <ul>
+        <li ui-sref="home"><i class="glyphicon glyphicon-home"></i> Home</li>
+        <li ui-sref="rooms"><i class="glyphicon glyphicon-modal-window"></i> Rooms</li>
+        <li ui-sref="devices"><i class="glyphicon glyphicon-oil"></i> Devices</li>
+        <li ui-sref="triggers"><i class="glyphicon glyphicon-tasks"></i> Triggers</li>
+      </ul>
+    </div>
+    <div class="anav-bottom">
+      <ul>
+        <li ui-sref="settings"><i class="glyphicon glyphicon-cog"></i> Settings</li>
+        <li class="text-right"><i class="glyphicon glyphicon-log-out"></i> Logout</li>
+      </ul>
+    </div>
+  </div>
+  <div style="position: absolute; z-index: 9997">
+  <button class="anav-opener"  ng-click="anav_show()">&#9776;</button>
+  </div>
 </body>
 </html>
