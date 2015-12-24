@@ -54,12 +54,13 @@ angular.module('statuses', ['ui.bootstrap'])
 
       loader = $timeout(load, 500);
     },
+    rooms: rooms,
     get: function (room) {
       return rooms[room] || [];
     }
   };
 })
-.filter('ageHumanReadable', function () {
+.filter('ageHumanReadable', function ($q) {
 
 
   var secondsToString = function (seconds) {
@@ -79,7 +80,7 @@ angular.module('statuses', ['ui.bootstrap'])
   };
 
   return function (input) {
-    return secondsToString(input);
+    return (!isNaN(input)) ? secondsToString(input): '&nbsp;';
   };
 
 })
@@ -124,17 +125,28 @@ angular.module('statuses', ['ui.bootstrap'])
           animation: $scope.animationsEnabled,
           templateUrl: 'roomDevices.html',
           size: 'lg',
-          controller: function ($scope, $uibModalInstance, devices) {
-            $scope.devices = devices;
+          controller: function ($scope, $uibModalInstance, $timeout, room, status) {
+            $scope.devices = status.rooms[room];
 
+            var getDevices = function () {
+              var devices = status.rooms[room];
+              if (devices.length > 0) {
+                $scope.devices = devices;
+              } else {
+                console.dir(devices);
+              }
+              $timeout(getDevices, 5000);
+            };
+
+            getDevices();
             $scope.ok = function () {
               $uibModalInstance.close();
             };
 
           },
           resolve: {
-            devices: function () {
-              return $scope.devices;
+            room: function () {
+              return $scope.room;
             }
           }
         });
@@ -160,7 +172,7 @@ angular.module('statuses', ['ui.bootstrap'])
 
 
       var parseRoom = function () {
-        var data = status.get($scope.room) || [];
+        var data = status.rooms[$scope.room] || [];
 
         var alert = false,
           alerting = 0;
