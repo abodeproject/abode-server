@@ -1,3 +1,5 @@
 node_modules/*
 public/vendor/*
 config.ini
+public/webcam*
+public/images/day.jpg
