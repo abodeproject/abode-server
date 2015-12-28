@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'ui.router','ngTouch'])
+angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'ui.router','ngTouch'])
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
@@ -62,6 +62,40 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
           auth.logout().then(function () {
             $state.go('login');
           });
+        };
+      }
+    })
+    .state('rooms', {
+      url: '/rooms',
+      title: 'Abode Rooms',
+      templateUrl: '/views/rooms.html',
+      controller: function () {
+
+      }
+    })
+    .state('devices', {
+      url: '/devices',
+      title: 'Abode Devices',
+      templateUrl: '/views/devices.html',
+      controller: function () {
+
+      }
+    })
+    .state('triggers', {
+      url: '/triggers',
+      title: 'Abode Triggers',
+      templateUrl: '/views/triggers.html',
+      controller: function () {
+
+      }
+    })
+    .state('logout', {
+      url: '/logout',
+      title: 'Abode Logout',
+      templateUrl: '/views/logout.html',
+      controller: function ($scope, $state, auth) {
+        $scope.logout = function () {
+          auth.logout();
         };
       }
     })
