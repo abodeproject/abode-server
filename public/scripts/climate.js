@@ -80,7 +80,7 @@ angular.module('climate', ['ui.bootstrap'])
       height: '@',
       width: '@'
     },
-    controller: function ($scope, $interval, $uibModal, climate) {
+    controller: function ($scope, $interval, $uibModal, climate, devices) {
       climate.add_room($scope.room);
 
       $scope.interval = $scope.interval || 2;
@@ -101,6 +101,10 @@ angular.module('climate', ['ui.bootstrap'])
           size: 'lg',
           controller: function ($scope, $uibModalInstance, $timeout, room, climate) {
             $scope.devices = climate.rooms[room];
+
+            $scope.open = function (device) {
+              devices.openDevice(device);
+            };
 
             $scope.has_capability = function (device, cap) {
               return (device.capabilities.indexOf(cap) !== -1);
@@ -127,7 +131,7 @@ angular.module('climate', ['ui.bootstrap'])
             }
           }
         });
-      }; 
+      };
 
       var parseRoom = function () {
         var data = climate.rooms[$scope.room] || [];

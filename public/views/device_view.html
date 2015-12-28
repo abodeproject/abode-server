@@ -1,0 +1,12 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{name}}</h4>
+</div>
+<div class="modal-body">
+  <div ng-repeat="capability in capabilities" ng-include="capability.view" class="row" >
+  </div>
+</div>
+
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary btn-sm" type="button" ng-click="ok()">Close</button>
+</div>

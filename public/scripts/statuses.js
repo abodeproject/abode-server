@@ -110,7 +110,7 @@ angular.module('statuses', ['ui.bootstrap'])
       state: '@',
       interval: '@'
     },
-    controller: function ($scope, $interval, $uibModal, status) {
+    controller: function ($scope, $interval, $uibModal, status, devices) {
       status.add_room($scope.room);
 
       $scope.interval = $scope.interval || 2;
@@ -127,6 +127,10 @@ angular.module('statuses', ['ui.bootstrap'])
           size: 'lg',
           controller: function ($scope, $uibModalInstance, $timeout, room, status) {
             $scope.devices = status.rooms[room];
+
+            $scope.open = function (device) {
+              devices.openDevice(device);
+            };
 
             var getDevices = function () {
               var devices = status.rooms[room];

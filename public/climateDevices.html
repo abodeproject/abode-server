@@ -1,7 +1,7 @@
 <div class="modal-body">
 
   <ul class="list-group">
-    <li class="list-group-item" ng-repeat="device in devices | orderBy: '+name'" ng-class="{'list-group-item-muted': '!device._on', 'list-group-item-success': device._on, 'list-group-item-info': device._mode == 'COOL', 'list-group-item-danger': device._mode == 'HEAT'}"><h5 class="list-group-item-heading">{{device.name}}</h5>
+    <li class="list-group-item" ng-repeat="device in devices | orderBy: '+name'" ng-class="{'list-group-item-muted': '!device._on', 'list-group-item-success': device._on, 'list-group-item-info': device._mode == 'COOL', 'list-group-item-danger': device._mode == 'HEAT'}" ng-click="open(device.name)"><h5 class="list-group-item-heading">{{device.name}}</h5>
        <p style="font-size: 1.4em;" class="list-group-item-text text-right">
          <i class="icon-fan" ng-show="has_capability(device, 'fan')"></i>
          <i class="icon-snow" ng-show="device._mode == 'COOL'"></i>
