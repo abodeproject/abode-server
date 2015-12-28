@@ -188,6 +188,7 @@ var actions = [
   'set_temperature',
   'set_mode',
   'set_humidity',
+  'set_point',
   'status',
 ];
 

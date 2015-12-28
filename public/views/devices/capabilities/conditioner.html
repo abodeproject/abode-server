@@ -1,6 +1,13 @@
-<div class="col-xs-7">
-  <h2><i class="icon-fire"></i> </h2>
-  <h2><i class="icon-snow"></i> </h2>
-  <h2><i class="glyphicon glyphicon-off"></i> </h2>
-  <h2>{{device._set_point}}&deg; F</h2>
+<div class="container-fluid">
+  <div class="col-xs-5">
+    <div class="img-circle" ng-click="set_mode('HEAT')" ng-class="{'bg-danger': device._mode == 'HEAT'}" style="cursor: pointer; margin: .5em; width: 1.7em; padding-top: .2em; text-align: center; vertical-align: middle; font-size: 4em;"><i class="icon-fire"></i></div>
+    <div class="img-circle" ng-click="set_mode('COOL')"  ng-class="{'bg-info': device._mode == 'COOL'}" style="cursor: pointer; margin: .5em; width: 1.7em; padding-top: .2em; text-align: center; vertical-align: middle; font-size: 4em;"><i class="icon-snow"></i></div>
+    <div class="img-circle" ng-click="set_mode('OFF')"  ng-class="{'bg-muted': device._mode == 'OFF'}" style="cursor: pointer; margin: .5em; width: 1.7em; padding-top: .2em; text-align: center; vertical-align: middle; font-size: 4em;"><i class="glyphicon glyphicon-off"></i></div>
+  </div>
+  <div class="col-xs-7 text-center" style="font-size: 6em;padding-top: .3em;">
+    <div><i class="icon-chevron-up" style="cursor: pointer;" ng-click="temp_up()"></i></div>
+    <div>{{device._set_point}}&deg;</div>
+    <div><i class="icon-chevron-down" style="cursor: pointer;" ng-click="temp_down()"></i></div>
+
+  </div>
 </div>
