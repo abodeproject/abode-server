@@ -10,8 +10,10 @@
 <link rel="stylesheet" type="text/css" href="css/abode.css">
 <link rel="stylesheet" type="text/css" href="css/statuses.css">
 <link rel="stylesheet" type="text/css" href="css/weather.css">
+<link rel="stylesheet" type="text/css" href="css/climate.css">
 <link rel="stylesheet" type="text/css" href="css/background.css">
 <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/whhg.css">
 <link rel="stylesheet" type="text/css" href="css/weather-icons.css">
 <link rel="stylesheet" type="text/css" href="css/weather-icons-wind.css">
 <script src="./scripts/abodeMonitor.js"></script>
@@ -20,6 +22,7 @@
 <script src="./scripts/background.js"></script>
 <script src="./scripts/weather.js"></script>
 <script src="./scripts/statuses.js"></script>
+<script src="./scripts/climate.js"></script>
 <script language="Javascript">
 
 </script>
@@ -101,7 +104,7 @@ html, body, .container-table {
   #date {
     position: absolute;
     right: 0px;
-    bottom: 0px;
+    top: 0px;
     text-align: right;
     font-size: 3em;
     padding-right: .25em;
@@ -230,7 +233,7 @@ html, body, .container-table {
     border: 0px;
     margin-top: 0em;
     margin-left: .3em;
-    z-index: 99999;
+    z-index: 1000;
   }
   .anav {
     position: absolute;
@@ -270,7 +273,7 @@ html, body, .container-table {
       </ul>
     </div>
   </div>
-  <div style="position: absolute; z-index: 9997">
+  <div style="position: absolute; z-index: 1000">
   <button class="anav-opener"  ng-click="anav_show()">&#9776;</button>
   </div>
 </body>
