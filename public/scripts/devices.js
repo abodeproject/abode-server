@@ -41,9 +41,9 @@ angular.module('devices', [])
 
           $scope.toggle_onoff = function () {
             if ($scope.device._on) {
-              $http.post('/devices/' + $scope.device.name + '/on');
-            } else {
               $http.post('/devices/' + $scope.device.name + '/off');
+            } else {
+              $http.post('/devices/' + $scope.device.name + '/on');
             }
           };
 
