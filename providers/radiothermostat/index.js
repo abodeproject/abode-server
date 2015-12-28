@@ -107,7 +107,8 @@ Radiothermostat.load = function () {
 
       device.set_state({
         _temperature: data.temp,
-        _mode: modes[data.tmode]
+        _mode: modes[data.tmode],
+        _set_point: data.t_heat || data.t_cool || 0
       });
 
     });
