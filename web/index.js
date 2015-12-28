@@ -44,15 +44,17 @@ var Web = function () {
 Web.check_auth = function (ip, uri, auth) {
   var allowed = false;
 
-  if (auth) {
-    return true;
-  }
-
   abode.config.allow_networks.forEach(function (net) {
 
     allowed = (addr(net).contains(addr(ip))) ? true : allowed;
 
   });
+  
+  if (allowed) { return true; }
+
+  if (auth) {
+    return true;
+  }
 
   abode.config.allow_uris.forEach(function (matcher) {
 
@@ -85,7 +87,7 @@ Web.init = function () {
     store: new MongoStore(store_config)
   }));
   Web.server.use(function (req, res, next) {
-    var ip = (abode.config.ip_header) ? req.headers[abode.config.ip_header] : req.ip;
+    var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
 
     if (Web.check_auth(ip, req.path, req.session.auth)) {
       next();
