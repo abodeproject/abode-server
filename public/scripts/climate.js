@@ -87,8 +87,6 @@ angular.module('climate', ['ui.bootstrap'])
       $scope.devices = [];
       $scope.value = '';
       $scope.styles = {
-        'right': '1em',
-        'bottom': '1em'
       };
       $scope.is_fan = false;
       $scope.is_cool = false;
@@ -167,7 +165,7 @@ angular.module('climate', ['ui.bootstrap'])
 
       $interval(parseRoom, (1000));
     },
-    template: '<button ng-click="openDetails()" class="img-circle climate" ng-style="styles"><div class="climate-value">{{value}}&deg;</div><div class="climate-fan bg-success img-circle" ng-show="is_fan"><i class="icon-fan"></i></div><div class="bg-info climate-cool img-circle" ng-show="is_cool"><i class="icon-snow"></i></div><div class="bg-danger climate-heat img-circle" ng-show="is_heat"><i class="icon-fire"></i></div></button>',
+    template: '<li><button ng-click="openDetails()" class="status img-circle"><div class="climate-value">{{value}}&deg;</div><div class="climate-icon climate-fan bg-success img-circle" ng-show="is_fan"><i class="icon-fan"></i></div><div class="climate-icon bg-info climate-cool img-circle" ng-show="is_cool"><i class="icon-snow"></i></div><div class="climate-icon bg-danger climate-heat img-circle" ng-show="is_heat"><i class="icon-fire"></i></div></button></li>',
     replace: true,
   };
 

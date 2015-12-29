@@ -90,11 +90,29 @@ angular.module('statuses', ['ui.bootstrap'])
     restrict: 'E',
     transclude: true,
     scope: {
+      'left': '@',
+      'right': '@',
+      'top': '@',
+      'bottom': '@',
+      'width': '@',
+      'height': '@',
+      'align': '@',
+      'size': '@',
     },
-    controller: function () {
+    controller: function ($scope) {
+      $scope.styles =  {};
+
+      if ($scope.left) { $scope.styles.left = $scope.left + 'em'; }
+      if ($scope.right) { $scope.styles.right = $scope.right + 'em'; }
+      if ($scope.top) { $scope.styles.top = $scope.top + 'em'; }
+      if ($scope.bottom) { $scope.styles.bottom = $scope.bottom + 'em'; }
+      if ($scope.width) { $scope.styles.width = $scope.width + 'em'; }
+      if ($scope.height) { $scope.styles.height = $scope.height + 'em'; }
+      if ($scope.align) { $scope.styles['text-align'] = $scope.align; }
+      if ($scope.size) { $scope.styles['font-size'] = $scope.size + 'em'; }
 
     },
-    template: '<div ng-transclude></div>',
+    template: '<ul class="statuses" ng-style="styles" ng-transclude></ul>',
     replace: true,
   };
 
@@ -204,7 +222,7 @@ angular.module('statuses', ['ui.bootstrap'])
 
       $interval(parseRoom, (1000));
     },
-    template: '<button class="status {{icon}}" ng-click="openDetails()"><span class="status_badge" ng-class="{status_alert: alert}">{{alerting}}</span></button>',
+    template: '<li><button class="status img-circle" ng-click="openDetails()"><div class="status-icon"><i class="fi-{{icon}}"></i></div><span class="img-circle status_badge bg-info" ng-class="{\'bg-danger\': alert}">{{alerting}}</span></button></li>',
     replace: true,
   };
 

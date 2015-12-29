@@ -1,6 +1,6 @@
 
 <background></background>
-<content>
+<content margin="1">
 
   <div class="text-danger" style="position: absolute; text-align: center; right: .5em; top: .5em; font-size: 5em; text-shadow; text-shadow: 0 0 .05em black;" ng-show="http_error">
     <i class="glyphicon glyphicon-warning-sign"></i>
@@ -29,13 +29,13 @@
 
   <weather width="8" height="8" bottom="-.5" left="-.5" device="Weather" type="icon" value="current"></weather>
 
-  <statuses id="statuses">
-    <status room="All Doors" icon="doors"></status>
-    <status room="All Windows" icon="windows"></status>
+  <statuses bottom="0" left="0" right="0" align="right" size="1.2">
+    <status room="All Doors" icon="door-open"></status>
+    <status room="All Windows" icon="window"></status>
     <status room="All Motion" icon="motion"></status>
+    <climate room="All Climate" stat="_temperature"></climate>
   </statuses>
 
-  <climate room="All Climate" stat="_temperature"></climate>
 <!--
   <div style="position: absolute; height: 5em; width: 5em; bottom: 0.5em; right: 0.5em; background-color: #aaa; border: .4em solid #fff;" class="img-circle">
 

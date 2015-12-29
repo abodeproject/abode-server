@@ -1,49 +1,44 @@
 .climate {
-  position: absolute; 
-  height: 5em; 
-  width: 5em; 
-  bottom: 2em; 
-  right: 2em; 
-  background-color: #333; 
+  position: relative;
+  height: 5em;
+  width: 5em;
+  background-color: #333;
   border: .4em solid #fff;
 }
 
 .climate-value {
-  position: absolute; 
-  top: .3em; 
-  bottom: 0em; 
-  right: 0em; 
-  left: 0em; 
-  font-size: 2em; 
+  position: absolute;
+  top: .3em;
+  bottom: 0em;
+  right: 0em;
+  left: 0em;
+  font-size: 2em;
   text-align: center;
 }
 
-.climate-heat {
+.climate-icon {
   text-align: center;
   position: absolute;
+  bottom: -.4em;
   height: 1.5em;
   width: 1.5em;
+  padding-top: .01em;
+}
+.climate-icon i {
+  font-size: .9em;
+}
+.climate-heat {
   bottom: -.4em;
   right: -.3em;
-  padding-top: .01em;
 }
 
 .climate-cool {
-  text-align: center; 
-  position: absolute;
-  height: 1.5em;
-  width: 1.5em;
   bottom: -.4em;
   left: 1.4em;
   padding-top: .01em;
 }
 
 .climate-fan {
-  text-align: center;
-  position: absolute;
-  height: 1.5em;
-  width: 1.5em;
-  bottom: -.4em; 
   left: -.3em;
   padding-top: .01em;
 }

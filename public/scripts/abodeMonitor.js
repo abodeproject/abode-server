@@ -179,10 +179,14 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       restrict: 'E',
       transclude: true,
       scope: {
+        'margin': '@'
       },
-      controller: function () {
+      controller: function ($scope) {
+        $scope.styles = {};
+
+        if ($scope.margin !== undefined) { $scope.styles.margin = $scope.margin + 'em'; }
       },
-      template: '<div class="content" ng-transclude></div>',
+      template: '<div class="content" ng-style="styles" ng-transclude></div>',
       replace: true,
     };
   });
