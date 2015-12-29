@@ -98,6 +98,7 @@ angular.module('statuses', ['ui.bootstrap'])
       'height': '@',
       'align': '@',
       'size': '@',
+      'background': '@',
     },
     controller: function ($scope) {
       $scope.styles =  {};
@@ -110,6 +111,7 @@ angular.module('statuses', ['ui.bootstrap'])
       if ($scope.height) { $scope.styles.height = $scope.height + 'em'; }
       if ($scope.align) { $scope.styles['text-align'] = $scope.align; }
       if ($scope.size) { $scope.styles['font-size'] = $scope.size + 'em'; }
+      if ($scope.background) { $scope.styles.background = $scope.background; }
 
     },
     template: '<ul class="statuses" ng-style="styles" ng-transclude></ul>',

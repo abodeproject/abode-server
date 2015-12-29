@@ -179,12 +179,37 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       restrict: 'E',
       transclude: true,
       scope: {
-        'margin': '@'
+        format: '@',
+        top: '@',
+        bottom: '@',
+        left: '@',
+        right: '@',
+        height: '@',
+        width: '@',
+        align: '@',
+        size: '@',
+        background: '@',
+        color: '@',
+        shadow: '@',
+        margin: '@'
       },
       controller: function ($scope) {
         $scope.styles = {};
 
-        if ($scope.margin !== undefined) { $scope.styles.margin = $scope.margin + 'em'; }
+        if ($scope.top) { $scope.styles.top = $scope.top + 'em'; }
+        if ($scope.bottom) { $scope.styles.bottom = $scope.bottom + 'em'; }
+        if ($scope.left) { $scope.styles.left = $scope.left + 'em'; }
+        if ($scope.right) { $scope.styles.right = $scope.right + 'em'; }
+        if ($scope.height) { $scope.styles.height = $scope.height + 'em'; }
+        if ($scope.width) { $scope.styles.width = $scope.width + 'em'; }
+        if ($scope.align) { $scope.styles['text-align'] = $scope.align; }
+        if ($scope.size) { $scope.styles['font-size'] = $scope.size + 'em'; }
+        if ($scope.background) { $scope.styles.background = $scope.background; }
+        if ($scope.color) { $scope.styles.color = $scope.color; }
+        if ($scope.shadow) { $scope.styles['text-shadow'] = $scope.shadow; }
+        if ($scope.margin) { $scope.styles.margin = (isNaN($scope.margin)) ? $scope.margin : $scope.margin + 'em'; }
+
+        console.log($scope.styles);
       },
       template: '<div class="content" ng-style="styles" ng-transclude></div>',
       replace: true,

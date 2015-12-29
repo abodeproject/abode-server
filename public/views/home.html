@@ -1,50 +1,44 @@
 
-<background></background>
-<content margin="1">
+<background ></background>
+<content margin="1" top="0" bottom="0" left="0" right="0">
 
   <div class="text-danger" style="position: absolute; text-align: center; right: .5em; top: .5em; font-size: 5em; text-shadow; text-shadow: 0 0 .05em black;" ng-show="http_error">
     <i class="glyphicon glyphicon-warning-sign"></i>
     <div style="font-size: .4em; font-weight: bold;">Connection Error</div>
   </div>
-  <datetime format="EEE, MMM d" id="date"></datetime>
-  <datetime format="h:mm" id="time"></datetime>
 
-  <weather bottom=".6" left="2.5" size="3" width="5.2" device="Weather" type="value">
-    {{current.temp}}&deg;F
-    <span style="font-size: .35em; display: inline-block;">
-      <div>{{forecast[0].temp_high}}</div>
-      <div>{{forecast[0].temp_low}}</div>
-    </span>
-  </weather>
+  <content bottom="-1" left="-1" right="-1" height="9" background="rgba(0, 0, 0, 0.5)"></content>
 
-  <weather size="1.6" bottom=".25" left="4.8" type="value" device="Weather">
-    <i class="wi wi-wind wi-towards-n" style="transform: rotate({{current.wind_degrees}}deg); transition: 1s;"></i> {{current.wind}}mph
-    <span ng-show="current.rain_total > 0">
-    <i class="wi wi-umbrella"></i> {{current.rain_total}}in
-    </span>
-    <span ng-show="current.rain_total == 0">
-    {{current.humidity}} <i class="wi wi-humidity"></i>
-    </span>
-  </weather>
+  <content bottom="0" top="0" right="0" left="0">
+    <datetime top="0" right=".25" size="3" align="right" color="white" shadow="0 0 .1em black" format="EEE, MMM d"></datetime>
+    <datetime top="0" bottom="0" left="0" right="0" height="1.5" shadow="0 0 .1em black" margin="auto" align="center"  color="white" size="18" format="h:mm" id="time"></datetime>
 
-  <weather width="8" height="8" bottom="-.5" left="-.5" device="Weather" type="icon" value="current"></weather>
+    <statuses bottom="0" left="0" right="0" align="right">
+      <status room="All Doors" icon="door-open"></status>
+      <status room="All Windows" icon="window"></status>
+      <status room="All Motion" icon="motion"></status>
+      <climate room="All Climate" stat="_temperature"></climate>
+    </statuses>
 
-  <statuses bottom="0" left="0" right="0" align="right" size="1.2">
-    <status room="All Doors" icon="door-open"></status>
-    <status room="All Windows" icon="window"></status>
-    <status room="All Motion" icon="motion"></status>
-    <climate room="All Climate" stat="_temperature"></climate>
-  </statuses>
+    <weather bottom=".6" left="2.5" size="3.5" width="5.2" device="Weather" type="value">
+      {{current.temp}}&deg;F
+      <span style="font-size: .35em; display: inline-block;">
+        <div>{{forecast[0].temp_high}}</div>
+        <div>{{forecast[0].temp_low}}</div>
+      </span>
+    </weather>
 
-<!--
-  <div style="position: absolute; height: 5em; width: 5em; bottom: 0.5em; right: 0.5em; background-color: #aaa; border: .4em solid #fff;" class="img-circle">
+    <weather size="1.8" bottom=".1" left="4.8" type="value" device="Weather">
+      <i class="wi wi-wind wi-towards-n" style="transform: rotate({{current.wind_degrees}}deg); transition: 1s;"></i> {{current.wind}}mph
+      <span ng-show="current.rain_total > 0">
+      <i class="wi wi-umbrella"></i> {{current.rain_total}}in
+      </span>
+      <span ng-show="current.rain_total == 0">
+      {{current.humidity}} <i class="wi wi-humidity"></i>
+      </span>
+    </weather>
 
-    <div style="position: absolute; top: .3em; bottom: 0em; right: 0em; left: 0em; font-size: 2em; text-align: center;">68&deg;</div>
+    <weather width="9" height="9" bottom="-.75" left="-.5" device="Weather" type="icon" value="current"></weather>
+  </content>
 
-    <div class="bg-danger img-circle" style="text-align: center; position: absolute; height: 1.5em; width: 1.5em; bottom: -.4em; right: -.3em; padding-top: .01em;"><i class="icon-fire"></i></div>
-    <div class="bg-info img-circle" style="text-align: center; position: absolute; height: 1.5em; width: 1.5em; bottom: -.4em; left: 1.4em; padding-top: .01em;"><i class="icon-snow"></i></div>
-    <div class="bg-success img-circle" style="text-align: center; position: absolute; height: 1.5em; width: 1.5em; bottom: -.4em; left: -.3em; padding-top: .01em;"><i class="icon-fan"></i></div>
-
-  </div>
--->
 </content>

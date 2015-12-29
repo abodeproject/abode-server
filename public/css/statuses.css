@@ -10,7 +10,7 @@
   height: 5em;
   width: 5em;
   background-color: #333;
-  border: .4em solid #fff;
+  border: .3em solid #fff;
   margin: 0em .5em;
 }
 .status-icon {
@@ -45,8 +45,8 @@
   position: absolute;
   bottom: -.4em;
   right: -.3em;
-  height: 1.5em;
-  width: 1.5em;
+  height: 1.7em;
+  width: 1.7em;
   padding: 2px 4px;
   font-weight: bold;
 }
