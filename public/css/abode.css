@@ -26,6 +26,20 @@
     animation: spin-stop 2s ease-out;
 }
 
+
+.bg-dark {
+  background-color: #333;
+}
+
 .bg-muted {
   background-color: #777;
 }
+
+.bg-light {
+  background-color: #ccc;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+

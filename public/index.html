@@ -118,7 +118,7 @@ html, body, .container-table {
   }
   .anav-mid {
     position: absolute;
-    bottom: 4em;
+    bottom: 6em;
     top: 7em;
     left: 0em;
     right: 0em;
@@ -141,7 +141,7 @@ html, body, .container-table {
     background-color: #333;
     position: absolute;
     bottom: 0em;
-    height: 4em;
+    height: 6em;
     left: 0em;
     right: 0em;
   }
@@ -201,35 +201,9 @@ html, body, .container-table {
   }
 </style>
 </head>
-<body ng-controller="main" ng-swipe-right="anav_show()" ng-swipe-left="anav_hide()">
-  <div class="view" ui-view>
+<body ng-controller="main" ng-swipe-right="anav_show()" ng-swipe-left="anav_hide()" ui-view>
+  <div class="view">
     <i class="glyphicon glyphicon-refresh"></i> Loading...
-  </div>
-  <div class="anav-shade" ng-click="anav_hide()" ng-show="anav_visible"></div>
-  <div class="anav-drawer" ng-class="{'anav-visible': anav_visible}">
-    <div class="anav-opener">
-
-    </div>
-    <div class="anav-top">
-    <img src="./images/home.png" style="height: 5em;">
-    </div>
-    <div class="anav-mid">
-      <ul>
-        <li ui-sref="home"><i class="glyphicon glyphicon-home"></i> Home</li>
-        <li ui-sref="rooms"><i class="glyphicon glyphicon-modal-window"></i> Rooms</li>
-        <li ui-sref="devices"><i class="glyphicon glyphicon-oil"></i> Devices</li>
-        <li ui-sref="triggers"><i class="glyphicon glyphicon-tasks"></i> Triggers</li>
-      </ul>
-    </div>
-    <div class="anav-bottom">
-      <ul>
-        <li ui-sref="settings"><i class="glyphicon glyphicon-cog"></i> Settings</li>
-        <li class="text-right"><i class="glyphicon glyphicon-log-out"></i> Logout</li>
-      </ul>
-    </div>
-  </div>
-  <div style="position: absolute; z-index: 1000">
-  <button class="anav-opener"  ng-click="anav_show()">&#9776;</button>
   </div>
 </body>
 </html>

@@ -3,7 +3,7 @@
 angular.module('datetime', [])
 .service('datetime', function ($interval, $http, $state) {
 
-  var obj = {};
+  var obj = {is: {}};
   var updater;
 
   var parseDetails = function (response) {

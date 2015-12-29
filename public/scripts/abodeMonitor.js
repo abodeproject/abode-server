@@ -7,9 +7,9 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
     $urlRouterProvider.otherwise('/home');
 
     $stateProvider
-    .state('home', {
-      url: '/home',
-      templateUrl: '/views/home.html',
+    .state('index', {
+      url: '',
+      templateUrl: '/views/index.html',
       resolve: {
         check: function ($state, $q, auth) {
           var defer = $q.defer();
@@ -24,10 +24,20 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
           return defer.promise;
         }
       },
+      controller: function ($scope, $state) {
+        $scope.goSettings = function () {
+          $state.go('index.settings');
+        };
+
+      }
+    })
+    .state('index.home', {
+      url: '/home',
+      templateUrl: '/views/home.html',
       controller: function ($scope, $state, $interval, datetime) {
         $scope.is = datetime.get().is;
         $scope.goSettings = function () {
-          $state.go('settings');
+          $state.go('index.settings');
         };
 
         $interval(function () {
@@ -54,6 +64,8 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
         }
       },
       controller: function ($scope, $state, auth) {
+        $scope.active = 'general';
+
         $scope.goHome = function () {
           $state.go('home');
         };
@@ -65,7 +77,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
         };
       }
     })
-    .state('rooms', {
+    .state('index.rooms', {
       url: '/rooms',
       title: 'Abode Rooms',
       templateUrl: '/views/rooms.html',
@@ -73,7 +85,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
       }
     })
-    .state('devices', {
+    .state('index.devices', {
       url: '/devices',
       title: 'Abode Devices',
       templateUrl: '/views/devices.html',
@@ -81,7 +93,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
       }
     })
-    .state('triggers', {
+    .state('index.triggers', {
       url: '/triggers',
       title: 'Abode Triggers',
       templateUrl: '/views/triggers.html',
@@ -109,7 +121,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
         $scope.login = function () {
 
           auth.login($scope.user).then(function () {
-            $state.go('home');
+            $state.go('index.home');
           }, function (err) {
             $scope.error = err;
           });
@@ -209,7 +221,6 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
         if ($scope.shadow) { $scope.styles['text-shadow'] = $scope.shadow; }
         if ($scope.margin) { $scope.styles.margin = (isNaN($scope.margin)) ? $scope.margin : $scope.margin + 'em'; }
 
-        console.log($scope.styles);
       },
       template: '<div class="content" ng-style="styles" ng-transclude></div>',
       replace: true,

@@ -30,7 +30,7 @@ angular.module('statuses', ['ui.bootstrap'])
   };
 
   var load = function () {
-    if ($state.current.name !== 'home') {
+    if ($state.current.name !== 'index.home') {
       $interval.cancel(updater);
       return;
     }

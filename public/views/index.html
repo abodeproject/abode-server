@@ -1,0 +1,29 @@
+  <div class="view" ui-view>
+
+  </div>
+  <div class="anav-shade" ng-click="anav_hide()" ng-show="anav_visible"></div>
+  <div class="anav-drawer" ng-class="{'anav-visible': anav_visible}">
+    <div class="anav-opener">
+
+    </div>
+    <div class="anav-top">
+    <img src="./images/home.png" style="height: 5em;">
+    </div>
+    <div class="anav-mid">
+      <ul>
+        <li ui-sref="index.home"><i class="glyphicon glyphicon-home"></i> Home</li>
+        <li ui-sref="index.rooms"><i class="glyphicon glyphicon-modal-window"></i> Rooms</li>
+        <li ui-sref="index.devices"><i class="glyphicon glyphicon-oil"></i> Devices</li>
+        <li ui-sref="index.triggers"><i class="glyphicon glyphicon-tasks"></i> Triggers</li>
+      </ul>
+    </div>
+    <div class="anav-bottom">
+      <ul>
+        <li ui-sref="settings"><i class="glyphicon glyphicon-cog"></i> Settings</li>
+        <li class="text-right"><i class="glyphicon glyphicon-log-out"></i> Logout</li>
+      </ul>
+    </div>
+  </div>
+  <div style="position: absolute; z-index: 1000">
+  <button class="anav-opener"  ng-click="anav_show()">&#9776;</button>
+  </div>
