@@ -29,7 +29,7 @@ angular.module('background', [])
       var previous = 0;
 
       var updateBackground = function () {
-        if ($state.current.name !== 'home') {
+        if ($state.current.name !== 'index.home') {
           $interval.cancel(updater);
           return;
         }
