@@ -148,7 +148,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
     var connection_checker = function () {
       if ($rootScope.http_error) {
-        $http.get('./auth').then(function () {
+        $http.get('/api/auth').then(function () {
           return;
         });
       }
@@ -161,7 +161,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
     return {
       request: function (request) {
-        if (request.url !== './auth' && $rootScope.http_error) {
+        if (request.url !== '/api/auth' && $rootScope.http_error) {
           return $q.reject(request);
         }
         $rootScope.http_processing = true;
@@ -177,7 +177,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
         return response;
       },
       responseError: function (rejection) {
-        if (rejection.status === 401 && rejection.config.url !== './auth') {
+        if (rejection.status === 401 && rejection.config.url !== '/api/auth') {
           $rootScope.authorized = false;
         } else if ( [-1, 503].indexOf(rejection.status) >= 0 ) {
           $rootScope.http_error = true;

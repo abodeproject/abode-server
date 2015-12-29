@@ -43,7 +43,7 @@ devices.capabilities.forEach(function (capability) {
 
 router.post('/', web.isJson, function (req, res) {
   devices.create(req.body).then(function () {
-    res.status(201).end({'status': 'success'});
+    res.status(201).send({'status': 'success'});
   }, function (err) {
     log.error(err.message || err);
     res.status(422).send(err);
