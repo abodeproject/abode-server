@@ -4,6 +4,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
+    $urlRouterProvider.when('', '/home');
     $urlRouterProvider.otherwise('/home');
 
     $stateProvider
