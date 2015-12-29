@@ -32,7 +32,7 @@ Wunderground = function () {
     return defer.promise;
   }
 
-  abode.web.server.use('/wunderground', routes);
+  abode.web.server.use('/api/wunderground', routes);
 
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {

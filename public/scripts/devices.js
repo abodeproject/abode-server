@@ -6,7 +6,7 @@ angular.module('devices', [])
   var getDevice = function (device) {
     var defer = $q.defer();
 
-    $http({ url: '/devices/' + device }).then(function (response) {
+    $http({ url: '/api/devices/' + device }).then(function (response) {
       defer.resolve(response.data);
     }, function () {
 
@@ -25,6 +25,8 @@ angular.module('devices', [])
         size: 'sm',
         controller: function ($scope, $uibModalInstance, $interval, $timeout, devices, device) {
           $scope.device = angular.copy(device);
+          $scope.processing = false;
+          $scope.errors = false;
           $scope.capabilities = angular.copy(device.capabilities).map(function (c) {
             return {
               'name': c,
@@ -47,25 +49,101 @@ angular.module('devices', [])
 
           $scope.name = device.name;
 
+          $scope.reload = function () {
+
+            $scope.processing = true;
+            $scope.errors = false;
+
+            if ($scope.device.active === false) {
+              $http.get('/api/devices/' + $scope.device.name).then(function (response) {
+                $scope.device = response.data;
+                $scope.processing = false;
+                $scope.errors = false;
+              }, function () {
+                $scope.processing = false;
+                $scope.errors = true;
+              });
+            } else {
+              $http.get('/api/devices/' + $scope.device.name).then(function (response) {
+                $scope.device = response.data;
+                $scope.processing = false;
+                $scope.errors = false;
+              }, function () {
+                $scope.processing = false;
+                $scope.errors = true;
+              });
+            }
+
+          };
+
           $scope.ok = function () {
             $uibModalInstance.close();
           };
 
+
           $scope.toggle_onoff = function () {
-            if ($scope.device._on) {
-              $http.post('/devices/' + $scope.device.name + '/off');
+
+            $scope.processing = true;
+            $scope.errors = false;
+
+            if ($scope.device.active === false) {
+              if ($scope.device._on) {
+                $http.put('/api/devices/' + $scope.device.name, {'_on': false}).then(function () {
+                  $scope.processing = false;
+                  $scope.errors = false;
+                }, function () {
+                  $scope.processing = false;
+                  $scope.errors = true;
+                });
+              } else {
+                $http.put('/api/devices/' + $scope.device.name, {'_on': true}).then(function () {
+                  $scope.processing = false;
+                  $scope.errors = false;
+                }, function () {
+                  $scope.processing = false;
+                  $scope.errors = true;
+                });
+              }
             } else {
-              $http.post('/devices/' + $scope.device.name + '/on');
+              if ($scope.device._on) {
+                $http.post('/api/devices/' + $scope.device.name + '/off').then(function () {
+                  $scope.processing = false;
+                  $scope.errors = false;
+                }, function () {
+                  $scope.processing = false;
+                  $scope.errors = true;
+                });
+              } else {
+                $http.post('/api/devices/' + $scope.device.name + '/on').then(function () {
+                  $scope.processing = false;
+                  $scope.errors = false;
+                }, function () {
+                  $scope.processing = false;
+                  $scope.errors = true;
+                });
+              }
             }
           };
 
           $scope.set_mode = function (mode) {
-            $http.post('/devices/' + $scope.device.name + '/set_mode', [mode]);
+
+            $scope.processing = true;
+            $scope.errors = false;
+
+            $http.post('/api/devices/' + $scope.device.name + '/set_mode', [mode]).then(function () {
+              $scope.processing = false;
+              $scope.errors = false;
+            }, function () {
+              $scope.processing = false;
+              $scope.errors = true;
+            });
           };
 
           var temp_wait;
 
           $scope.temp_up = function () {
+            $scope.processing = true;
+            $scope.errors = false;
             if (temp_wait) {
               $timeout.cancel(temp_wait);
             }
@@ -75,6 +153,8 @@ angular.module('devices', [])
           };
 
           $scope.temp_down = function () {
+            $scope.processing = true;
+            $scope.errors = false;
             if (temp_wait) {
               $timeout.cancel(temp_wait);
             }
@@ -84,10 +164,18 @@ angular.module('devices', [])
           };
 
           $scope.set_temp = function (temp) {
-            $http.post('/devices/' + $scope.device.name + '/set_point', [$scope.device._set_point]).then(function () {
+
+            $scope.processing = true;
+            $scope.errors = false;
+
+            $http.post('/api/devices/' + $scope.device.name + '/set_point', [$scope.device._set_point]).then(function () {
               temp_wait = undefined;
+              $scope.processing = false;
+              $scope.errors = false;
             }, function () {
               temp_wait = undefined;
+              $scope.processing = false;
+              $scope.errors = true;
             });
           }
 

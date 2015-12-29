@@ -123,7 +123,7 @@ Time = function () {
   events = abode.events;
   routes = require('./routes');
 
-  abode.web.server.use('/time', routes);
+  abode.web.server.use('/api/time', routes);
 
   Time.config = abode.config.time || {};
   Time.config.location = Time.config.location || abode.config.location;

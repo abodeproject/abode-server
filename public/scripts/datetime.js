@@ -16,7 +16,7 @@ angular.module('datetime', [])
       $interval.cancel(updater);
       return;
     }
-    $http({ url: '/time' }).then(parseDetails);
+    $http({ url: '/api/time' }).then(parseDetails);
   };
 
   var updateTime = function () {

@@ -20,7 +20,7 @@ Radiothermostat = function () {
   config.enabled = config.enabled || true;
   config.interval = config.interval || 1;
 
-  abode.web.server.use('/radiothermostat', routes);
+  abode.web.server.use('/api/radiothermostat', routes);
 
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {

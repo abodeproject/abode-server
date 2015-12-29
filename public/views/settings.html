@@ -1,4 +1,4 @@
-<div style="font-size: 2em; color: black; background-color: white; position: absolute; top: 0em; bottom: 3em; left: 0em; right: 0em; overflow: auto;">
+<div style="font-size: 2em; color: black; background-color: white; position: absolute; top: 0em; bottom: 3.5em; left: 0em; right: 0em; overflow: auto;">
   <div class="bg-light" style="position: fixed; width: 10em; bottom: 0em; top: 0em; padding-top: 1em;">
     <ul style="list-style: none;">
       <li ng-click="active = 'general'" ng-class="{'bg-white': active == 'general'}" style="cursor: pointer; padding: .5em; margin: 0em; border-top-left-radius: .25em; border-bottom-left-radius: .25em;">General</li>
@@ -15,6 +15,8 @@
     <p>Name</p>
     <p>Location</p>
     <p>Time</p>
+    <p>Restart</p>
+    <p>Shutdown</p>
     </div>
     <div ng-show="active == 'sources'">
       <h3>Sources</h3>
@@ -49,7 +51,7 @@
     </div>
   </div>
 </div>
-<div class="bg-dark" style="position: absolute; bottom: 0em; left: 0em; right: 0em; height: 6em; text-align: right; padding-top: 1em; padding-right: 2em;">
+<div class="bg-dark" style="position: absolute; bottom: 0em; left: 0em; right: 0em; height: 7em; text-align: right; padding-top: 1em; padding-right: 2em;">
       <button class="btn btn-info btn-sm" style="width: 6em;" ng-click="logout()">Save</button>
       <button class="btn btn-warning btn-sm" style="width: 6em;" ui-sref="index.home">Cancel</button>
 </div>

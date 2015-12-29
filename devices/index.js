@@ -26,7 +26,7 @@ var Devices = function () {
   abode = require('../abode');
   routes = require('./routes');
 
-  abode.web.server.use('/devices', routes);
+  abode.web.server.use('/api/devices', routes);
 
   return Devices.load();
 };

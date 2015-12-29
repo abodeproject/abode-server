@@ -11,7 +11,7 @@ angular.module('auth', [])
     check: function () {
       var defer = $q.defer();
 
-      $http.get('/auth')
+      $http.get('/api/auth')
       .then(function () {
         defer.resolve();
       }, function () {
@@ -23,7 +23,7 @@ angular.module('auth', [])
     login: function (data) {
       var defer = $q.defer();
 
-      $http.post('/auth', data)
+      $http.post('/api/auth', data)
       .then(function () {
         defer.resolve();
       }, function (response) {
@@ -35,7 +35,7 @@ angular.module('auth', [])
     logout: function () {
       var defer = $q.defer();
 
-      $http.delete('/auth')
+      $http.delete('/api/auth')
       .then(function () {
         defer.resolve();
       }, function (response) {

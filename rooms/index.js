@@ -14,7 +14,7 @@ var Rooms = function () {
   abode = require('../abode');
   routes = require('./routes');
 
-  abode.web.server.use('/rooms', routes);
+  abode.web.server.use('/api/rooms', routes);
 
   return Rooms.load();
 };

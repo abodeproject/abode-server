@@ -25,7 +25,7 @@ angular.module('statuses', ['ui.bootstrap'])
 
   var getRoom = function (room) {
 
-    $http({ url: '/rooms/' + room + '/devices' }).then(parseRoom(room), errorResponse(room));
+    $http({ url: '/api/rooms/' + room + '/devices' }).then(parseRoom(room), errorResponse(room));
 
   };
 

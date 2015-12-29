@@ -18,7 +18,7 @@ var Triggers = function () {
   abode = require('../abode');
   routes = require('./routes');
 
-  abode.web.server.use('/triggers', routes);
+  abode.web.server.use('/api/triggers', routes);
 
   if (Triggers.config.debug_conditions) {
     logger.getLogger('abode.triggers.conditions').setLevel('DEBUG');

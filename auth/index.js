@@ -25,7 +25,7 @@ var Auth = function () {
   abode = require('../abode');
   routes = require('./routes');
 
-  abode.web.server.use('/auth', routes);
+  abode.web.server.use('/api/auth', routes);
 
   config = abode.config;
   config.secret = config.secret || 'abcdefg1234567';

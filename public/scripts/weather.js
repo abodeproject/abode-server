@@ -24,7 +24,7 @@ angular.module('weather', ['datetime'])
 
   var getWeather = function (device) {
 
-    $http({ url: '/devices/' + device }).then(parseWeather(device), errorResponse(device));
+    $http({ url: '/api/devices/' + device }).then(parseWeather(device), errorResponse(device));
 
   };
 
