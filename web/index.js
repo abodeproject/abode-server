@@ -41,7 +41,7 @@ var Web = function () {
 
 };
 
-Web.check_auth = function (ip, uri, auth) {
+Web.check_auth = function (ip, uri, auth, session) {
   var allowed = false;
 
   abode.config.allow_networks.forEach(function (net) {
@@ -49,8 +49,8 @@ Web.check_auth = function (ip, uri, auth) {
     allowed = (addr(net).contains(addr(ip))) ? true : allowed;
 
   });
-  
-  if (allowed) { return true; }
+
+  if (allowed) { session.auth = true; return true; }
 
   if (auth) {
     return true;
@@ -89,7 +89,7 @@ Web.init = function () {
   Web.server.use(function (req, res, next) {
     var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
 
-    if (Web.check_auth(ip, req.path, req.session.auth)) {
+    if (Web.check_auth(ip, req.path, req.session.auth, req.session)) {
       next();
     } else {
       res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
