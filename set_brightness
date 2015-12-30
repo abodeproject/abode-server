@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+  echo "set_brightness DISPLAY BRIGHTNESS"
+  echo "DISPLAY should be one of: $(ls /sys/class/backlight)"
+  exit 1
+fi
+
+echo "echo $2 > /sys/class/backlight/$1/brightness"
+sudo sh -c "echo $2 > /sys/class/backlight/$1/brightness"
