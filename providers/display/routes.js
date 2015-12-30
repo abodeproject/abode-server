@@ -39,7 +39,7 @@ router.get('/max_brightness', function (req, res) {
 
 router.get('/power', function (req, res) {
 
-  res.send({'power': display.on});
+  res.send({'power': display.power});
 
 });
 

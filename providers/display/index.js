@@ -58,7 +58,7 @@ Display.load = function () {
         return;
       }
 
-      Display.on = (stdout.indexOf('Monitor is On') !== -1);
+      Display.power = (stdout.indexOf('Monitor is On') !== -1);
       log.info('Monitor power:', Display.on);
       mon_defer.resolve();
     };
