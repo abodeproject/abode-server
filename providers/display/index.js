@@ -59,7 +59,7 @@ Display.load = function () {
       }
 
       Display.power = (stdout.indexOf('Monitor is Off') === -1);
-      log.info('Monitor power:', Display.power);
+      log.debug('Monitor power:', Display.power);
       mon_defer.resolve();
     };
 
@@ -79,7 +79,7 @@ Display.load = function () {
       }
 
       Display.max_brightness = parseInt(data, 10);
-      log.info('Max brightness:', Display.max_brightness);
+      log.debug('Max brightness:', Display.max_brightness);
       bl_defer.resolve(data);
     });
 
@@ -97,7 +97,7 @@ Display.load = function () {
       }
 
       Display.brightness = parseInt(data, 10);
-      log.info('Current brightness:', Display.brightness);
+      log.debug('Current brightness:', Display.brightness);
       bl_defer.resolve(data);
     });
 
@@ -107,11 +107,16 @@ Display.load = function () {
   var parseDisplay = function (display) {
 
     Display.display = display;
-    log.info('Parsing display:', Display.display);
+    log.debug('Parsing display:', Display.display);
 
     get_currentbacklight()
     .then(get_maxbacklight, failLoad)
-    .then(get_monitor_power, failLoad);
+    .then(get_monitor_power, failLoad)
+    .then(function (response) {
+      defer.resolve(response);
+    }, function (err) {
+      defer.reject(err);
+    });
   };
 
   var findDisplay = function (displays) {
@@ -135,7 +140,7 @@ Display.load = function () {
 
   };
 
-  log.info('Loading display properties');
+  log.debug('Loading display properties');
   fs.readdir(base, function (err, displays) {
     if (!err) {
       findDisplay(displays);
