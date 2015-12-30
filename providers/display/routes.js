@@ -8,7 +8,7 @@ router.get('/', function (req, res) {
 
   res.send({
     'name': display.display,
-    'power': display.on,
+    'power': display.power,
     'brightness': display.brightness,
     'max_brightness': display.max_brightness,
   });
