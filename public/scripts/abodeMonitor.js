@@ -34,7 +34,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
     })
     .state('index.home', {
       url: '/home',
-      templateUrl: '/views/home.html',
+      templateUrl: '/api/abode/views/home.html',
       controller: function ($scope, $state, $interval, datetime) {
         $scope.is = datetime.get().is;
         $scope.goSettings = function () {

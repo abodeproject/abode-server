@@ -3,3 +3,4 @@ public/vendor/*
 config.ini
 public/webcam*
 public/images/day.jpg
+views/*.html

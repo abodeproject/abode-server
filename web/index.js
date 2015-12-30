@@ -79,6 +79,7 @@ Web.init = function () {
   Web.server = express();
   Web.server.use(logger.connectLogger(log));
   Web.server.use(bodyParser.json());
+  Web.server.use(bodyParser.text());
   Web.server.use(session({
     name: 'abode-auth',
     saveUninitialized: true,

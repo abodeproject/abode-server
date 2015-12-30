@@ -2,6 +2,7 @@
   <div class="bg-light" style="position: fixed; width: 10em; bottom: 0em; top: 0em; padding-top: 1em;">
     <ul style="list-style: none;">
       <li ng-click="active = 'general'" ng-class="{'bg-white': active == 'general'}" style="cursor: pointer; padding: .5em; margin: 0em; border-top-left-radius: .25em; border-bottom-left-radius: .25em;">General</li>
+      <li ng-click="active = 'home'" ng-class="{'bg-white': active == 'home'}" style="cursor: pointer; padding: .5em;">Home</li>
       <li ng-click="active = 'sources'" ng-class="{'bg-white': active == 'sources'}" style="cursor: pointer; padding: .5em;">Sources</li>
       <li ng-click="active = 'sensors'" ng-class="{'bg-white': active == 'sensors'}" style="cursor: pointer; padding: .5em;">Sensors</li>
       <li ng-click="active = 'providers'" ng-class="{'bg-white': active == 'providers'}" style="cursor: pointer; padding: .5em;">Providers</li>
@@ -17,6 +18,10 @@
     <p>Time</p>
     <p>Restart</p>
     <p>Shutdown</p>
+    </div>
+    <div ng-show="active == 'home'">
+      <h3>Home</h3>
+      <p>Content</p>
     </div>
     <div ng-show="active == 'sources'">
       <h3>Sources</h3>

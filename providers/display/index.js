@@ -18,10 +18,10 @@ var Display = function () {
 
   abode.web.server.use('/api/display', routes);
 
-  config = Display.config || {};
-  config.interval = config.interval || 5;
-  config.enabled = (config.enabled === false) ? false : true;
+  abode.config.display.interval = abode.config.display.interval || 5;
+  abode.config.display.enabled = (abode.config.display.enabled === false) ? false : true;
 
+  config = abode.config.display || {};
   if (config.enabled === true) {
     log.info('Starting Display');
 
@@ -124,6 +124,7 @@ Display.load = function () {
     if (displays.length === 0) {
       failLoad('Failed to find a display');
     } else if (displays.length === 1) {
+      config.name = displays[0];
       parseDisplay(displays[0]);
     } else {
       if (config.display) {
@@ -134,6 +135,7 @@ Display.load = function () {
         }
       } else {
         log.warn('Multiple displays found, using first: ', displays[0]);
+        config.name = displays[0];
         parseDisplay(displays[0]);
       }
     }

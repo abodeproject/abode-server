@@ -27,6 +27,9 @@ Abode.init = function (config) {
   config.providers = config.providers || [];
   config.fail_on_provider = config.fail_on_provider || true;
 
+  Abode.save_needed = false;
+  Abode.views = {};
+
   //Create a new event emitter
   Abode.events = new events.EventEmitter();
 
@@ -85,7 +88,7 @@ Abode.init = function (config) {
     Abode.triggers = require('../triggers');
     Abode.web = require('../web');
     Abode.web.init();
-
+    Abode.web.server.use('/api/abode', require('./routes'));
 
     //Start initializing our modules
     loadModule('providers')(Abode.config.providers)
@@ -111,6 +114,171 @@ Abode.init = function (config) {
     log.error('Connection error: %s', err);
   });
   Abode.db.once('open', start);
+
+  return defer.promise;
+};
+
+Abode.write_config = function () {
+  var defer = q.defer();
+
+  fs.writeFile('config.ini', ini.encode(Abode.config, {whitespace: true}), function (err) {
+    if (err) {
+      defer.reject({'status': 'failed', 'message': err});
+      return;
+    }
+
+    Abode.save_needed = false;
+    defer.resolve({'status': 'success'});
+  });
+
+  return defer.promise;
+};
+
+Abode.update_config = function (data, section) {
+  var defer = q.defer();
+
+  Abode.save_needed = true;
+
+  Object.keys(data).forEach(function (key) {
+    if (section) {
+      Abode.config[section][key] = data[key];
+    } else {
+      Abode.config[key] = data[key];
+    }
+  });
+
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+Abode.read_view = function (file) {
+  var defer = q.defer();
+
+  var read_default = function () {
+
+    fs.readFile('views/defaults/' + file, 'utf8', function (err, data) {
+      if (err) {
+        defer.reject(err);
+        return;
+      }
+
+      defer.resolve(data);
+
+    });
+
+  };
+
+  var read_custom = function () {
+
+    fs.readFile('views/' + file, function (err, data) {
+      if (err) {
+        read_default();
+        return;
+      }
+
+      defer.resolve(data);
+
+    });
+
+  };
+
+  read_custom();
+
+  return defer.promise;
+};
+
+Abode.default_views = function () {
+  var defer = q.defer();
+
+  fs.readdir('views/defaults', function (err, files) {
+    if (err) {
+      defer.reject(err);
+      return;
+    }
+
+    defer.resolve(files);
+
+  });
+
+
+  return defer.promise;
+};
+
+Abode.get_view = function (view) {
+  var defer = q.defer();
+
+  Abode.default_views().then(function (views) {
+
+    if (views.indexOf(view) === -1) {
+      defer.reject({'status': 'failed', 'message': 'View not found'});
+      return;
+    }
+
+    Abode.read_view(view).then(function (data) {
+      defer.resolve(data);
+    }, function (err) {
+      defer.reject({'status': 'failed', 'message': err});
+    });
+
+  }, function (err) {
+    defer.reject({'status': 'failed', 'message': err});
+  });
+
+
+  return defer.promise;
+};
+
+Abode.write_view = function (view, data) {
+  var defer = q.defer();
+
+
+  Abode.default_views().then(function (views) {
+
+    if (views.indexOf(view) === -1) {
+      defer.reject({'status': 'failed', 'message': 'View not found'});
+      return;
+    }
+
+    fs.writeFile('views/' + view, data, function (err) {
+      if (err) {
+        defer.reject({'status': 'failed', 'message': err});
+        return;
+      }
+
+      defer.resolve({'status': 'success'});
+
+    });
+
+  }, function (err) {
+    defer.reject({'status': 'failed', 'message': err});
+  });
+
+  return defer.promise;
+};
+
+Abode.delete_view = function (view, data) {
+  var defer = q.defer();
+
+
+  Abode.default_views().then(function (views) {
+
+    if (views.indexOf(view) === -1) {
+      defer.reject({'status': 'failed', 'message': 'View not found'});
+      return;
+    }
+
+    fs.unlink('views/' + view, function (err) {
+      if (err) {
+        defer.reject({'status': 'failed', 'message': err});
+        return;
+      }
+
+      defer.resolve({'status': 'success'});
+    });
+
+  }, function (err) {
+    defer.reject({'status': 'failed', 'message': err});
+  });
 
   return defer.promise;
 };

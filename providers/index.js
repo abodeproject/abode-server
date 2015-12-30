@@ -38,12 +38,16 @@ var Providers = function (providers) {
       log.debug('Loading provider: ' + provider);
       Providers[provider] = require('./' + provider);
 
+      //Set our config
+      abode.config[provider] = abode.config[provider] || {};
+
       //Set our log level
       if (abode.config[provider] && abode.config[provider].debug) {
         provider_log.setLevel('DEBUG');
 
       } else {
         provider_log.setLevel('INFO');
+        abode.config[provider].debug = false;
       }
 
       Providers[provider]().then(function () {
