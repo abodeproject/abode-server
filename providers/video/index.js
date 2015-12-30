@@ -2,11 +2,9 @@
 
 var abode,
   routes,
-  config,
   q = require('q'),
-  fs = require('fs'),
-  path = require('path'),
-  spawn = require('child_process').spawn;
+  spawn = require('child_process').spawn,
+  exec = require('child_process').exec;
 
 var logger = require('log4js'),
   log = logger.getLogger('video');
@@ -79,6 +77,7 @@ Video.stop = function () {
   log.info('Stopping Video:', Video.spawn.pid);
 
   Video.spawn.kill('SIGKILL');
+  exec('pkill ' + abode.config.video.player);
 
   defer.resolve();
 
