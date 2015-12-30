@@ -78,21 +78,9 @@ Video.stop = function () {
 
   log.info('Stopping Video:', Video.spawn.pid);
 
-  Video.spawn.kill();
+  Video.spawn.kill('SIGKILL');
 
-  if (Video.spawn.connected) {
-    setTimeout(function () {
-      if (Video.spawn.connected) {
-        log.info('Video still running, killing');
-        Video.spawn.kill('SIGKILL');
-        Video.playing = false;
-      }
-      defer.resolve();
-    }, 5000);
-  } else {
-    Video.playing = false;
-    defer.resolve();
-  }
+  defer.resolve();
 
   return defer.promise;
 };
