@@ -9,7 +9,7 @@ var abode,
   spawn = require('child_process').spawn;
 
 var logger = require('log4js'),
-  log = logger.getLogger('display');
+  log = logger.getLogger('video');
 
 var Video = function () {
   var defer = q.defer();
@@ -52,16 +52,20 @@ Video.start = function (config) {
 
   Video.spawn = spawn(abode.config.video.player, config.url, {env: process.env});
   Video.spawn.on('close', function (status) {
+    console.log('close');
     Video.last_status = status;
     Video.playing = false;
   });
   Video.spawn.on('disconnect', function () {
+    console.log('disconnect');
     Video.playing = false;
   });
   Video.spawn.on('exit', function () {
+    console.log('exit');
     Video.playing = false;
   });
   Video.spawn.on('error', function (err) {
+    console.log('error');
     defer.reject({'status': 'failed', 'message': err});
     Video.playing = false;
   });
