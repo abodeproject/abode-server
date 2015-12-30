@@ -51,31 +51,24 @@ Video.start = function (config) {
   config.url.unshift.apply(abode.config.video.options);
 
   Video.spawn = spawn(abode.config.video.player, config.url, {env: process.env});
-  Video.spawn.on('close', function (status) {
-    console.log('close');
+  Video.spawn.on('exit', function (status, sig) {
+    log.info('Video exited: %s (%s)', status, sig);
     Video.last_status = status;
     Video.playing = false;
   });
-  Video.spawn.on('disconnect', function () {
-    console.log('disconnect');
-    Video.playing = false;
-  });
-  Video.spawn.on('exit', function () {
-    console.log('exit');
-    Video.playing = false;
-  });
   Video.spawn.on('error', function (err) {
-    console.log('error');
+    log.error('Error playing video:', err);
     defer.reject({'status': 'failed', 'message': err});
-    Video.playing = false;
+    Video.stop();
   });
 
   setTimeout(function () {
     Video.playing = true;
-    defer.resolve({'status': 'success'});
+    defer.resolve({'status': 'success', 'pid': Video.spawn.pid});
   }, 1000);
 
   setTimeout(Video.stop, config.duration * 1000);
+  log.info('Video timer set for %s seconds', config.duration);
 
   return defer.promise;
 };
@@ -83,11 +76,14 @@ Video.start = function (config) {
 Video.stop = function () {
   var defer = q.defer();
 
+  log.info('Stopping Video:', Video.spawn.pid);
+
   Video.spawn.kill();
 
   if (Video.spawn.connected) {
     setTimeout(function () {
       if (Video.spawn.connected) {
+        log.info('Video still running, killing');
         Video.spawn.kill('SIGKILL');
         Video.playing = false;
       }
