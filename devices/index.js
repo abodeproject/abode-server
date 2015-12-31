@@ -38,6 +38,7 @@ Devices.capabilities = [
   'appliance',
   'conditioner',
   'fan',
+  'motion',
   'motion_sensor',
   'temperature_sensor',
   'humidity_sensor',
