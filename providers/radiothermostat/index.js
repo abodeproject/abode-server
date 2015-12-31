@@ -83,7 +83,7 @@ Radiothermostat.set_mode = function (device, mode) {
     if (!error && response.statusCode === 200) {
       log.debug('Successfully set thermostat mode: %s', mode);
       Radiothermostat.get_status(device).then(function (data) {
-        defer.resolve({'status': 'success', 'update': {'_mode': mode, '_set_point': data.update._set_point}});
+        defer.resolve({'status': 'success', 'update': {'_mode': mode, '_set_point': data.update._set_point, '_on': data.update._on}});
       }, function (err) {
         defer.reject(err);
       });
@@ -133,6 +133,7 @@ Radiothermostat.get_status = function (device) {
     device.config.raw = data;
 
     defer.resolve({'update': {
+        _on: (data.tstat > 0),
         _temperature: data.temp,
         _mode: modes[data.tmode],
         _set_point: data.t_heat || data.t_cool || 0
