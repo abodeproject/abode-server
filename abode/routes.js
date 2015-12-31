@@ -81,5 +81,22 @@ router.delete('/views/:view', function (req, res) {
 
 });
 
+router.get('/status/', function (req, res) {
+
+  var level,
+    display = abode.providers.display;
+  if (abode.providers.display.power && display.max_brightness && display.brightness) {
+    level = Math.round((display.brightness / display.max_brightness) * 100);
+  } else {
+    level = 0;
+  }
+
+  res.status(200).send({
+    '_on': display.power,
+    '_level': level
+  });
+
+});
+
 
 module.exports = router;

@@ -50,6 +50,8 @@ Devices.capabilities = [
   'openclose',
   'io',
   'weather',
+  'video',
+  'onoff',
 ];
 Devices._devices = [];
 Devices.logs = mongoose.model('DeviceLogs', DeviceLogSchema);
@@ -172,6 +174,7 @@ DeviceSchema.methods.set_temperature = function (level) { return this.send_comma
 DeviceSchema.methods.set_mode = function (mode) { return this.send_command('set_mode', mode, false); };
 DeviceSchema.methods.set_humidity = function (level) { return this.send_command('set_humidity', level, false); };
 DeviceSchema.methods.status = function () { return this.send_command('get_status', undefined, false); };
+DeviceSchema.methods.play = function (url, duration) { return this.send_command('play', [url, duration], false); };
 
 DeviceSchema.methods.is_on = DeviceSchema.methods.is_open = function (cache) { return this.send_command('is_on', undefined, cache, '_on', true); };
 DeviceSchema.methods.is_off = DeviceSchema.methods.is_closed = function (cache) { return this.send_command('is_off', undefined, cache, '_on', false); };
