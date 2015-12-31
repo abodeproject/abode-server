@@ -185,7 +185,6 @@ var actions = [
   'open',
   'close',
   'set_level',
-  'set_temperature',
   'set_mode',
   'set_humidity',
   'set_point',
@@ -225,7 +224,7 @@ actions.forEach(function (action) {
 
     if (response.then) {
       response.then(function (result) {
-        res.send({'status': 'success', 'response': result});
+        res.send({'status': 'success', 'response': result, 'device': device});
       }, function (err) {
         res.status(400).send(err || {'status': 'failed', 'message': 'Failed to send action'});
       });

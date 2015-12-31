@@ -64,8 +64,10 @@ angular.module('devices', [])
                 $scope.errors = true;
               });
             } else {
-              $http.get('/api/devices/' + $scope.device.name).then(function (response) {
-                $scope.device = response.data;
+              $http.post('/api/devices/' + $scope.device.name + '/status').then(function (response) {
+                if (response.data.device) {
+                  $scope.device = response.data.device;
+                }
                 $scope.processing = false;
                 $scope.errors = false;
               }, function () {
@@ -130,7 +132,10 @@ angular.module('devices', [])
             $scope.processing = true;
             $scope.errors = false;
 
-            $http.post('/api/devices/' + $scope.device.name + '/set_mode', [mode]).then(function () {
+            $http.post('/api/devices/' + $scope.device.name + '/set_mode', [mode]).then(function (response) {
+              if (response.data.device) {
+                $scope.device = response.data.device;
+              }
               $scope.processing = false;
               $scope.errors = false;
             }, function () {
@@ -168,7 +173,11 @@ angular.module('devices', [])
             $scope.processing = true;
             $scope.errors = false;
 
-            $http.post('/api/devices/' + $scope.device.name + '/set_point', [$scope.device._set_point]).then(function () {
+            $http.post('/api/devices/' + $scope.device.name + '/set_point', [$scope.device._set_point]).then(function (response) {
+              console.log(response.data.device);
+              if (response.data.device) {
+                $scope.device = response.data.device;
+              }
               temp_wait = undefined;
               $scope.processing = false;
               $scope.errors = false;

@@ -6,7 +6,7 @@
          <i class="icon-fan" ng-show="has_capability(device, 'fan')"></i>
          <i class="icon-snow" ng-show="device._mode == 'COOL'"></i>
          <i class="icon-fire" ng-show="device._mode == 'HEAT'"></i>
-         <span ng-show="has_capability(device, 'temperature_sensor')"><i class="wi wi-thermometer"></i> {{device._temperature}}&deg;</span>
+         <span ng-show="has_capability(device, 'temperature_sensor')"><i class="wi wi-thermometer"></i> {{device._temperature}}</span>
        </p>
     </li>
 
