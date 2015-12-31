@@ -23,7 +23,7 @@ var Rad = function () {
     }
 
     log.info('Starting Rad provider');
-    setInterval(Rad.load, (1000 * 60 * config.interval));
+    setInterval(Rad.load, (1000 * config.interval));
     Rad.load();
   });
 
@@ -72,7 +72,19 @@ Rad.play = function (device, url, duration) {
   var defer = q.defer();
 
   log.debug('Starting video on %s for %s seconds: %s', device.name, duration, url);
-  defer.resolve();
+  request.post({
+      uri: device.config.address + '/api/video',
+      json: {'url': url, 'duration': duration}
+    }, function (error, response, body) {
+    if (!error && response.statusCode === 200) {
+      log.debug('Successfully start video on Rad: %s', device.name);
+      defer.resolve({'status': 'success'});
+    } else {
+      log.error('Failed to start video on %s: %s', device.name, body);
+      defer.reject({'status': 'failed', 'message': body});
+    }
+  });
+
 
   return defer.promise;
 };
@@ -99,7 +111,7 @@ Rad.get_status = function (device) {
 
   log.debug('Getting Rad status: %s', device.name);
 
-  request(device.config.address + '/api/abode/status', function (error, response, body) {
+  request({uri: device.config.address + '/api/abode/status', json: true}, function (error, response, body) {
     if (!error && response.statusCode === 200) {
       log.info('Received status for Rad', device.name);
       defer.resolve({'update': body});
@@ -108,8 +120,6 @@ Rad.get_status = function (device) {
       defer.reject({'status': 'failed', 'message': body});
     }
   });
-
-  defer.resolve();
 
   return defer.promise;
 };
@@ -124,7 +134,11 @@ Rad.load = function () {
 
   devices.forEach(function (device) {
     Rad.get_status(device).then(function (data) {
+      if (data.update) {
 
+        device.set_state(data.update);
+
+      }
     });
   });
 

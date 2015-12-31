@@ -190,6 +190,7 @@ var actions = [
   'set_humidity',
   'set_point',
   'status',
+  'play',
 ];
 
 var statuses = [

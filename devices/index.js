@@ -105,8 +105,10 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
     cache = false;
   }
 
+  args = (args instanceof Array) ? args : [args];
+  args.unshift(self);
+
   if ((this.active === false || cache === true) && key !== undefined) {
-    console.log('here');
     if (value !== undefined) {
       defer.resolve((this[key] === value));
     } else {
@@ -124,7 +126,7 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
   }
 
   //Call the function and expect a promise back
-  providers[self.provider][cmd](self, args).then(function (status) {
+  providers[self.provider][cmd].apply(self, args).then(function (status) {
     status.update = status.update || {};
 
     // If our status contained an "update" flag, update the device
