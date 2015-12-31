@@ -92,6 +92,22 @@ angular.module('climate', ['ui.bootstrap'])
       $scope.is_cool = false;
       $scope.is_heat = false;
 
+      var temp_index = 0;
+
+      //Alternate the temp value
+      $interval(function () {
+
+        var devs = climate.rooms[$scope.room].filter(function (device) {
+          return (device.capabilities.indexOf('temperature_sensor') !== -1);
+        });
+
+        temp_index += 1;
+        if (temp_index >= devs.length) {
+          temp_index = 0;
+        }
+
+      }, 5000);
+
       $scope.openDetails = function () {
         $uibModal.open({
           animation: $scope.animationsEnabled,
@@ -134,16 +150,17 @@ angular.module('climate', ['ui.bootstrap'])
       var parseRoom = function () {
         var data = climate.rooms[$scope.room] || [];
 
-        var alert = false,
-          alerting = 0;
-
-          var fan = false;
-          var cool = false;
-          var heat = false;
+        var count = 0,
+          fan = false,
+          cool = false,
+          heat = false;
 
         data.forEach(function (device) {
           if (device.capabilities.indexOf('temperature_sensor') !== -1) {
-            $scope.value = Math.floor(device[$scope.stat]);
+            if (count === temp_index) {
+              $scope.value = Math.floor(device[$scope.stat]);
+            }
+            count += 1;
           }
           if (device.capabilities.indexOf('fan') !== -1) {
             fan = (device._on === true) ? true : fan;
