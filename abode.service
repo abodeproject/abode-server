@@ -5,6 +5,7 @@ StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=abode
 Environment=NODE_ENV=prod
+After=network.target mongodb.service
 
 [Install]
 WantedBy=multi-user.target
