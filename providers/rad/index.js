@@ -116,8 +116,8 @@ Rad.get_status = function (device) {
       log.info('Received status for Rad', device.name);
       defer.resolve({'update': body});
     } else {
-      log.error('Failed to Rad status for %s: %s', device.name, body);
-      defer.reject({'status': 'failed', 'message': body});
+      log.error('Failed get Rad status for %s: %s', device.name, String(error));
+      defer.reject({'status': 'failed', 'message': String(error)});
     }
   });
 
