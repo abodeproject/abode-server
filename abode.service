@@ -1,11 +1,12 @@
 [Service]
-ExecStart=DISPLAY=0:0 /usr/local/bin/node /home/abode/app/index.js
+ExecStart=/usr/local/bin/node /home/abode/app/index.js
 User=abode
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=abode
-Environment=NODE_ENV=prod
+Environment=DISPLAY=0:0
+Environment=NODE_ENV=production
 After=network.target mongodb.service
 
 [Install]
