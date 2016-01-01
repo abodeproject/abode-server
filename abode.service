@@ -1,5 +1,6 @@
 [Service]
 ExecStart=DISPLAY=0:0 /usr/local/bin/node /home/abode/app/index.js
+User=abode
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
