@@ -12,7 +12,7 @@ angular.module('datetime', [])
   };
 
   var getDetails = function () {
-    if ($state.current.name !== 'home') {
+    if ($state.current.name !== 'index.home') {
       $interval.cancel(updater);
       return;
     }
