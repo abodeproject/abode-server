@@ -131,6 +131,7 @@ angular.module('statuses', ['ui.bootstrap'])
       interval: '@'
     },
     controller: function ($scope, $interval, $uibModal, status, devices) {
+      var intervals = [];
       status.add_room($scope.room);
 
       $scope.interval = $scope.interval || 2;
@@ -145,8 +146,13 @@ angular.module('statuses', ['ui.bootstrap'])
           animation: $scope.animationsEnabled,
           templateUrl: 'roomDevices.html',
           size: 'lg',
-          controller: function ($scope, $uibModalInstance, $timeout, room, status) {
+          controller: function ($scope, $uibModalInstance, $interval, room, status) {
+            var intervals = [];
             $scope.devices = status.rooms[room];
+
+            $scope.ok = function () {
+              $uibModalInstance.close();
+            };
 
             $scope.open = function (device) {
               devices.openDevice(device);
@@ -159,13 +165,14 @@ angular.module('statuses', ['ui.bootstrap'])
               } else {
                 console.dir(devices);
               }
-              $timeout(getDevices, 5000);
             };
 
             getDevices();
-            $scope.ok = function () {
-              $uibModalInstance.close();
-            };
+            intervals.push($interval(getDevices, 5000));
+
+            $scope.$on('destroy', function () {
+              intervals.forEach($interval.cancel);
+            });
 
           },
           resolve: {
@@ -175,25 +182,6 @@ angular.module('statuses', ['ui.bootstrap'])
           }
         });
       };
-
-
-      var secondsToString = function (seconds) {
-        var numyears = Math.floor(seconds / 31536000);
-        var numdays = Math.floor((seconds % 31536000) / 86400);
-        var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
-        var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
-        var numseconds = Math.floor((((seconds % 31536000) % 86400) % 3600) % 60);
-        numyears = (numyears === 0) ? '' : numyears + ' years ';
-        numdays = (numdays === 0) ? '' : numdays + ' days ';
-        numhours = (numhours === 0) ? '' : numhours + ' hours ';
-        numminutes = (numminutes === 0) ? '' : numminutes + ' min ';
-        numseconds = (numseconds === 0) ? '' : numseconds + ' sec ';
-
-        return numyears + numdays + numhours + numminutes + numseconds;
-
-      };
-
-
 
       var parseRoom = function () {
         var data = status.rooms[$scope.room] || [];
@@ -222,7 +210,11 @@ angular.module('statuses', ['ui.bootstrap'])
         $scope.devices = data;
       };
 
-      $interval(parseRoom, (1000));
+      intervals.push($interval(parseRoom, 1000));
+
+      $scope.$on('destroy', function () {
+        intervals.forEach($interval.cancel);
+      });
     },
     template: '<li><button class="status img-circle" ng-click="openDetails()"><div class="status-icon"><i class="fi-{{icon}}"></i></div><span class="img-circle status_badge bg-info" ng-class="{\'bg-danger\': alert}">{{alerting}}</span></button></li>',
     replace: true,

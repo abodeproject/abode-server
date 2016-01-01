@@ -81,11 +81,12 @@ angular.module('climate', ['ui.bootstrap'])
       width: '@'
     },
     controller: function ($scope, $interval, $uibModal, climate, devices) {
+      var intervals = [];
       climate.add_room($scope.room);
 
       $scope.interval = $scope.interval || 2;
       $scope.devices = [];
-      $scope.value = '';
+      $scope.value = '?';
       $scope.styles = {
       };
       $scope.is_fan = false;
@@ -94,8 +95,7 @@ angular.module('climate', ['ui.bootstrap'])
 
       var temp_index = 0;
 
-      //Alternate the temp value
-      $interval(function () {
+      var value_alternator = function () {
 
         var devs = climate.rooms[$scope.room].filter(function (device) {
           return (device.capabilities.indexOf('temperature_sensor') !== -1);
@@ -106,15 +106,19 @@ angular.module('climate', ['ui.bootstrap'])
           temp_index = 0;
         }
 
-      }, 5000);
-
+      };
       $scope.openDetails = function () {
         $uibModal.open({
           animation: $scope.animationsEnabled,
           templateUrl: 'climateDevices.html',
           size: 'lg',
-          controller: function ($scope, $uibModalInstance, $timeout, room, climate) {
+          controller: function ($scope, $uibModalInstance, $interval, room, climate) {
+            var intervals = [];
             $scope.devices = climate.rooms[room];
+
+            $scope.ok = function () {
+              $uibModalInstance.close();
+            };
 
             $scope.open = function (device) {
               devices.openDevice(device);
@@ -131,13 +135,13 @@ angular.module('climate', ['ui.bootstrap'])
               } else {
                 console.dir(devices);
               }
-              $timeout(getDevices, 5000);
             };
-
             getDevices();
-            $scope.ok = function () {
-              $uibModalInstance.close();
-            };
+            intervals.push($interval(getDevices, 5000));
+
+            $scope.$on('destroy', function () {
+              intervals.forEach($interval.cancel);
+            });
           },
           resolve: {
             room: function () {
@@ -180,7 +184,15 @@ angular.module('climate', ['ui.bootstrap'])
         $scope.devices = data;
       };
 
-      $interval(parseRoom, (1000));
+
+
+      intervals.push($interval(value_alternator, 5000));
+      intervals.push($interval(parseRoom, (1000)));
+
+      //Clean our intervals
+      $scope.$on('$destroy', function () {
+        intervals.forEach($interval.cancel);
+      });
     },
     template: '<li><button ng-click="openDetails()" class="status img-circle"><div class="climate-value">{{value}}</div><span class="climate-icon climate-fan bg-success img-circle" ng-show="is_fan"><i class="icon-fan"></i></span><span class="climate-icon bg-info climate-cool img-circle" ng-show="is_cool"><i class="icon-snow"></i></span><span class="climate-icon bg-danger climate-heat img-circle" ng-show="is_heat"><i class="icon-fire"></i></span></button></li>',
     replace: true,

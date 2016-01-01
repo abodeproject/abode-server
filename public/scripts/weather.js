@@ -79,7 +79,9 @@ angular.module('weather', ['datetime'])
       align: '@',
     },
     controllerAs: 'weather',
-    controller: function ($scope, $interval, $timeout, $http, $element, $transclude, weather, datetime) {
+    controller: function ($scope, $interval, $http, $element, $transclude, weather, datetime) {
+      var intervals = [];
+
       $scope.interval = $scope.interval || 5;
       $scope.parsed = '?';
       $scope.time = {is: {day: true, night: false}};
@@ -212,7 +214,12 @@ angular.module('weather', ['datetime'])
         $scope.parsed = parseValue($scope.value, $scope.weather);
       };
 
-      $interval(parseWeather, (1000));
+      intervals.push($interval(parseWeather, 1000));
+
+      $scope.$on('destroy', function () {
+        intervals.forEach($interval.cancel);
+      });
+
       $transclude($scope, function(transEl) {
         $element.append(transEl);
       });
