@@ -1,5 +1,5 @@
 [Service]
-ExecStart=DISPLAY=0:0 /usr/local/bin/node /home/scott/git/abode-device/index.js
+ExecStart=DISPLAY=0:0 /usr/local/bin/node /home/abode/app/index.js
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
