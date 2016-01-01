@@ -1,5 +1,6 @@
 [Service]
 ExecStart=/usr/local/bin/node /home/abode/app/index.js
+WorkingDirectory=/home/abode/app
 User=abode
 Restart=always
 StandardOutput=syslog
