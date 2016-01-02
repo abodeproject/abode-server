@@ -37,6 +37,8 @@ angular.module('devices', [])
         templateUrl: 'views/device_view.html',
         size: 'sm',
         controller: function ($scope, $uibModalInstance, $interval, $timeout, devices, device) {
+          var intervals = [];
+
           $scope.device = angular.copy(device);
           $scope.processing = false;
           $scope.errors = false;
@@ -187,7 +189,6 @@ angular.module('devices', [])
             $scope.errors = false;
 
             $http.post('/api/devices/' + $scope.device.name + '/set_point', [$scope.device._set_point]).then(function (response) {
-              console.log(response.data.device);
               if (response.data.device) {
                 $scope.device = response.data.device;
               }
@@ -201,14 +202,19 @@ angular.module('devices', [])
             });
           }
 
-          $interval(function () {
+          var device_checker = function () {
             if (temp_wait) {
               return;
             }
             getDevice($scope.device.name).then(function (response) {
               $scope.device = response;
             });
-          }, 2000);
+          }
+          intervals.push($interval(device_checker, 2000));
+
+          $scope.$on('$destroy', function () {
+            intervals.forEach($interval.cancel);
+          });
         },
         resolve: {
           device: function () {

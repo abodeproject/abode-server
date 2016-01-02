@@ -216,7 +216,7 @@ angular.module('weather', ['datetime'])
 
       intervals.push($interval(parseWeather, 1000));
 
-      $scope.$on('destroy', function () {
+      $scope.$on('$destroy', function () {
         intervals.forEach($interval.cancel);
       });
 

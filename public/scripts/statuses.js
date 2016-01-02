@@ -212,7 +212,7 @@ angular.module('statuses', ['ui.bootstrap'])
 
       intervals.push($interval(parseRoom, 1000));
 
-      $scope.$on('destroy', function () {
+      $scope.$on('$destroy', function () {
         intervals.forEach($interval.cancel);
       });
     },
