@@ -211,5 +211,36 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       template: '<div class="content" ng-style="styles" ng-transclude></div>',
       replace: true,
     };
+  })
+  .service('confirm', function ($q, $uibModal) {
+    return function (msg) {
+      var defer = $q.defer();
+
+      var modal = $uibModal.open({
+        animation: true,
+        templateUrl: 'views/confirm.html',
+        size: 'sm',
+        controller: function ($scope, $uibModalInstance) {
+          $scope.msg = msg;
+
+          $scope.no = function () {
+            $uibModalInstance.dismiss();
+          };
+
+          $scope.yes = function () {
+            $uibModalInstance.close();
+          };
+
+        }
+      });
+
+      modal.result.then(function () {
+        defer.resolve();
+      }, function () {
+        defer.reject();
+      });
+
+      return defer.promise;
+    }
   });
 

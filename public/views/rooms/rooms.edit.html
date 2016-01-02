@@ -6,7 +6,29 @@
     </div>
     <div class="row">
       <div class="col-sm-8 col-sm-offset-2" style="font-size: 2em;">
-
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
+            <form name="addRoom">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Name" required="" ng-model="room.name">
+              </div>
+              <div class="form-group">
+                <button type="submit" class="pull-right btn btn-sm btn-primary" ng-click="save()" ng-disabled="addRoom.$invalid"><i class="icon-savetodrive"></i> Save</button>
+                <button type="submit" class="btn btn-sm btn-default" ng-click="remove()" ng-disabled="addRoom.$invalid"><i class="icon-circledelete"></i> Remove</button>
+              </div>
+              <div ng-show="loading"><i class="icon-refresh spin"></i> Loading Devices</div>
+              <div class="form-group" ng-hide="loading">
+                <label for="name">Devices </label>
+                <button class="btn btn-success btn-xs pull-right" ng-click="addDevice()"><i class="icon-plus-sign"></i> Assign</button>
+                <ul class="list-group">
+                  <li class="list-group-item" ng-repeat="device in devices">{{device.name}} <button class="pull-right btn btn-default btn-xs" ng-click="removeDevice(device._id)"><i class="icon-remove-sign"></i> Unassign</button></li>
+                </ul>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
