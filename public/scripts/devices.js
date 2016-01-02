@@ -34,9 +34,9 @@ angular.module('devices', [])
 
       $uibModal.open({
         animation: true,
-        templateUrl: 'views/device_view.html',
+        templateUrl: 'views/devices/devices.view.html',
         size: 'sm',
-        controller: function ($scope, $uibModalInstance, $interval, $timeout, devices, device) {
+        controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, devices, device) {
           var intervals = [];
 
           $scope.device = angular.copy(device);
@@ -49,6 +49,11 @@ angular.module('devices', [])
             };
 
           });
+
+          $scope.edit = function () {
+            $uibModalInstance.close();
+            $state.go('index.devices.edit', {'name': device.name});
+          };
 
           $scope.sensors = $scope.capabilities.filter(function (c) {
 
@@ -306,6 +311,12 @@ angular.module('devices', [])
 
 
   $scope.load();
+})
+.controller('devicesEdit', function () {
+
+})
+.controller('deviceAdd', function () {
+
 })
 .directive('device', function () {
 

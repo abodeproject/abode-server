@@ -5,6 +5,9 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
     $urlRouterProvider.when('', '/home');
+    $urlRouterProvider.when('/devices', '/devices/list');
+    $urlRouterProvider.when('/rooms', '/rooms/list');
+    $urlRouterProvider.when('/triggers', '/triggers/list');
     $urlRouterProvider.otherwise('/home');
 
     $stateProvider
@@ -80,7 +83,11 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
     })
     .state('index.rooms', {
       url: '/rooms',
-      templateUrl: '/views/rooms.html',
+      templateUrl: '/views/rooms/rooms.html',
+    })
+    .state('index.rooms.list', {
+      url: '/list',
+      templateUrl: '/views/rooms/rooms.list.html',
       controller: 'roomsList'
     })
     .state('index.rooms.add', {
@@ -95,33 +102,42 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
     })
     .state('index.devices', {
       url: '/devices',
-      templateUrl: '/views/devices.html',
+      templateUrl: '/views/devices/devices.html',
+    })
+    .state('index.devices.list', {
+      url: '/list',
+      templateUrl: '/views/devices/devices.list.html',
       controller: 'devicesList'
     })
     .state('index.devices.add', {
-      url: '/devices/add',
-      templateUrl: '/views/devices.add.html',
+      url: '/add',
+      templateUrl: '/views/devices/devices.add.html',
       controller: 'devicesAdd'
     })
     .state('index.devices.edit', {
-      url: '/devices/:name',
-      templateUrl: '/views/devices.edit.html',
-      controller: 'devicesEdit'
+      url: '/:name',
+      templateUrl: '/views/devices/devices.edit.html',
+      controller: function () {
+        console.log('here');
+      }
     })
     .state('index.triggers', {
       url: '/triggers',
-      title: 'Abode Triggers',
-      templateUrl: '/views/triggers.html',
+      templateUrl: '/views/triggers/triggers.html',
+    })
+    .state('index.triggers.list', {
+      url: '/list',
+      templateUrl: '/views/triggers/triggers.list.html',
       controller: 'triggersList'
     })
     .state('index.triggers.add', {
-      url: '/triggers/add',
-      templateUrl: '/views/triggers.add.html',
+      url: '/add',
+      templateUrl: '/views/triggers/triggers.add.html',
       controller: 'triggersAdd'
     })
     .state('index.triggers.edit', {
-      url: '/triggers/:name',
-      templateUrl: '/views/triggers.edit.html',
+      url: '/:name',
+      templateUrl: '/views/triggers/triggers.edit.html',
       controller: 'triggersEdit'
     })
     .state('logout', {
@@ -166,6 +182,15 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
     $rootScope.$on('$stateChangeStart', function () {
       $scope.anav_hide();
+    });
+
+    $rootScope.$on('$stateChangeError', function () {
+      console.log('state change error');
+      console.dir(arguments);
+    });
+
+    $rootScope.$on('$stateNotFound', function () {
+      console.log('state not found');
     });
 
     var connection_checker = function () {
