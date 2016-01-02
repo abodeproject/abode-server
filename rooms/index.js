@@ -380,7 +380,6 @@ Rooms.create = function (config) {
     log.info('Room created: ', config.name);
     self._rooms.push(room);
 
-    console.log('here1');
     defer.resolve(room);
   });
 

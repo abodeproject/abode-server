@@ -28,7 +28,7 @@ router.get('/logs', function (req, res) {
 
 router.get('/', function (req, res) {
   res.send(devices.list().map(function (d) {
-    return {'_id': d._id, 'name': d.name};
+    return {'_id': d._id, 'name': d.name, '_rooms': d._rooms};
   }));
   res.end();
 });

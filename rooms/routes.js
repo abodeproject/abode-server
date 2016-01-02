@@ -13,8 +13,7 @@ router.get('/', function (req, res) {
 
 router.post('/', web.isJson, function (req, res) {
   rooms.create(req.body).then(function (room) {
-    console.log('here2');
-    res.status(201).send(room);
+    res.status(200).send(room);
   }, function (err) {
     res.status(422).send(err);
   });

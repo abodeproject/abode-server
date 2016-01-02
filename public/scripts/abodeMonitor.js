@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'ui.router','ngTouch'])
+angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'ui.router','ngTouch'])
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
@@ -80,27 +80,49 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
     })
     .state('index.rooms', {
       url: '/rooms',
-      title: 'Abode Rooms',
       templateUrl: '/views/rooms.html',
-      controller: function () {
-
-      }
+      controller: 'roomsList'
+    })
+    .state('index.rooms.add', {
+      url: '/rooms/add',
+      templateUrl: '/views/rooms.add.html',
+      controller: 'roomsAdd'
+    })
+    .state('index.rooms.edit', {
+      url: '/rooms/:name',
+      templateUrl: '/views/rooms.edit.html',
+      controller: 'roomsEdit'
     })
     .state('index.devices', {
       url: '/devices',
-      title: 'Abode Devices',
       templateUrl: '/views/devices.html',
-      controller: function () {
-
-      }
+      controller: 'devicesList'
+    })
+    .state('index.devices.add', {
+      url: '/devices/add',
+      templateUrl: '/views/devices.add.html',
+      controller: 'devicesAdd'
+    })
+    .state('index.devices.edit', {
+      url: '/devices/:name',
+      templateUrl: '/views/devices.edit.html',
+      controller: 'devicesEdit'
     })
     .state('index.triggers', {
       url: '/triggers',
       title: 'Abode Triggers',
       templateUrl: '/views/triggers.html',
-      controller: function () {
-
-      }
+      controller: 'triggersList'
+    })
+    .state('index.triggers.add', {
+      url: '/triggers/add',
+      templateUrl: '/views/triggers.add.html',
+      controller: 'triggersAdd'
+    })
+    .state('index.triggers.edit', {
+      url: '/triggers/:name',
+      templateUrl: '/views/triggers.edit.html',
+      controller: 'triggersEdit'
     })
     .state('logout', {
       url: '/logout',

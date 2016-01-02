@@ -15,8 +15,21 @@ angular.module('devices', [])
     return defer.promise;
   };
 
+  var load = function () {
+    var defer = $q.defer();
+
+    $http.get('api/devices').then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  };
+
   return {
     get: getDevice,
+    load: load,
     openDevice: function (device) {
 
       $uibModal.open({
@@ -206,6 +219,29 @@ angular.module('devices', [])
 
     }
   };
+})
+.controller('devicesList', function ($scope, $state, devices) {
+  $scope.devices = [];
+  $scope.loading = true;
+
+  $scope.view = function (device) {
+    devices.openDevice(device.name);
+  };
+
+  $scope.load = function () {
+    devices.load().then(function (devices) {
+      $scope.devices = devices;
+      $scope.loading = false;
+      $scope.error = false;
+    }, function () {
+      $scope.loading = false;
+      $scope.error = true;
+    });
+  };
+
+
+
+  $scope.load();
 })
 .directive('device', function () {
 
