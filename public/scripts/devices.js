@@ -62,6 +62,16 @@ angular.module('devices', [])
 
           });
 
+          $scope.has_capability = function (capability) {
+            var match = $scope.capabilities.filter(function (c) {
+
+              return (c.name === capability);
+
+            });
+
+            return (match.length > 0);
+          };
+
           $scope.name = device.name;
 
           $scope.reload = function () {
@@ -202,8 +212,56 @@ angular.module('devices', [])
             });
           }
 
+          var level_wait;
+
+          $scope.level_up = function () {
+            $scope.processing = true;
+            $scope.errors = false;
+            if (level_wait) {
+              $timeout.cancel(level_wait);
+            }
+            if ($scope.device._level < 100){
+              $scope.device._level += 1;
+            }
+
+            level_wait = $timeout($scope.set_level, 2000);
+          };
+
+          $scope.level_down = function () {
+            $scope.processing = true;
+            $scope.errors = false;
+            if (level_wait) {
+              $timeout.cancel(level_wait);
+            }
+
+            if ($scope.device._level > 0){
+              $scope.device._level -= 1;
+            }
+
+            level_wait = $timeout($scope.set_level, 2000);
+          };
+
+          $scope.set_level = function (temp) {
+
+            $scope.processing = true;
+            $scope.errors = false;
+
+            $http.post('/api/devices/' + $scope.device.name + '/level', [$scope.device._level]).then(function (response) {
+              if (response.data.device) {
+                $scope.device = response.data.device;
+              }
+              level_wait = undefined;
+              $scope.processing = false;
+              $scope.errors = false;
+            }, function () {
+              level_wait = undefined;
+              $scope.processing = false;
+              $scope.errors = true;
+            });
+          }
+
           var device_checker = function () {
-            if (temp_wait) {
+            if (temp_wait || level_wait) {
               return;
             }
             getDevice($scope.device.name).then(function (response) {
