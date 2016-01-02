@@ -98,5 +98,12 @@ router.get('/status/', function (req, res) {
 
 });
 
+router.get('/providers', function (req, res) {
+  res.send(abode.providers._providers);
+});
+
+router.get('/capabilities', function (req, res) {
+  res.send(abode.devices.capabilities);
+});
 
 module.exports = router;

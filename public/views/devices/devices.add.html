@@ -1,4 +1,5 @@
   <div class="container-fluid bg-muted">
+    <div style="position: fixed; right: 1em; top: .5em; font-size: 3em; cursor: pointer" ng-click="back()"><i class="glyphicon glyphicon-arrow-left"></i></div>
     <div class="row">
       <div class="col-sm-8 col-sm-offset-2 col-xs-offset-1">
         <h2>Add Device</h2>
@@ -6,6 +7,36 @@
     </div>
     <div class="row">
       <div class="col-sm-8 col-sm-offset-2" style="font-size: 2em;">
+
+        <div class="panel panel-default">
+          <div class="panel-body">{{errors}}
+            <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
+            <form name="addDevice">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Name" required="" ng-model="device.name">
+              </div>
+              <div class="form-group">
+                <label for="name">Provider</label>
+                <select size="1" class="form-control" id="provider" placeholder="Provider" required="" ng-model="device.provider" ng-options="o as o for o in providers | orderBy: '+'"></select>
+              </div>
+              <div class="form-group">
+                <label for="name">Capabilities</label>
+                <div style="overflow: auto; height: 8em;">
+                <ul class="list-group">
+                  <li class="list-group-item" ng-repeat="capability in capabilities | orderBy: '+'" ng-click="toggle_capability(capability)" ng-class="{'list-group-item-success': has_capability(capability)}">
+                    <i class="glyphicon glyphicon-ok-circle" ng-show="has_capability(capability)"></i>
+                    <i class="glyphicon glyphicon-ban-circle text-muted" ng-show="!has_capability(capability)"></i>
+                    {{capability}}
+                  </li>
+                </ul>
+                </div>
+              </div>
+
+              <button type="submit" class="pull-right btn btn-sm btn-primary" ng-click="add()" ng-disabled="addDevice.$invalid"><i class="icon-circleadd"></i> Add</button>
+            </form>
+          </div>
+        </div>
 
       </div>
     </div>

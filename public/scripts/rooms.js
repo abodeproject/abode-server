@@ -200,7 +200,7 @@ angular.module('rooms', ['ui.router'])
     rooms.view(room.name);
   };
 
-  $scope.view = function (room) {
+  $scope.edit = function (room) {
     $state.go('index.rooms.edit', {'name': room.name});
   };
 
@@ -219,9 +219,13 @@ angular.module('rooms', ['ui.router'])
 
   $scope.load();
 })
-.controller('roomsAdd', function ($scope, rooms) {
+.controller('roomsAdd', function ($scope, $state, rooms) {
   $scope.room = {};
   $scope.alerts = [];
+
+  $scope.back = function () {
+    $state.go('index.rooms');
+  };
 
   $scope.closeAlert = function(index) {
     $scope.alerts.splice(index, 1);

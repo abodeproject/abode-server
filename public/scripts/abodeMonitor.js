@@ -212,6 +212,16 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       replace: true,
     };
   })
+  .directive('stopEvent', function () {
+    return {
+      restrict: 'A',
+      link: function (scope, element, attr) {
+        element.bind('click', function (e) {
+            e.stopPropagation();
+        });
+      }
+    };
+   })
   .service('confirm', function ($q, $uibModal) {
     return function (msg) {
       var defer = $q.defer();
