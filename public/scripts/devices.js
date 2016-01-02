@@ -1,6 +1,30 @@
 'use strict';
 
-angular.module('devices', [])
+angular.module('devices', ['ui.router'])
+.config(function($stateProvider, $urlRouterProvider) {
+  $urlRouterProvider.when('/devices', '/devices/list');
+
+  $stateProvider
+  .state('index.devices', {
+    url: '/devices',
+    templateUrl: '/views/devices/devices.html',
+  })
+  .state('index.devices.list', {
+    url: '/list',
+    templateUrl: '/views/devices/devices.list.html',
+    controller: 'devicesList'
+  })
+  .state('index.devices.add', {
+    url: '/add',
+    templateUrl: '/views/devices/devices.add.html',
+    controller: 'devicesAdd'
+  })
+  .state('index.devices.edit', {
+    url: '/:name',
+    templateUrl: '/views/devices/devices.edit.html',
+    controller: 'devicesEdit'
+  });
+})
 .service('devices', function ($q, $http, $uibModal) {
 
   var getDevice = function (device) {

@@ -1,6 +1,30 @@
 'use strict';
 
-angular.module('triggers', [])
+angular.module('triggers', ['ui.router'])
+.config(function($stateProvider, $urlRouterProvider) {
+  $urlRouterProvider.when('/triggers', '/triggers/list');
+
+  $stateProvider
+  .state('index.triggers', {
+    url: '/triggers',
+    templateUrl: '/views/triggers/triggers.html',
+  })
+  .state('index.triggers.list', {
+    url: '/list',
+    templateUrl: '/views/triggers/triggers.list.html',
+    controller: 'triggersList'
+  })
+  .state('index.triggers.add', {
+    url: '/add',
+    templateUrl: '/views/triggers/triggers.add.html',
+    controller: 'triggersAdd'
+  })
+  .state('index.triggers.edit', {
+    url: '/:name',
+    templateUrl: '/views/triggers/triggers.edit.html',
+    controller: 'triggersEdit'
+  });
+})
 .service('triggers', function ($http, $q) {
   var load = function () {
     var defer = $q.defer();

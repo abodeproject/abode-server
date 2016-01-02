@@ -5,9 +5,6 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
     $urlRouterProvider.when('', '/home');
-    $urlRouterProvider.when('/devices', '/devices/list');
-    $urlRouterProvider.when('/rooms', '/rooms/list');
-    $urlRouterProvider.when('/triggers', '/triggers/list');
     $urlRouterProvider.otherwise('/home');
 
     $stateProvider
@@ -80,65 +77,6 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
           });
         };
       }
-    })
-    .state('index.rooms', {
-      url: '/rooms',
-      templateUrl: '/views/rooms/rooms.html',
-    })
-    .state('index.rooms.list', {
-      url: '/list',
-      templateUrl: '/views/rooms/rooms.list.html',
-      controller: 'roomsList'
-    })
-    .state('index.rooms.add', {
-      url: '/rooms/add',
-      templateUrl: '/views/rooms.add.html',
-      controller: 'roomsAdd'
-    })
-    .state('index.rooms.edit', {
-      url: '/rooms/:name',
-      templateUrl: '/views/rooms.edit.html',
-      controller: 'roomsEdit'
-    })
-    .state('index.devices', {
-      url: '/devices',
-      templateUrl: '/views/devices/devices.html',
-    })
-    .state('index.devices.list', {
-      url: '/list',
-      templateUrl: '/views/devices/devices.list.html',
-      controller: 'devicesList'
-    })
-    .state('index.devices.add', {
-      url: '/add',
-      templateUrl: '/views/devices/devices.add.html',
-      controller: 'devicesAdd'
-    })
-    .state('index.devices.edit', {
-      url: '/:name',
-      templateUrl: '/views/devices/devices.edit.html',
-      controller: function () {
-        console.log('here');
-      }
-    })
-    .state('index.triggers', {
-      url: '/triggers',
-      templateUrl: '/views/triggers/triggers.html',
-    })
-    .state('index.triggers.list', {
-      url: '/list',
-      templateUrl: '/views/triggers/triggers.list.html',
-      controller: 'triggersList'
-    })
-    .state('index.triggers.add', {
-      url: '/add',
-      templateUrl: '/views/triggers/triggers.add.html',
-      controller: 'triggersAdd'
-    })
-    .state('index.triggers.edit', {
-      url: '/:name',
-      templateUrl: '/views/triggers/triggers.edit.html',
-      controller: 'triggersEdit'
     })
     .state('logout', {
       url: '/logout',
