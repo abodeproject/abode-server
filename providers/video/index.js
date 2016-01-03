@@ -37,36 +37,59 @@ var Video = function () {
 Video.start = function (config) {
   var defer = q.defer();
 
-  if (Video.playing) {
-    defer.reject({'status': 'failed', 'message': 'Video already playing'});
+  var play = function () {
+    Video.stdout = '';
+    Video.stderr = '';
+
+    Video.url = config.url;
+    config.url = [config.url];
+    config.url.unshift.apply(abode.config.video.options);
+
+    Video.spawn = spawn(abode.config.video.player, config.url, {env: process.env});
+    Video.spawn.on('exit', function (status, sig) {
+      log.info('Video exited: %s (%s)', status, sig);
+      Video.last_status = status;
+      Video.playing = false;
+    });
+    Video.spawn.on('error', function (err) {
+      log.error('Error playing video:', err);
+      defer.reject({'status': 'failed', 'message': err});
+      Video.stop();
+    });
+
+    setTimeout(function () {
+      Video.playing = true;
+      defer.resolve({'status': 'success', 'pid': Video.spawn.pid});
+    }, 1000);
+
+    Video.timer = setTimeout(Video.stop, config.duration * 1000);
+    log.info('Video timer set for %s seconds', config.duration);
+  };
+
+  //If trying to play the same video, extend the timeout
+  if (Video.playing && Video.url === config.url) {
+    clearTimeout(Video.timer);
+    Video.timer = setTimeout(Video.stop, config.duration * 1000);
+
+    defer.resolve({'status': 'success', 'message': 'Video duration extended'});
     return defer.promise;
   }
 
-  Video.stdout = '';
-  Video.stderr = '';
+  //If video is playing and url is different, stop the current one
+  if (Video.playing && Video.url !== config.url) {
+    clearTimeout(Video.timer);
 
-  config.url = [config.url];
-  config.url.unshift.apply(abode.config.video.options);
-
-  Video.spawn = spawn(abode.config.video.player, config.url, {env: process.env});
-  Video.spawn.on('exit', function (status, sig) {
-    log.info('Video exited: %s (%s)', status, sig);
-    Video.last_status = status;
-    Video.playing = false;
-  });
-  Video.spawn.on('error', function (err) {
-    log.error('Error playing video:', err);
-    defer.reject({'status': 'failed', 'message': err});
     Video.stop();
-  });
 
-  setTimeout(function () {
-    Video.playing = true;
-    defer.resolve({'status': 'success', 'pid': Video.spawn.pid});
-  }, 1000);
+    //Delay playing to account for cleanup
+    //Could probably generate a event to trigger off instead but i'm feeling lazy
+    setTimeout(play, 1000);
 
-  setTimeout(Video.stop, config.duration * 1000);
-  log.info('Video timer set for %s seconds', config.duration);
+    return defer.promise;
+  }
+
+  //If nothing is playing start playing
+  play();
 
   return defer.promise;
 };
