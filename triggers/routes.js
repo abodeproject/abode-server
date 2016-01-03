@@ -11,8 +11,8 @@ router.get('/', function (req, res) {
 });
 
 router.post('/', web.isJson, function (req, res) {
-  triggers.create(req.body).then(function () {
-    res.status(201).end();
+  triggers.create(req.body).then(function (response) {
+    res.status(201).send(response);
   }, function (err) {
     res.status(422).send(err);
   });
@@ -52,12 +52,10 @@ router.delete('/:id', function (req, res) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
     return;
   }
-  trigger.delete().then(function () {
-    res.send();
-    res.end();
+  trigger.delete().then(function (response) {
+    res.send(response);
   }, function (err) {
-    res.send(err);
-    res.end();
+    res.status(400).send(err);
   });
 });
 

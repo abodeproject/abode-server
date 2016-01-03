@@ -359,7 +359,7 @@ TriggersSchema.methods.delete = function () {
       // Reload the devices
       Triggers.load().then(function () {
         log.info('Trigger Deleted: ', self.name);
-        defer.resolve();
+        defer.resolve({'status': 'success', 'message': 'Trigger Deleted'});
       }, function (err) {
         log.error('Failed to reload Triggers');
         defer.reject(err);
@@ -392,7 +392,7 @@ Triggers.create = function (config) {
 
     log.debug('Trigger created: ', config.name);
     self._Triggers.push(trigger);
-    defer.resolve(trigger);
+    defer.resolve({'status': 'success', 'message': 'Trigger Created', 'trigger': trigger});
   });
 
   return defer.promise;
