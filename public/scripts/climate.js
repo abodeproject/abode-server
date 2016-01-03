@@ -121,7 +121,12 @@ angular.module('climate', ['ui.bootstrap'])
             };
 
             $scope.open = function (device) {
-              devices.openDevice(device);
+              var modal = devices.openDevice(device);
+              modal.result.then(function(config) {
+                if (config.recurse) {
+                  $uibModalInstance.close(config);
+                }
+              });
             };
 
             $scope.has_capability = function (device, cap) {

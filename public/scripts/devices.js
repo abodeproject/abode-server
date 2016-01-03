@@ -106,7 +106,7 @@ angular.module('devices', ['ui.router'])
 
   var openDevice =function (device) {
 
-    $uibModal.open({
+    return $uibModal.open({
       animation: true,
       templateUrl: 'views/devices/devices.view.html',
       size: 'sm',
@@ -125,7 +125,7 @@ angular.module('devices', ['ui.router'])
         });
 
         $scope.edit = function () {
-          $uibModalInstance.close();
+          $uibModalInstance.close({'recurse': true});
           $state.go('index.devices.edit', {'name': device.name});
         };
 

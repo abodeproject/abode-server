@@ -84,7 +84,7 @@ angular.module('rooms', ['ui.router'])
 
   var viewRoom = function (room) {
 
-    $uibModal.open({
+    return $uibModal.open({
       animation: true,
       templateUrl: 'views/rooms/rooms.view.html',
       size: 'lg',
@@ -130,6 +130,7 @@ angular.module('rooms', ['ui.router'])
         }
       }
     });
+
   };
 
   var addRoomDevice = function (room, device) {
