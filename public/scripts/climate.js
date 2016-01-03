@@ -3,6 +3,7 @@
 angular.module('climate', ['ui.bootstrap'])
 .service('climate', function ($interval, $timeout, $http, $state) {
   var rooms = {};
+  var states = [];
   var loader;
   var updater;
 
@@ -30,13 +31,18 @@ angular.module('climate', ['ui.bootstrap'])
   };
 
   var load = function () {
-    if ($state.current.name !== 'index.home') {
-      $interval.cancel(updater);
+    if (states.indexOf($state.current.name) === -1) {
       return;
     }
 
     Object.keys(rooms).forEach(getRoom);
 
+  };
+
+  var register_state = function(state) {
+    if (states.indexOf(state) === -1) {
+      states.push(state);
+    }
   };
 
   updater = $interval(load, 10000);
@@ -57,7 +63,8 @@ angular.module('climate', ['ui.bootstrap'])
     rooms: rooms,
     get: function (room) {
       return rooms[room] || [];
-    }
+    },
+    register: register_state
   };
 })
 .directive('climate', function () {
@@ -80,9 +87,10 @@ angular.module('climate', ['ui.bootstrap'])
       height: '@',
       width: '@'
     },
-    controller: function ($scope, $interval, $uibModal, climate, devices) {
+    controller: function ($scope, $interval, $uibModal, $state, climate, devices) {
       var intervals = [];
       climate.add_room($scope.room);
+      climate.register($state.current.name);
 
       $scope.interval = $scope.interval || 2;
       $scope.devices = [];

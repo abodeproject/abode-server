@@ -3,6 +3,7 @@
 angular.module('statuses', ['ui.bootstrap'])
 .service('status', function ($interval, $timeout, $http, $state) {
   var rooms = {};
+  var states = [];
   var loader;
   var updater;
 
@@ -30,13 +31,18 @@ angular.module('statuses', ['ui.bootstrap'])
   };
 
   var load = function () {
-    if ($state.current.name !== 'index.home') {
-      $interval.cancel(updater);
+    if (states.indexOf($state.current.name) === -1) {
       return;
     }
 
     Object.keys(rooms).forEach(getRoom);
 
+  };
+
+  var register_state = function(state) {
+    if (states.indexOf(state) === -1) {
+      states.push(state);
+    }
   };
 
   updater = $interval(load, 10000);
@@ -57,7 +63,8 @@ angular.module('statuses', ['ui.bootstrap'])
     rooms: rooms,
     get: function (room) {
       return rooms[room] || [];
-    }
+    },
+    register: register_state
   };
 })
 .filter('ageHumanReadable', function ($q) {
@@ -130,9 +137,10 @@ angular.module('statuses', ['ui.bootstrap'])
       state: '@',
       interval: '@'
     },
-    controller: function ($scope, $interval, $uibModal, status, devices) {
+    controller: function ($scope, $interval, $uibModal, $state, status, devices) {
       var intervals = [];
       status.add_room($scope.room);
+      status.register($state.current.name);
 
       $scope.interval = $scope.interval || 2;
       $scope.state = $scope.state || '_on';

@@ -3,6 +3,7 @@
 angular.module('weather', ['datetime'])
 .service('weather', function ($interval, $timeout, $http, $state) {
   var devices = {};
+  var states = [];
   var loader;
   var updater;
 
@@ -30,12 +31,17 @@ angular.module('weather', ['datetime'])
 
   var load = function () {
 
-    if ($state.current.name !== 'index.home') {
-      $interval.cancel(updater);
+    if (states.indexOf($state.current.name) === -1) {
       return;
     }
 
     Object.keys(devices).forEach(getWeather);
+  };
+
+  var register_state = function(state) {
+    if (states.indexOf(state) === -1) {
+      states.push(state);
+    }
   };
 
   updater = $interval(load, 1000 * 60);
@@ -55,7 +61,8 @@ angular.module('weather', ['datetime'])
     },
     get: function (device) {
       return devices[device];
-    }
+    },
+    register: register_state
   };
 
 })
@@ -79,7 +86,7 @@ angular.module('weather', ['datetime'])
       align: '@',
     },
     controllerAs: 'weather',
-    controller: function ($scope, $interval, $http, $element, $transclude, weather, datetime) {
+    controller: function ($scope, $interval, $http, $element, $transclude, $state, weather, datetime) {
       var intervals = [];
 
       $scope.interval = $scope.interval || 5;
@@ -90,6 +97,7 @@ angular.module('weather', ['datetime'])
         forecast: {},
       };
       weather.add_device($scope.device);
+      weather.register($state.current.name);
 
       if ($scope.left !== undefined) {
         $element[0].style.left = $scope.left + 'em';
