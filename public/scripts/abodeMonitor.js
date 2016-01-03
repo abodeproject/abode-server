@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'ui.router','ngTouch'])
+angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'settings', 'ui.router','ngTouch'])
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
@@ -45,37 +45,6 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
           $scope.is = datetime.get().is || {};
         }, 1000);
 
-      }
-    })
-    .state('settings', {
-      url: '/settings',
-      templateUrl: '/views/settings.html',
-      resolve: {
-        check: function ($state, $q, auth) {
-          var defer = $q.defer();
-
-          auth.check(false).then(function () {
-            defer.resolve();
-          }, function () {
-            $state.go('login');
-            defer.reject();
-          });
-
-          return defer.promise;
-        }
-      },
-      controller: function ($scope, $state, auth) {
-        $scope.active = 'general';
-
-        $scope.goHome = function () {
-          $state.go('home');
-        };
-
-        $scope.logout = function () {
-          auth.logout().then(function () {
-            $state.go('login');
-          });
-        };
       }
     })
     .state('logout', {
