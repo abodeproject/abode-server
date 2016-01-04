@@ -2,6 +2,12 @@
   position: absolute;
   list-style: none;
 }
+
+@media (min-width: 480px) {
+  .status {
+    font-size: 1.2em;
+  }
+}
 .statuses li {
   display: inline-block;
 }
