@@ -3,6 +3,7 @@
 </div>
 <div class="modal-body">
   <form name="actionFrm">
+            <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
 
   <div class="container-fluid">
     <div class="row">
@@ -12,7 +13,7 @@
           <label for="trigger">Type</label>
           <div>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in action_types" ng-click="builder.type = t.value" ng-class="{'list-group-item-success': builder.type == t.value}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in action_types" ng-click="changeType(t.value); builder.type = t.value" ng-class="{'list-group-item-success': builder.type == t.value}">
               <i class="{{t.icon}}"></i> {{t.name}}
             </li>
           </ul>
@@ -24,7 +25,7 @@
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="builder.type == 'devices'">
           <label for="trigger">Device</label>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in devices | orderBy: '+name'" ng-click="builder.item = t.name" ng-class="{'list-group-item-success': builder.item == t.name}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in devices | orderBy: '+name'" ng-click="changeItem(t.name); builder.item = t" ng-class="{'list-group-item-success': builder.item == t}">
               {{t.name}}
             </li>
           </ul>
@@ -33,7 +34,7 @@
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="builder.type == 'rooms'">
           <label for="trigger">Room</label>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="builder.item = t.name" ng-class="{'list-group-item-success': builder.item == t.name}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="changeItem(t.name); builder.item = t.name" ng-class="{'list-group-item-success': builder.item == t.name}">
               {{t.name}}
             </li>
           </ul>
@@ -45,7 +46,7 @@
           <label for="trigger">Action</label>
           <div>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in type_actions" ng-click="change_action(t)" ng-class="{'list-group-item-success': builder.action == t.value}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in type_actions" ng-click="change_action(t)" ng-show="has_capability(t.capabilities)" ng-class="{'list-group-item-success': builder.action == t.value}">
               {{t.name}}
             </li>
           </ul>
@@ -53,31 +54,31 @@
         </div>
       </div>
 
-      <div class="col-sm-6" style="font-size: 1.5em;" ng-show="type_args.indexOf('level') != -1">
+      <div class="col-sm-6" style="font-size: 1.5em;" ng-show="has_capability('level')">
         <div class="form-group">
           <label for="name">Level</label>
-          <input type="text" class="form-control" id="name" placeholder="Level" ng-model="trigger.arguments[0]">
+          <input type="text" class="form-control" id="name" placeholder="Level" ng-model="builder.level">
         </div>
       </div>
 
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="type_args.indexOf('url') != -1">
         <div class="form-group">
           <label for="name">URL</label>
-          <input type="text" class="form-control" id="name" placeholder="URL" ng-model="trigger.arguments[0]">
+          <input type="text" class="form-control" id="name" placeholder="URL" ng-model="builder.url">
         </div>
       </div>
 
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="type_args.indexOf('duration') != -1">
         <div class="form-group">
           <label for="name">Duration</label>
-          <input type="text" class="form-control" id="name" placeholder="Duration (seconds)" ng-model="trigger.arguments[1]">
+          <input type="text" class="form-control" id="name" placeholder="Duration (seconds)" ng-model="builder.duration">
         </div>
       </div>
 
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="type_args.indexOf('temperature') != -1">
         <div class="form-group">
           <label for="name">Temperature</label>
-          <input type="text" class="form-control" id="name" placeholder="Temperature" ng-model="trigger.arguments[0]">
+          <input type="text" class="form-control" id="name" placeholder="Temperature" ng-model="builder.mode.temperature">
         </div>
       </div>
 
@@ -85,13 +86,13 @@
         <div class="form-group">
           <label for="name">Mode</label>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-click="trigger.arguments[0] = 'COOL'" ng-class="{'list-group-item-success': trigger.arguments[0] == 'COOL'}">
+            <li class="list-group-item" style="cursor: pointer;" ng-click="builder.mode = 'COOL'" ng-class="{'list-group-item-success': builder.mode == 'COOL'}">
               <i class="icon-snow"></i> COOL
             </li>
-            <li class="list-group-item" style="cursor: pointer;" ng-click="trigger.arguments[0] = 'HEAT'" ng-class="{'list-group-item-success': trigger.arguments[0] == 'HEAT'}">
+            <li class="list-group-item" style="cursor: pointer;" ng-click="builder.mode = 'HEAT'" ng-class="{'list-group-item-success': builder.mode == 'HEAT'}">
               <i class="icon-fire"></i> HEAT
             </li>
-            <li class="list-group-item" style="cursor: pointer;" ng-click="trigger.arguments[0] = 'OFF'" ng-class="{'list-group-item-success': trigger.arguments[0] == 'OFF'}">
+            <li class="list-group-item" style="cursor: pointer;" ng-click="builder.mode = 'OFF'" ng-class="{'list-group-item-success': builder.mode == 'OFF'}">
               <i class="glyphicon glyphicon-off"></i> OFF
             </li>
           </ul>
