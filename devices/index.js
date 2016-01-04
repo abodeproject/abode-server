@@ -53,6 +53,7 @@ Devices.capabilities = [
   'weather',
   'video',
   'onoff',
+  'display',
 ];
 Devices._devices = [];
 Devices.logs = mongoose.model('DeviceLogs', DeviceLogSchema);
