@@ -62,3 +62,41 @@
 .border-default {
   border-color: #464545;
 }
+
+.select-list {
+  overflow: auto;
+  height: 8em;
+  padding: .2em;
+  border-radius: .1em;
+  border: 1px solid #aaa;
+}
+
+.epochtime {
+  font-size: .9em;
+}
+.epochtime>div {
+  display: inline-block;
+  vertical-align: middle;
+  height: 6em;
+  width: 4em;
+}
+.epochtime-days input, .epochtime-hours input, .epochtime-minutes input, .epochtime-days button, .epochtime-hours button, .epochtime-minutes button {
+  width: 4em;
+  height: 2em;
+  text-align: center;
+}
+.epochtime-days button, .epochtime-hours button, .epochtime-minutes button {
+  border: 0px;
+  background-color: inherit;
+}
+.epochtime-meridian, .epochtime-label {
+  padding-top: 2em;
+  width: 1em !important;
+  text-align: center;
+}
+.epochtime-meridian button {
+  width: 4em;
+  height: 2em;
+  text-align: center;
+  background-color: #464545;
+}

@@ -40,7 +40,7 @@ var TriggersSchema = mongoose.Schema({
   },
   'enabled': {'type': Boolean, 'default': true},
   'match': String,
-  'match_type': String,
+  'match_type': {'type': String, 'default': ''},
   'actions': [
     {
       'name': {'type': String, 'required': true},

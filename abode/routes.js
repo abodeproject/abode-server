@@ -106,4 +106,8 @@ router.get('/capabilities', function (req, res) {
   res.send(abode.devices.capabilities);
 });
 
+router.get('/triggers', function (req, res) {
+  res.send(abode.triggers.types);
+});
+
 module.exports = router;

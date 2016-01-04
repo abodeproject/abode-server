@@ -221,5 +221,341 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
       return defer.promise;
     }
-  });
+  })
+  .directive('toggle', function () {
+    return {
+      restrict: 'E',
+      transclude: false,
+      scope: {
+        on: '@',
+        off: '@',
+        value: '=',
+      },
+      controller: function ($scope) {
+        $scope.styles = {};
+        $scope.value = ($scope.value === true) ? true : false;
+
+        if (!$scope.on) { $scope.on = 'On'; }
+        if (!$scope.off) { $scope.on = 'Off'; }
+
+        var setStyles = function () {
+          if ($scope.value) {
+            $scope.styles.left = '1em';
+          } else {
+            $scope.styles.left = '0em';
+          }
+        };
+
+        setStyles();
+
+        $scope.styles = {
+          'top': '0em',
+          'bottom': '0em',
+          'width': '1em',
+          'background-color': '#eee',
+          'box-sizing': 'border-box',
+          'position': 'absolute',
+          'transition': '.2s',
+          'border-radius': '.1em',
+        };
+
+        $scope.toggle = function () {
+          if ($scope.value) {
+            $scope.value = false;
+          } else {
+            $scope.value = true;
+          }
+        };
+
+        $scope.$watch('value', function () {
+          setStyles();
+        }, true);
+
+      },
+      template: '<div ng-click="toggle()" ng-class="{\'bg-success\': (value == true)}" style="border-radius: .1em; cursor: pointer; transition: .2s; position: relative; box-sizing: border-box; width: 2em; height: 1em; line-height: 1em; display:inline-block; border: 1px solid #aaa;"><div ng-style="styles"></div></div>',
+      replace: true,
+    };
+  })
+  .directive('epochduration', ['$compile', function () {
+    return {
+      restrict: 'E',
+      replace: 'true',
+      scope: {
+        time: '='
+      },
+      template: '<div class="epochtime"><div class="epochtime-days"><button ng-click="increaseDay()"><i class="icon-pigpenv"></i></button><input type="text" ng-model="days"><button ng-click="decreaseDay()"><i class="icon-pigpens"></i></button></div><div class="epochtime-label">:</div><div class="epochtime-hours"><button ng-click="increaseHour()"><i class="icon-pigpenv"></i></button><input type="text" ng-model="hours"><button ng-click="decreaseHour()"><i class="icon-pigpens"></i></button></div><div class="epochtime-label">:</div><div class="epochtime-minutes"><button ng-click="increaseMinute()"><i class="icon-pigpenv"></i></button><input type="text" ng-model="minutes"><button ng-click="decreaseMinute()"><i class="icon-pigpens"></i></button></div></div>',
+      link: function (scope) {
+        scope.time = scope.time || 0;
+        var dayWatch, timeWatch, hourWatch, minuteWatch, meridianWatch;
+
+        var updateTime = function () {
+          clearWatches();
+
+          var d = 60 * 60 * 24 * scope.days;
+          var h = 60 * 60 * scope.hours;
+          var m = 60 * scope.minutes;
+
+          scope.time = h + m + d;
+
+          makeWatches();
+        };
+
+        var splitTime = function () {
+          clearWatches();
+
+          scope.time = scope.time || 0;
+          scope.days =  parseInt(scope.time / (60 * 60 * 24));
+          scope.hours =  parseInt(scope.time / 60 / 60);
+          scope.minutes =  parseInt(scope.time % (60 * 60) / 60);
+
+          makeWatches();
+        };
+
+        scope.increaseDay = function () {
+          scope.days = parseInt(scope.days, 10);
+          scope.days += 1;
+        };
+
+        scope.decreaseDay = function () {
+          scope.days = parseInt(scope.days, 10);
+          if (scope.days === 0) {
+            scope.days = 0;
+          } else {
+            scope.days -= 1;
+          }
+        };
+
+        scope.increaseHour = function () {
+          scope.hours = parseInt(scope.hours, 10);
+          if (scope.hours === 23) {
+            scope.hours = 0;
+            scope.increaseDay();
+          } else {
+            scope.hours += 1;
+          }
+        };
+
+        scope.decreaseHour = function () {
+          scope.hours = parseInt(scope.hours, 10);
+          if (scope.hours === 0) {
+            scope.hours = 23;
+            scope.decreaseDay();
+          } else {
+            scope.hours -= 1;
+          }
+        };
+
+        scope.increaseMinute = function () {
+          scope.minutes = parseInt(scope.minutes, 10);
+          if (scope.minutes === 59) {
+            scope.minutes = 0;
+            scope.increaseHour();
+          } else {
+            scope.minutes += 1;
+          }
+        };
+
+        scope.decreaseMinute = function () {
+          scope.minutes = parseInt(scope.minutes, 10);
+          if (scope.minutes === 0) {
+            scope.minutes = 0;
+            scope.decreaseHour();
+          } else {
+            scope.minutes -= 1;
+          }
+        };
+
+        var clearWatches = function () {
+          if (dayWatch !== undefined) {
+            dayWatch();
+          }
+          if (hourWatch !== undefined) {
+            hourWatch();
+          }
+          if (minuteWatch !== undefined) {
+            minuteWatch();
+          }
+          if (meridianWatch !== undefined) {
+            meridianWatch();
+          }
+          if (timeWatch !== undefined) {
+            timeWatch();
+          }
+        };
+
+        var makeWatches = function () {
+          dayWatch = scope.$watch('days', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              updateTime();
+            }
+          });
+
+          hourWatch = scope.$watch('hours', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              updateTime();
+            }
+          });
+
+          minuteWatch = scope.$watch('minutes', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              updateTime();
+            }
+          });
+
+          meridianWatch = scope.$watch('meridian', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              updateTime();
+            }
+          });
+
+          timeWatch = scope.$watch('time', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              console.log('time change', newVal, oldVal);
+              splitTime();
+            }
+          });
+        };
+
+        scope.changeMeridian = function () {
+          scope.meridian = (scope.meridian === 'PM') ? 'AM' : 'PM';
+        };
+
+
+        splitTime();
+      }
+    };
+  }])
+  .directive('epochtime', ['$compile', function () {
+    return {
+      restrict: 'E',
+      replace: 'true',
+      scope: {
+        time: '='
+      },
+      template: '<div class="epochtime"><div class="epochtime-hours"><button ng-click="increaseHour()"><i class="icon-pigpenv"></i></button><input type="text" ng-model="hours"><button ng-click="decreaseHour()"><i class="icon-pigpens"></i></button></div><div class="epochtime-label">:</div><div class="epochtime-minutes"><button ng-click="increaseMinute()"><i class="icon-pigpenv"></i></button><input type="text" ng-model="minutes"><button ng-click="decreaseMinute()"><i class="icon-pigpens"></i></button></div><div class="epochtime-meridian"><button ng-click="changeMeridian()">{{meridian}}</button></div></div>',
+      link: function (scope) {
+        scope.time = (!isNaN(scope.time)) ? scope.time : 0;
+        scope.meridian = 'AM';
+        var timeWatch, hourWatch, minuteWatch, meridianWatch;
+
+        var updateTime = function () {
+          clearWatches();
+
+          var h = 60 * 60 * scope.hours;
+          var m = 60 * scope.minutes;
+          var o = (scope.meridian === 'PM') ? (60 * 60 * 12) : 0;
+
+          scope.time = h + m + o;
+
+          makeWatches();
+        };
+
+        var splitTime = function () {
+          clearWatches();
+
+          scope.hours =  parseInt(scope.time / 60 / 60);
+          scope.minutes =  parseInt(scope.time % (60 * 60) / 60);
+          scope.meridian = (scope.hours >= 12) ? 'PM' : 'AM';
+          if (scope.meridian === 'PM') {
+            scope.hours = scope.hours - 12;
+          }
+
+          makeWatches();
+        };
+
+        scope.increaseHour = function () {
+          scope.hours = parseInt(scope.hours, 10);
+          if (scope.hours === 12 && scope.meridian === 'AM') {
+            scope.hours = 1;
+            scope.meridian = 'PM';
+          } else if (scope.hours === 12 && scope.meridian === 'PM') {
+            scope.hours = 1;
+            scope.meridian = 'AM';
+          } else {
+            scope.hours += 1;
+          }
+        };
+
+        scope.decreaseHour = function () {
+          scope.hours = parseInt(scope.hours, 10);
+          if (scope.hours === 1 && scope.meridian === 'AM') {
+            scope.hours = 12;
+            scope.meridian = 'PM';
+          } else if (scope.hours === 1 && scope.meridian === 'PM') {
+            scope.hours =12;
+            scope.meridian = 'AM';
+          } else {
+            scope.hours -= 1;
+          }
+        };
+
+        scope.increaseMinute = function () {
+          scope.minutes = parseInt(scope.minutes, 10);
+          if (scope.minutes === 59) {
+            scope.minutes = 0;
+            scope.increaseHour();
+          } else {
+            scope.minutes += 1;
+          }
+        };
+
+        scope.decreaseMinute = function () {
+          scope.minutes = parseInt(scope.minutes, 10);
+          if (scope.minutes === 0) {
+            scope.minutes = 0;
+            scope.decreaseHour();
+          } else {
+            scope.minutes -= 1;
+          }
+        };
+        var clearWatches = function () {
+          if (hourWatch !== undefined) {
+            hourWatch();
+          }
+          if (minuteWatch !== undefined) {
+            minuteWatch();
+          }
+          if (meridianWatch !== undefined) {
+            meridianWatch();
+          }
+          if (timeWatch !== undefined) {
+            timeWatch();
+          }
+        };
+
+        var makeWatches = function () {
+          hourWatch = scope.$watch('hours', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              updateTime();
+            }
+          });
+
+          minuteWatch = scope.$watch('minutes', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              updateTime();
+            }
+          });
+
+          meridianWatch = scope.$watch('meridian', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              updateTime();
+            }
+          });
+
+          timeWatch = scope.$watch('time', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+              splitTime();
+            }
+          });
+        };
+
+        scope.changeMeridian = function () {
+          scope.meridian = (scope.meridian === 'PM') ? 'AM' : 'PM';
+        };
+
+
+        splitTime();
+      }
+    };
+  }]);
 
