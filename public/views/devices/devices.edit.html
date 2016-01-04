@@ -24,7 +24,7 @@
                 <label for="name">Capabilities</label>
                 <div style="overflow: auto; height: 8em;">
                 <ul class="list-group">
-                  <li class="list-group-item" ng-repeat="capability in capabilities | orderBy: '+'" ng-click="toggle_capability(capability)" ng-class="{'list-group-item-success': has_capability(capability)}">
+                  <li class="list-group-item" ng-repeat="capability in capabilities | orderBy: '+'" ng-click="toggle_capability(capability)" ng-class="{'list-group-item-success': has_capability(capability)}" style="cursor: pointer;">
                     <i class="glyphicon glyphicon-ok-circle" ng-show="has_capability(capability)"></i>
                     <i class="glyphicon glyphicon-ban-circle text-muted" ng-show="!has_capability(capability)"></i>
                     {{capability}}
