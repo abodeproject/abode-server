@@ -10,10 +10,10 @@
       <div class="col-sm-6" style="font-size: 1.5em;">
 
         <div class="form-group">
-          <label for="trigger">Type</label>
+          <label for="trigger">Type<span ng-show="builder.type">: {{builder.type}}</span></label>
           <div>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in action_types" ng-click="changeType(t.value); builder.type = t.value" ng-class="{'list-group-item-success': builder.type == t.value}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in action_types" ng-click="changeType(t.value);" ng-class="{'list-group-item-success': builder.type == t.value}">
               <i class="{{t.icon}}"></i> {{t.name}}
             </li>
           </ul>
@@ -23,18 +23,18 @@
       </div>
 
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="builder.type == 'devices'">
-          <label for="trigger">Device</label>
+          <label for="trigger">Device<span ng-show="builder.item">: {{builder.item.name}}</span></label>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in devices | orderBy: '+name'" ng-click="changeItem(t.name); builder.item = t" ng-class="{'list-group-item-success': builder.item == t}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in devices | orderBy: '+name'" ng-click="changeItem(t.name);" ng-class="{'list-group-item-success': builder.item == t}">
               {{t.name}}
             </li>
           </ul>
       </div>
 
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="builder.type == 'rooms'">
-          <label for="trigger">Room</label>
+          <label for="trigger">Room<span ng-show="builder.item">: {{builder.item.name}}</span></label>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="changeItem(t.name); builder.item = t.name" ng-class="{'list-group-item-success': builder.item == t.name}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="changeItem(t.name);" ng-class="{'list-group-item-success': builder.item == t.name}">
               {{t.name}}
             </li>
           </ul>
@@ -43,7 +43,7 @@
       <div class="col-sm-6" style="font-size: 1.5em;">
 
         <div class="form-group">
-          <label for="trigger">Action</label>
+          <label for="trigger">Action<span ng-show="builder.action">: {{builder.action}}</span></label>
           <div>
           <ul class="list-group bg-muted select-list" >
             <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in type_actions" ng-click="change_action(t)" ng-show="has_capability(t.capabilities)" ng-class="{'list-group-item-success': builder.action == t.value}">
