@@ -43,3 +43,22 @@
   background-color: #fff;
 }
 
+.border-danger {
+  border-color: #881c11;
+}
+
+.border-success {
+  border-color: #00805f;
+}
+
+.border-info {
+  border-color: #3498DB;
+}
+
+.border-primary {
+  border-color: #375A7F;
+}
+
+.border-default {
+  border-color: #464545;
+}
