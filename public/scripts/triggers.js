@@ -157,10 +157,10 @@ angular.module('triggers', ['ui.router'])
         $scope.type_actions = [
           {name: 'On', value: 'on', arguments: []},
           {name: 'Off', value: 'off', arguments: []},
-          {name: 'Level', value: 'level', arguments: ['level']},
+          {name: 'Level', value: 'level', arguments: ['set_level']},
           {name: 'Mode', value: 'mode', arguments: ['mode']},
           {name: 'Temperature', value: 'set_point', arguments: ['temperature']},
-          {name: 'Brightness', value: 'brightness', arguments: ['set_level']},
+          {name: 'Brightness', value: 'brightness', arguments: ['level']},
           {name: 'Play', value: 'play', arguments: ['url', 'duration']},
           {name: 'Stop', value: 'stop', arguments: []},
         ];
