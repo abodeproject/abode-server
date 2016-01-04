@@ -160,7 +160,7 @@ angular.module('triggers', ['ui.router'])
           {name: 'Level', value: 'level', arguments: ['level']},
           {name: 'Mode', value: 'mode', arguments: ['mode']},
           {name: 'Temperature', value: 'set_point', arguments: ['temperature']},
-          {name: 'Brightness', value: 'brightness', arguments: ['level']},
+          {name: 'Brightness', value: 'brightness', arguments: ['set_level']},
           {name: 'Play', value: 'play', arguments: ['url', 'duration']},
           {name: 'Stop', value: 'stop', arguments: []},
         ];
