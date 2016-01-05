@@ -146,7 +146,24 @@ angular.module('rooms', ['ui.router'])
         };
 
         $scope.has_capability = function (device, cap) {
-          return (device.capabilities.indexOf(cap) !== -1);
+          var has = false;
+          if (!(cap instanceof Array)) {
+            cap = [cap];
+          }
+
+          cap.forEach(function (c) {
+            has = (device.capabilities.indexOf(c) !== -1) ? true : has;
+          });
+
+          return has;
+        };
+
+        $scope.device_state = function (device, key, match, cap) {
+          if (cap) {
+            return (device[key] === match && $scope.has_capability(device, cap));
+          } else {
+            return (device[key] === match);
+          }
         };
 
         $scope.reload();

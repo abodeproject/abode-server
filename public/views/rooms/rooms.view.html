@@ -9,7 +9,7 @@
 <div class="modal-body">
 
   <ul class="list-group">
-    <li class="list-group-item" style="cursor: pointer" ng-repeat="device in devices | orderBy: ['-_on', '+age', '+name']" ng-class="{'list-group-item-success': device._on && (has_capability(device, 'light') || has_capability(device, 'fan') || has_capability(device, 'display')), 'list-group-item-danger': device._on && (has_capability(device, 'door') || has_capability(device, 'window') || has_capability(device, 'motion_sensor')), 'list-group-item-danger': device._mode == 'HEAT', 'list-group-item-info': device._mode == 'COOL'}" ng-click="open(device.name)">
+    <li class="list-group-item" style="cursor: pointer" ng-repeat="device in devices | orderBy: ['-_on', '+age', '+name']" ng-class="{'list-group-item-success': device_state(device, '_on', true, ['light', 'display', 'fan']), 'list-group-item-danger': device_state(device, '_on', true, ['door', 'window', 'motion_sensor']) || device._mode == 'HEAT', 'list-group-item-info': device._mode == 'COOL'}" ng-click="open(device.name)">
       <h5 class="list-group-item-heading">
         <i class="icon-fan" ng-show="has_capability(device, 'fan')"></i>
         <i class="icon-lightbulb-idea" ng-show="has_capability(device, 'light')"></i>
