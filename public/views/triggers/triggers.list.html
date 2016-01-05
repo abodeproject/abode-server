@@ -9,8 +9,18 @@
       <div class="col-sm-8 col-sm-offset-2" style="font-size: 2em;">
         <h4 ng-show="loading"><i class="icon-refresh spin"></i> Loading...</h4>
         <ul class="list-group" ng-hide="loading">
-          <li class="list-group-item" style="cursor: pointer;" ng-repeat="trigger in triggers | orderBy: '+name'" ng-click="edit(trigger)">
+          <li class="list-group-item" style="font-size: 1.2em; cursor: pointer;" ng-repeat="trigger in triggers | orderBy: '+name'" ng-click="edit(trigger)">
             {{trigger.name}}<button class="pull-right btn btn-xs btn-danger" ng-click="remove(trigger)" stop-event><i class="icon-trash"></i></button>
+            <div style="font-size: .6em;" class="text-muted">
+              <span ng-show="trigger.match">{{trigger.match_type | capitalize}} is
+              <span ng-show="trigger.match_type == 'time'">{{trigger.match | date: 'h:mm a'}}</span>
+              <span ng-show="trigger.match_type == 'date'">{{trigger.match | date: 'EEE MMM d, yyyy'}}</span>
+              <span ng-show="trigger.match_type == 'device'">{{trigger.match}}</span>
+              <span ng-show="trigger.match_type == 'string'">{{trigger.match}}</span>
+              <span ng-show="trigger.match_type == 'number'">{{trigger.match}}</span>
+               from </span>
+              {{trigger.trigger}} Event
+            </div>
           </li>
         </ul>
       </div>
