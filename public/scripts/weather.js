@@ -10,7 +10,7 @@ angular.module('weather', ['datetime'])
   var errorResponse = function (device) {
 
     return function (response) {
-      console.log('Error getting weather for device %s: %s', device, response);
+      //console.log('Error getting weather for device %s: %s', device, response);
     };
 
   };
