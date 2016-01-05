@@ -385,6 +385,15 @@ angular.module('triggers', ['ui.router'])
   $scope.editAction = triggers.editAction;
   $scope.removeAction = triggers.removeAction;
 
+  $scope.match_types = [
+    {name: 'None', value: '', icon: 'glyphicon glyphicon-ban-circle'},
+    {name: 'Device', value: 'device', icon: 'glyphicon glyphicon-oil'},
+    {name: 'Time', value: 'time', icon: 'icon-clockalt-timealt'},
+    {name: 'Date', value: 'date', icon: 'icon-calendar'},
+    {name: 'String', value: 'string', icon: 'icon-quote'},
+    {name: 'Number', value: 'number', icon: 'icon-infinityalt'}
+  ];
+
   var getDevices = function () {
     $scope.devices_loading = true;
     devices.load().then(function (devices) {
@@ -395,6 +404,8 @@ angular.module('triggers', ['ui.router'])
       $scope.devices_loading = false;
     });
   };
+
+  getDevices();
 
   $scope.$watch('delay', function (type) {
     if (!type) {
@@ -419,15 +430,9 @@ angular.module('triggers', ['ui.router'])
     $scope.trigger.match = '';
   };
 
-
-  $scope.match_types = [
-    {name: 'None', value: '', icon: 'glyphicon glyphicon-ban-circle'},
-    {name: 'Device', value: 'device', icon: 'glyphicon glyphicon-oil'},
-    {name: 'Time', value: 'time', icon: 'icon-clockalt-timealt'},
-    {name: 'Date', value: 'date', icon: 'icon-calendar'},
-    {name: 'String', value: 'string', icon: 'icon-quote'},
-    {name: 'Number', value: 'number', icon: 'icon-infinityalt'}
-  ];
+  $scope.changeDevice = function (device) {
+    trigger.match = device.name;
+  };
 
   $scope.closeAlert = function(index) {
     $scope.alerts.splice(index, 1);

@@ -45,14 +45,14 @@
                 <div ng-show="trigger.match_type == 'device'">
                   <div ng-show="devices_loading"><i class="icon-loadingalt spin"></i> Loading...</div>
                   <ul class="list-group bg-muted select-list" ng-hide="devices_loading">
-                    <li class="list-group-item" style="cursor: pointer;" ng-repeat="device in devices" ng-click="trigger.match = device.name" ng-class="{'list-group-item-success': trigger.match == device.name}">
+                    <li class="list-group-item" style="cursor: pointer;" ng-repeat="device in devices" ng-click="changeDevice(device)" ng-class="{'list-group-item-success': trigger.match == device.name}">
                       {{device.name}}
                     </li>
                   </ul>
                 </div>
 
                 <div ng-show="trigger.match_type == 'time'" style="padding-left: 1em;">
-                  <epochtime time="trigger.match"></epochduration>
+                  <epochtime time="trigger.match" disabled="{{trigger.match_type == 'time'}}"></epochduration>
                 </div>
 
                 <div ng-show="trigger.match_type == 'string'" style="padding-left: 1em;">

@@ -430,13 +430,26 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       restrict: 'E',
       replace: 'true',
       scope: {
-        time: '='
+        time: '=',
+        disabled: '@'
       },
       template: '<div class="epochtime"><div class="epochtime-hours"><button ng-click="increaseHour()"><i class="icon-pigpenv"></i></button><input type="text" ng-model="hours"><button ng-click="decreaseHour()"><i class="icon-pigpens"></i></button></div><div class="epochtime-label">:</div><div class="epochtime-minutes"><button ng-click="increaseMinute()"><i class="icon-pigpenv"></i></button><input type="text" ng-model="minutes"><button ng-click="decreaseMinute()"><i class="icon-pigpens"></i></button></div><div class="epochtime-meridian"><button ng-click="changeMeridian()">{{meridian}}</button></div></div>',
       link: function (scope) {
-        scope.time = (!isNaN(scope.time)) ? scope.time : 0;
         scope.meridian = 'AM';
         var timeWatch, hourWatch, minuteWatch, meridianWatch;
+
+        scope.$watch('disabled', function (newVal, oldVal) {
+          if (newVal !== oldVal) {
+            if (newVal === false) {
+              clearWatches();
+            } else {
+              scope.time = (!isNaN(scope.time)) ? scope.time : 0;
+              scope.meridian = 'AM';
+
+              splitTime();
+            }
+          }
+        });
 
         var updateTime = function () {
           clearWatches();
@@ -553,8 +566,13 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
           scope.meridian = (scope.meridian === 'PM') ? 'AM' : 'PM';
         };
 
+        if (!scope.disabled) {
+          scope.time = (!isNaN(scope.time)) ? scope.time : 0;
 
-        splitTime();
+          console.log('here', scope.disabled);
+          splitTime();
+        }
+
       }
     };
   }]);
