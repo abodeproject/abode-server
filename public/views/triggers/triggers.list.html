@@ -13,7 +13,7 @@
             {{trigger.name}}<button class="pull-right btn btn-xs btn-danger" ng-click="remove(trigger)" stop-event><i class="icon-trash"></i></button>
             <div style="font-size: .6em;" class="text-muted">
               <span ng-show="trigger.match">{{trigger.match_type | capitalize}} is
-              <span ng-show="trigger.match_type == 'time'">{{trigger.match | date: 'h:mm a'}}</span>
+              <span ng-show="trigger.match_type == 'time'">{{trigger.match | time}}</span>
               <span ng-show="trigger.match_type == 'date'">{{trigger.match | date: 'EEE MMM d, yyyy'}}</span>
               <span ng-show="trigger.match_type == 'device'">{{trigger.match}}</span>
               <span ng-show="trigger.match_type == 'string'">{{trigger.match}}</span>
