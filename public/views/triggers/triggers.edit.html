@@ -51,8 +51,10 @@
                   </ul>
                 </div>
 
+                {{trigger.match_type}}
+                {{trigger.match_type == 'time'}}
                 <div ng-show="trigger.match_type == 'time'" style="padding-left: 1em;">
-                  <epochtime time="trigger.match" disabled="{{trigger.match_type == 'time'}}"></epochduration>
+                  <epochtime time="trigger.match" disabled="{{trigger.match_type != 'time'}}"></epochduration>
                 </div>
 
                 <div ng-show="trigger.match_type == 'string'" style="padding-left: 1em;">

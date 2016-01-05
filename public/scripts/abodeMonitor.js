@@ -566,10 +566,9 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
           scope.meridian = (scope.meridian === 'PM') ? 'AM' : 'PM';
         };
 
-        if (!scope.disabled) {
+        if (scope.disabled === 'false') {
           scope.time = (!isNaN(scope.time)) ? scope.time : 0;
 
-          console.log('here', scope.disabled);
           splitTime();
         }
 
