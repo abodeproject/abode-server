@@ -207,7 +207,7 @@ angular.module('climate', ['ui.bootstrap'])
         intervals.forEach($interval.cancel);
       });
     },
-    template: '<li><button ng-click="openDetails()" class="status img-circle"><div class="climate-value">{{value}}</div><span class="climate-icon climate-fan bg-success img-circle" ng-show="is_fan"><i class="icon-fan"></i></span><span class="climate-icon bg-info climate-cool img-circle" ng-show="is_cool"><i class="icon-snow"></i></span><span class="climate-icon bg-danger climate-heat img-circle" ng-show="is_heat"><i class="icon-fire"></i></span></button></li>',
+    template: '<li><button ng-click="openDetails()" class="status border-default img-circle"><div class="climate-value">{{value}}</div><span class="climate-icon climate-fan bg-success img-circle" ng-show="is_fan"><i class="icon-fan"></i></span><span class="climate-icon bg-info climate-cool img-circle" ng-show="is_cool"><i class="icon-snow"></i></span><span class="climate-icon bg-danger climate-heat img-circle" ng-show="is_heat"><i class="icon-fire"></i></span></button></li>',
     replace: true,
   };
 

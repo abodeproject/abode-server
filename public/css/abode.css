@@ -43,6 +43,11 @@
   background-color: #fff;
 }
 
+
+.border-default {
+  border-color: #464545;
+}
+
 .border-danger {
   border-color: #881c11;
 }
@@ -57,10 +62,6 @@
 
 .border-primary {
   border-color: #375A7F;
-}
-
-.border-default {
-  border-color: #464545;
 }
 
 .select-list {
