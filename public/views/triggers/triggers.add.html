@@ -30,39 +30,49 @@
                 </ul>
                 </div>
               </div>
+
               <div class="form-group">
                 <label for="trigger">Match<span ng-show="trigger.match_type">: {{trigger.match_type}}<span ng-show="trigger.match_type == 'device' && trigger.match">.{{trigger.match}}</span></span></label>
-                <div>
-                <ul class="list-group bg-muted select-list" >
-                  <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in match_types" ng-click="changeType(t.value)" ng-class="{'list-group-item-success': trigger.match_type == t.value}">
-                    <i class="{{t.icon}}"></i> {{t.name}}
-                  </li>
-                </ul>
-                </div>
               </div>
-              <div class="form-group">
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-sm-6">
 
-                <div ng-show="trigger.match_type == 'device'">
-                  <div ng-show="devices_loading"><i class="icon-loadingalt spin"></i> Loading...</div>
-                  <ul class="list-group bg-muted select-list" ng-hide="devices_loading">
-                    <li class="list-group-item" style="cursor: pointer;" ng-repeat="device in devices | orderBy: '+name'" ng-click="changeDevice(device)" ng-class="{'list-group-item-success': trigger.match == device.name}">
-                      {{device.name}}
-                    </li>
-                  </ul>
+                    <div class="form-group">
+                      <ul class="list-group bg-muted select-list" >
+                        <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in match_types" ng-click="changeType(t.value)" ng-class="{'list-group-item-success': trigger.match_type == t.value}">
+                          <i class="{{t.icon}}"></i> {{t.name}}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+
+                    <div class="form-group">
+                      <div ng-show="trigger.match_type == 'device'">
+                        <div ng-show="devices_loading"><i class="icon-loadingalt spin"></i> Loading...</div>
+                        <ul class="list-group bg-muted select-list" ng-hide="devices_loading">
+                          <li class="list-group-item" style="cursor: pointer;" ng-repeat="device in devices | orderBy: '+name'" ng-click="changeDevice(device)" ng-class="{'list-group-item-success': trigger.match == device.name}">
+                            {{device.name}}
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div ng-show="trigger.match_type == 'time'" style="padding-left: 1em;">
+                        <epochtime time="trigger.match" disabled="{{trigger.match_type != 'time'}}"></epochtime>
+                      </div>
+
+                      <div ng-show="trigger.match_type == 'string'" style="padding-left: 1em;">
+                        <input type="text" class="form-control" id="match" placeholder="String" required="" ng-model="trigger.match">
+                      </div>
+
+                      <div ng-show="trigger.match_type == 'number'" style="padding-left: 1em;">
+                        <input type="text" class="form-control" id="match" placeholder="Number" required="" ng-model="trigger.match">
+                      </div>
+
+                    </div>
+                  </div>
                 </div>
-
-                <div ng-show="trigger.match_type == 'time'" style="padding-left: 1em;">
-                  <epochtime time="trigger.match" disabled="{{trigger.match_type != 'time'}}"></epochduration>
-                </div>
-
-                <div ng-show="trigger.match_type == 'string'" style="padding-left: 1em;">
-                  <input type="text" class="form-control" id="match" placeholder="String" required="" ng-model="trigger.match">
-                </div>
-
-                <div ng-show="trigger.match_type == 'number'" style="padding-left: 1em;">
-                  <input type="text" class="form-control" id="match" placeholder="Number" required="" ng-model="trigger.match">
-                </div>
-
               </div>
               <div class="form-group">
                 <label for="trigger">Conditions</label>

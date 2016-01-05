@@ -79,10 +79,10 @@
   display: inline-block;
   vertical-align: middle;
   height: 6em;
-  width: 4em;
+  width: 2em;
 }
 .epochtime-days input, .epochtime-hours input, .epochtime-minutes input, .epochtime-days button, .epochtime-hours button, .epochtime-minutes button {
-  width: 4em;
+  width: 2em;
   height: 2em;
   text-align: center;
 }
