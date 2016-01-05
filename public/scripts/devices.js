@@ -471,7 +471,9 @@ angular.module('devices', ['ui.router'])
     });
   };
 
-
+  $scope.has_capability = function (device, cap) {
+    return (device.capabilities.indexOf(cap) !== -1);
+  };
 
   $scope.load();
 })

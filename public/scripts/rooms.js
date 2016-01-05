@@ -74,6 +74,21 @@ angular.module('rooms', ['ui.router'])
     var defer = $q.defer();
 
     $http({ url: '/api/rooms/' + room + '/devices'}).then(function (response) {
+
+      response.data.forEach(function (device) {
+        if (device._on === true) {
+          device.age = new Date() - new Date(device.last_on);
+        } else {
+          device.age = new Date() - new Date(device.last_off);
+        }
+
+        if (!isNaN(device.age)) {
+          device.age = device.age / 1000;
+        } else {
+          device.age = 0;
+        }
+      });
+
       defer.resolve(response.data);
     }, function (err) {
       defer.reject(err);
@@ -88,12 +103,13 @@ angular.module('rooms', ['ui.router'])
       animation: true,
       templateUrl: 'views/rooms/rooms.view.html',
       size: 'lg',
-      controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, rooms, room) {
+      controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, rooms, room, devices) {
         var intervals = [];
-
 
         $scope.name = room.name;
         $scope.room = room;
+        $scope.devices = [];
+        $scope.open = devices.openDevice;
 
         $scope.ok = function () {
           $uibModalInstance.close();
@@ -110,15 +126,32 @@ angular.module('rooms', ['ui.router'])
           $scope.errors = false;
 
           $http.get('/api/rooms/' + $scope.room.name).then(function (response) {
+
+
+
             $scope.room = response.data;
-            $scope.processing = false;
-            $scope.errors = false;
+            getRoomDevices(room.name).then(function (devices) {
+              $scope.devices = devices;
+              $scope.processing = false;
+              $scope.errors = false;
+            }, function () {
+              $scope.processing = false;
+              $scope.errors = true;
+            });
           }, function () {
             $scope.processing = false;
             $scope.errors = true;
           });
 
         };
+
+        $scope.has_capability = function (device, cap) {
+          return (device.capabilities.indexOf(cap) !== -1);
+        };
+
+        $scope.reload();
+
+        intervals.push($interval($scope.reload, 5000));
 
         $scope.$on('$destroy', function () {
           intervals.forEach($interval.cancel);

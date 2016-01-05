@@ -87,7 +87,7 @@ angular.module('climate', ['ui.bootstrap'])
       height: '@',
       width: '@'
     },
-    controller: function ($scope, $interval, $uibModal, $state, climate, devices) {
+    controller: function ($scope, $interval, $uibModal, $state, climate, devices, rooms) {
       var intervals = [];
       climate.add_room($scope.room);
       climate.register($state.current.name);
@@ -100,6 +100,7 @@ angular.module('climate', ['ui.bootstrap'])
       $scope.is_fan = false;
       $scope.is_cool = false;
       $scope.is_heat = false;
+      $scope.open = rooms.view;
 
       var temp_index = 0;
 
@@ -207,7 +208,7 @@ angular.module('climate', ['ui.bootstrap'])
         intervals.forEach($interval.cancel);
       });
     },
-    template: '<li><button ng-click="openDetails()" class="status border-default img-circle"><div class="climate-value">{{value}}</div><span class="climate-icon climate-fan bg-success img-circle" ng-show="is_fan"><i class="icon-fan"></i></span><span class="climate-icon bg-info climate-cool img-circle" ng-show="is_cool"><i class="icon-snow"></i></span><span class="climate-icon bg-danger climate-heat img-circle" ng-show="is_heat"><i class="icon-fire"></i></span></button></li>',
+    template: '<li><button ng-click="open(room)" class="status border-default img-circle"><div class="climate-value">{{value}}</div><span class="climate-icon climate-fan bg-success img-circle" ng-show="is_fan"><i class="icon-fan"></i></span><span class="climate-icon bg-info climate-cool img-circle" ng-show="is_cool"><i class="icon-snow"></i></span><span class="climate-icon bg-danger climate-heat img-circle" ng-show="is_heat"><i class="icon-fire"></i></span></button></li>',
     replace: true,
   };
 

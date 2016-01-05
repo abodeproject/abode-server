@@ -67,30 +67,6 @@ angular.module('statuses', ['ui.bootstrap'])
     register: register_state
   };
 })
-.filter('ageHumanReadable', function ($q) {
-
-
-  var secondsToString = function (seconds) {
-    var numyears = Math.floor(seconds / 31536000);
-    var numdays = Math.floor((seconds % 31536000) / 86400);
-    var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
-    var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
-    var numseconds = Math.floor((((seconds % 31536000) % 86400) % 3600) % 60);
-    numyears = (numyears === 0) ? '' : numyears + ' years ';
-    numdays = (numdays === 0) ? '' : numdays + ' days ';
-    numhours = (numhours === 0) ? '' : numhours + ' hours ';
-    numminutes = (numminutes === 0) ? '' : numminutes + ' min ';
-    numseconds = (numseconds === 0) ? '' : numseconds + ' sec ';
-
-    return numyears + numdays + numhours + numminutes + numseconds;
-
-  };
-
-  return function (input) {
-    return (!isNaN(input)) ? secondsToString(input): '&nbsp;';
-  };
-
-})
 .directive('statuses', function () {
 
   return {
@@ -137,7 +113,7 @@ angular.module('statuses', ['ui.bootstrap'])
       state: '@',
       interval: '@'
     },
-    controller: function ($scope, $interval, $uibModal, $state, status, devices) {
+    controller: function ($scope, $interval, $uibModal, $state, status, devices, rooms) {
       var intervals = [];
       status.add_room($scope.room);
       status.register($state.current.name);
@@ -147,6 +123,7 @@ angular.module('statuses', ['ui.bootstrap'])
       $scope.alerting = 0;
       $scope.popup_template = 'roomDevices.html';
       $scope.devices = [];
+      $scope.open = rooms.view;
 
 
       $scope.openDetails = function () {
@@ -229,7 +206,7 @@ angular.module('statuses', ['ui.bootstrap'])
         intervals.forEach($interval.cancel);
       });
     },
-    template: '<li><button class="status img-circle border-default" ng-class="{\'border-danger\': alert}" ng-click="openDetails()"><div class="status-icon"><i class="fi-{{icon}}"></i></div><span class="img-circle status_badge bg-info" ng-class="{\'bg-danger\': alert}">{{alerting}}</span></button></li>',
+    template: '<li><button class="status img-circle border-default" ng-class="{\'border-danger\': alert}" ng-click="open(room)"><div class="status-icon"><i class="fi-{{icon}}"></i></div><span class="img-circle status_badge bg-info" ng-class="{\'bg-danger\': alert}">{{alerting}}</span></button></li>',
     replace: true,
   };
 
