@@ -141,7 +141,7 @@
               </div>
               <div class="form-group">
                 <button type="submit" class="pull-right btn btn-sm btn-primary" ng-click="add()" ng-disabled="editTrigger.$invalid"><i class="icon-savetodrive"></i> Add</button>
-                <button type="submit" class="btn btn-sm btn-default" ng-click="remove()" ng-disabled="editTrigger.$invalid"><i class="icon-circledelete"></i> Remove</button>
+                <button class="btn btn-warning btn-sm pull-left" type="button" ng-click="state.go('^')">Cancel</button>
               </div>
             </form>
           </div>
