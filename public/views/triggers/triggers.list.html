@@ -11,7 +11,7 @@
         <ul class="list-group" ng-hide="loading">
           <li class="list-group-item" style="font-size: 1.2em; cursor: pointer;" ng-repeat="trigger in triggers | orderBy: '+name'" ng-click="edit(trigger)">
             {{trigger.name}}<button class="pull-right btn btn-xs btn-danger" ng-click="remove(trigger)" stop-event><i class="icon-trash"></i></button>
-            <div style="font-size: .6em;" class="text-muted">
+            <div style="font-size: .6em;" class="text-muted" ng-class="{'strike-through': !trigger.enabled}">
               <span ng-show="trigger.match">{{trigger.match_type | capitalize}} is
                 <span ng-show="trigger.match_type == 'time'">{{trigger.match | time}} during </span>
                 <span ng-show="trigger.match_type == 'date'">{{trigger.match | date: 'EEE MMM d, yyyy'}} during </span>

@@ -101,3 +101,7 @@
   text-align: center;
   background-color: #464545;
 }
+
+.strike-through {
+  text-decoration: line-through;
+}
