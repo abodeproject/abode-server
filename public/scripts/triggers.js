@@ -359,7 +359,7 @@ angular.module('triggers', ['ui.router'])
     'types': getTypes
   };
 })
-.controller('triggersList', function ($scope, $state, triggers) {
+.controller('triggersList', function ($scope, $state, triggers, confirm) {
   $scope.triggers = [];
   $scope.loading = true;
 
@@ -378,6 +378,16 @@ angular.module('triggers', ['ui.router'])
     });
   };
 
+  $scope.remove = function (trigger) {
+    confirm('Are you sure you want to remove this Trigger?').then(function () {
+      triggers.remove(trigger._id).then(function () {
+        $scope.load();
+      }, function (err) {
+        $scope.alerts = [{'type': 'danger', 'msg': 'Failed to remove Trigger'}];
+        $scope.errors = err;
+      });
+    });
+  };
 
 
   $scope.load();
