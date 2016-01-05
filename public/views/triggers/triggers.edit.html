@@ -24,7 +24,7 @@
 
                 <div>
                 <ul class="list-group bg-muted select-list">
-                  <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in trigger_types" ng-click="trigger.trigger = t" ng-class="{'list-group-item-success': trigger.trigger == t.name}">
+                  <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in trigger_types" ng-click="trigger.trigger = t.name" ng-class="{'list-group-item-success': trigger.trigger == t.name}">
                     {{t.name}}
                   </li>
                 </ul>
@@ -45,7 +45,7 @@
                 <div ng-show="trigger.match_type == 'device'">
                   <div ng-show="devices_loading"><i class="icon-loadingalt spin"></i> Loading...</div>
                   <ul class="list-group bg-muted select-list" ng-hide="devices_loading">
-                    <li class="list-group-item" style="cursor: pointer;" ng-repeat="device in devices" ng-click="changeDevice(device)" ng-class="{'list-group-item-success': trigger.match == device.name}">
+                    <li class="list-group-item" style="cursor: pointer;" ng-repeat="device in devices | orderBy: '+name'" ng-click="changeDevice(device)" ng-class="{'list-group-item-success': trigger.match == device.name}">
                       {{device.name}}
                     </li>
                   </ul>

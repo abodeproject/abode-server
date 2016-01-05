@@ -25,7 +25,7 @@
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="builder.type == 'devices'">
           <label for="trigger">Device<span ng-show="builder.item">: {{builder.item.name}}</span></label>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in devices | orderBy: '+name'" ng-click="changeItem(t.name);" ng-class="{'list-group-item-success': builder.item == t}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in devices | orderBy: '+name'" ng-click="changeItem(t);" ng-class="{'list-group-item-success': builder.item == t}">
               {{t.name}}
             </li>
           </ul>

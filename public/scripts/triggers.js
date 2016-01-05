@@ -17,7 +17,19 @@ angular.module('triggers', ['ui.router'])
   .state('index.triggers.add', {
     url: '/add',
     templateUrl: '/views/triggers/triggers.add.html',
-    controller: 'triggersAdd'
+    controller: 'triggersEdit',
+    resolve: {
+      'trigger': function () {
+
+        return {'enabled': true};
+
+      },
+      'types': function (triggers) {
+
+        return triggers.types();
+
+      }
+    }
   })
   .state('index.triggers.edit', {
     url: '/:name',
@@ -233,10 +245,10 @@ angular.module('triggers', ['ui.router'])
           var capabilities = [];
           var type = get_type($scope.builder.type);
 
-          if (type.capabilities) {
+          if (type && type.capabilities) {
             capabilities = type.capabilities;
-          } else if (type.value === 'devices' && $scope.builder.item) {
-            capabilities = $scope.builder.item.capabilities;
+          } else if (type && type.value === 'devices' && $scope.builder.item) {
+            capabilities = $scope.builder.item.capabilities || [];
           }
 
           var has = false;
@@ -440,6 +452,16 @@ angular.module('triggers', ['ui.router'])
 
   $scope.save = function () {
     triggers.save($scope.trigger).then(function () {
+      $scope.alerts = [{'type': 'success', 'msg': 'Trigger Saved'}];
+    }, function (err) {
+      $scope.alerts = [{'type': 'danger', 'msg': 'Failed to save Trigger'}];
+      $scope.errors = err;
+    });
+  };
+
+  $scope.add = function () {
+    triggers.add($scope.trigger).then(function () {
+      $scope.trigger = {'enabled': true};
       $scope.alerts = [{'type': 'success', 'msg': 'Trigger Saved'}];
     }, function (err) {
       $scope.alerts = [{'type': 'danger', 'msg': 'Failed to save Trigger'}];
