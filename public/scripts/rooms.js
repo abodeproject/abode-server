@@ -111,12 +111,23 @@ angular.module('rooms', ['ui.router'])
         $scope.devices = [];
         $scope.open = devices.openDevice;
 
+
+
+        $scope.open = function (device) {
+          var modal = devices.openDevice(device);
+          modal.result.then(function(config) {
+            if (config.recurse) {
+              $uibModalInstance.close(config);
+            }
+          });
+        };
+
         $scope.ok = function () {
           $uibModalInstance.close();
         };
 
         $scope.edit = function () {
-          $uibModalInstance.close();
+          $uibModalInstance.close({'recurse': true});
           $state.go('index.rooms.edit', {'name': room.name});
         };
 
