@@ -440,7 +440,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
 
         scope.$watch('disabled', function (newVal, oldVal) {
           if (newVal !== oldVal) {
-            if (newVal === false) {
+            if (newVal === 'true') {
               clearWatches();
             } else {
               scope.time = (!isNaN(scope.time)) ? scope.time : 0;
