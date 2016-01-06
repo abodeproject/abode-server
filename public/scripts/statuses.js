@@ -206,7 +206,7 @@ angular.module('statuses', ['ui.bootstrap'])
         intervals.forEach($interval.cancel);
       });
     },
-    template: '<li><button class="status img-circle border-default" ng-class="{\'border-danger\': alert}" ng-click="open(room)"><div class="status-icon"><i class="fi-{{icon}}"></i></div><span class="img-circle status_badge bg-info" ng-show="alert" ng-class="{\'bg-danger\': alert}">{{alerting}}</span></button></li>',
+    template: '<li><button class="status img-circle border-default" ng-class="{\'border-danger\': alert, \'text-muted\': !alert}" ng-click="open(room)"><div class="status-icon"><i class="fi-{{icon}}"></i></div><span class="img-circle status_badge bg-info" ng-show="alert" ng-class="{\'bg-danger\': alert}">{{alerting}}</span></button></li>',
     replace: true,
   };
 
