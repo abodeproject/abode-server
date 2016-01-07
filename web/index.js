@@ -2,9 +2,11 @@
 
 var abode,
   q = require('q'),
-  addr = require('netaddr').Addr,
   logger = require('log4js'),
   log = logger.getLogger('abode.web'),
+  https = require('https'),
+  addr = require('netaddr').Addr,
+  read = require('fs').readFileSync,
   bodyParser = require('body-parser'),
   session = require('express-session'),
   MongoStore = require('connect-mongo')(session),
@@ -21,8 +23,30 @@ var Web = function () {
   //Set our config defaults
   Web.config = abode.config.web || {};
   Web.config.port = Web.config.port || 8080;
+  Web.config.ssl_port = Web.config.ssl_port || 8443;
   Web.config.address = Web.config.address || '127.0.0.1';
 
+  if (Web.config.key && Web.config.cert) {
+    var httpsOptions = {
+      key: read(Web.config.key, 'utf8'),
+      cert: read(Web.config.cert, 'utf8')
+    };
+
+    if (Web.config.ca) {
+      httpsOptions.ca = [];
+      Web.config.ca.forEach(function (ca) {
+        httpsOptions.ca.push(read(ca, 'utf8'));
+      });
+    }
+    
+    https.createServer(httpsOptions, Web.server).listen(Web.config.ssl_port, Web.config.address, function (err) {
+      if (err) {
+        log.error(err);
+        return;
+      }
+      log.info('HTTPS server listening on %s:%s', Web.config.address, Web.config.ssl_port);
+    });
+  }
 
   //Listen on the port
   Web.server.listen(Web.config.port, Web.config.address, function (err) {
