@@ -6,13 +6,19 @@ $packages = [
   'mongodb-clients',
   'mongodb-server',
   'rpi-update',
+  'apache2',
+]
+
+$service = [
+  'mongodb',
+  'apache2',
 ]
 
 package {$packages:
   ensure => present,
 }
 
-service {'mongodb':
+service {$services:
   ensure => running,
   enable => true
 }
