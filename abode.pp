@@ -21,5 +21,6 @@ package {$packages:
 service {$services:
   ensure => running,
   enable => true
+  require => Package[$packages],
 }
 
