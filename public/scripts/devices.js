@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('devices', ['ui.router'])
+angular.module('devices', ['ui.router','ngResource'])
 .config(function($stateProvider, $urlRouterProvider) {
   $urlRouterProvider.when('/devices', '/devices/list');
 

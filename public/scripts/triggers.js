@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('triggers', ['ui.router'])
+angular.module('triggers', ['ui.router','ngResource'])
 .config(function($stateProvider, $urlRouterProvider) {
   $urlRouterProvider.when('/triggers', '/triggers/list');
 

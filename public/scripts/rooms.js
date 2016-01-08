@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('rooms', ['ui.router'])
+angular.module('rooms', ['ui.router','ngResource'])
 .config(function($stateProvider, $urlRouterProvider) {
 
   $urlRouterProvider.when('/rooms', '/rooms/list');
