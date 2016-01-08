@@ -25,11 +25,15 @@ var Web = function () {
   Web.config.port = Web.config.port || 8080;
   Web.config.ssl_port = Web.config.ssl_port || 8443;
   Web.config.address = Web.config.address || '127.0.0.1';
+  Web.config.secureProtocol = Web.config.secureProtocol || 'TLSv1_2_server_method';
+  Web.config.ciphers = Web.config.ciphers || 'AES128-GCM-SHA256:HIGH:!RC4:!MD5:!aNULL:!EDH';
 
   if (Web.config.key && Web.config.cert) {
     var httpsOptions = {
       key: read(Web.config.key, 'utf8'),
-      cert: read(Web.config.cert, 'utf8')
+      cert: read(Web.config.cert, 'utf8'),
+      secureProtocol: Web.config.secureProtocol,
+      ciphers: Web.config.ciphers
     };
 
     if (Web.config.ca) {
