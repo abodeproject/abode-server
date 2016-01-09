@@ -22,8 +22,8 @@
         {{device.name}}
         <p class="list-group-item-text pull-right">
           <span class="badge"></span>
-          <span class="badge" ng-show="device._mode == 'COOL'"><i class="icon-snow"></i></span>
-          <span class="badge" ng-show="device._mode == 'HEAT'"><i class="icon-fire"></i></span>
+          <span class="badge" ng-show="device._mode == 'COOL'">{{device._set_point}} <i class="icon-snow"></i></span>
+          <span class="badge" ng-show="device._mode == 'HEAT'">{{device._set_point}} <i class="icon-fire"></i></span>
           <span class="badge" ng-show="has_capability(device, 'temperature_sensor')">{{device._temperature}} <i class="wi wi-thermometer"></i></span>
           <span class="badge" ng-show="has_capability(device, 'humidity_sensor')">{{device._humidity}} <i class="wi wi-humidity"></i></span>
           <span class="badge" ng-show="has_capability(device, 'light_sensor')">{{device._lumens}} <i class="wi wi-day-sunny wi-fw"></i></span>
