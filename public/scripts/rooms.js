@@ -33,7 +33,45 @@ angular.module('rooms', ['ui.router','ngResource'])
     }
   });
 })
-.service('rooms', function ($http, $q, $uibModal) {
+.service('rooms', function ($http, $q, $uibModal, $resource) {
+  var model = $resource('/api/rooms/:id/:action', {id: '@_id'}, {
+    'update': { method: 'PUT' },
+    'get_temperature': { method: 'GET' , params: { action: 'get_temperature'}},
+    'get_humidity': { method: 'GET' , params: { action: 'get_humidity'}},
+    'get_lumacity': { method: 'GET' , params: { action: 'get_lumacity'}},
+    'motion_on': { method: 'GET' , params: { action: 'motion_on'}},
+    'motion_off': { method: 'GET' , params: { action: 'motion_off'}},
+    'doors_open': { method: 'GET' , params: { action: 'doors_open'}},
+    'doors_closed': { method: 'GET' , params: { action: 'doors_closed'}},
+    'windows_open': { method: 'GET' , params: { action: 'windows_open'}},
+    'windows_closed': { method: 'GET' , params: { action: 'windows_closed'}},
+    'shades_open': { method: 'GET' , params: { action: 'shades_open'}},
+    'shades_closed': { method: 'GET' , params: { action: 'shades_closed'}},
+    'conditioning_on': { method: 'GET' , params: { action: 'conditioning_on'}},
+    'conditioning_off': { method: 'GET' , params: { action: 'conditioning_off'}},
+    'lights_on': { method: 'GET' , params: { action: 'lights_on'}},
+    'lights_off': { method: 'GET' , params: { action: 'lights_off'}},
+    'appliances_on': { method: 'GET' , params: { action: 'appliances_on'}},
+    'appliances_off': { method: 'GET' , params: { action: 'appliances_off'}},
+    'scenes_on': { method: 'GET' , params: { action: 'scenes_on'}},
+    'scenes_off': { method: 'GET' , params: { action: 'scenes_off'}},
+    'off': { method: 'POST' , params: { action: 'off'}},
+    'on': { method: 'POST' , params: { action: 'on'}},
+    'open': { method: 'POST' , params: { action: 'open'}},
+    'close': { method: 'POST' , params: { action: 'close'}},
+    'set_level': { method: 'POST' , params: { action: 'set_level'}},
+    'set_mode': { method: 'POST' , params: { action: 'set_mode'}},
+    'set_humidity': { method: 'POST' , params: { action: 'set_humidity'}},
+    'set_point': { method: 'POST' , params: { action: 'set_point'}},
+    'status': { method: 'POST' , params: { action: 'status'}},
+    'play': { method: 'POST' , params: { action: 'play'}},
+  });
+
+  var test = model.get({'id': 'Living Room'});
+  test.$promise.then(function (out) {
+    console.dir(out);
+    console.dir(out.$lights_on());
+  });
   var loadRooms = function () {
     var defer = $q.defer();
 
