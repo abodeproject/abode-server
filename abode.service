@@ -6,7 +6,7 @@ Restart=always
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=abode
-Environment=DISPLAY=0:0
+Environment=DISPLAY=:0
 Environment=NODE_ENV=production
 After=network.target mongodb.service
 
