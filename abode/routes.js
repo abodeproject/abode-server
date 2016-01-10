@@ -1,6 +1,7 @@
 'use strict';
 
-var ini = require('ini'),
+var fs = require('fs'),
+  ini = require('ini'),
   web = require('../web'),
   abode = require('../abode'),
   express = require('express'),
@@ -84,16 +85,49 @@ router.delete('/views/:view', function (req, res) {
 router.get('/status/', function (req, res) {
 
   var level,
+    status = {},
     display = abode.providers.display;
+
   if (abode.providers.display.power && display.max_brightness && display.brightness) {
     level = Math.round((display.brightness / display.max_brightness) * 100);
   } else {
     level = 0;
   }
 
-  res.status(200).send({
-    '_on': display.power,
-    '_level': level
+  status._on = display.power;
+  status._level = display.level;
+  status.capabilities = [
+    'display',
+    'video',
+  ];
+
+
+  fs.readFile('/dev/shm/sensors.json', function (err, data) {
+    if (err) {
+      log.error('Could not read sensor file: ', err);
+      res.status(200).send(status);
+
+      return;
+    }
+
+    data = JSON.parse(data) || {};
+
+    if (data._temperature) {
+      status.capabilities.push('temperature_sensor');
+      status._temperature = data._temperature;
+    }
+
+    if (data._humidity) {
+      status.capabilities.push('humidity_sensor');
+      status._humidity = data._humidity;
+    }
+
+    if (data._lumens) {
+      status.capabilities.push('light_sensor');
+      status._lumens = data._lumens;
+    }
+
+    res.status(200).send(status);
   });
 
 });
