@@ -88,19 +88,19 @@ router.get('/status/', function (req, res) {
     status = {},
     display = abode.providers.display;
 
-  if (abode.providers.display.power && display.max_brightness && display.brightness) {
-    level = Math.round((display.brightness / display.max_brightness) * 100);
-  } else {
-    level = 0;
-  }
 
   status._on = display.power;
-  status._level = display.level;
   status.capabilities = [
     'display',
     'video',
+    'onoff',
   ];
 
+  if (abode.providers.display.power && display.max_brightness && display.brightness) {
+    level = Math.round((display.brightness / display.max_brightness) * 100);
+    status._level = level;
+    status.capabilities.push('dimmer');
+  }
 
   fs.readFile('/dev/shm/sensors.json', function (err, data) {
     if (err) {

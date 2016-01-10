@@ -111,7 +111,6 @@ Display.load = function () {
 
     get_currentbacklight()
     .then(get_maxbacklight, failLoad)
-    .then(get_monitor_power, failLoad)
     .then(function (response) {
       defer.resolve(response);
     }, function (err) {
@@ -142,13 +141,18 @@ Display.load = function () {
 
   };
 
-  log.debug('Loading display properties');
-  fs.readdir(base, function (err, displays) {
-    if (!err) {
-      findDisplay(displays);
-    } else {
-      failLoad('No backlight class found');
-    }
+
+  get_monitor_power().then(function () {
+    log.debug('Loading display properties');
+    fs.readdir(base, function (err, displays) {
+      if (!err) {
+        findDisplay(displays);
+      } else {
+        failLoad('No backlight class found');
+      }
+    });
+  }, function () {
+    failLoad('No monitor detected');
   });
 
   return defer.promise;
