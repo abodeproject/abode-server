@@ -8,6 +8,15 @@ var logger = require('log4js'),
   log = logger.getLogger('abode.rooms');
 var mongoose = require('mongoose');
 
+var RoomLogSchema = mongoose.Schema({
+  'room': mongoose.Schema.Types.ObjectId,
+  'created': { 'type': Date, 'default': Date.now },
+  'extra': Object,
+  'command': String,
+  'to':  Object,
+  'from':  Object,
+});
+
 // Define our main Rooms object
 var Rooms = function () {
   devices = require('../devices');
@@ -29,21 +38,49 @@ var RoomSchema = mongoose.Schema({
     'index': true
   },
   '_devices': Array,
+  '_temperature': Number,
+  '_humidity': Number,
+  '_lumacity': Number,
+  '_set_point': Number,
+  '_motion_on': Boolean,
+  '_motion_off': Boolean,
+  '_doors_open': Boolean,
+  '_doors_closed': Boolean,
+  '_windows_open': Boolean,
+  '_windows_closed': Boolean,
+  '_shades_open': Boolean,
+  '_shades_closed': Boolean,
+  '_conditioning_on': Boolean,
+  '_conditioning_off': Boolean,
+  '_lights_on': Boolean,
+  '_lights_off': Boolean,
+  '_appliances_on': Boolean,
+  '_appliances_off': Boolean,
+  '_fans_on': Boolean,
+  '_fans_off': Boolean,
+  '_scenes_on': Boolean,
+  '_scenes_off': Boolean,
+  '_mode_heat': Boolean,
+  '_mode_cool': Boolean,
   'last_seen': Date,
 });
 
 Rooms._rooms = [];
+Rooms.logs = mongoose.model('RoomLogs', RoomLogSchema);
 
 // Function that returns another function based on the config passed
 // that will then query specific statuses for for the romm defined
 // in the initial config
 var getStatuses = function (config) {
-  return function () {
+  return function (cache) {
     var room_status = false,
-      room_value = {'high': null, 'low': null, 'average': 0},
+      room_value = {'high': null, 'low': null, 'average': 0, 'total': 0},
       index = -1,
       self = this,
       defer = q.defer();
+
+    cache = (cache === undefined) ? false : cache;
+    config.filter = (config.filter === undefined) ? true : config.filter;
 
     //should check to ensure get functino exists
     var devices = self['get_' + config.type]();
@@ -51,7 +88,8 @@ var getStatuses = function (config) {
     //Once we're done return the data
     var done = function () {
       if (config.value === 'int') {
-        room_status.average = (room_status.average / devices.length);
+        room_value.average = (room_value.total / devices.length);
+        defer.resolve(room_value.average);
       } else {
         defer.resolve(room_status);
       }
@@ -72,11 +110,18 @@ var getStatuses = function (config) {
       }
 
       var endpoint = devices[index][config.key];
-      console.log(devices[index].name);
 
       if (endpoint instanceof Function) {
+        var dev_timeout;
+
+        dev_timeout = setTimeout(function () {
+          log.warn('Timeout reached statusing device %s for %s', devices[index].name, config.key);
+          next_device();
+        }, 5000);
+
         //Call the config.key method on the device
-        endpoint.apply(devices[index]).then(function (value) {
+        endpoint.apply(devices[index], [cache]).then(function (value) {
+          clearTimeout(dev_timeout);
           //Move on to the next device
           if (config.value === 'int') {
             if (room_value.high === null || value > room_value.high) {
@@ -85,14 +130,15 @@ var getStatuses = function (config) {
             if (room_value.high === null || value < room_value.low) {
               room_value.high = value;
             }
-            room_value += value;
+            room_value.total += value;
           } else {
-            if (value === true) {
+            if (value === config.filter) {
               room_status = true;
             }
           }
           next_device();
         }, function (err) {
+          clearTimeout(dev_timeout);
           //If we encounter an error, call fail()
           fail(err);
         });
@@ -101,13 +147,14 @@ var getStatuses = function (config) {
         if (endpoint === true) {
           room_status = true;
         }
+        next_device();
       }
 
     };
 
     //If no devices exist, call fail() and stop
     if (devices.length === 0) {
-      fail(new Error('No devices to status'));
+      fail(new Error('No devices to status: ' + config.type));
       return defer.promise;
     }
 
@@ -305,8 +352,9 @@ RoomSchema.methods.remove_device = function (device) {
 
 // Add the various status methods for the room schema
 RoomSchema.methods.get_temperature = getStatuses( {'type': 'temperature_sensors', 'key': 'temperature', 'value': 'int'} );
-RoomSchema.methods.get_humidity = getStatuses( {'type': 'humidity_sensor', 'key': 'humidity', 'value': 'int'} );
-RoomSchema.methods.get_lumacity = getStatuses( {'type': 'light_sensor', 'key': 'lumens', 'value': 'int'} );
+RoomSchema.methods.get_humidity = getStatuses( {'type': 'humidity_sensors', 'key': 'humidity', 'value': 'int'} );
+RoomSchema.methods.get_lumacity = getStatuses( {'type': 'light_sensors', 'key': 'lumens', 'value': 'int'} );
+RoomSchema.methods.get_set_point = getStatuses( {'type': 'conditioners', 'key': 'set_point', 'value': 'int'} );
 RoomSchema.methods.motion_on =  getStatuses( {'type': 'motion_sensors', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.motion_off = getStatuses( {'type': 'motion_sensors', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.doors_open = getStatuses( {'type': 'doors', 'key': 'is_open', 'filter': true} );
@@ -319,14 +367,19 @@ RoomSchema.methods.conditioning_on = getStatuses( {'type': 'conditioners', 'key'
 RoomSchema.methods.conditioning_off = getStatuses( {'type': 'conditioners', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.lights_on = getStatuses( {'type': 'lights', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.lights_off = getStatuses( {'type': 'lights', 'key': 'is_off', 'filter': true} );
+RoomSchema.methods.fans_on = getStatuses( {'type': 'fans', 'key': 'is_on', 'filter': true} );
+RoomSchema.methods.fans_off = getStatuses( {'type': 'fans', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.appliances_on = getStatuses( {'type': 'appliances', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.appliances_off = getStatuses( {'type': 'appliances', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.scenes_on = getStatuses( {'type': 'scenes', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.scenes_off = getStatuses( {'type': 'scenes', 'key': 'is_off', 'filter': true} );
+RoomSchema.methods.mode_heat = getStatuses( {'type': 'conditioners', 'key': 'mode', 'filter': 'HEAT'} );
+RoomSchema.methods.mode_cool = getStatuses( {'type': 'conditioners', 'key': 'mode', 'filter': 'COOL'} );
 
 // Add the various device filtering methods for the room schema
 RoomSchema.methods.get_lights = filterDevices('light');
 RoomSchema.methods.get_appliances = filterDevices('appliance');
+RoomSchema.methods.get_fans = filterDevices('fan');
 RoomSchema.methods.get_conditioners = filterDevices('conditioner');
 RoomSchema.methods.get_motion_sensors = filterDevices('motion_sensor');
 RoomSchema.methods.get_temperature_sensors = filterDevices('temperature_sensor');
@@ -337,6 +390,154 @@ RoomSchema.methods.get_windows = filterDevices('window');
 RoomSchema.methods.get_doors = filterDevices('door');
 RoomSchema.methods.get_shades = filterDevices('shade');
 RoomSchema.methods.get_scenes = filterDevices('scene');
+
+// Define the function that resolves all rooms to room objects
+RoomSchema.methods.set_state = function (config, log_msg) {
+  var self = this;
+
+  log.debug('Setting room state for %s: ', self.name, config);
+
+  var onoff_events = {
+    '_lights_on': 'LIGHTS',
+    '_motion_on': 'MOTION',
+    '_fans_on': 'FANS',
+    '_mode_heat': 'HEAT',
+    '_mode_cool': 'COOL',
+    '_conditioning_on': 'CONDITIONING',
+    '_appliances_on': 'APPLIANCES',
+  };
+
+  var openclose_events = {
+    '_doors_open': 'DOORS',
+    '_windows_open': 'WINDOWS',
+    '_shades_open': 'SHADES',
+  };
+
+  var int_events = {
+    '_temperature': 'TEMPERATURE',
+    '_humidity': 'HUMIDITY',
+    '_lumacity': 'LUMACITY',
+    '_set_point': 'SET_POINT',
+  };
+
+  Object.keys(config).forEach(function (key) {
+
+    if (onoff_events[key]) {
+      if (config[key] === true && self[key] !== config[key]) {
+        abode.events.emit(onoff_events[key] + '_ON', self);
+        log.info('Emitting ' + onoff_events[key] + '_ON for', {'name': self.name, 'type': 'room'});
+      }
+      if (config[key] === false && self[key] !== config[key]) {
+        abode.events.emit(onoff_events[key] + '_OFF', self);
+        log.info('Emitting ' + onoff_events[key] + '_OFF for', {'name': self.name, 'type': 'room'});
+      }
+    }
+
+    if (openclose_events[key]) {
+      if (config[key] === true && self[key] !== config[key]) {
+        abode.events.emit(openclose_events[key] + '_OPEN', self);
+        log.info('Emitting ' + openclose_events[key] + '_OPEN for', {'name': self.name, 'type': 'room'});
+      }
+      if (config[key] === false && self[key] !== config[key]) {
+        abode.events.emit(openclose_events[key] + '_CLOSED', self);
+        log.info('Emitting ' + openclose_events[key] + '_CLOSED for', {'name': self.name, 'type': 'room'});
+      }
+    }
+
+    if (int_events[key]) {
+      if (Math.floor(self[key]) !== Math.floor(config[key])) {
+        abode.events.emit(int_events[key] + '_CHANGE', self);
+        log.info('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'room'});
+      }
+      if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) < Math.floor(config[key])) {
+        abode.events.emit(int_events[key] + '_UP', self);
+        log.info('Emitting ' + int_events[key] + '_UP for', {'name': self.name, 'type': 'room'});
+      }
+      if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) > Math.floor(config[key])) {
+        abode.events.emit(int_events[key] + '_DOWN', self);
+        log.info('Emitting ' + int_events[key] + '_DOWN for', {'name': self.name, 'type': 'room'});
+      }
+    }
+
+    // Update the key on the object
+    self[key] = config[key];
+  });
+
+  if (log_msg) {
+    self.log_entry(log_msg);
+  }
+
+  return self._save();
+};
+
+var statuses = {
+  'get_temperature': '_temperature',
+  'get_humidity': '_humidity',
+  'get_lumacity': '_lumacity',
+  'get_set_point': '_set_point',
+  'motion_on': '_motion_on',
+  'motion_off': '_motion_off',
+  'doors_open': '_doors_open',
+  'doors_closed': '_doors_closed',
+  'windows_open': '_windows_open',
+  'windows_closed': '_windows_closed',
+  'shades_open': '_shades_open',
+  'shades_closed': '_shades_closed',
+  'conditioning_on': '_conditioning_on',
+  'conditioning_off': '_conditioning_off',
+  'lights_on': '_lights_on',
+  'lights_off': '_lights_off',
+  'appliances_on': '_appliances_on',
+  'appliances_off': '_appliances_off',
+  'fans_on': '_fans_on',
+  'fans_off': '_fans_off',
+  'scenes_on': '_scenes_on',
+  'scenes_off': '_scenes_off',
+  'mode_heat': '_mode_heat',
+  'mode_cool': '_mode_cool',
+};
+
+RoomSchema.methods.status = function (cache) {
+  var update = {},
+    self = this,
+    defer = q.defer(),
+    status_defers = [];
+
+  cache = (cache === undefined) ? false : cache;
+
+  Object.keys(statuses).forEach(function (status) {
+    var roomTimeout,
+      status_defer = q.defer();
+
+    status_defers.push(status_defer.promise);
+
+    roomTimeout = setTimeout(function () {
+      log.warn('Timeout reached statusing room %s for %s', self.name, status);
+      status_defer.reject();
+    }, 5000);
+
+    log.debug('Checking status of room %s: %s', self.name, status);
+    self[status](cache).then(function (response) {
+      clearTimeout(roomTimeout);
+      update[statuses[status]] = response;
+      status_defer.resolve(response);
+    }, function (err) {
+      clearTimeout(roomTimeout);
+      status_defer.reject(err);
+    });
+
+  });
+
+  q.allSettled(status_defers).then(function () {
+    self.set_state(update).then(function (response) {
+      defer.resolve(response);
+    }, function (err) {
+      defer.resolve(err);
+    });
+  });
+
+  return defer.promise;
+};
 
 // Expand each device into it's object and return a list of objects
 RoomSchema.methods.get_devices = function () {

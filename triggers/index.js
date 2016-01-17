@@ -69,8 +69,31 @@ Triggers.types = [
   {'name': 'OFF'},
   {'name': 'OPEN'},
   {'name': 'CLOSE'},
+  {'name': 'LIGHTS_ON'},
+  {'name': 'LIGHTS_OFF'},
+  {'name': 'FANS_ON'},
+  {'name': 'FANS_OFF'},
+  {'name': 'APPLIANCES_ON'},
+  {'name': 'APPLIANCES_OFF'},
+  {'name': 'CONDITIONING_ON'},
+  {'name': 'CONDITIONING_OFF'},
+  {'name': 'WINDOWS_OPEN'},
+  {'name': 'WINDOWS_CLOSED'},
+  {'name': 'DOORS_OPEN'},
+  {'name': 'DOORS_CLOSED'},
+  {'name': 'SHADES_OPEN'},
+  {'name': 'SHADES_CLOSED'},
   {'name': 'MOTION_ON'},
-  {'name': 'MOTION_OFF'}
+  {'name': 'MOTION_OFF'},
+  {'name': 'TEMPERATURE_CHANGE'},
+  {'name': 'TEMPERATURE_UP'},
+  {'name': 'TEMPERATURE_DOWN'},
+  {'name': 'HUMIDITY_CHANGE'},
+  {'name': 'HUMIDITY_UP'},
+  {'name': 'HUMIDITY_DOWN'},
+  {'name': 'LUMACITY_CHANGE'},
+  {'name': 'LUMACITY_UP'},
+  {'name': 'LUMACITY_DOWN'},
 ];
 
 Triggers.lookupAction = function (key) {
@@ -285,7 +308,14 @@ Triggers.type_handler = function (trigger) {
 
       //If a matcher was provided, check it matches here
       if (t.match !== undefined && t.match !== '') {
-        if (t.match !== matcher.name && t.match !== String(matcher)) {
+        if (matcher.type && t.match_type === matcher.type && t.match === String(matcher.name)) {
+          log.debug('Type based match found');
+        } else if (t.match !== String(matcher)) {
+          log.debug('Simple matche found');
+        } else {
+          log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
+        }
+        if (t.match !== matcher.name && (t.match !== String(matcher)) ) {
           log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
           return false;
         } else {

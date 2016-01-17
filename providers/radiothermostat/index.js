@@ -66,6 +66,38 @@ Radiothermostat.off = function (device) {
   return Radiothermostat.set_mode(device, 'OFF');
 };
 
+Radiothermostat.is_on = function (device) {
+  var defer = q.defer();
+
+  defer.resolve({'response': (device._on === true)});
+
+  return defer.promise;
+};
+
+Radiothermostat.is_off = function (device) {
+  var defer = q.defer();
+
+  defer.resolve({'response': (device._on === false)});
+
+  return defer.promise;
+};
+
+Radiothermostat.temperature = function (device) {
+  var defer = q.defer();
+
+  defer.resolve({'response': device._temperature});
+
+  return defer.promise;
+};
+
+Radiothermostat.humidity = function (device) {
+  var defer = q.defer();
+
+  defer.resolve({'response': device._humidity});
+
+  return defer.promise;
+};
+
 Radiothermostat.set_mode = function (device, mode) {
   var defer = q.defer();
 
@@ -100,6 +132,11 @@ Radiothermostat.set_point = function (device, temp) {
   var defer = q.defer();
 
   var data = {};
+
+  if (typeof(temp) !== 'number') {
+    defer.resolve({'response': device._set_point});
+    return defer.promise;
+  }
 
   if (device._mode === 'HEAT') {
     data.t_heat = temp;

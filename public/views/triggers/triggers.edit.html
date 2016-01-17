@@ -24,7 +24,7 @@
 
                 <div>
                 <ul class="list-group bg-muted select-list">
-                  <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in trigger_types" ng-click="trigger.trigger = t.name" ng-class="{'list-group-item-success': trigger.trigger == t.name}">
+                  <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in trigger_types | orderBy: '+name'" ng-click="trigger.trigger = t.name" ng-class="{'list-group-item-success': trigger.trigger == t.name}">
                     {{t.name}}
                   </li>
                 </ul>
@@ -54,6 +54,15 @@
                         <ul class="list-group bg-muted select-list" ng-hide="devices_loading">
                           <li class="list-group-item" style="cursor: pointer;" ng-repeat="device in devices | orderBy: '+name'" ng-click="changeDevice(device)" ng-class="{'list-group-item-success': trigger.match == device.name}">
                             {{device.name}}
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div ng-show="trigger.match_type == 'room'">
+                        <div ng-show="rooms_loading"><i class="icon-loadingalt spin"></i> Loading...</div>
+                        <ul class="list-group bg-muted select-list" ng-hide="rooms_loading">
+                          <li class="list-group-item" style="cursor: pointer;" ng-repeat="room in rooms | orderBy: '+name'" ng-click="changeRoom(room)" ng-class="{'list-group-item-success': trigger.match == room.name}">
+                            {{room.name}}
                           </li>
                         </ul>
                       </div>

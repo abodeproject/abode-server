@@ -146,6 +146,7 @@ var filters = {
   'door': 'get_doors',
   'shade': 'get_shades',
   'scene': 'get_scenes',
+  'fans': 'get_fans',
 };
 
 Object.keys(filters).forEach(function (filter) {
@@ -163,9 +164,21 @@ Object.keys(filters).forEach(function (filter) {
 });
 
 var actions = [
+  'on',
+  'off',
+  'open',
+  'close',
+  'set_level',
+  'set_mode',
+  'set_humidity',
+  'set_point',
+];
+
+var statuses = [
   'get_temperature',
   'get_humidity',
   'get_lumacity',
+  'get_set_point',
   'motion_on',
   'motion_off',
   'doors_open',
@@ -180,27 +193,94 @@ var actions = [
   'lights_off',
   'appliances_on',
   'appliances_off',
+  'fans_on',
+  'fans_off',
   'scenes_on',
   'scenes_off',
 ];
 
-actions.forEach(function (action) {
 
-  router.get('/:id/' + action, function (req, res) {
+actions.forEach(function (action) {
+  router.post('/:id/' + action, function (req, res) {
+    var room = rooms.get(req.params.id);
+    if (!room) {
+      res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+      return;
+    }
+
+    var args = req.body || [];
+    var response = room[action].apply(room, args);
+
+    if (response.then) {
+      response.then(function (result) {
+        res.send({'status': 'success', 'response': result, 'room': room});
+      }, function (err) {
+        res.status(400).send(err || {'status': 'failed', 'message': 'Failed to send action'});
+      });
+    } else {
+      res.send({'status': 'success', 'response': response});
+    }
+  });
+
+});
+
+statuses.forEach(function (status) {
+
+  router.get('/:id/' + status, function (req, res) {
     var room = rooms.get(req.params.id);
     if (!room) {
       res.status(404).send({'status': 'failed', 'message': 'Room not found'});
       return;
     }
 
-    room[action]().then(function (response) {
-      console.log(response);
+    room[status]().then(function (response) {
       res.send({'status': 'success', 'response': response});
     }, function (err) {
-      res.status(400).send(err || {'status': 'failed', 'message': 'Failed to run action'});
+      res.status(400).send(err || {'status': 'failed', 'message': 'Failed to run status'});
     });
   });
 
+});
+
+
+router.post('/:id/status', function (req, res) {
+  var room = rooms.get(req.params.id);
+  if (!room) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  var response = room.status(false);
+
+  if (response.then) {
+    response.then(function (result) {
+      res.send({'status': 'success', 'response': result, 'room': room});
+    }, function (err) {
+      res.status(400).send(err || {'status': 'failed', 'message': 'Failed to send action'});
+    });
+  } else {
+    res.send({'status': 'success', 'response': response});
+  }
+});
+
+router.get('/:id/status', function (req, res) {
+  var room = rooms.get(req.params.id);
+  if (!room) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  var response = room.status(true);
+
+  if (response.then) {
+    response.then(function (result) {
+      res.send({'status': 'success', 'response': result, 'room': room});
+    }, function (err) {
+      res.status(400).send(err || {'status': 'failed', 'message': 'Failed to send action'});
+    });
+  } else {
+    res.send({'status': 'success', 'response': response});
+  }
 });
 
 module.exports = router;

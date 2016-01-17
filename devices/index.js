@@ -121,7 +121,7 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
 
   //Check for the command within the providers object
   if (providers[self.provider][cmd] === undefined) {
-    msg = 'Command not available for device';
+    msg = 'Command not available for device ' + self.name + ': ' + cmd;
     log.error(msg);
     defer.reject({'status': 'failed', 'msg': msg});
     return defer.promise;
@@ -199,32 +199,68 @@ DeviceSchema.methods.alerts = function (cache) { return this.send_command('alert
 
 // Define the function that resolves all rooms to room objects
 DeviceSchema.methods.set_state = function (config, log_msg) {
-  var self = this;
+  var self = this,
+    made_event = false;
 
   log.debug('Setting device state for %s: ', self.name, config);
 
+  var int_events = {
+    '_temperature': 'TEMPERATURE',
+    '_humidity': 'HUMIDITY',
+    '_lumacity': 'LUMACITY',
+    '_set_point': 'SET_POINT',
+    '_level': 'LEVEL',
+  };
+
   Object.keys(config).forEach(function (key) {
+
+    if (int_events[key]) {
+      if (Math.floor(self[key]) !== Math.floor(config[key])) {
+        abode.events.emit(int_events[key] + '_CHANGE', self);
+        log.info('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'device'});
+      }
+      if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) < Math.floor(config[key])) {
+        abode.events.emit(int_events[key] + '_UP', self);
+        log.info('Emitting ' + int_events[key] + '_UP for', {'name': self.name, 'type': 'device'});
+      }
+      if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) > Math.floor(config[key])) {
+        abode.events.emit(int_events[key] + '_DOWN', self);
+        log.info('Emitting ' + int_events[key] + '_DOWN for', {'name': self.name, 'type': 'device'});
+      }
+    }
 
     // Check for event triggers
     switch (key) {
       case '_on':
         if (config[key] === true && self[key] !== true) {
           self.last_on = new Date();
-          abode.events.emit('ON', self);
-          log.info('Emitting ON for', self.name);
+          if (self.capabilities.indexOf('openclose') === -1) {
+            abode.events.emit('ON', self);
+            log.info('Emitting ON for', {'type': 'device', 'name': self.name});
+          } else {
+            abode.events.emit('OPEN', self);
+            log.info('Emitting OPEN for', {'type': 'device', 'name': self.name});
+          }
         }
         if (config[key] === false && self[key] !== false) {
           self.last_off = new Date();
-          abode.events.emit('OFF', self);
-          log.info('Emitting OFF for', self.name);
+          if (self.capabilities.indexOf('openclose') === -1) {
+            abode.events.emit('OFF', self);
+            log.info('Emitting OFF for', {'type': 'device', 'name': self.name});
+          } else {
+            abode.events.emit('CLOSED', self);
+            log.info('Emitting CLOSED for', {'type': 'device', 'name': self.name});
+          }
         }
+        made_event = true;
         break;
       case 'low_battery':
         if (config[key] === true && self[key] !== true) {
           self.last_off = new Date();
           abode.events.emit('LOW_BATTERY', self);
-          log.info('Emit LOW_BATTERY for ', self.name);
+          log.info('Emit LOW_BATTERY for ', {'type': 'device', 'name': self.name});
         }
+        made_event = true;
         break;
     }
 
@@ -235,6 +271,14 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
   if (log_msg) {
     self.log_entry(log_msg);
   }
+
+
+  if (made_event) {
+    self.get_rooms().forEach(function (room) {
+      room.status(true);
+    });
+  }
+
 
   return self._save();
 };
@@ -310,6 +354,7 @@ DeviceSchema.methods._save = function () {
       defer.reject(err);
     } else {
       log.info('Device saved successfully: ' + self.name);
+
       defer.resolve();
     }
   });

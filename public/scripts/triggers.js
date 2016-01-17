@@ -392,7 +392,7 @@ angular.module('triggers', ['ui.router','ngResource'])
 
   $scope.load();
 })
-.controller('triggersEdit', function ($scope, $state, triggers, trigger, devices, confirm, types) {
+.controller('triggersEdit', function ($scope, $state, triggers, trigger, devices, rooms, confirm, types) {
   $scope.trigger = trigger;
   $scope.alerts = [];
   $scope.state = $state;
@@ -410,6 +410,7 @@ angular.module('triggers', ['ui.router','ngResource'])
   $scope.match_types = [
     {name: 'None', value: '', icon: 'glyphicon glyphicon-ban-circle'},
     {name: 'Device', value: 'device', icon: 'glyphicon glyphicon-oil'},
+    {name: 'Room', value: 'room', icon: 'glyphicon glyphicon-modal-window'},
     {name: 'Time', value: 'time', icon: 'icon-clockalt-timealt'},
     {name: 'Date', value: 'date', icon: 'icon-calendar'},
     {name: 'String', value: 'string', icon: 'icon-quote'},
@@ -427,7 +428,19 @@ angular.module('triggers', ['ui.router','ngResource'])
     });
   };
 
+  var getRooms = function () {
+    $scope.rooms_loading = true;
+    rooms.load().then(function (rooms) {
+      $scope.rooms = rooms;
+      $scope.rooms_loading = false;
+    }, function () {
+      $scope.rooms = [];
+      $scope.rooms_loading = false;
+    });
+  };
+
   getDevices();
+  getRooms();
 
   $scope.$watch('delay', function (type) {
     if (!type) {
@@ -445,6 +458,9 @@ angular.module('triggers', ['ui.router','ngResource'])
     if (type === 'device' && $scope.devices.length === 0) {
       getDevices();
     }
+    if (type === 'rooms' && $scope.devices.length === 0) {
+      getRooms();
+    }
   });
 
   $scope.changeType = function (type) {
@@ -454,6 +470,10 @@ angular.module('triggers', ['ui.router','ngResource'])
 
   $scope.changeDevice = function (device) {
     trigger.match = device.name;
+  };
+
+  $scope.changeRoom = function (room) {
+    trigger.match = room.name;
   };
 
   $scope.closeAlert = function(index) {
