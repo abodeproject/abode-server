@@ -409,9 +409,15 @@ angular.module('rooms', ['ui.router','ngResource'])
       animation: true,
       templateUrl: 'views/rooms/assign.html',
       size: 'sm',
-      controller: function ($scope, $uibModalInstance, devices) {
+      resolve: {
+        assigned: function () {
+          return $scope.devices.map(function (obj) {return obj.name; });
+        }
+      },
+      controller: function ($scope, $uibModalInstance, devices, assigned) {
         $scope.loading = true;
         $scope.devices = [];
+        $scope.assigned = assigned;
 
         $scope.cancel = function () {
           $uibModalInstance.dismiss();
