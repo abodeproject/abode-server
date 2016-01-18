@@ -270,7 +270,6 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
     // Update the key on the object if different
     if (JSON.stringify(self[key]) !== JSON.stringify(config[key])) {
       changes = true;
-      console.log(self[key], config[key]);
       self[key] = config[key];
     }
   });
@@ -287,7 +286,6 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
 
   //Save if changes have been made, otherwise return a resolve defer
   if (changes) {
-    console.log('saving device: ', self.name);
     return self._save();
   } else {
     var defer = q.defer();
@@ -388,16 +386,16 @@ DeviceSchema.methods.delete = function () {
     var complete = function () {
       self.remove(function (err) {
         if (err) {
-          console.log('Error deleting device: ', err);
+          log.error('Error deleting device: ', err);
           return defer.reject(err);
         }
 
         // Reload the devices
         Devices.load().then(function () {
-          console.log('Device Deleted: ', self.name);
+          log.info('Device Deleted: ', self.name);
           defer.resolve();
         }, function (err) {
-          console.log('Failed to reload devices');
+          log.error('Failed to reload devices');
           defer.reject(err);
         });
 
@@ -409,12 +407,12 @@ DeviceSchema.methods.delete = function () {
       //Look for rooms remaining.
       if (self._rooms.length > 0) {
         var room = rooms.get_by_id(self._rooms[0]);
-        console.log('Cleaning room: ', self._rooms[0]);
+        log.debug('Cleaning room: ', self._rooms[0]);
 
         room.remove_device(self).then(function () {
           clean_room();
         }, function (err) {
-          console.log('Error cleaning room: ', err);
+          log.error('Error cleaning room: ', err);
           defer.reject(err);
         });
       } else {
@@ -440,7 +438,7 @@ DeviceSchema.methods.add_room = function (room) {
     self._save().then(function () {
       defer.resolve();
     }, function (err) {
-      console.log('Error adding room to device: ', err);
+      log.error('Error adding room to device: ', err);
       defer.reject(err);
     });
   };
@@ -448,7 +446,7 @@ DeviceSchema.methods.add_room = function (room) {
   //Check if we have a proper room object
   if ( !(room instanceof rooms.model) ) {
     msg = 'Room is not an instance of Room';
-    console.log(msg);
+    log.error(msg);
     defer.reject({'status': 'failed', 'message': msg});
     return defer.promise;
   }
@@ -456,7 +454,7 @@ DeviceSchema.methods.add_room = function (room) {
   //Check if room is already added
   if (self._rooms.indexOf(room._id) > -1 ) {
     msg = 'Room already added to device';
-    console.log(msg);
+    log.error(msg);
     defer.reject({'status': 'failed', 'message': msg});
     return defer.promise;
   }
@@ -467,7 +465,7 @@ DeviceSchema.methods.add_room = function (room) {
     room._save().then(function () {
       save();
     }, function (err) {
-      console.log('Error adding device to room: ', err);
+      log.error('Error adding device to room: ', err);
       return defer.reject(err);
     });
 
@@ -491,7 +489,7 @@ DeviceSchema.methods.remove_room = function (room) {
     self._save().then(function () {
       defer.resolve();
     }, function (err) {
-      console.log('Error removing room from device: ', err);
+      log.error('Error removing room from device: ', err);
       defer.reject(err);
     });
   };
@@ -499,7 +497,7 @@ DeviceSchema.methods.remove_room = function (room) {
   //Check if we have a proper room object
   if ( !(room instanceof rooms.model) ) {
     msg = 'Room is not an instance of Room';
-    console.log(msg);
+    log.error(msg);
     defer.reject({'status': 'failed', 'message': msg});
     return defer.promise;
   }
@@ -507,7 +505,7 @@ DeviceSchema.methods.remove_room = function (room) {
   //Check if room is exists
   if (self._rooms.indexOf(room._id) === -1 ) {
     msg = 'Room not found in device';
-    console.log(msg);
+    log.error(msg);
     defer.reject({'status': 'failed', 'message': msg});
     return defer.promise;
   }
@@ -518,7 +516,7 @@ DeviceSchema.methods.remove_room = function (room) {
     room._save().then(function () {
       save();
     }, function (err) {
-      console.log('Error removing device from room: ', err);
+      log.error('Error removing device from room: ', err);
       return defer.reject(err);
     });
 
