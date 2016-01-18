@@ -107,10 +107,7 @@ var getStatuses = function (config) {
       //If our index is beyond the length, call done()
       if (index >= devices.length) {
         done();
-      }
-
-      if (!devices[index]) {
-        next_device();
+        return;
       }
 
       var endpoint = devices[index][config.key];
