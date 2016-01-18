@@ -102,7 +102,7 @@ Insteon.poller = function () {
 
     var device = devices[index];
 
-    if (device.active) {
+    if (device.active !== false) {
       log.info('Getting status of device: %s', device.name);
       device.status().then(wait, wait);
     } else {
