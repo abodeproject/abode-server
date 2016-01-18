@@ -230,7 +230,7 @@ Insteon.command = function (command, device, args) {
     args.unshift(device.name);
 
     // Send our command and resolve or reject the promise
-    log.info('Sending %s command to device %s (attempt %s/%s)', command, device.name, tries, Insteon.config.retries);
+    log.debug('Sending %s command to device %s (attempt %s/%s)', command, device.name, tries, Insteon.config.retries);
     Insteon.actions[command].handler.apply(this, args).settled.then(function (response) {
 
       //Resolve our promise with the response
