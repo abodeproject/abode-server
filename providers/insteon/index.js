@@ -78,10 +78,10 @@ Insteon.triggers = [
 ];
 
 Insteon.poller = function () {
-  log.info('Starting poller');
   var index = -1;
-
   var devices = abode.devices.get_by_provider('insteon');
+
+  log.info('Starting poller (%s devices)', devices.length);
 
   var done = function () {
     log.info('Finished polling devices');
