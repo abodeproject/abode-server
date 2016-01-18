@@ -135,8 +135,10 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
     // If our status contained an "update" flag, update the device
     Object.keys(status.update).forEach(function (key) {
       log.debug('Setting device attribute: ' + key + ' = ' + status.update[key]);
-      changes = true;
-      self[key] = status.update[key];
+      if (JSON.stringify(self[key]) !== JSON.stringify(status.update[key])) {
+        changes = true;
+        self[key] = status.update[key];
+      }
     });
 
     // Update the last_seen field
