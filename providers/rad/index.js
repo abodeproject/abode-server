@@ -113,7 +113,7 @@ Rad.get_status = function (device) {
 
   request({uri: device.config.address + '/api/abode/status', json: true}, function (error, response, body) {
     if (!error && response.statusCode === 200) {
-      log.info('Received status for Rad', device.name);
+      log.debug('Received status for Rad', device.name);
       defer.resolve({'update': body});
     } else {
       log.error('Failed get Rad status for %s: %s', device.name, String(error));
