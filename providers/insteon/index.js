@@ -80,13 +80,19 @@ Insteon.triggers = [
 ];
 
 Insteon.poller = function () {
-  var index = -1;
-  var devices = abode.devices.get_by_provider('insteon');
+  var diff,
+    finish,
+    index = -1,
+    start = new Date(),
+    devices = abode.devices.get_by_provider('insteon');
 
   log.info('Starting poller (%s devices)', devices.length);
 
   var done = function () {
-    log.info('Finished polling devices');
+    finish = new Date();
+
+    diff = (finish - start) / 1000;
+    log.info('Finished polling devices in %s seconds.', diff);
     setTimeout(Insteon.poller, Insteon.config.poller_delay * 60 * 1000);
   };
 
