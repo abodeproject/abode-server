@@ -211,7 +211,6 @@ Radiothermostat.get = function (address) {
         data = JSON.parse(data || {});
         defer.resolve(data);
         log.debug('Parsed thermostat data: %s\n%s', address, data);
-        log.info('Parsed thermostat: ', address);
 
       } catch (e) {
 
