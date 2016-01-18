@@ -25,7 +25,7 @@ var Insteon = function () {
   Insteon.config.retries = Insteon.config.retries || 3;
   Insteon.config.debug = (Insteon.config.debug !== undefined) ? Insteon.config.debug : abode.config.debug;
   Insteon.config.modem_debug = (Insteon.config.modem_debug !== undefined) ? Insteon.config.modem_debug : Insteon.config.debug;
-
+  Insteon.config.poller_delay = (Insteon.config.poller_delay !== undefined) ? Insteon.config.poller_delay : 5;
 
   //Set our log level
   if (Insteon.config.modem_debug) {
@@ -61,6 +61,8 @@ var Insteon = function () {
     defer.resolve();
   }
 
+  setTimeout(Insteon.poller, 1000);
+
   return defer.promise;
 };
 
@@ -74,6 +76,41 @@ Insteon.triggers = [
   {'name': 'INSTEON_ON'},
   {'name': 'INSTEON_OFF'}
 ];
+
+Insteon.poller = function () {
+  log.info('Starting poller');
+  var index = -1;
+
+  var devices = abode.devices.get_by_provider('insteon');
+
+  var done = function () {
+    log.info('Finished polling devices');
+    setTimeout(Insteon.poller, Insteon.config.poller_delay * 60 * 1000);
+  };
+
+  var wait = function () {
+    setTimeout(next, 5 * 1000);
+  };
+
+  var next = function () {
+    index += 1;
+
+    if (index >= devices.length) {
+      done();
+      return;
+    }
+
+    var device = devices[index];
+
+    if (device.active) {
+      device.status().then(wait, wait);
+    } else {
+      next();
+    }
+  };
+
+  next();
+};
 
 // Give a device name, return the Insteon device address
 Insteon.lookupByName = function (name) {
