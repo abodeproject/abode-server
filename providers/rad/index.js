@@ -14,7 +14,7 @@ var Rad = function () {
 
   config = abode.config.rad || {};
   config.enabled = (config.enabled === false) ? false : true;
-  config.interval = config.interval || 5;
+  config.interval = config.interval || 30;
 
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {
