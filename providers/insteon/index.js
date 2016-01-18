@@ -61,7 +61,9 @@ var Insteon = function () {
     defer.resolve();
   }
 
-  setTimeout(Insteon.poller, 1000);
+  abode.events.on('ABODE_STARTED', function () {
+    setTimeout(Insteon.poller, 1000);
+  });
 
   return defer.promise;
 };
