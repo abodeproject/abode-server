@@ -3,7 +3,7 @@
 var abode;
 var q = require('q');
 var logger = require('log4js'),
-  log = logger.getLogger('abode.providers');
+  log = logger.getLogger('providers');
 
 //Build our providers object
 var Providers = function (providers) {
@@ -31,6 +31,7 @@ var Providers = function (providers) {
       var provider_defer = q.defer(),
         provider_log = logger.getLogger(provider);
 
+      logger.addAppender(logger.appenders.console(), provider);
       //Add the provider promise to our defer array
       provider_defers.push(provider_defer.promise);
 

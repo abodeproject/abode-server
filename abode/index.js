@@ -41,6 +41,11 @@ Abode.init = function (config) {
     Abode.config = config;
   }
 
+
+  logger.clearAppenders();
+  logger.loadAppender('file');
+  logger.addAppender(logger.appenders.console(), 'abode');
+
   //Set our log level
   if (Abode.config.debug) {
     log.setLevel('DEBUG');
@@ -53,9 +58,10 @@ Abode.init = function (config) {
     var func = Abode[mod];
 
     if (func instanceof Function ) {
-      var mod_log = logger.getLogger('abode.' + mod);
+      logger.addAppender(logger.appenders.console(), mod);
+      var mod_log = logger.getLogger(mod);
 
-      log.debug('Setting log level: abode.' + mod);
+      log.debug('Setting log level: ' + mod);
 
       //Set our log level
       if (Abode.config[mod] && Abode.config[mod].debug) {

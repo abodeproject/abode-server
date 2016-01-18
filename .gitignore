@@ -5,3 +5,4 @@ public/webcam*
 public/images/day.jpg
 views/*.html
 ssl/*
+logs/*

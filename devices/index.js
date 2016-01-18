@@ -8,7 +8,7 @@ var providers;
 var mongoose = require('mongoose');
 var q = require('q');
 var logger = require('log4js'),
-  log = logger.getLogger('abode.devices');
+  log = logger.getLogger('devices');
 
 var DeviceLogSchema = mongoose.Schema({
   'device': mongoose.Schema.Types.ObjectId,

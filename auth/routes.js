@@ -4,7 +4,7 @@ var web = require('../web'),
   auth = require('../auth'),
   express = require('express'),
   logger = require('log4js'),
-  log = logger.getLogger('abode.auth'),
+  log = logger.getLogger('auth'),
   router = express.Router();
 
 

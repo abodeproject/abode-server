@@ -2,8 +2,10 @@
 
 var abode,
   q = require('q'),
+  fs = require('fs'),
   logger = require('log4js'),
-  log = logger.getLogger('abode.web'),
+  log = logger.getLogger('web'),
+  http_logger = logger.getLogger('http_access'),
   https = require('https'),
   addr = require('netaddr').Addr,
   read = require('fs').readFileSync,
@@ -27,6 +29,9 @@ var Web = function () {
   Web.config.address = Web.config.address || '127.0.0.1';
   Web.config.secureProtocol = Web.config.secureProtocol || 'TLSv1_2_server_method';
   Web.config.ciphers = Web.config.ciphers || 'AES128-GCM-SHA256:HIGH:!RC4:!MD5:!aNULL:!EDH';
+  Web.config.access_log = Web.config.access_log || 'logs/abode_access.log';
+
+  logger.addAppender(logger.appenders.file(Web.config.access_log, logger.layouts.messagePassThroughLayout, 4194304, 4), 'http_access');
 
   if (Web.config.key && Web.config.cert) {
     var httpsOptions = {
@@ -42,7 +47,7 @@ var Web = function () {
         httpsOptions.ca.push(read(ca, 'utf8'));
       });
     }
-    
+
     https.createServer(httpsOptions, Web.server).listen(Web.config.ssl_port, Web.config.address, function (err) {
       if (err) {
         log.error(err);
@@ -102,10 +107,9 @@ Web.init = function () {
     mongooseConnection: abode.db,
   };
 
-
   //Create an express instance
   Web.server = express();
-  Web.server.use(logger.connectLogger(log));
+  Web.server.use(logger.connectLogger(http_logger));
   Web.server.use(bodyParser.json());
   Web.server.use(bodyParser.text());
   Web.server.use(session({

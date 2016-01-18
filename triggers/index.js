@@ -9,7 +9,7 @@ var conditions = require('./conditions');
 var mongoose = require('mongoose');
 var q = require('q');
 var logger = require('log4js'),
-  log = logger.getLogger('abode.triggers');
+  log = logger.getLogger('triggers');
 
 // Build the Triggers object
 var Triggers = function () {
@@ -21,9 +21,9 @@ var Triggers = function () {
   abode.web.server.use('/api/triggers', routes);
 
   if (Triggers.config.debug_conditions) {
-    logger.getLogger('abode.triggers.conditions').setLevel('DEBUG');
+    logger.getLogger('triggers.conditions').setLevel('DEBUG');
   } else {
-    logger.getLogger('abode.triggers.conditions').setLevel('INFO');
+    logger.getLogger('triggers.conditions').setLevel('INFO');
   }
 
   return Triggers.load();

@@ -5,7 +5,7 @@ var devices = require('../devices'),
   web = require('../web'),
   express = require('express'),
   logger = require('log4js'),
-  log = logger.getLogger('abode.devices'),
+  log = logger.getLogger('devices'),
   router = express.Router();
 
 router.get('/logs', function (req, res) {

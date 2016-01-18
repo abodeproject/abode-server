@@ -8,7 +8,7 @@ var mongoose = require('mongoose');
 var q = require('q');
 var crypto = require('crypto');
 var logger = require('log4js'),
-  log = logger.getLogger('abode.auth');
+  log = logger.getLogger('auth');
 
 var AuthSchema = mongoose.Schema({
   'name': { 'type': String, 'required': true, 'unique': true },

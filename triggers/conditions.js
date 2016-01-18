@@ -3,7 +3,7 @@
 
 var q = require('q'),
   logger = require('log4js'),
-  log = logger.getLogger('abode.triggers.conditions');
+  log = logger.getLogger('triggers.conditions');
 
 var abode = require('../abode');
 var log,

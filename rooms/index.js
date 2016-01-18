@@ -5,7 +5,7 @@ var devices;
 var routes;
 var q = require('q');
 var logger = require('log4js'),
-  log = logger.getLogger('abode.rooms');
+  log = logger.getLogger('rooms');
 var mongoose = require('mongoose');
 
 var RoomLogSchema = mongoose.Schema({
