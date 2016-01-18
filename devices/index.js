@@ -129,11 +129,13 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
 
   //Call the function and expect a promise back
   providers[self.provider][cmd].apply(self, args).then(function (status) {
+    var changes = false;
     status.update = status.update || {};
 
     // If our status contained an "update" flag, update the device
     Object.keys(status.update).forEach(function (key) {
       log.debug('Setting device attribute: ' + key + ' = ' + status.update[key]);
+      changes = true;
       self[key] = status.update[key];
     });
 
@@ -141,7 +143,7 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
     self.last_seen = new Date();
 
     // Save the device
-    self._save().then(function () {
+    self._save(changes).then(function () {
       defer.resolve(status.response);
     }, function (err) {
       defer.reject(err);
@@ -174,7 +176,7 @@ DeviceSchema.methods.off = function () { return this.send_command('off', undefin
 DeviceSchema.methods.open = function () { return this.send_command('open', undefined, false); };
 DeviceSchema.methods.close = function () { return this.send_command('close', undefined, false); };
 DeviceSchema.methods.set_level = function (level) { return this.send_command('set_level', level, false); };
-DeviceSchema.methods.set_point = function (level) { return this.send_command('set_point', level, false); };
+DeviceSchema.methods.set_point = function (level, cache) { return this.send_command('set_point', level, cache); };
 DeviceSchema.methods.set_mode = function (mode) { return this.send_command('set_mode', mode, false); };
 DeviceSchema.methods.set_humidity = function (level) { return this.send_command('set_humidity', level, false); };
 DeviceSchema.methods.status = function () { return this.send_command('get_status', undefined, false); };
@@ -200,6 +202,7 @@ DeviceSchema.methods.alerts = function (cache) { return this.send_command('alert
 // Define the function that resolves all rooms to room objects
 DeviceSchema.methods.set_state = function (config, log_msg) {
   var self = this,
+    changes = false,
     made_event = false;
 
   log.debug('Setting device state for %s: ', self.name, config);
@@ -264,14 +267,17 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
         break;
     }
 
-    // Update the key on the object
-    self[key] = config[key];
+    // Update the key on the object if different
+    if (JSON.stringify(self[key]) !== JSON.stringify(config[key])) {
+      changes = true;
+      console.log(self[key], config[key]);
+      self[key] = config[key];
+    }
   });
 
   if (log_msg) {
     self.log_entry(log_msg);
   }
-
 
   if (made_event) {
     self.get_rooms().forEach(function (room) {
@@ -279,8 +285,15 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
     });
   }
 
-
-  return self._save();
+  //Save if changes have been made, otherwise return a resolve defer
+  if (changes) {
+    console.log('saving device: ', self.name);
+    return self._save();
+  } else {
+    var defer = q.defer();
+    defer.resolve();
+    return defer.promise;
+  }
 };
 
 DeviceSchema.methods.log_entry = function (msg) {
@@ -343,9 +356,11 @@ DeviceSchema.methods.get_rooms = function () {
 };
 
 // Define a save function that returns an promise instead of using a callback
-DeviceSchema.methods._save = function () {
+DeviceSchema.methods._save = function (log_save) {
   var self = this,
     defer = q.defer();
+
+  log_save = (log_save === undefined) ? true : log_save;
 
   this.save(function (err) {
     if (err) {
@@ -353,7 +368,9 @@ DeviceSchema.methods._save = function () {
       log.debug(err.message || err);
       defer.reject(err);
     } else {
-      log.info('Device saved successfully: ' + self.name);
+      if (log_save) {
+        log.info('Device saved successfully: ' + self.name);
+      }
 
       defer.resolve();
     }
