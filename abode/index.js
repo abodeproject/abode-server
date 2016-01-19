@@ -92,6 +92,7 @@ Abode.init = function (config) {
     Abode.rooms = require('../rooms');
     Abode.devices = require('../devices');
     Abode.triggers = require('../triggers');
+    Abode.scenes = require('../scenes');
     Abode.web = require('../web');
     Abode.web.init();
     Abode.web.server.use('/api/abode', require('./routes'));
@@ -103,6 +104,7 @@ Abode.init = function (config) {
     .then(loadModule('rooms'))
     .then(loadModule('devices'))
     .then(loadModule('triggers'))
+    .then(loadModule('scenes'))
     .then(function() {
       Abode.events.emit('ABODE_STARTED');
       defer.resolve();

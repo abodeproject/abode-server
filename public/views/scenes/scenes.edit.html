@@ -1,0 +1,107 @@
+  <div class="container-fluid bg-muted" style="padding-bottom: 2em;">
+    <div style="position: fixed; right: 1em; top: .5em; font-size: 3em; cursor: pointer" ng-click="back()"><i class="glyphicon glyphicon-arrow-left"></i></div>
+    <div class="row">
+      <div class="col-sm-8 col-sm-offset-2 col-xs-offset-1">
+        <h2>Edit Scene</h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-8 col-sm-offset-2" style="font-size: 2em;">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
+            <form name="saveScene">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Name" required="" ng-model="scene.name">
+              </div>
+              <div class="form-group">
+                <label for="enabled">Repeat: </label>
+                <toggle value="scene.repeat" class="pull-right"></toggle>
+              </div>
+              <div class="form-group">
+                <label for="enabled">Enable On/Off: </label>
+                <toggle value="scene.onoff" class="pull-right"></toggle>
+              </div>
+              <div class="form-group" ng-show="scene.repeat">
+                <label for="enabled">Repeat Delay (hh:mm:ss) </label>
+                <epochduration time="scene.repeat_delay" ></epochduration>
+              </div>
+
+              <div class="form-group">
+                <label for="name">Steps </label>
+                <button class="btn btn-success btn-xs pull-right" ng-click="addStep()"><i class="icon-plus-sign"></i> Add Step</button>
+                <ul class="list-group">
+                  <li class="list-group-item" ng-repeat="step in scene._steps">
+                    <div class="row">
+                      <div class="col-xs-1" style="text-align: center">
+                        <div><button class="btn btn-sm btn-default"><i class="icon-arrow-up"></i></button></div>
+                        <div>{{$index + 1}}</div>
+                        <div><button class="btn btn-sm btn-default"><i class="icon-arrow-down"></i></button></div>
+                      </div>
+                      <div class="col-xs-9">
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="enabled">Step Delay: </label>
+                              <epochduration time="step.delay"></epochduration>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="enabled">Devices: </label>
+                              <button class="btn btn-success btn-xs pull-right" ng-click="addDevice(step)"><i class="icon-plus-sign"></i> Device</button>
+
+                              <ul class="list-group">
+                                <li class="list-group-item" ng-repeat="device in step.devices" style="cursor: pointer" ng-click="editDevice(device)">
+                                  {{device.name}} <button class="pull-right btn btn-default btn-xs" ng-click="removeDevice(step, $index)"><i class="icon-remove-sign"></i></button>
+                                  <div style="font-size: .70em;">
+                                    <span ng-show="!device._level && device._on">Turn ON</span>
+                                    <span ng-show="device._level > 0">Turn ON to {{device._level}}% brightness</span>
+                                    <span ng-show="device._mode == 'COOL'">Turn on COOL to {{device._set_point}}&deg;</span>
+                                    <span ng-show="device._mode == 'HEAT'">Turn on HEAT to {{device._set_point}}&deg;</span>
+                                    <span ng-show="device._mode == 'OFF'">Turn OFF</span>
+                                    <span ng-show="device._on == false">Turn OFF</span>
+                                    <span ng-show="device.duration > 0"> over {{device.duration | ageHumanReadable}} and {{device.stages}} stages</span>
+                                    <span ng-show="device.duration == 0"> immediately</span>
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="enabled">Wait for Devices: </label>
+                              <toggle value="step.wait" class="pull-right"></toggle>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-xs-2">
+                        <button class="pull-right btn btn-default btn-xs" ng-click="removeStep($index)"><i class="icon-remove-sign"></i> Remove</button>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="form-group">
+                <button type="submit" class="pull-right btn btn-sm btn-primary" ng-click="save()" ng-disabled="saveScene.$invalid"><i class="icon-savetodrive"></i> Save</button>
+                <button type="submit" class="btn btn-sm btn-default" ng-click="remove()"><i class="icon-circledelete"></i> Remove</button>
+              </div>
+
+              <div ng-show="loading"><i class="icon-refresh spin"></i> Loading Rooms</div>
+              <div class="form-group" ng-hide="loading">
+                <label for="name">Rooms </label>
+                <button class="btn btn-success btn-xs pull-right" ng-click="addRoom()"><i class="icon-plus-sign"></i> Assign</button>
+                <ul class="list-group">
+                  <li class="list-group-item" ng-repeat="room in rooms">{{room.name}} <button class="pull-right btn btn-default btn-xs" ng-click="removeRoom(room._id)"><i class="icon-remove-sign"></i> Unassign</button></li>
+                </ul>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

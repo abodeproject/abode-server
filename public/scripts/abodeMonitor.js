@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'settings', 'ui.router','ngTouch'])
+angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'scenes', 'settings', 'ui.router','ngTouch'])
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');

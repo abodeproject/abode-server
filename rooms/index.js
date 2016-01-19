@@ -2,6 +2,7 @@
 
 var abode;
 var devices;
+var scenes;
 var routes;
 var q = require('q');
 var logger = require('log4js'),
@@ -20,6 +21,7 @@ var RoomLogSchema = mongoose.Schema({
 // Define our main Rooms object
 var Rooms = function () {
   devices = require('../devices');
+  scenes = require('../scenes');
   abode = require('../abode');
   routes = require('./routes');
 
@@ -38,6 +40,7 @@ var RoomSchema = mongoose.Schema({
     'index': true
   },
   '_devices': Array,
+  '_scenes': Array,
   '_temperature': Number,
   '_humidity': Number,
   '_lumacity': Number,
@@ -341,6 +344,113 @@ RoomSchema.methods.remove_device = function (device) {
       save();
     }, function (err) {
       log.error('Error removing room from device: ', err);
+      return defer.reject(err);
+    });
+
+  } else {
+    save();
+  }
+
+  return defer.promise;
+};
+
+// Add a scene to a room
+RoomSchema.methods.add_scene = function (scene) {
+  var msg,
+    self = this,
+    defer = q.defer();
+
+  var save = function () {
+    //Add scene to room
+    self._scenes.push(scene._id);
+
+    //Save the room
+    self._save().then(function () {
+      log.debug('Successfully added scene to room');
+      defer.resolve();
+    }, function (err) {
+      log.error('Error adding scene to room: ', err);
+      defer.reject(err);
+    });
+  };
+
+  //Check if we have a proper room object
+  if ( !(scene instanceof scenes.model) ) {
+    msg = 'Scene is not an instance of the Scene Model';
+    log.error(msg);
+    defer.reject({'status': 'failed', 'message': msg});
+    return defer.promise;
+  }
+
+  //Check if room is already added
+  if (self._scenes.indexOf(scene._id) > -1 ) {
+    msg = 'Scene already added to room';
+    log.error(msg);
+    defer.reject({'status': 'failed', 'message': msg});
+    return defer.promise;
+  }
+
+  //Add scene to room if not already added
+  if (scene._rooms.indexOf(self._id) === -1 ) {
+    scene._rooms.push(self._id);
+
+    scene._save().then(function () {
+      save();
+    }, function (err) {
+      log.error('Error adding room to scene: ', err);
+      return defer.reject(err);
+    });
+
+  } else {
+    save();
+  }
+
+  return defer.promise;
+};
+
+// Remove a scene from a room
+RoomSchema.methods.remove_scene = function (scene) {
+  var msg,
+    self = this,
+    defer = q.defer();
+
+  var save = function () {
+    //Remove scene from room
+    self._scenes.splice(self._scenes.indexOf(scene._id), 1);
+
+    //Save the room
+    self._save().then(function () {
+      defer.resolve();
+    }, function (err) {
+      log.error(err.message || err);
+      defer.reject(err);
+    });
+  };
+
+  // Check if the scene is an instance of the scene model
+  if ( !(scene instanceof scenes.model) ) {
+    msg = 'Scene is not an instance of the Scene Model';
+    log.error(msg);
+    defer.reject({'status': 'failed', 'message': msg});
+    return defer.promise;
+  }
+
+  //Check if the scene is a member of the room
+  if (self._scenes.indexOf(scene._id) === -1 ) {
+    msg = 'Scene not found in room';
+    log.error(msg);
+    defer.reject({'status': 'failed', 'message': msg});
+    return defer.promise;
+  }
+
+  //Remove room from scene if exists
+  if (scene._rooms.indexOf(self._id) > -1 ) {
+    scene._rooms.splice(scene._rooms.indexOf(self._id), 1);
+
+    scene._save().then(function () {
+      save();
+    }, function (err) {
+      log.error('Error removing room from scene: ', err);
       return defer.reject(err);
     });
 
