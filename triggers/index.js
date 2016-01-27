@@ -310,7 +310,7 @@ Triggers.type_handler = function (trigger) {
       if (t.match !== undefined && t.match !== '') {
         if (matcher.type && t.match_type === matcher.type && t.match === String(matcher.name)) {
           log.debug('Type based match found');
-        } else if (t.match !== String(matcher)) {
+        } else if (t.match === String(matcher)) {
           log.debug('Simple matche found');
         } else {
           log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
