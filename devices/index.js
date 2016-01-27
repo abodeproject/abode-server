@@ -221,15 +221,15 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
 
     if (int_events[key]) {
       if (Math.floor(self[key]) !== Math.floor(config[key])) {
-        abode.events.emit(int_events[key] + '_CHANGE', self);
+        abode.events.emit(int_events[key] + '_CHANGE', {'name': self.name, 'type': 'device'});
         log.info('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'device'});
       }
       if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) < Math.floor(config[key])) {
-        abode.events.emit(int_events[key] + '_UP', self);
+        abode.events.emit(int_events[key] + '_UP', {'name': self.name, 'type': 'device'});
         log.info('Emitting ' + int_events[key] + '_UP for', {'name': self.name, 'type': 'device'});
       }
       if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) > Math.floor(config[key])) {
-        abode.events.emit(int_events[key] + '_DOWN', self);
+        abode.events.emit(int_events[key] + '_DOWN', {'name': self.name, 'type': 'device'});
         log.info('Emitting ' + int_events[key] + '_DOWN for', {'name': self.name, 'type': 'device'});
       }
     }
