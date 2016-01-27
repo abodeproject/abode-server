@@ -301,15 +301,21 @@ Triggers.type_handler = function (trigger) {
 
   return function(matcher) {
     matcher = matcher || '';
-    log.debug('Received "%s" event: ', trigger, matcher.name || matcher || '');
+    log.debug('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
 
     //Loop through each trigger for the given type
     Triggers.get_by_type(trigger).forEach(function (t) {
 
       //If a matcher was provided, check it matches here
       if (t.match !== undefined && t.match !== '') {
-        if (matcher.type && t.match_type === matcher.type && t.match === String(matcher.name)) {
-          log.debug('Type based match found');
+        if (matcher.type && t.match_type === matcher.type) {
+          log.debug('Checking type based match');
+          if (t.match === String(matcher.name) || t.match.name === String(matcher.name)) {
+            log.debug('Type based match found');
+          } else {
+            log.debug('Trigger not typed matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
+            return false;
+          }
         } else if (t.match === String(matcher)) {
           log.debug('Simple matche found');
         } else {
