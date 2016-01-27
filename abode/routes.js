@@ -112,17 +112,17 @@ router.get('/status/', function (req, res) {
 
     data = JSON.parse(data) || {};
 
-    if (data._temperature) {
+    if (data._temperature !== undefined) {
       status.capabilities.push('temperature_sensor');
       status._temperature = data._temperature;
     }
 
-    if (data._humidity) {
+    if (data._humidity !== undefined) {
       status.capabilities.push('humidity_sensor');
       status._humidity = data._humidity;
     }
 
-    if (data._lumens) {
+    if (data._lumens !== undefined) {
       status.capabilities.push('light_sensor');
       status._lumens = data._lumens;
     }
