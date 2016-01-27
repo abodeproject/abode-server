@@ -212,7 +212,7 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
   var int_events = {
     '_temperature': 'TEMPERATURE',
     '_humidity': 'HUMIDITY',
-    '_lumacity': 'LUMACITY',
+    '_lumens': 'LUMACITY',
     '_set_point': 'SET_POINT',
     '_level': 'LEVEL',
   };

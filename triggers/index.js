@@ -315,12 +315,14 @@ Triggers.type_handler = function (trigger) {
         } else {
           log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
         }
+        /*
         if (t.match !== matcher.name && (t.match !== String(matcher)) ) {
           log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
           return false;
         } else {
           log.debug('Trigger matched: %s (%s == %s)', t.name, t.match, matcher.name || matcher || '');
         }
+        */
       }
 
       //Fire the trigger
@@ -464,7 +466,7 @@ Triggers.get_by_name = function (name) {
 
 //Given an id, return the room
 Triggers.get_by_id = function (id) {
-  var triggers = this.list();
+  var triggers = Triggers.list();
   var trigger = triggers.filter(function (item) { return (String(item._id) === String(id)); });
 
   if (trigger.length === 0) {
