@@ -314,6 +314,7 @@ Triggers.type_handler = function (trigger) {
           log.debug('Simple matche found');
         } else {
           log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
+          return false;
         }
         /*
         if (t.match !== matcher.name && (t.match !== String(matcher)) ) {
