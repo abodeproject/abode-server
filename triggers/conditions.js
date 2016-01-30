@@ -47,10 +47,12 @@ var lookupValue = function (key) {
   keys.forEach(function (key) {
     log.debug('Looking up key:', key);
     if (lookupObj !== undefined && lookupObj[key] !== undefined) {
+      log.debug('Found key:', lookupObj[key]);
       //If the key was found, set the lookupObj to that key
       scope = lookupObj;
       lookupObj = lookupObj[key];
     } else {
+      log.debug('Could not find key:', key, lookupObj);
       //Otherwise set lookupObj to undef
       lookupObj = undefined;
     }
@@ -58,7 +60,7 @@ var lookupValue = function (key) {
 
   //If lookupObj is undefined, return undefined
   if (lookupObj === undefined) {
-    return key;
+    return;
   }
 
   //If the lookupObj has a handler property which is a function call and return the response
@@ -152,13 +154,13 @@ orCheck = function (conditions) {
     defer = q.defer(),
     response = false;
 
-  log.debug('Processing or conditions: ', conditions);
+  log.debug('Processing OR conditions: ', conditions);
   conditions.forEach(function (condition) {
     var c_defer = q.defer();
     condition_defers.push(c_defer.promise);
 
     //Process any nested AND conditions
-    if (condition.and instanceof Array) {
+    if (condition.and instanceof Array && condition.and.length > 0) {
       andCheck(condition.and).then(function (r) {
         response = (r) ? true : response;
         c_defer.resolve();
@@ -167,7 +169,7 @@ orCheck = function (conditions) {
     }
 
     //Process any nested OR conditions
-    if (condition.or instanceof Array) {
+    if (condition.or instanceof Array && condition.or.length > 0) {
       orCheck(condition.or).then(function (r) {
         response = (r) ? true : response;
         c_defer.resolve();
@@ -176,7 +178,7 @@ orCheck = function (conditions) {
     }
 
     //Process the condition
-    log.debug('Checking or condition: ', condition);
+    log.debug('Checking OR condition: ', condition);
     conditionCheck(condition).then(function (r) {
       response = (r) ? true : response;
       c_defer.resolve();
@@ -199,7 +201,7 @@ andCheck = function (conditions) {
     defer = q.defer(),
     response = true;
 
-  log.debug('Processing and conditions: ', conditions);
+  log.debug('Processing AND conditions: ', conditions);
   conditions.forEach(function (condition) {
     var c_defer = q.defer();
     condition_defers.push(c_defer.promise);
@@ -223,7 +225,7 @@ andCheck = function (conditions) {
     }
 
     //Process the condition
-    log.debug('Checking and condition: ', condition);
+    log.debug('Checking AND condition: ', condition);
     conditionCheck(condition).then(function (r) {
       response = (r) ? r : false;
       c_defer.resolve();
@@ -246,6 +248,7 @@ var checkConditions = function (conditions) {
   log.debug('Checking conditions: ', conditions);
   //If no conditions passed, return true
   if (conditions === undefined || (conditions instanceof Array !== true) || conditions.length === 0) {
+    log.debug('No conditions to check');
     defer.resolve(true);
     return defer.promise;
   }
