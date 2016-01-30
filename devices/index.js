@@ -221,6 +221,9 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
 
     if (int_events[key]) {
       if (Math.floor(self[key]) !== Math.floor(config[key])) {
+        changes = true;
+        self[key] = config[key];
+
         abode.events.emit(int_events[key] + '_CHANGE', {'name': self.name, 'type': 'device'});
         log.info('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'device'});
       }
@@ -238,6 +241,9 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
     switch (key) {
       case '_on':
         if (config[key] === true && self[key] !== true) {
+          changes = true;
+          self[key] = config[key];
+
           self.last_on = new Date();
           if (self.capabilities.indexOf('openclose') === -1) {
             abode.events.emit('ON', self);
@@ -248,6 +254,9 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
           }
         }
         if (config[key] === false && self[key] !== false) {
+          changes = true;
+          self[key] = config[key];
+
           self.last_off = new Date();
           if (self.capabilities.indexOf('openclose') === -1) {
             abode.events.emit('OFF', self);
@@ -261,6 +270,9 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
         break;
       case 'low_battery':
         if (config[key] === true && self[key] !== true) {
+          changes = true;
+          self[key] = config[key];
+
           self.last_off = new Date();
           abode.events.emit('LOW_BATTERY', self);
           log.info('Emit LOW_BATTERY for ', {'type': 'device', 'name': self.name});
