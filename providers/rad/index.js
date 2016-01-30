@@ -133,6 +133,9 @@ Rad.load = function () {
   }
 
   devices.forEach(function (device) {
+    if (device.active !== true) {
+      return;
+    }
     Rad.get_status(device).then(function (data) {
       if (data.update) {
 

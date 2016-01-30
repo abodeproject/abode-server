@@ -56,14 +56,16 @@ var Insteon = function () {
       defer.reject(err);
 
     });
+
+
+    abode.events.on('ABODE_STARTED', function () {
+      setTimeout(Insteon.poller, 1000);
+    });
+
   } else {
     log.warn('Not starting Insteon.  Not enabled');
     defer.resolve();
   }
-
-  abode.events.on('ABODE_STARTED', function () {
-    setTimeout(Insteon.poller, 1000);
-  });
 
   return defer.promise;
 };

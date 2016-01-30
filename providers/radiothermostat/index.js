@@ -238,6 +238,9 @@ Radiothermostat.load = function () {
   }
 
   devices.forEach(function (device) {
+    if (device.active !== true) {
+      return;
+    }
     Radiothermostat.get_status(device).then(function (data) {
 
       device.set_state(data.update);
