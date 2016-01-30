@@ -1,7 +1,8 @@
 'use strict';
 
-var devices = require('../devices'),
-  rooms = require('../rooms'),
+var abode = require('../abode'),
+  devices = abode.devices,
+  rooms = abode.rooms,
   web = require('../web'),
   express = require('express'),
   logger = require('log4js'),
