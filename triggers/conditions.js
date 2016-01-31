@@ -11,10 +11,66 @@ var log,
   orCheck,
   andCheck;
 
+var lookupValue = function (type, object, key) {
+  /*
+  Given a dot separated string, lookup the method/property across providers
+  */
+  var scope,
+    lookupObj;
+
+  switch (type) {
+    case 'devices':
+      lookupObj = abode.devices.by_name();
+      break;
+    case 'rooms':
+      lookupObj = abode.rooms.by_name();
+      break;
+    case 'scenes':
+      lookupObj = abode.scenes.by_name();
+      break;
+    case 'time':
+      return Number(key);
+      break;
+    case 'string':
+      return String(key);
+      break;
+    case 'number':
+      return Number(key);
+      break;
+    case 'boolean':
+      return Boolean(key);
+      break;
+    default:
+      return key;
+  }
+
+  if (!lookupObj[object]) {
+    return undefined;
+  }
+
+  scope = lookupObj[object];
+  if (!scope) {
+    return undefined;
+  }
+
+  lookupObj = scope[key];
+
+  //If the lookupObj has a handler property which is a function call and return the response
+  if (lookupObj instanceof Function) {
+    return lookupObj.apply(scope);
+
+  //Otherwise return the value
+  } else {
+    return lookupObj;
+  }
+};
+
+/*
 var lookupValue = function (key) {
   /*
   Given a dot separated string, lookup the method/property across providers
   */
+/*
   var keys,
     lookupObj = abode.providers;
 
@@ -72,6 +128,7 @@ var lookupValue = function (key) {
     return lookupObj;
   }
 };
+*/
 
 var conditionCheck = function (condition) {
 
@@ -111,7 +168,8 @@ var conditionCheck = function (condition) {
   //Function to lookup our value
   var value_lookup = function () {
     log.debug('Looking up condition value: ', condition.lookup);
-    value = lookupValue(condition.lookup);
+    value = lookupValue(condition.right_type, condition.right_object, condition.right_key);
+    //value = lookupValue(condition.lookup);
     if (value && value.then && value.then instanceof Function) {
       value.then(function (value) {
         expanded.value = value;
@@ -128,7 +186,8 @@ var conditionCheck = function (condition) {
   //Function to lookup our key
   var key_lookup = function () {
     log.debug('Looking up condition key: ', condition.key);
-    key = lookupValue(condition.key);
+    key = lookupValue(condition.left_type, condition.left_object, condition.left_key);
+    //key = lookupValue(condition.key);
     if (key && key.then && key.then instanceof Function) {
       key.then(function (key) {
         expanded.key = key;

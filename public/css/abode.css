@@ -105,3 +105,11 @@
 .strike-through {
   text-decoration: line-through;
 }
+
+.or-conditions {
+  border-left: .2em solid #C87F0A;
+}
+
+.and-conditions {
+  border-left: .2em solid #00805f;
+}

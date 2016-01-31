@@ -21,7 +21,7 @@ angular.module('triggers', ['ui.router','ngResource'])
     resolve: {
       'trigger': function () {
 
-        return {'enabled': true};
+        return {'enabled': true, 'conditions': [], 'actions': []};
 
       },
       'types': function (triggers) {
@@ -49,7 +49,7 @@ angular.module('triggers', ['ui.router','ngResource'])
     }
   });
 })
-.service('triggers', function ($http, $q, $uibModal, confirm, devices, rooms) {
+.service('triggers', function ($http, $q, $uibModal, confirm, devices, rooms, scenes) {
   var load = function () {
     var defer = $q.defer();
 
@@ -136,7 +136,7 @@ angular.module('triggers', ['ui.router','ngResource'])
       animation: true,
       templateUrl: 'views/triggers/triggers.action.html',
       size: 'lg',
-      controller: function ($scope, $uibModalInstance, action, devices, rooms, title) {
+      controller: function ($scope, $uibModalInstance, action, devices, rooms, scenes, title) {
         $scope.action = action;
         $scope.title = title;
         $scope.builder = {};
@@ -347,6 +347,116 @@ angular.module('triggers', ['ui.router','ngResource'])
     });
   };
 
+
+  var openCondition = function (condition, title) {
+
+    return $uibModal.open({
+      animation: true,
+      templateUrl: 'views/triggers/conditions.edit.html',
+      size: 'lg',
+      controller: function ($scope, $uibModalInstance, devices, rooms, scenes, title, condition) {
+        $scope.title = title;
+        $scope.condition = condition || {'and': [], 'or': []};;
+        $scope.devices = devices;
+        $scope.left_capabilities = [];
+        $scope.right_capabilities = [];
+        $scope.rooms = rooms;
+        $scope.scenes = scenes;
+        $scope.condition_options = [
+          {title: '<', value: 'lt'},
+          {title: '≤', value: 'le'},
+          {title: '=', value: 'eq'},
+          {title: '≥', value: 'ge'},
+          {title: '>', value: 'gt'},
+          {title: '≠', value: 'ne'},
+        ]
+
+        if ($scope.condition.and && $scope.condition.and.length > 0) {
+          $scope.type = 'and';
+        } else if ($scope.condition.or && $scope.condition.or.length > 0) {
+          $scope.type = 'or';
+        } else {
+          $scope.type = 'condition';
+        }
+
+        $scope.editCondition = editCondition;
+        $scope.addCondition = addCondition;
+
+        $scope.changeCondition = function (c) {
+          $scope.condition.condition = c.value;
+        };
+
+        $scope.changeType = function (t) {
+          if ($scope.type !== t) {
+            $scope.type = t;
+            $scope.condition = {'and': [], 'or': []};
+          }
+        };
+
+        $scope.save = function () {
+          if ($scope.type !== 'condition') {
+            if ($scope.condition.and.length === 0 && $scope.condition.or.length === 0) {
+              alert('Need at least one condition in the group');
+              return;
+            }
+
+            if ($scope.condition.name === '') {
+              alert('Name is required for groups');
+              return;
+            }
+          } else {
+            if (!$scope.condition.left_key || !$scope.condition.right_key || !$scope.condition.condition) {
+              console.log($scope.condition.left_key, $scope.condition.right_key, $scope.condition.condition);
+              console.dir($scope.condition);
+              alert('All condition values required');
+              return;
+            }
+          }
+          $uibModalInstance.close($scope.condition);
+        };
+
+        $scope.cancel = function () {
+          $uibModalInstance.dismiss();
+        };
+
+      },
+      resolve: {
+        devices: function () {
+          return devices.load();
+        },
+        rooms: function () {
+          return rooms.load();
+        },
+        scenes: function () {
+          return scenes.load();
+        },
+        title: function () {
+          return title;
+        },
+        condition: function () {
+          return condition;
+        }
+      }
+    });
+
+  };
+
+
+  var editCondition = function (condition) {
+    var modal = openCondition(condition, 'Edit Condition');
+    modal.result.then(function (result) {
+      condition = result;
+    });
+
+  };
+
+  var addCondition = function (conditions) {
+    var modal = openCondition({}, 'Add Condition');
+    modal.result.then(function (result) {
+      conditions.push(result);
+    });
+  };
+
   return {
     'load': load,
     'add': addTrigger,
@@ -356,7 +466,142 @@ angular.module('triggers', ['ui.router','ngResource'])
     'editAction': editAction,
     'addAction': addAction,
     'removeAction': removeAction,
+    'editCondition': editCondition,
+    'addCondition': addCondition,
     'types': getTypes
+  };
+})
+.directive('conditions', function ($uibModal) {
+  return {
+    restrict: 'E',
+    transclude: true,
+    scope: {
+      'value': '=',
+      'type': '@',
+      'name': '='
+    },
+    controller: function ($scope, triggers) {
+      $scope.name = $scope;
+      $scope.conditions = $scope.value;
+
+      $scope.addCondition = triggers.addCondition;
+      $scope.editCondition = triggers.editCondition;
+
+      $scope.removeCondition = function (index) {
+        $scope.value.splice(index, 1);
+      }
+    },
+    templateUrl: '/views/triggers/triggers.conditions.html',
+    replace: true,
+  };
+})
+.directive('conditionSide', function ($uibModal, devices, rooms, scenes) {
+  return {
+    restrict: 'E',
+    transclude: true,
+    scope: {
+      'side': '@',
+      'value': '=',
+      'devices': '=',
+      'rooms': '=',
+      'scenes': '=',
+    },
+    controller: function ($scope) {
+      $scope.expanded = true;
+      $scope.capabilities = [];
+      $scope.type = $scope.value[$scope.side + '_type'];
+      $scope.obj = $scope.value[$scope.side + '_object'];
+      $scope.key = $scope.value[$scope.side + '_key'];
+      $scope.watched = {}
+
+      if ($scope.type === 'devices') {
+        devices.get($scope.obj).then(function (result) {
+          $scope.capabilities = result.capabilities;
+        });
+      } else if ($scope.type !== 'devices' && $scope.type !== 'scenes' && $scope.type !== 'rooms') {
+        $scope.watched.key = $scope.key;
+      }
+
+      $scope.condition_types = [
+        {name: 'Device', value: 'devices', icon: 'glyphicon glyphicon-oil'},
+        {name: 'Room', value: 'rooms', icon: 'glyphicon glyphicon-modal-window', capabilities: ['light', 'dimmer', 'conditioner']},
+        {name: 'Scene', value: 'scenes', icon: 'icon-picture', capabilities: ['onoff']},
+        {name: 'Video', value: 'video', icon: 'icon-playvideo', capabilities: ['video']},
+        {name: 'Display', value: 'display', icon: 'icon-monitor', capabilities: ['display']},
+        {name: 'Boolean', value: 'boolean', icon: 'icon-moonfirstquarter'},
+        {name: 'Time', value: 'time', icon: 'icon-clockalt-timealt'},
+        {name: 'Number', value: 'number', icon: 'icon-counter'},
+        {name: 'String', value: 'string', icon: 'icon-textcursor'},
+      ];
+
+      $scope.condition_keys = [
+        {name: 'On', value: '_on', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'Open', value: '_on', arguments: [], capabilities: ['door', 'window']},
+        {name: 'Motion', value: '_on', arguments: [], capabilities: ['motion_sensor']},
+        {name: 'Level', value: '_level', arguments: ['level'], capabilities: ['dimmer']},
+        {name: 'Mode', value: '_mode', arguments: ['mode'], capabilities: ['conditioner']},
+        {name: 'Set Point', value: '_set_point', arguments: ['temperature'], capabilities: ['conditioner']},
+        {name: 'Temperature', value: '_temperature', arguments: ['temperature'], capabilities: ['temperature_sensor']},
+        {name: 'Humidity', value: '_humidity', arguments: ['temperature'], capabilities: ['humidity_sensor']},
+        {name: 'Lumacity', value: '_lumens', arguments: ['temperature'], capabilities: ['light_sensor']},
+      ];
+
+      $scope.$watch('watched', function (value) {
+        if ($scope.obj) {
+          return;
+        }
+        if ($scope.value[$scope.side + '_key'] !== value.key) {
+          $scope.value[$scope.side + '_key'] = value.key;
+        }
+      }, true);
+
+      $scope.toggle = function () {
+        $scope.expanded = ($scope.expanded) ? false : true;
+      };
+
+      $scope.changeType = function (t) {
+        $scope.capabilities = t.capabilities || [];
+        $scope.value[$scope.side + '_type'] = t.value;
+        $scope.value[$scope.side + '_object'] = undefined;
+        $scope.value[$scope.side + '_key'] = undefined;
+        $scope.watched.key = undefined;
+
+        $scope.type = $scope.value[$scope.side + '_type'];
+        $scope.obj = $scope.value[$scope.side + '_object'];
+        $scope.key = $scope.value[$scope.side + '_key'];
+      };
+      $scope.changeItem = function (i) {
+        if (i.capabilities) {
+          $scope.capabilities = i.capabilities;
+        }
+        $scope.value[$scope.side + '_object'] = i.name;
+        $scope.value[$scope.side + '_key'] = undefined;
+        $scope.watched.key = undefined;
+
+        $scope.obj = $scope.value[$scope.side + '_object'];
+        $scope.key = $scope.value[$scope.side + '_key'];
+      };
+      $scope.changeKey = function (k) {
+        $scope.value[$scope.side + '_key'] = k.value;
+        $scope.watched.key = undefined;
+
+        $scope.key = $scope.value[$scope.side + '_key'];
+      }
+
+      $scope.hasCapability = function (c) {
+        var has = false;
+
+        $scope.capabilities.forEach(function (capability) {
+          if (c.indexOf(capability) !== -1) {
+            has = true;
+          }
+        });
+
+        return has;
+      };
+    },
+    templateUrl: '/views/triggers/conditions.side.html',
+    replace: true,
   };
 })
 .controller('triggersList', function ($scope, $state, triggers, confirm) {

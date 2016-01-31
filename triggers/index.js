@@ -52,7 +52,13 @@ var TriggersSchema = mongoose.Schema({
       'and': Array,
       'or': Array,
       'name': String,
+      'left_type': String,
+      'left_object': String,
+      'left_key': String,
       'condition': {'type': String},
+      'right_type': String,
+      'right_object': String,
+      'right_key': String,
       'lookup': {'type': String},
       'key': {'type': String}
     }
