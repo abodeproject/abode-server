@@ -592,7 +592,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
   })
   .filter('capitalize', function() {
     return function(token) {
-      return token.charAt(0).toUpperCase() + token.slice(1);
+      return (token instanceof String) ? token.charAt(0).toUpperCase() + token.slice(1) : token;
     };
   })
   .filter('ageHumanReadable', function () {
