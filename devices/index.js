@@ -246,10 +246,10 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
 
           self.last_on = new Date();
           if (self.capabilities.indexOf('openclose') === -1) {
-            abode.events.emit('ON', self);
+            abode.events.emit('ON', {'type': 'device', 'name': self.name});
             log.info('Emitting ON for', {'type': 'device', 'name': self.name});
           } else {
-            abode.events.emit('OPEN', self);
+            abode.events.emit('OPEN', {'type': 'device', 'name': self.name});
             log.info('Emitting OPEN for', {'type': 'device', 'name': self.name});
           }
         }
@@ -259,10 +259,10 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
 
           self.last_off = new Date();
           if (self.capabilities.indexOf('openclose') === -1) {
-            abode.events.emit('OFF', self);
+            abode.events.emit('OFF', {'type': 'device', 'name': self.name});
             log.info('Emitting OFF for', {'type': 'device', 'name': self.name});
           } else {
-            abode.events.emit('CLOSED', self);
+            abode.events.emit('CLOSED', {'type': 'device', 'name': self.name});
             log.info('Emitting CLOSED for', {'type': 'device', 'name': self.name});
           }
         }
