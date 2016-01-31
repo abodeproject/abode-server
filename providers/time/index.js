@@ -145,6 +145,18 @@ Time = function () {
   return deferred.promise;
 };
 
+Time.getTime = function (date) {
+  var hour, min, sec,
+    toParse = new Date(date);
+
+  //Get the time, or number of seconds since midnight
+  hour = toParse.getHours() * 60 * 60;
+  min = toParse.getMinutes() * 60;
+  sec = toParse.getSeconds();
+
+  return hour + min + sec;
+};
+
 Time.triggers = [
   {'name': 'TIME_CHANGE'},
   {'name': 'DAY_CHANGE'},

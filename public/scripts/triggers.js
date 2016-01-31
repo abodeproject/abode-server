@@ -548,7 +548,7 @@ angular.module('triggers', ['ui.router','ngResource'])
         {name: 'Day of Week', value: 'day', arguments: [], capabilities: ['time']},
         {name: 'Time of Sunset', value: 'sunset', arguments: [], capabilities: ['time']},
         {name: 'Time of Sunrise', value: 'sunrise', arguments: [], capabilities: ['time']},
-        {name: 'Time of Noon', value: 'noon', arguments: [], capabilities: ['time']},
+        {name: 'Time of Noon', value: 'solar_noon', arguments: [], capabilities: ['time']},
         {name: 'Sunday', value: 'sunday', arguments: [], capabilities: ['time.is']},
         {name: 'Monday', value: 'monday', arguments: [], capabilities: ['time.is']},
         {name: 'Tuesday', value: 'tuesday', arguments: [], capabilities: ['time.is']},
