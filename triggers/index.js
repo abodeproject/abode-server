@@ -222,8 +222,10 @@ Triggers.trigger_duration = function (duration) {
   }
 
   //Set the timeout
-  log.debug('Trigger duration configured for %s seconds', duration.time);
-  setTimeout(duration_handler, duration.time * 1000);
+  if (duration.time) {
+    log.debug('Trigger duration configured for %s seconds', duration.time);
+    setTimeout(duration_handler, duration.time * 1000);
+  }
 };
 
 Triggers.fire_trigger = function (config) {

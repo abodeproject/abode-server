@@ -28,7 +28,7 @@ var lookupValue = function (type, object, key) {
     case 'scenes':
       lookupObj = abode.scenes.by_name();
       break;
-    case 'time':
+    case 'timeofday':
       return Number(key);
       break;
     case 'string':
@@ -41,16 +41,41 @@ var lookupValue = function (type, object, key) {
       return Boolean(key);
       break;
     default:
-      return key;
+      var found = true,
+        parts = type.split('.');
+      lookupObj = abode.providers;
+      object = undefined;
+
+      parts.forEach(function (part) {
+        log.debug('Looking up part:', part);
+        if (lookupObj === undefined) {
+          return;
+        }
+        if (lookupObj[part]) {
+          lookupObj = lookupObj[part];
+        } else {
+          log.debug('Failed to lookup part:', part);
+          lookupObj = undefined;
+        }
+      });
+
+
+      if (lookupObj == undefined) {
+        return key;
+      }
   }
 
-  if (!lookupObj[object]) {
-    return undefined;
-  }
+  if (object !== undefined) {
+    log.debug('Object lookup');
+    lookupObj = lookupObj[object];
+    scope = lookupObj[object];
 
-  scope = lookupObj[object];
-  if (!scope) {
-    return undefined;
+    if (lookupObj === undefined) {
+      return undefined;
+    }
+  } else {
+
+    scope = lookupObj;
   }
 
   lookupObj = scope[key];
@@ -138,7 +163,7 @@ var conditionCheck = function (condition) {
     expanded = {},
     defer = q.defer();
 
-  log.debug('Processing condition: %s %s %s', condition.key, condition.condition, condition.lookup);
+  log.debug('Processing condition: %s %s %s', condition.left_type, condition.condition, condition.right_type);
   //Setup our validator functions
   validators = {
     'eq': function (left, right) { return (String(left) === String(right)); },
@@ -167,7 +192,7 @@ var conditionCheck = function (condition) {
 
   //Function to lookup our value
   var value_lookup = function () {
-    log.debug('Looking up condition value: ', condition.lookup);
+    log.debug('Looking up condition value: ', condition.right_type, condition.right_object, condition.right_key);
     value = lookupValue(condition.right_type, condition.right_object, condition.right_key);
     //value = lookupValue(condition.lookup);
     if (value && value.then && value.then instanceof Function) {
@@ -185,7 +210,7 @@ var conditionCheck = function (condition) {
 
   //Function to lookup our key
   var key_lookup = function () {
-    log.debug('Looking up condition key: ', condition.key);
+    log.debug('Looking up condition key: ', condition.left_type, condition.left_object, condition.left_key);
     key = lookupValue(condition.left_type, condition.left_object, condition.left_key);
     //key = lookupValue(condition.key);
     if (key && key.then && key.then instanceof Function) {

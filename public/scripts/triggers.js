@@ -406,8 +406,6 @@ angular.module('triggers', ['ui.router','ngResource'])
             }
           } else {
             if (!$scope.condition.left_key || !$scope.condition.right_key || !$scope.condition.condition) {
-              console.log($scope.condition.left_key, $scope.condition.right_key, $scope.condition.condition);
-              console.dir($scope.condition);
               alert('All condition values required');
               return;
             }
@@ -528,8 +526,10 @@ angular.module('triggers', ['ui.router','ngResource'])
         {name: 'Scene', value: 'scenes', icon: 'icon-picture', capabilities: ['onoff']},
         {name: 'Video', value: 'video', icon: 'icon-playvideo', capabilities: ['video']},
         {name: 'Display', value: 'display', icon: 'icon-monitor', capabilities: ['display']},
+        {name: 'Time', value: 'timeofday', icon: 'icon-clockalt-timealt'},
+        {name: 'Date/Time', value: 'time', icon: 'icon-calendar', capabilities: ['time']},
+        {name: 'Time is...', value: 'time.is', icon: 'icon-calendarthree', capabilities: ['time.is']},
         {name: 'Boolean', value: 'boolean', icon: 'icon-moonfirstquarter'},
-        {name: 'Time', value: 'time', icon: 'icon-clockalt-timealt'},
         {name: 'Number', value: 'number', icon: 'icon-counter'},
         {name: 'String', value: 'string', icon: 'icon-textcursor'},
       ];
@@ -544,7 +544,30 @@ angular.module('triggers', ['ui.router','ngResource'])
         {name: 'Temperature', value: '_temperature', arguments: ['temperature'], capabilities: ['temperature_sensor']},
         {name: 'Humidity', value: '_humidity', arguments: ['temperature'], capabilities: ['humidity_sensor']},
         {name: 'Lumacity', value: '_lumens', arguments: ['temperature'], capabilities: ['light_sensor']},
+        {name: 'Current Time', value: 'time', arguments: [], capabilities: ['time']},
+        {name: 'Day of Week', value: 'day', arguments: [], capabilities: ['time']},
+        {name: 'Time of Sunset', value: 'sunset', arguments: [], capabilities: ['time']},
+        {name: 'Time of Sunrise', value: 'sunrise', arguments: [], capabilities: ['time']},
+        {name: 'Time of Noon', value: 'noon', arguments: [], capabilities: ['time']},
+        {name: 'Sunday', value: 'sunday', arguments: [], capabilities: ['time.is']},
+        {name: 'Monday', value: 'monday', arguments: [], capabilities: ['time.is']},
+        {name: 'Tuesday', value: 'tuesday', arguments: [], capabilities: ['time.is']},
+        {name: 'Wednesday', value: 'wednesday', arguments: [], capabilities: ['time.is']},
+        {name: 'Thursday', value: 'thursday', arguments: [], capabilities: ['time.is']},
+        {name: 'Friday', value: 'friday', arguments: [], capabilities: ['time.is']},
+        {name: 'Saturday', value: 'saturday', arguments: [], capabilities: ['time.is']},
+        {name: 'Day', value: 'day', arguments: [], capabilities: ['time.is']},
+        {name: 'Night', value: 'night', arguments: [], capabilities: ['time.is']},
       ];
+
+
+      if ($scope.type !== 'devices') {
+        $scope.condition_types.forEach(function (t) {
+          if (t.value === $scope.type) {
+            $scope.capabilities = t.capabilities;
+          }
+        });
+      }
 
       $scope.$watch('watched', function (value) {
         if ($scope.obj) {
@@ -757,4 +780,60 @@ angular.module('triggers', ['ui.router','ngResource'])
 })
 .controller('room', function () {
 
+})
+.filter('conditionReadable', function () {
+    return function (condition) {
+      var left, right, cond;
+
+      var formatSide = function (side) {
+        var text,
+          type = condition[side + '_type'],
+          obj = condition[side + '_object'],
+          key = condition[side + '_key'];
+
+
+        if (['devices', 'scenes', 'rooms'].indexOf(type) != -1) {
+          type = type.substr(0, type.length - 1);
+          text = 'the ' + type + ' key ' + obj + '.' + key;
+        } else if (type === 'boolean') {
+          text = key;
+        } else if (['string','number'].indexOf(type) !== -1) {
+          text = 'the ' + type + ' "' + key + '"';
+        } else {
+          text = 'the ' + type + '.' + key;
+        }
+
+        return text;
+      }
+
+      if ((condition.and && condition.and.length > 0) || (condition.or && condition.or.length > 0)) {
+        return condition.name;
+      }
+
+      left = formatSide('left');
+      right = formatSide('right');
+
+      switch (condition.condition) {
+        case 'eq':
+          cond = 'equal to'
+          break;
+        case 'ne':
+          cond = 'not equal to'
+          break;
+        case 'lt':
+          cond = 'less then';
+          break;
+        case 'le':
+          cond = 'less then or equal to';
+          break;
+        case 'gt':
+          cond = 'greater then';
+          break;
+        case 'ge':
+          cond = 'greater then or equal to';
+          break;
+      }
+
+      return 'If ' + left + ' is ' + cond + ' ' + right;
+    };
 });
