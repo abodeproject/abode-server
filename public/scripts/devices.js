@@ -325,7 +325,7 @@ angular.module('devices', ['ui.router','ngResource'])
           $scope.processing = true;
           $scope.errors = false;
 
-          $http.post('/api/devices/' + $scope.device.name + '/level', [$scope.device._level]).then(function (response) {
+          $http.post('/api/devices/' + $scope.device.name + '/set_level', [$scope.device._level]).then(function (response) {
             if (response.data.device) {
               $scope.device = response.data.device;
             }
