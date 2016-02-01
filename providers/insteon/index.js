@@ -515,7 +515,7 @@ Insteon.get_status = function (device) {
   var defer = q.defer();
 
   Insteon.device_status(device).then(function (state) {
-    defer.resolve({'update': {'_level': state, '_on': (state > 0) ? true : false}, 'response': {'_level': state, '_on': (state > 0) ? true : false}});
+    defer.resolve({'update': {'_level': parseInt((state / 255) * 100, 10), '_on': (state > 0) ? true : false}, 'response': {'_level': parseInt((state / 255) * 100, 10), '_on': (state > 0) ? true : false}});
   }, function (err) {
     defer.reject(err);
   });
