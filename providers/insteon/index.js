@@ -21,7 +21,7 @@ var Insteon = function () {
   Insteon.config.serial_flowcontrol = Insteon.config.serial_flowcontrol || 0;
   Insteon.config.timeout = Insteon.config.timeout || 1000;
   Insteon.config.queue_timeout = Insteon.config.queue_timeout || 5000;
-  Insteon.config.delay = Insteon.config.delay || 300;
+  Insteon.config.delay = Insteon.config.delay || 400;
   Insteon.config.retries = Insteon.config.retries || 3;
   Insteon.config.debug = (Insteon.config.debug !== undefined) ? Insteon.config.debug : abode.config.debug;
   Insteon.config.modem_debug = (Insteon.config.modem_debug !== undefined) ? Insteon.config.modem_debug : Insteon.config.debug;
@@ -223,13 +223,13 @@ Insteon.command = function (command, device, args) {
 
   device = device || {'name': 'MODEM'};
 
+  //Build our handler arguments, device should be the first argument
+  args = args || [];
+  args.unshift(device.name);
+
   // Function to call for each attempt
   var attempt = function () {
     tries += 1;
-
-    //Build our handler arguments, device should be the first argument
-    args = args || [];
-    args.unshift(device.name);
 
     // Send our command and resolve or reject the promise
     log.debug('Sending %s command to device %s (attempt %s/%s)', command, device.name, tries, Insteon.config.retries);
