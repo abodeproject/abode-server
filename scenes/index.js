@@ -375,22 +375,22 @@ SceneSchema.methods.start = function () {
     }
 
     if (action._on === true && action._level === undefined) {
-      log.debug('Sending ON to object');
+      log.debug('Sending ON to object:', object.name);
       return (action.object_type === 'scenes') ? object.start() : object.on();
     }
     if (action._on === false && action._level === undefined) {
-      log.debug('Sending OFF to object');
+      log.debug('Sending OFF to object:', object.name);
       return (action.object_type === 'scenes') ? object.stop() : object.off();
     }
     if (action._on !== undefined && action._level !== undefined) {
-      log.debug('Sending set level to object');
+      log.debug('Sending set level to object:', object.name, action._level);
       return object.set_level(action._level);
     }
     if (action._mode !== undefined) {
-      log.debug('Setting mode for object: ', action.name);
+      log.debug('Setting mode for object: ', action.name, action._mode);
       object.set_mode(action._mode).then(function () {
         setTimeout(function () {
-          log.debug('Setting set_point for object: ', action.name);
+          log.debug('Setting set_point for object: ', action.nameaction._set_point);
           object.set_point(action._set_point).then(defer.resolve, defer.reject);
         });
       }, function (err) {
