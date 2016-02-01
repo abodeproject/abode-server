@@ -3,6 +3,7 @@
 var abode;
 var devices;
 var rooms;
+var scenes;
 var routes;
 var q = require('q');
 var logger = require('log4js'),
@@ -21,9 +22,10 @@ var SceneLogSchema = mongoose.Schema({
 // Define our main Scenes object
 var Scenes = function () {
   var defer = q.defer();
-  devices = require('../devices');
-  rooms = require('../rooms');
   abode = require('../abode');
+  devices = abode.devices;
+  scenes = abode.scenes;
+  rooms = abode.rooms;
   routes = require('./routes');
 
   abode.web.server.use('/api/scenes', routes);
@@ -32,7 +34,7 @@ var Scenes = function () {
     Scenes._scenes.forEach(function (scene) {
       if (scene._on) {
         log.info('Scene was previously on, restarting:', scene.name);
-        scene.start();
+        scene.on();
       }
     });
     defer.resolve();
@@ -77,10 +79,11 @@ var SceneSchema = mongoose.Schema({
   '_rooms': {'type': Array, 'default': []},
   '_steps': [
     {
-      'devices': [
+      'actions': [
         {
-          'name': {'type': String, 'required': true, 'unique': true},
-          'device_id': {'type': mongoose.Schema.Types.ObjectId, 'required': true},
+          'name': {'type': String, 'required': true},
+          'object_type': {'type': String},
+          'object_id': {'type': mongoose.Schema.Types.ObjectId, 'required': true},
           'stages': {'type': Number, 'default': 0},
           'duration': {'type': Number, 'default': 0},
           '_on': {'type': Boolean, 'default': false},
@@ -96,6 +99,8 @@ var SceneSchema = mongoose.Schema({
       'wait': {'type': Boolean, 'default': true},
     },
   ],
+  'last_on': Date,
+  'last_off': Date,
   'created': Date,
   'updated': Date
 });
@@ -313,6 +318,8 @@ SceneSchema.methods.start = function () {
     q.allSettled(step_defers).then(function () {
       log.debug('All steps run, updating scene state');
 
+      self.last_on = new Date();
+
       if (!self.onoff) {
         self._state = 'stopped';
         self._on = false;
@@ -345,34 +352,46 @@ SceneSchema.methods.start = function () {
   // Run an action, returing a promise
   var doAction = function (action) {
     var defer = q.defer(),
-      device = devices.get(action.device_id);
+      object ;
+
+    switch (action.object_type) {
+      case 'devices':
+        object = devices.get(action.object_id);
+        break;
+      case 'scenes':
+        object = scenes.get(action.object_id);
+        break;
+      case 'rooms':
+        object = rooms.get(action.object_id);
+        break;
+    }
 
     log.debug('Processing action: %s', action.name);
 
-    if (!device) {
-      log.error('Could not find device: ', action.name);
-      defer.reject('Could not find device: ' + action.name);
+    if (!object) {
+      log.error('Could not find object: ', action.name);
+      defer.reject('Could not find object: ' + action.object_type + '.' + action.object);
       return defer.promise;
     }
 
-    if (action._on !== true && action._level === undefined) {
-      log.debug('Sending ON to device');
-      return device.on();
+    if (action._on === true && action._level === undefined) {
+      log.debug('Sending ON to object');
+      return (action.object_type === 'scenes') ? object.start() : object.on();
     }
-    if (action._on !== false && action._level === undefined) {
-      log.debug('Sending OFF to device');
-      return device.off();
+    if (action._on === false && action._level === undefined) {
+      log.debug('Sending OFF to object');
+      return (action.object_type === 'scenes') ? object.stop() : object.off();
     }
     if (action._on !== undefined && action._level !== undefined) {
-      log.debug('Sending set level to device');
-      return device.set_level(action._level);
+      log.debug('Sending set level to object');
+      return object.set_level(action._level);
     }
     if (action._mode !== undefined) {
-      log.debug('Setting mode for device: ', action.name);
-      device.set_mode(action._mode).then(function () {
+      log.debug('Setting mode for object: ', action.name);
+      object.set_mode(action._mode).then(function () {
         setTimeout(function () {
-          log.debug('Setting set_point for device: ', action.name);
-          device.set_point(action._set_point).then(defer.resolve, defer.reject);
+          log.debug('Setting set_point for object: ', action.name);
+          object.set_point(action._set_point).then(defer.resolve, defer.reject);
         });
       }, function (err) {
         defer.reject(err);
@@ -404,7 +423,7 @@ SceneSchema.methods.start = function () {
     var startStep = function () {
       var action_defers = [];
 
-      step.devices.forEach(function (action) {
+      step.actions.forEach(function (action) {
         action_defers.push(doAction(action));
       });
 
@@ -454,6 +473,8 @@ SceneSchema.methods.stop = function () {
 
   self._on = false;
   self._state = 'stopped';
+  self.last_off = new Date();
+
   timers.forEach(function (timer) {
     log.debug('Clearing Timer');
     clearTimeout(timer);
@@ -494,7 +515,7 @@ Scenes.create = function (config) {
   // Create the new scene
   scene.save( function (err) {
     if (err) {
-      log.error('Failed to create scene');
+      log.error('Failed to create scene', err);
       log.debug(err.message || err);
 
       defer.reject({'status': 'failed', 'message': 'Failed to create scene', 'error': err});

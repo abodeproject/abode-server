@@ -281,7 +281,7 @@ angular.module('scenes', ['ui.router','ngResource'])
     });
   };
 })
-.controller('scenesEdit', function ($scope, $state, $uibModal, scenes, scene, confirm) {
+.controller('scenesEdit', function ($scope, $state, $uibModal, scene, devices, scenes, rooms, confirm) {
   $scope.scene = scene;
   $scope.alerts = [];
   $scope.rooms = [];
@@ -313,35 +313,62 @@ angular.module('scenes', ['ui.router','ngResource'])
 
   $scope.addStep = function () {
     $scope.scene._steps.push({
-      'devices': [],
+      'actions': [],
       'delay': 0,
       'wait': false,
     });
   };
 
   $scope.removeDevice = function(step, index) {
-    step.devices.splice(index, 1);
+    step.actions.splice(index, 1);
   };
 
-  $scope.editDevice = function (device) {var assign = $uibModal.open({
+  $scope.editAction = function (action) {var assign = $uibModal.open({
       animation: true,
-      templateUrl: 'views/scenes/edit.device.html',
-      size: 'sm',
+      templateUrl: 'views/scenes/edit.action.html',
       resolve: {
         selected: function () {
-          return device;
+          return action;
         },
-        device: function (devices) {
-          return devices.get(device.device_id);
+        action: function () {
+          switch (action.object_type) {
+            case 'devices':
+              return devices.get(action.object_id);
+            case 'rooms':
+              return rooms.get(action.object_id);
+            case 'scenes':
+              return scenes.get(action.object_id);
+            default:
+              return undefined;
+          }
         }
       },
-      controller: function ($scope, $uibModalInstance, devices, device, selected) {
+      controller: function ($scope, $uibModalInstance, action, selected) {
         $scope.loading = true;
-        $scope.device = device;
+        $scope.device = action;
         $scope.selected = selected;
+        $scope.selected_capabilities = [];
 
+        Object.keys($scope.selected).forEach(function (k) {
+          if (k[0] !== '_') {
+            return;
+          }
+          $scope.device[k] = $scope.selected[k];
+        });
 
-        $scope.capabilities = angular.copy(device.capabilities).map(function (c) {
+        switch (selected.object_type) {
+          case 'devices':
+            $scope.selected_capabilities = $scope.device.capabilities;
+            break;
+          case 'scenes':
+            $scope.selected_capabilities = ['light'];
+            break;
+          case 'scenes':
+            $scope.selected_capabilities = ['dimmer', 'light'];
+            break;
+        }
+
+        $scope.capabilities = angular.copy($scope.selected_capabilities).map(function (c) {
           return {
             'name': c,
             'view': 'views/devices/capabilities/' + c + '.html'
@@ -359,9 +386,7 @@ angular.module('scenes', ['ui.router','ngResource'])
           $uibModalInstance.dismiss();
         };
 
-        $scope.add = function () {
-          $scope.selected.name = $scope.device.name;
-          $scope.selected.device_id = $scope.device._id;
+        $scope.save = function () {
 
           if ($scope.has_capability('fan')) {
             $scope.selected._on = $scope.device._on;
@@ -493,28 +518,77 @@ angular.module('scenes', ['ui.router','ngResource'])
     });
 
     assign.result.then(function (result) {
-      device = result;
+      action = result;
 
     });
   };
 
-  $scope.addDevice = function (step) {
+  $scope.addAction = function (step) {
     var assign = $uibModal.open({
       animation: true,
-      templateUrl: 'views/scenes/add.device.html',
-      size: 'sm',
+      templateUrl: 'views/scenes/add.action.html',
       resolve: {
         assigned: function () {
 
-          return step.devices.map(function (obj) {return obj.name; });
+          return step.actions.map(function (obj) {return obj.name; });
+        },
+        devices: function () {
+          return devices.load();
+        },
+        scenes: function () {
+          return scenes.load();
+        },
+        rooms: function () {
+          return rooms.load();
         }
       },
-      controller: function ($scope, $uibModalInstance, devices, assigned) {
-        $scope.loading = true;
-        $scope.devices = [];
+      controller: function ($scope, $uibModalInstance, devices, scenes, rooms, assigned) {
+        $scope.devices = devices;
+        $scope.scenes = scenes;
+        $scope.rooms = rooms;
         $scope.assigned = assigned;
         $scope.selected = {};
+        $scope.selected_capabilities = [];
 
+
+
+        $scope.action_types = [
+          {name: 'Device', value: 'devices', icon: 'glyphicon glyphicon-oil'},
+          {name: 'Room', value: 'rooms', icon: 'glyphicon glyphicon-modal-window', capabilities: ['dimmer', 'light']},
+          {name: 'Scene', value: 'scenes', icon: 'icon-picture', capabilities: ['light']},
+        ];
+
+        $scope.changeType = function (t) {
+          $scope.selected.object_type = t.value;
+          $scope.selected.object_id = undefined;
+          $scope.selected_capabilities = t.capabilities;
+        };
+
+        $scope.changeItem = function (o) {
+          $scope.selected.object_id = o._id;
+          $scope.selected.stages = 0;
+          $scope.selected.duration = 0;
+          $scope.device = o;
+          if (o.capabilities) {
+            $scope.selected_capabilities = o.capabilities;
+          }
+
+
+          $scope.capabilities = angular.copy($scope.selected_capabilities).map(function (c) {
+            return {
+              'name': c,
+              'view': 'views/devices/capabilities/' + c + '.html'
+            };
+
+          });
+
+          $scope.controls = $scope.capabilities.filter(function (c) {
+
+            return (c.name.indexOf('_sensor') === -1);
+
+          });
+
+        };
 
         $scope.cancel = function () {
           $uibModalInstance.dismiss();
@@ -551,7 +625,6 @@ angular.module('scenes', ['ui.router','ngResource'])
 
         $scope.add = function () {
           $scope.selected.name = $scope.device.name;
-          $scope.selected.device_id = $scope.device._id;
 
           if ($scope.has_capability('fan')) {
             $scope.selected._on = $scope.device._on;
@@ -666,24 +739,12 @@ angular.module('scenes', ['ui.router','ngResource'])
           $scope.device._set_point -= 1;
         };
 
-        $scope.load = function () {
-          devices.load().then(function (devices) {
-            $scope.devices = devices;
-            $scope.loading = false;
-            $scope.error = false;
-          }, function () {
-            $scope.loading = false;
-            $scope.error = true;
-          });
-        };
-
-        $scope.load();
-
       }
     });
 
     assign.result.then(function (device) {
-      step.devices.push(device);
+      step.actions = step.actions || [];
+      step.actions.push(device);
 
     });
   };

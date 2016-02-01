@@ -49,29 +49,29 @@
                           </div>
                           <div class="col-md-4">
                             <div class="form-group">
-                              <label for="enabled">Devices: </label>
-                              <button class="btn btn-success btn-xs pull-right" ng-click="addDevice(step)"><i class="icon-plus-sign"></i> Device</button>
+                              <label for="enabled">Actions: </label>
+                              <button class="btn btn-success btn-xs pull-right" ng-click="addAction(step)"><i class="icon-plus-sign"></i> Add</button>
 
                               <ul class="list-group">
-                                <li class="list-group-item" ng-repeat="device in step.devices" style="cursor: pointer" ng-click="editDevice(device)">
-                                  {{device.name}} <button class="pull-right btn btn-default btn-xs" ng-click="removeDevice(step, $index)"><i class="icon-remove-sign"></i></button>
+                                <li class="list-group-item" ng-repeat="action in step.actions" style="cursor: pointer" ng-click="editAction(action)">
+                                  {{action.name}} <button class="pull-right btn btn-default btn-xs" ng-click="removeDevice(step, $index)"><i class="icon-remove-sign"></i></button>
                                   <div style="font-size: .70em;">
-                                    <span ng-show="!device._level && device._on">Turn ON</span>
-                                    <span ng-show="device._level > 0">Turn ON to {{device._level}}% brightness</span>
-                                    <span ng-show="device._mode == 'COOL'">Turn on COOL to {{device._set_point}}&deg;</span>
-                                    <span ng-show="device._mode == 'HEAT'">Turn on HEAT to {{device._set_point}}&deg;</span>
-                                    <span ng-show="device._mode == 'OFF'">Turn OFF</span>
-                                    <span ng-show="device._on == false">Turn OFF</span>
-                                    <span ng-show="device.duration > 0"> over {{device.duration | ageHumanReadable}} and {{device.stages}} stages</span>
-                                    <span ng-show="device.duration == 0"> immediately</span>
+                                    <span ng-show="!action._level && action._on">Turn ON</span>
+                                    <span ng-show="action._level > 0">Turn ON to {{action._level}}% brightness</span>
+                                    <span ng-show="action._mode == 'COOL'">Turn on COOL to {{action._set_point}}&deg;</span>
+                                    <span ng-show="action._mode == 'HEAT'">Turn on HEAT to {{action._set_point}}&deg;</span>
+                                    <span ng-show="action._mode == 'OFF'">Turn OFF</span>
+                                    <span ng-show="action._on == false">Turn OFF</span>
+                                    <span ng-show="action.duration > 0"> over {{action.duration | ageHumanReadable}} and {{action.stages}} stages</span>
+                                    <span ng-show="action.duration == 0"> immediately</span>
                                   </div>
                                 </li>
                               </ul>
                             </div>
                           </div>
-                          <div class="col-md-4">
+                          <div class="col-md-3 c">
                             <div class="form-group">
-                              <label for="enabled">Wait for Devices: </label>
+                              <label for="enabled">Wait for Actions: </label>
                               <toggle value="step.wait" class="pull-right"></toggle>
                             </div>
                           </div>

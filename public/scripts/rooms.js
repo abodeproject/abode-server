@@ -108,6 +108,33 @@ angular.module('rooms', ['ui.router','ngResource'])
     return defer.promise;
   };
 
+  var getRoomScenes = function (room) {
+    var defer = $q.defer();
+
+    $http({ url: '/api/rooms/' + room + '/scenes'}).then(function (response) {
+
+      response.data.forEach(function (scene) {
+        if (scene._on === true) {
+          scene.age = new Date() - new Date(scene.last_on);
+        } else {
+          scene.age = new Date() - new Date(scene.last_off);
+        }
+
+        if (!isNaN(scene.age)) {
+          scene.age = scene.age / 1000;
+        } else {
+          scene.age = 0;
+        }
+      });
+
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  };
+
   var getRoomDevices = function (room) {
     var defer = $q.defer();
 
@@ -147,6 +174,7 @@ angular.module('rooms', ['ui.router','ngResource'])
         $scope.name = room.name;
         $scope.room = room;
         $scope.devices = [];
+        $scope.scenes = [];
         $scope.open = devices.openDevice;
 
 
@@ -179,6 +207,15 @@ angular.module('rooms', ['ui.router','ngResource'])
 
 
             $scope.room = response.data;
+            getRoomScenes(room.name).then(function (scenes) {
+              $scope.scenes = scenes;
+              $scope.processing = false;
+              $scope.errors = false;
+            }, function () {
+              $scope.processing = false;
+              $scope.errors = true;
+            });
+
             getRoomDevices(room.name).then(function (devices) {
               $scope.devices = devices;
               $scope.processing = false;

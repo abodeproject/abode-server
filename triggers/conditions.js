@@ -30,19 +30,14 @@ var lookupValue = function (type, object, key) {
       break;
     case 'timeofday':
       return Number(key);
-      break;
     case 'string':
       return String(key);
-      break;
     case 'number':
       return Number(key);
-      break;
     case 'boolean':
       return Boolean(key);
-      break;
     default:
-      var found = true,
-        parts = type.split('.');
+      var parts = type.split('.');
       lookupObj = abode.providers;
       object = undefined;
 
@@ -60,7 +55,7 @@ var lookupValue = function (type, object, key) {
       });
 
 
-      if (lookupObj == undefined) {
+      if (lookupObj === undefined) {
         return key;
       }
   }

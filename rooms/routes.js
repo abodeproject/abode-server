@@ -29,6 +29,17 @@ router.get('/:id', function (req, res) {
   res.end();
 });
 
+router.get('/:id/scenes', function (req, res) {
+  var room = rooms.get(req.params.id);
+  if (!room) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  res.send(room.get_scenes());
+
+});
+
 router.get('/:id/devices', function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {

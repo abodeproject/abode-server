@@ -665,6 +665,21 @@ RoomSchema.methods.get_devices = function () {
   return items;
 };
 
+// Expand each device into it's object and return a list of objects
+RoomSchema.methods.get_scenes = function () {
+  var self = this,
+    items = [];
+
+  self._scenes.forEach(function (item) {
+    var scene = scenes.get_by_id(item);
+    if (scene !== false) {
+      items.push(scene);
+    }
+  });
+
+  return items;
+};
+
 Rooms.model = mongoose.model('Rooms', RoomSchema);
 
 // Return all the rooms
