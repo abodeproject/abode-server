@@ -527,7 +527,7 @@ angular.module('triggers', ['ui.router','ngResource'])
 
       $scope.condition_types = [
         {name: 'Device', value: 'devices', icon: 'glyphicon glyphicon-oil'},
-        {name: 'Room', value: 'rooms', icon: 'glyphicon glyphicon-modal-window', capabilities: ['light', 'dimmer', 'conditioner']},
+        {name: 'Room', value: 'rooms', icon: 'glyphicon glyphicon-modal-window', capabilities: ['room']},
         {name: 'Scene', value: 'scenes', icon: 'icon-picture', capabilities: ['onoff']},
         {name: 'Video', value: 'video', icon: 'icon-playvideo', capabilities: ['video']},
         {name: 'Display', value: 'display', icon: 'icon-monitor', capabilities: ['display']},
@@ -542,8 +542,14 @@ angular.module('triggers', ['ui.router','ngResource'])
       $scope.condition_keys = [
         {name: 'Is On', value: 'is_on', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
         {name: 'Is Off', value: 'is_off', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
-        {name: 'On Time', value: 'On Time', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
-        {name: 'Off Time', value: 'Off Time', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'On Time', value: 'on_time', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'Off Time', value: 'off_time', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'Motion On', value: 'motion_on', arguments: [], capabilities: ['room']},
+        {name: 'Motion Off', value: 'motion_off', arguments: [], capabilities: ['room']},
+        {name: 'Lights On', value: 'lights_on', arguments: [], capabilities: ['room']},
+        {name: 'Lights Off', value: 'lights_off', arguments: [], capabilities: ['room']},
+        {name: 'Heat On', value: 'mode_heat', arguments: [], capabilities: ['room']},
+        {name: 'Cool On', value: 'mode_cool', arguments: [], capabilities: ['room']},
         {name: 'Open', value: '_on', arguments: [], capabilities: ['door', 'window']},
         {name: 'Motion', value: '_on', arguments: [], capabilities: ['motion_sensor']},
         {name: 'Level', value: '_level', arguments: ['level'], capabilities: ['dimmer']},

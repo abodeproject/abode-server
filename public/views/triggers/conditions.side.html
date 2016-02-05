@@ -34,7 +34,7 @@
     <div class="col-sm-4" style="font-size: 1.5em;" ng-show="type == 'rooms'">
         <label for="trigger">Room <span ng-show="obj">({{obj | capitalize}})</span></label>
         <ul class="list-group bg-muted select-list" >
-          <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="changeItem('left', t);" ng-class="{'list-group-item-success': condition.left_obj == t.name}">
+          <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="changeItem(t);" ng-class="{'list-group-item-success': obj == t.name}">
             {{t.name}}
           </li>
         </ul>
