@@ -143,12 +143,14 @@ angular.module('triggers', ['ui.router','ngResource'])
         $scope.type_args = [];
         $scope.devices = devices;
         $scope.rooms = rooms;
+        $scope.scenes = scenes;
         $scope.alerts = [];
 
 
         $scope.action_types = [
           {name: 'Device', value: 'devices', icon: 'glyphicon glyphicon-oil'},
           {name: 'Room', value: 'rooms', icon: 'glyphicon glyphicon-modal-window', capabilities: ['light', 'dimmer', 'conditioner']},
+          {name: 'Scene', value: 'scenes', icon: 'icon-picture', capabilities: ['light']},
           {name: 'Video', value: 'video', icon: 'icon-playvideo', capabilities: ['video']},
           {name: 'Display', value: 'display', icon: 'icon-monitor', capabilities: ['display']},
         ];
@@ -321,6 +323,9 @@ angular.module('triggers', ['ui.router','ngResource'])
         },
         rooms: function () {
           return rooms.load();
+        },
+        scenes: function () {
+          return scenes.load();
         },
         title: function () {
           return title;
@@ -535,7 +540,10 @@ angular.module('triggers', ['ui.router','ngResource'])
       ];
 
       $scope.condition_keys = [
-        {name: 'On', value: '_on', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'Is On', value: 'is_on', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'Is Off', value: 'is_off', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'On Time', value: 'On Time', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
+        {name: 'Off Time', value: 'Off Time', arguments: [], capabilities: ['light', 'dimmer', 'display', 'fan', 'onoff']},
         {name: 'Open', value: '_on', arguments: [], capabilities: ['door', 'window']},
         {name: 'Motion', value: '_on', arguments: [], capabilities: ['motion_sensor']},
         {name: 'Level', value: '_level', arguments: ['level'], capabilities: ['dimmer']},

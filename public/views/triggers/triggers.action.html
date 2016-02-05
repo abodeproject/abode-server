@@ -34,7 +34,16 @@
       <div class="col-sm-6" style="font-size: 1.5em;" ng-show="builder.type == 'rooms'">
           <label for="trigger">Room<span ng-show="builder.item">: {{builder.item.name}}</span></label>
           <ul class="list-group bg-muted select-list" >
-            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="changeItem(t.name);" ng-class="{'list-group-item-success': builder.item == t.name}">
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in rooms | orderBy: '+name'" ng-click="changeItem(t);" ng-class="{'list-group-item-success': builder.item == t}">
+              {{t.name}}
+            </li>
+          </ul>
+      </div>
+
+      <div class="col-sm-6" style="font-size: 1.5em;" ng-show="builder.type == 'scenes'">
+          <label for="trigger">Scene<span ng-show="builder.item">: {{builder.item.name}}</span></label>
+          <ul class="list-group bg-muted select-list" >
+            <li class="list-group-item" style="cursor: pointer;" ng-repeat="t in scenes | orderBy: '+name'" ng-click="changeItem(t);" ng-class="{'list-group-item-success': builder.item == t}">
               {{t.name}}
             </li>
           </ul>
