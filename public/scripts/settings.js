@@ -135,7 +135,7 @@ angular.module('settings', ['ui.router'])
   var save_view = function (view) {
     var defer = $q.defer();
 
-    $http.put('/api/abode/views/home.html', view).then(function (response) {
+    $http.put('/api/abode/views/home.html', view, {headers: {'Content-Type': 'text/plain'}}).then(function (response) {
       defer.resolve(response.data);
     }, function (err) {
       defer.reject(err);
