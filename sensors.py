@@ -55,11 +55,12 @@ def start_loop():
         data = {"_temperature": temperature, "_humidity": humidity, "_lumens": light}
         try:
           write_file(data)
-        except: 
+        except Exception as e:
+          print e
           pass
 
         print "Temp: %s, Humidity %s, Light: %s%%" % (temperature, humidity, light)
-#        response = requests.put("http://abode.scottneel.com:8080/api/devices/%s" % device, json.dumps(data), headers={'content-type': 'application/json'}) 
+#        response = requests.put("http://abode.scottneel.com:8080/api/devices/%s" % device, json.dumps(data), headers={'content-type': 'application/json'})
 #        print response.text
       else:
         print "Failed to poll DHT22"

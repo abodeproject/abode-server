@@ -15,7 +15,7 @@
             <form name="settings">
 
               <ul class="list-group" ng-hide="loading">
-                <li class="list-group-item" style="cursor: pointer;" ng-click="view(room)" ng-repeat="provider in providers | orderBy: '+name'">
+                <li class="list-group-item" style="cursor: pointer;" ng-click="providerSettings(provider.route)" ng-repeat="provider in providers | orderBy: '+name'">
                   {{provider.name}} <span class="badge"><i class="glyphicon glyphicon-ok text-success"></i></span>
                 </li>
               </ul>

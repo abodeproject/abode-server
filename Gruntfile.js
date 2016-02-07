@@ -1,7 +1,6 @@
 'use strict';
 
 module.exports = function(grunt) {
-  var jasmine;
 
   grunt.initConfig({
     jshint: {
@@ -53,6 +52,7 @@ module.exports = function(grunt) {
         script: 'index.js',
         options: {
           ext: 'ini,js',
+          ignore: ['public/**'],
           env: {
             NODE_ENV: 'dev',
           }
@@ -75,21 +75,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-env');
   grunt.loadNpmTasks('grunt-nodemon');
-
-  grunt.registerTask('jasmine', function () {
-    if (jasmine) {
-      jasmine.kill();
-    }
-    jasmine = grunt.util.spawn({
-      cmd: 'jasmine-node',
-      args: ['--verbose', 'specs']
-    }, function() {
-      console.log('Running Jasmine');
-    });
-    jasmine.stdout.pipe(process.stdout);
-    jasmine.stderr.pipe(process.stderr);
-    grunt.task.run('watch');
-  });
 
   grunt.registerTask('default', ['jshint', 'nodemon:dev']);
 };

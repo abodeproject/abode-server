@@ -26,6 +26,10 @@
                 <button type="submit" class="pull-right btn btn-sm btn-danger" ng-click="shutdown()" style="width: 10em;"><i class="icon-shutdown"></i> Shutdown</button>
               </div>
               <div class="form-group">
+                <label for="name">Save Config</label>
+                <button type="submit" class="pull-right btn btn-sm btn-danger" ng-click="write_config()" style="width: 10em;"><i class="icon-save-floppy"></i> Save Config</button>
+              </div>
+              <div class="form-group">
                 <button type="submit" class="btn btn-sm btn-default" ng-click="state.go('^')"><i class="glyphicon glyphicon-arrow-left"></i> Cancel</button>
               </div>
             </form>

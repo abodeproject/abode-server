@@ -1,10 +1,69 @@
 'use strict';
 
 angular.module('insteon', [])
-.service('insteon', function () {
-  return {};
+.config(function($stateProvider, $urlRouterProvider) {
+
+  $stateProvider
+  .state('index.settings.insteon', {
+    url: '/settings',
+    templateUrl: '/views/providers/insteon/settings.html',
+    controller: 'insteonSettings',
+    resolve: {
+      config: function (insteon) {
+        return insteon.get_config();
+      }
+    }
+  })
 })
-.controller('insteonSettings', function () {
+.service('insteon', function (settings) {
+
+  var get_config = function () {
+
+    return settings.get_config('insteon');
+
+  };
+
+  var save_config = function (config) {
+
+    return settings.save_config('insteon', config);
+
+  };
+
+  return {
+    get_config: get_config,
+    save: save_config
+  };
+
+})
+.controller('insteonSettings', function ($scope, insteon, notifier, config) {
+
+  $scope.config = config;
+  $scope.devices = [
+    '/dev/ttyUSB0',
+    '/dev/ttyUSB1',
+    '/dev/ttyUSB2',
+    '/dev/ttyUSB3',
+  ];
+
+  $scope.save = function () {
+
+    insteon.save($scope.config).then(function () {
+      $scope.status = 'saved';
+
+      notifier.notify({
+        'status': 'success',
+        'message': 'Insteon Settings Saved'
+      });
+
+    }, function (err) {
+      notifier.notify({
+        'status': 'failed',
+        'message': 'Insteon Settings Failed to Saved',
+        'details': err
+      });
+    });
+
+  };
 
 })
 .controller('insteonEdit', function () {

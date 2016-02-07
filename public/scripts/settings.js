@@ -10,6 +10,11 @@ angular.module('settings', ['ui.router'])
     url: '/settings',
     templateUrl: '/views/settings/settings.html',
     controller: 'settings',
+    resolve: {
+      config: function (settings) {
+        return settings.get_config();
+      }
+    }
   })
   .state('index.settings.list', {
     url: '/list',
@@ -30,10 +35,22 @@ angular.module('settings', ['ui.router'])
   .state('index.settings.general', {
     url: '/general',
     templateUrl: '/views/settings/settings.general.html',
+    controller: 'settings',
+    resolve: {
+      config: function (settings) {
+        return settings.get_config();
+      }
+    }
   })
   .state('index.settings.home', {
     url: '/home',
     templateUrl: '/views/settings/settings.home.html',
+    controller: 'homeSettings',
+    resolve: {
+      view: function (settings) {
+        return settings.get_view();
+      }
+    }
   })
   .state('index.settings.sources', {
     url: '/sources',
@@ -60,7 +77,106 @@ angular.module('settings', ['ui.router'])
     templateUrl: '/views/settings/settings.advanced.html',
   });
 })
-.controller('settings', function ($scope, $state) {
+.service('settings', function ($q, $http) {
+
+  var get_config = function (provider) {
+    var defer = $q.defer();
+
+    var url = (provider) ? '/api/abode/config/' + provider : '/api/abode/config'
+
+    $http.get(url).then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  };
+
+  var save_config = function (provider, config) {
+    var defer = $q.defer();
+
+
+    var url = (provider) ? '/api/abode/config/' + provider : '/api/abode/config'
+
+    $http.put(url, config).then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  };
+
+  var write_config = function () {
+    var defer = $q.defer();
+
+    $http.post('/api/abode/save').then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  }
+
+  var get_view = function () {
+    var defer = $q.defer();
+
+    $http.get('/api/abode/views/home.html').then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  }
+
+  var save_view = function (view) {
+    var defer = $q.defer();
+
+    $http.put('/api/abode/views/home.html', view).then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  }
+
+  return {
+    get_config: get_config,
+    save_config: save_config,
+    write_config: write_config,
+    get_view: get_view,
+    save_view: save_view,
+  };
+
+})
+.controller('homeSettings', function ($scope, $state, settings, notifier, view) {
+  $scope.view = view;
+
+  $scope.saveView = function () {
+
+    settings.save_view($scope.view).then(function () {
+
+      notifier.notify({
+        'status': 'success',
+        'message': 'Home Template Saved'
+      });
+
+    }, function (err) {
+      notifier.notify({
+        'status': 'failed',
+        'message': 'Failed to Save Home Template',
+        'details': err
+      });
+    });
+
+  }
+})
+.controller('settings', function ($scope, $state, settings, notifier, config) {
+  $scope.config = config;
   $scope.state = $state;
   $scope.reload = function () {
     document.location.reload();
@@ -84,4 +200,46 @@ angular.module('settings', ['ui.router'])
   $scope.sources = [
     {'name': 'Muir', 'route': 'index.settings.insteon'},
   ];
+
+  $scope.providerSettings = function (p) {
+    $state.go(p);
+  };
+
+  $scope.save = function () {
+
+    settings.save_config(undefined, $scope.config).then(function () {
+
+      notifier.notify({
+        'status': 'success',
+        'message': 'Settings Saved'
+      });
+
+    }, function (err) {
+      notifier.notify({
+        'status': 'failed',
+        'message': 'Settings Failed to Save',
+        'details': err
+      });
+    });
+
+  };
+
+  $scope.write_config = function () {
+    settings.write_config().then(function () {
+
+      notifier.notify({
+        'status': 'success',
+        'message': 'Config Saved'
+      });
+
+    }, function (err) {
+
+      notifier.notify({
+        'status': 'failed',
+        'message': 'Failed to Save Config',
+        'details': err
+      });
+
+    });
+  };
 });

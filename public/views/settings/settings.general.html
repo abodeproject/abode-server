@@ -11,32 +11,32 @@
 
         <div class="panel panel-default">
           <div class="panel-body">
-            <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
             <form name="settings">
               <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" class="form-control" id="name" placeholder="Name" required="" ng-model="room.name">
+                <input type="text" class="form-control" id="name" placeholder="Name" required="" ng-model="config.name">
               </div>
               <div class="form-group">
                 <label for="name">Location</label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="name" placeholder="Latitude" required="" ng-model="room.name">
+                  <input type="text" class="form-control" id="name" placeholder="Latitude" required="" ng-model="config.location.lat">
                   <span class="input-group-addon">Lat </span>
                 </div>
                 </div>
               <div class="form-group">
                 <div class="input-group">
-                  <input type="text" class="form-control" id="name" placeholder="Longitude" required="" ng-model="room.name">
+                  <input type="text" class="form-control" id="name" placeholder="Longitude" required="" ng-model="config.location.long">
                   <span class="input-group-addon">Long</span>
                 </div>
               </div>
+
               <div class="form-group">
-                <label for="name">Time</label>
-                <input type="text" class="form-control" id="name" placeholder="Name" required="" ng-model="room.name">
+                <label for="enabled">Debug: </label>
+                <toggle value="config.debug" class="pull-right"></toggle>
               </div>
+
               <div class="form-group">
-                <button type="submit" class="pull-right btn btn-sm btn-primary" ng-click="save()" ng-disabled="settings.$invalid"><i class="icon-savetodrive"></i> Save</button>
-                <button type="submit" class="btn btn-sm btn-default" ng-click="state.go('^')"><i class="glyphicon glyphicon-arrow-left"></i> Cancel</button>
+                <button type="submit" class="pull-right btn btn-sm btn-primary" ng-click="save()"><i class="icon-savetodrive"></i> Save</button>
               </div>
             </form>
           </div>

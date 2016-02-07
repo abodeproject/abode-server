@@ -1,6 +1,25 @@
 'use strict';
 
-angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'scenes', 'settings', 'insteon', 'wunderground', 'ui.router','ngTouch'])
+angular.module('abodeMonitor', [
+  'auth',
+  'datetime',
+  'background',
+  'weather',
+  'statuses',
+  'climate',
+  'devices',
+  'rooms',
+  'triggers',
+  'scenes',
+  'settings',
+  'insteon',
+  'wunderground',
+  'ifttt',
+  'rad',
+  'video',
+  'radiothermostat',
+  'ui.router',
+  'ngTouch'])
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
@@ -25,7 +44,9 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
           return defer.promise;
         }
       },
-      controller: function ($scope, $state) {
+      controller: function ($scope, $state, notifier) {
+        $scope.notifications = notifier.notifications;
+
         $scope.goSettings = function () {
           $state.go('index.settings');
         };
@@ -618,5 +639,36 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
       return (!isNaN(input)) ? secondsToString(input): '&nbsp;';
     };
 
-  });
+  })
+  .service('notifier', function ($timeout) {
+    var notifications = [];
+
+    var shiftNotifications = function () {
+      notifications.shift();
+    };
+
+    var notify = function (config) {
+      notifications.push(config);
+      $timeout(shiftNotifications, 2000);
+    };
+
+    return {
+      notify: notify,
+      notifications: notifications
+    };
+  })
+  .directive('notifier', ['$compile', function () {
+    return {
+      restrict: 'E',
+      replace: 'true',
+      scope: {
+        notifications: '=',
+      },
+      templateUrl: 'views/notifier.html',
+      link: function (scope) {
+        scope.notifications = scope.notifications || [];
+
+      }
+    };
+  }]);
 
