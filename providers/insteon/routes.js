@@ -1,3 +1,5 @@
+'use strict';
+
 var insteon = require('../insteon'),
   express = require('express'),
   router = express.Router();
@@ -28,7 +30,7 @@ router.get('/linking/status', function (req, res) {
 
 });
 
-router.post('/linking/cancel', function (req, res) {
+router.post('/linking/stop', function (req, res) {
 
   insteon.stop_linking().then(function () {
     res.status(200).send({'status': 'success'});
@@ -47,7 +49,11 @@ router.post('/linking/clear', function (req, res) {
 
 router.get('/linking/last', function (req, res) {
 
-  res.send(insteon.last_device.config);
+  if (insteon.last_device && insteon.last_device.config) {
+    res.send(insteon.last_device.config);
+  } else {
+    res.status(404).status({'status': 'failed'});
+  }
 
 });
 

@@ -635,7 +635,7 @@ Insteon.start_linking = function (type, auto_add) {  //Reset the record index
 
   type = type || 'controller';
 
-  Insteon.auto_add = auto_add || true;
+  Insteon.auto_add = (auto_add !== undefined) ? auto_add : true;
 
   var types = {
     'controller': 0x01,
