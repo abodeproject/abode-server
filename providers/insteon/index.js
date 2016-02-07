@@ -1,6 +1,7 @@
 'use strict';
 
 var q = require('q');
+var routes;
 var merge = require('merge');
 var abode = require('../../abode');
 var logger = require('log4js'),
@@ -9,6 +10,10 @@ var logger = require('log4js'),
 var Insteon = function () {
   var defer = q.defer(),
     modem_log = logger.getLogger('insteon.modem');
+
+  routes = require('./routes');
+
+  abode.web.server.use('/api/insteon', routes);
 
   //Set our configuration options
   Insteon.config = abode.config.insteon || {};
@@ -625,10 +630,12 @@ Insteon.get_device_config = function (device) {
 
 };
 
-Insteon.start_linking = function (type) {  //Reset the record index
+Insteon.start_linking = function (type, auto_add) {  //Reset the record index
   var defer = q.defer();
 
   type = type || 'controller';
+
+  Insteon.auto_add = auto_add || true;
 
   var types = {
     'controller': 0x01,
@@ -687,24 +694,36 @@ Insteon.link_complete = function (message) {
   var device = Insteon.getDevice(message.address);
 
   if (device === undefined) {
+
     console.log({
       'name': 'New Device',
       'capabilities': message.capabilities,
       'provider': 'insteon',
       'config': message
     });
-    abode.devices.create({
-      'name': 'New Device',
-      'capabilities': message.capabilities,
-      'provider': 'insteon',
-      'config': message
-    }).then(function (device) {
-      Insteon.last_device = device;
-      log.info('Successfully added new device: ', message.address);
-    }, function (err) {
-      log.error(err);
-    });
+
+    if (Insteon.auto_add) {
+      abode.devices.create({
+        'name': 'New Device',
+        'capabilities': message.capabilities,
+        'provider': 'insteon',
+        'config': message
+      }).then(function (device) {
+        Insteon.last_device = device;
+        log.info('Successfully added new device: ', message.address);
+      }, function (err) {
+        log.error(err);
+      });
+    } else {
+      log.info('Device linked but auto_add is disabled: ', message.address);
+      Insteon.last_device = {
+        'capabilities': message.capabilities,
+        'provider': 'insteon',
+        'config': message
+      };
+    }
   } else {
+    Insteon.last_device = device;
     device.config = merge(device.config, message);
     device._save().then(function () {
       log.info('Successfully saved existing device: ', message.address);

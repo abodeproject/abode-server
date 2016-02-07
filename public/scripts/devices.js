@@ -484,6 +484,8 @@ angular.module('devices', ['ui.router','ngResource'])
   $scope.alerts = [];
   $scope.rooms = [];
   $scope.loading = false;
+  $scope.section = 'provider'
+  $scope.provider_template = '/views/providers/' + device.provider + '/edit.html';
 
   if (!device) {
     $state.go('index.devices.list');
@@ -614,6 +616,12 @@ angular.module('devices', ['ui.router','ngResource'])
   $scope.alerts = [];
   $scope.providers = providers;
   $scope.capabilities = capabilities;
+  $scope.section = 'provider';
+  $scope.provider_templates = {};
+
+  $scope.providers.forEach(function (p) {
+    $scope.provider_templates[p] = '/views/providers/' + p + '/add.html';
+  });
 
   $scope.back = function () {
     $state.go('index.devices');
@@ -621,6 +629,12 @@ angular.module('devices', ['ui.router','ngResource'])
 
   $scope.closeAlert = function(index) {
     $scope.alerts.splice(index, 1);
+  };
+
+  $scope.changeProvider = function (p) {
+    $scope.device.provider = p;
+    $scope.section = 'settings';
+    $scope.provider_template = '/views/providers/' + p + '/add.html';
   };
 
   $scope.add = function () {

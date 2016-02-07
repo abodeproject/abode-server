@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'scenes', 'settings', 'ui.router','ngTouch'])
+angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'statuses', 'climate', 'devices', 'rooms', 'triggers', 'scenes', 'settings', 'insteon', 'wunderground', 'ui.router','ngTouch'])
   .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
 
     $httpProvider.interceptors.push('abodeHttpInterceptor');
@@ -592,7 +592,7 @@ angular.module('abodeMonitor', ['auth', 'datetime','background', 'weather', 'sta
   })
   .filter('capitalize', function() {
     return function(token) {
-      return (token instanceof String) ? token.charAt(0).toUpperCase() + token.slice(1) : token;
+      return (typeof(token) === 'string') ? token.charAt(0).toUpperCase() + token.slice(1) : token;
     };
   })
   .filter('ageHumanReadable', function () {

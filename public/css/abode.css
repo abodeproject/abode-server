@@ -113,3 +113,49 @@
 .and-conditions {
   border-left: .2em solid #00805f;
 }
+
+.section-nav {
+  list-style: none;
+  padding: 0px;
+  width: 100%;
+}
+
+
+.section-nav li {
+  cursor: pointer;
+  padding: .25em;
+}
+
+.section-nav li.active {
+  background-color: #375A7F;
+}
+
+
+.section-nav li:hover {
+  background-color: #444;
+}
+
+
+
+.section-nav li:hover.active {
+  background-color: #375A7F;
+}
+
+.insteon-types {
+  list-style: none;
+  padding: 0px;
+}
+.insteon-types li {
+  display: inline-block;
+  height: 5em;
+  width: 5em;
+  border: 1px solid #aaa;
+  text-align: center;
+  margin: .5em;
+  border-radius: .2em;
+  cursor: pointer;
+}
+
+.insteon-types li.active {
+  background-color: ;
+}
