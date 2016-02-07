@@ -13,5 +13,5 @@ angular.module('wunderground', [])
 })
 .controller('wundergroundAdd', function ($scope) {
   $scope.device = $scope.$parent.device
-  $scope.device.capabilities = ['weather']
+  $scope.device.capabilities = ['weather','temperature_sensor', 'humidity_sensor'];
 });

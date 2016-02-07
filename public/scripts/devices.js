@@ -641,6 +641,7 @@ angular.module('devices', ['ui.router','ngResource'])
     devices.add($scope.device).then(function () {
       $scope.alerts = [{'type': 'success', 'msg': 'Device Added'}];
       $scope.device = {'capabilities': []};
+      $scope.section = 'provider';
     }, function (err) {
       $scope.alerts = [{'type': 'danger', 'msg': 'Failed to add Device'}];
       $scope.errors = err;
