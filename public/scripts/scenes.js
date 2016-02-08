@@ -259,7 +259,7 @@ angular.module('scenes', ['ui.router','ngResource'])
 
   $scope.load();
 })
-.controller('scenesAdd', function ($scope, $state, scenes) {
+.controller('scenesAdd', function ($scope, $state, notifier, scenes) {
   $scope.scene = {};
   $scope.alerts = [];
 
@@ -273,15 +273,15 @@ angular.module('scenes', ['ui.router','ngResource'])
 
   $scope.add = function () {
     scenes.add($scope.scene).then(function () {
-      $scope.alerts = [{'type': 'success', 'msg': 'Scene Added'}];
+      notifier.notify({'status': 'success', 'message': 'Scene Added'});
       $scope.scene = {};
     }, function (err) {
-      $scope.alerts = [{'type': 'danger', 'msg': 'Failed to add Scene'}];
+      notifier.notify({'status': 'failed', 'message': 'Failed to add Scene', 'details': err});
       $scope.errors = err;
     });
   };
 })
-.controller('scenesEdit', function ($scope, $state, $uibModal, scene, devices, scenes, rooms, confirm) {
+.controller('scenesEdit', function ($scope, $state, $uibModal, notifier, scene, devices, scenes, rooms, confirm) {
   $scope.scene = scene;
   $scope.alerts = [];
   $scope.rooms = [];
@@ -755,9 +755,9 @@ angular.module('scenes', ['ui.router','ngResource'])
 
   $scope.save = function () {
     scenes.save($scope.scene).then(function () {
-      $scope.alerts = [{'type': 'success', 'msg': 'Scene Saved'}];
+      notifier.notify({'status': 'success', 'message': 'Scene Saved'});
     }, function (err) {
-      $scope.alerts = [{'type': 'danger', 'msg': 'Failed to save Scene'}];
+      notifier.notify({'status': 'failed', 'message': 'Failed to save Scene', 'details': err});
       $scope.errors = err;
     });
   };
@@ -765,9 +765,10 @@ angular.module('scenes', ['ui.router','ngResource'])
   $scope.remove = function () {
     confirm('Are you sure you want to remove this Scene?').then(function () {
       scenes.remove(scene._id).then(function () {
+        notifier.notify({'status': 'success', 'message': 'Scene Removed'});
         $state.go('index.scenes');
       }, function (err) {
-        $scope.alerts = [{'type': 'danger', 'msg': 'Failed to remove Scene'}];
+        notifier.notify({'status': 'failed', 'message': 'Failed to remove Scene', 'details': err});
         $scope.errors = err;
       });
     });
@@ -778,9 +779,9 @@ angular.module('scenes', ['ui.router','ngResource'])
     confirm('Are you sure?').then(function () {
       scenes.removeRoom(scene.name, id).then(function () {
         getRooms();
-        $scope.alerts = [{'type': 'success', 'msg': 'Room removed from Scene'}];
-      }, function () {
-        $scope.alerts = [{'type': 'danger', 'msg': 'Failed to remove Room from Scene'}];
+        notifier.notify({'status': 'success', 'message': 'Room removed from Scene'});
+      }, function (err) {
+        notifier.notify({'status': 'failed', 'message': 'Failed to remove Room from Scene', 'details': err});
       });
     });
 
@@ -829,9 +830,9 @@ angular.module('scenes', ['ui.router','ngResource'])
 
       scenes.addRoom(scene.name, room.name).then(function () {
         getRooms();
-        $scope.alerts = [{'type': 'success', 'msg': 'Room added to Scene'}];
+        notifier.notify({'status': 'success', 'message': 'Room added to Scene'});
       }, function () {
-        $scope.alerts = [{'type': 'danger', 'msg': 'Failed to add Room to Scene'}];
+        notifier.notify({'status': 'failed', 'message': 'Failed to add Room to Scene', 'details': err});
       });
 
     });

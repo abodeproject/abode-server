@@ -674,7 +674,7 @@ angular.module('triggers', ['ui.router','ngResource'])
 
   $scope.load();
 })
-.controller('triggersEdit', function ($scope, $state, triggers, trigger, devices, rooms, confirm, types) {
+.controller('triggersEdit', function ($scope, $state, notifier, triggers, trigger, devices, rooms, confirm, types) {
   $scope.trigger = trigger;
   $scope.alerts = [];
   $scope.state = $state;
@@ -764,9 +764,9 @@ angular.module('triggers', ['ui.router','ngResource'])
 
   $scope.save = function () {
     triggers.save($scope.trigger).then(function () {
-      $scope.alerts = [{'type': 'success', 'msg': 'Trigger Saved'}];
+      notifier.notify({'status': 'success', 'message': 'Trigger Saved'});
     }, function (err) {
-      $scope.alerts = [{'type': 'danger', 'msg': 'Failed to save Trigger'}];
+      notifier.notify({'status': 'failed', 'message': 'Failed to save Trigger', 'details': err});
       $scope.errors = err;
     });
   };
@@ -774,9 +774,9 @@ angular.module('triggers', ['ui.router','ngResource'])
   $scope.add = function () {
     triggers.add($scope.trigger).then(function () {
       $scope.trigger = {'enabled': true};
-      $scope.alerts = [{'type': 'success', 'msg': 'Trigger Saved'}];
+      notifier.notify({'status': 'success', 'message': 'Trigger Added'});
     }, function (err) {
-      $scope.alerts = [{'type': 'danger', 'msg': 'Failed to save Trigger'}];
+      notifier.notify({'status': 'failed', 'message': 'Failed to add Trigger', 'details': err});
       $scope.errors = err;
     });
   };

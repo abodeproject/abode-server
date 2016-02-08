@@ -442,7 +442,7 @@ angular.module('rooms', ['ui.router','ngResource'])
 
   $scope.load();
 })
-.controller('roomsAdd', function ($scope, $state, rooms) {
+.controller('roomsAdd', function ($scope, $state, notifier, rooms) {
   $scope.room = {};
   $scope.alerts = [];
 
@@ -456,15 +456,15 @@ angular.module('rooms', ['ui.router','ngResource'])
 
   $scope.add = function () {
     rooms.add($scope.room).then(function () {
-      $scope.alerts = [{'type': 'success', 'msg': 'Room Added'}];
+      notifier.notify({'status': 'success', 'message': 'Room Added'});
       $scope.room = {};
     }, function (err) {
-      $scope.alerts = [{'type': 'danger', 'msg': 'Failed to add Room'}];
+      notifier.notify({'status': 'failed', 'message': 'Failed to add Room', 'details': err});
       $scope.errors = err;
     });
   };
 })
-.controller('roomsEdit', function ($scope, $state, $uibModal, rooms, room, confirm) {
+.controller('roomsEdit', function ($scope, $state, $uibModal, notifier, rooms, room, confirm) {
   $scope.room = room;
   $scope.alerts = [];
   $scope.devices = [];
@@ -496,9 +496,9 @@ angular.module('rooms', ['ui.router','ngResource'])
 
   $scope.save = function () {
     rooms.save($scope.room).then(function () {
-      $scope.alerts = [{'type': 'success', 'msg': 'Room Saved'}];
+      notifier.notify({'status': 'success', 'message': 'Room Saved'});
     }, function (err) {
-      $scope.alerts = [{'type': 'danger', 'msg': 'Failed to save Room'}];
+      notifier.notify({'status': 'failed', 'message': 'Failed to save Room', 'details': err});
       $scope.errors = err;
     });
   };
@@ -506,9 +506,10 @@ angular.module('rooms', ['ui.router','ngResource'])
   $scope.remove = function () {
     confirm('Are you sure you want to remove this Room?').then(function () {
       rooms.remove(room._id).then(function () {
+        notifier.notify({'status': 'success', 'message': 'Room Removed'});
         $state.go('index.rooms');
       }, function (err) {
-        $scope.alerts = [{'type': 'danger', 'msg': 'Failed to remove Room'}];
+        notifier.notify({'status': 'failed', 'message': 'Failed to remove Room', 'details': err});
         $scope.errors = err;
       });
     });
@@ -519,9 +520,9 @@ angular.module('rooms', ['ui.router','ngResource'])
     confirm('Are you sure?').then(function () {
       rooms.removeDevice(room.name, id).then(function () {
         getDevices();
-        $scope.alerts = [{'type': 'success', 'msg': 'Device removed from Room'}];
-      }, function () {
-        $scope.alerts = [{'type': 'danger', 'msg': 'Failed to remove Device from Room'}];
+        notifier.notify({'status': 'success', 'message': 'Device removed from Room'});
+      }, function (err) {
+        notifier.notify({'status': 'failed', 'message': 'Failed to remove Device from Room', 'details': err});
       });
     });
 
@@ -570,9 +571,9 @@ angular.module('rooms', ['ui.router','ngResource'])
 
       rooms.addDevice(room.name, device.name).then(function () {
         getDevices();
-        $scope.alerts = [{'type': 'success', 'msg': 'Device added to Room'}];
+        notifier.notify({'status': 'success', 'message': 'Device added to Room'});
       }, function () {
-        $scope.alerts = [{'type': 'danger', 'msg': 'Failed to add Device to Room'}];
+        notifier.notify({'status': 'failed', 'message': 'Failed to add Device to Room', 'details': err});
       });
 
     });
