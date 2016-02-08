@@ -52,7 +52,7 @@ module.exports = function(grunt) {
         script: 'index.js',
         options: {
           ext: 'ini,js',
-          ignore: ['public/**'],
+          ignore: ['public/**/*.js'],
           env: {
             NODE_ENV: 'dev',
           }
@@ -62,7 +62,7 @@ module.exports = function(grunt) {
         script: 'index.js',
         options: {
           ext: 'js,ini',
-          ignore: ['public/**'],
+          ignore: ['public/**/*.js'],
           env: {
             NODE_ENV: 'prod',
           }
