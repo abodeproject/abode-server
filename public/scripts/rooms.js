@@ -182,7 +182,7 @@ angular.module('rooms', ['ui.router','ngResource'])
 
         var filters = {
           'temperature_sensor': ['conditioner', 'temperature_sensor', 'fan', 'humidity_sensor'],
-          'light': ['light', 'dimmer'],
+          'light': ['light'],
           'motion_sensor': ['motion_sensor'],
           'window': ['window'],
           'door': ['door'],
