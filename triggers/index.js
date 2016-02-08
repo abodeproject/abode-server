@@ -128,6 +128,9 @@ Triggers.lookupAction = function (key) {
     case 'rooms':
       lookupObj = abode.rooms.by_name();
       break;
+    case 'scenes':
+      lookupObj = abode.scenes.by_name();
+      break;
     default:
       return;
   }
@@ -138,6 +141,8 @@ Triggers.lookupAction = function (key) {
   //Loop through each key and lookup against the providers (lookupObj)
   keys.forEach(function (key) {
     if (lookupObj === undefined) { return; }
+    if (keys[0] === 'scenes' && key === 'on') key = 'start';
+    if (keys[0] === 'scenes' && key === 'off') key = 'stop';
 
     if (lookupObj[key] !== undefined) {
       //Save the previous lookupObj as the self object
