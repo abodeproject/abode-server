@@ -312,7 +312,7 @@ angular.module('rooms', ['ui.router','ngResource'])
           }
 
           cap.forEach(function (c) {
-            has = (device.capbilities && device.capabilities.indexOf(c) !== -1) ? true : has;
+            has = (device.capabilities.indexOf(c) !== -1) ? true : has;
           });
 
           return has;
