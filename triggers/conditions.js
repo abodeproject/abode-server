@@ -61,9 +61,9 @@ var lookupValue = function (type, object, key) {
   }
 
   if (object !== undefined) {
-    log.debug('Object lookup');
-    lookupObj = lookupObj[object];
+    log.debug('Object lookup:', object);
     scope = lookupObj[object];
+    lookupObj = lookupObj[object];
 
     if (lookupObj === undefined) {
       return undefined;
