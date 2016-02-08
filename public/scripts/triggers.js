@@ -411,6 +411,7 @@ angular.module('triggers', ['ui.router','ngResource'])
             }
           } else {
             if (!$scope.condition.left_key || !$scope.condition.right_key || !$scope.condition.condition) {
+              console.dir($scope.condition);
               alert('All condition values required');
               return;
             }
