@@ -64,6 +64,7 @@ var lookupValue = function (type, object, key) {
     log.debug('Object lookup');
     lookupObj = lookupObj[object];
     scope = lookupObj[object];
+    lookupObj = scope[key];
 
     if (lookupObj === undefined) {
       return undefined;
@@ -71,9 +72,9 @@ var lookupValue = function (type, object, key) {
   } else {
 
     scope = lookupObj;
+    lookupObj = scope[key];
   }
 
-  lookupObj = scope[key];
 
   //If the lookupObj has a handler property which is a function call and return the response
   if (lookupObj instanceof Function) {
