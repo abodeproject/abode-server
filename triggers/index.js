@@ -109,6 +109,7 @@ Triggers.lookupAction = function (key) {
 
   var keys,
     self,
+    is_scene = false,
     lookupObj = abode.providers;
 
 
@@ -129,6 +130,7 @@ Triggers.lookupAction = function (key) {
       lookupObj = abode.rooms.by_name();
       break;
     case 'scenes':
+      is_scene = true;
       lookupObj = abode.scenes.by_name();
       break;
     default:
@@ -141,9 +143,10 @@ Triggers.lookupAction = function (key) {
   //Loop through each key and lookup against the providers (lookupObj)
   keys.forEach(function (key) {
     if (lookupObj === undefined) { return; }
-    if (keys[0] === 'scenes' && key === 'on') key = 'start';
-    if (keys[0] === 'scenes' && key === 'off') key = 'stop';
+    if (is_scene && key === 'on') key = 'start';
+    if (is_scene && key === 'off') key = 'stop';
 
+    log.debug('Looking up action:', key);
     if (lookupObj[key] !== undefined) {
       //Save the previous lookupObj as the self object
       self = lookupObj;
