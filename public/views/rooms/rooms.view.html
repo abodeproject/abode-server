@@ -8,17 +8,17 @@
 </div>
 <div class="modal-body">
   <div class="row">
-    <div class="col-sm-2">
+    <div class="col-xs-2">
       <div class="room_filter" ng-click="filter('light')" ng-class="{selected: filter_condition =='light'}">
         <i class="icon-lightbulb-idea"></i>
         <div class="on-count" ng-class="{'on-ok': on_counts.light > 0}">{{filter_counts.light}}</div>
       </div>
     </div>
-    <div class="col-sm-2"><div class="room_filter" ng-click="filter('scenes')" ng-class="{selected: filter_condition =='scenes'}"><i class="icon-picture"></i><div class="on-count" ng-class="{'on-ok': on_counts.scenes != 0}">{{filter_counts.scenes}}</div></div></div>
-    <div class="col-sm-2"><div class="room_filter" ng-click="filter('motion_sensor')" ng-class="{selected: filter_condition =='motion_sensor'}"><i class="fi-motion"></i><div class="on-count" ng-class="{'on-danger': on_counts.motion_sensor != 0}">{{filter_counts.motion_sensor}}</div></div></div>
-    <div class="col-sm-2"><div class="room_filter" ng-click="filter('door')" ng-class="{selected: filter_condition =='door'}"><i class="fi-door-open"></i><div class="on-count" ng-class="{'on-danger': on_counts.door != 0}">{{filter_counts.door}}</div></div></div>
-    <div class="col-sm-2"><div class="room_filter" ng-click="filter('window')" ng-class="{selected: filter_condition =='window'}"><i class="fi-window"></i><div class="on-count" ng-class="{'on-danger': on_counts.window != 0}">{{filter_counts.window}}</div></div></div>
-    <div class="col-sm-2"><div class="room_filter" ng-click="filter('temperature_sensor')" ng-class="{selected: filter_condition =='temperature_sensor'}">{{room_temperature}}</div></div>
+    <div class="col-xs-2"><div class="room_filter" ng-click="filter('scenes')" ng-class="{selected: filter_condition =='scenes'}"><i class="icon-picture"></i><div class="on-count" ng-class="{'on-ok': on_counts.scenes != 0}">{{filter_counts.scenes}}</div></div></div>
+    <div class="col-xs-2"><div class="room_filter" ng-click="filter('motion_sensor')" ng-class="{selected: filter_condition =='motion_sensor'}"><i class="fi-motion"></i><div class="on-count" ng-class="{'on-danger': on_counts.motion_sensor != 0}">{{filter_counts.motion_sensor}}</div></div></div>
+    <div class="col-xs-2"><div class="room_filter" ng-click="filter('door')" ng-class="{selected: filter_condition =='door'}"><i class="fi-door-open"></i><div class="on-count" ng-class="{'on-danger': on_counts.door != 0}">{{filter_counts.door}}</div></div></div>
+    <div class="col-xs-2"><div class="room_filter" ng-click="filter('window')" ng-class="{selected: filter_condition =='window'}"><i class="fi-window"></i><div class="on-count" ng-class="{'on-danger': on_counts.window != 0}">{{filter_counts.window}}</div></div></div>
+    <div class="col-xs-2"><div class="room_filter" ng-click="filter('temperature_sensor')" ng-class="{selected: filter_condition =='temperature_sensor'}">{{room_temperature}}</div></div>
   </div>
   <ul class="list-group">
     <li class="list-group-item" style="cursor: pointer" ng-repeat="scene in scenes | orderBy: ['-_on', '+age', '+name']" ng-class="{'list-group-item-success': scene._on}" ng-show="filter_condition=='scenes' || filter_conditions==''" ng-click="openScene(scene)">
