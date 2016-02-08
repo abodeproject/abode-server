@@ -64,11 +64,12 @@ var lookupValue = function (type, object, key) {
     log.debug('Object lookup');
     lookupObj = lookupObj[object];
     scope = lookupObj[object];
-    lookupObj = scope[key];
 
     if (lookupObj === undefined) {
       return undefined;
     }
+
+    lookupObj = scope[key];
   } else {
 
     scope = lookupObj;
