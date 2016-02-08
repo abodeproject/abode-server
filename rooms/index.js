@@ -680,6 +680,33 @@ RoomSchema.methods.get_scenes = function () {
   return items;
 };
 
+// Expand each device into it's object and return a list of objects
+RoomSchema.methods.on = function () {
+  var defer = q.defer();
+
+  defer.resolve();
+
+  return defer.promise;
+};
+
+// Expand each device into it's object and return a list of objects
+RoomSchema.methods.off = function () {
+  var defer = q.defer();
+
+  defer.resolve();
+
+  return defer.promise;
+};
+
+// Expand each device into it's object and return a list of objects
+RoomSchema.methods.set_level = function () {
+  var defer = q.defer();
+
+  defer.resolve();
+
+  return defer.promise;
+};
+
 Rooms.model = mongoose.model('Rooms', RoomSchema);
 
 // Return all the rooms

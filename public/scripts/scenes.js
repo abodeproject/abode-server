@@ -554,7 +554,7 @@ angular.module('scenes', ['ui.router','ngResource'])
 
         $scope.action_types = [
           {name: 'Device', value: 'devices', icon: 'glyphicon glyphicon-oil'},
-          {name: 'Room', value: 'rooms', icon: 'glyphicon glyphicon-modal-window', capabilities: ['dimmer', 'light']},
+          {name: 'Room', value: 'rooms', icon: 'glyphicon glyphicon-modal-window', capabilities: ['light']},
           {name: 'Scene', value: 'scenes', icon: 'icon-picture', capabilities: ['light']},
         ];
 
