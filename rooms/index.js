@@ -682,28 +682,77 @@ RoomSchema.methods.get_scenes = function () {
 
 // Expand each device into it's object and return a list of objects
 RoomSchema.methods.on = function () {
-  var defer = q.defer();
+  var devices,
+    scenes,
+    cmd_defers = [],
+    defer = q.defer();
 
-  defer.resolve();
+  devices = this.get_devices();
+  scenes = this.get_scenes();
+
+  devices.forEach(function (d) {
+    cmd_defers.push(d.on());
+  });
+
+  scenes.forEach(function (s) {
+    cmd_defers.push(s.on());
+  });
+
+  q.allSettled(cmd_defers).then(function () {
+    defer.resolve();
+  });
 
   return defer.promise;
 };
 
 // Expand each device into it's object and return a list of objects
 RoomSchema.methods.off = function () {
-  var defer = q.defer();
+  var devices,
+    scenes,
+    cmd_defers = [],
+    defer = q.defer();
 
-  defer.resolve();
+  devices = this.get_devices();
+  scenes = this.get_scenes();
+
+  devices.forEach(function (d) {
+    cmd_defers.push(d.off());
+  });
+
+  scenes.forEach(function (s) {
+    cmd_defers.push(s.on());
+  });
+
+  q.allSettled(cmd_defers).then(function () {
+    defer.resolve();
+  });
 
   return defer.promise;
 };
 
 // Expand each device into it's object and return a list of objects
-RoomSchema.methods.set_level = function () {
-  var defer = q.defer();
+RoomSchema.methods.set_level = function (level) {
+  var devices,
+    scenes,
+    cmd_defers = [],
+    defer = q.defer();
 
-  defer.resolve();
+  devices = this.get_devices();
+  scenes = this.get_scenes();
 
+  devices.forEach(function (d) {
+    cmd_defers.push(d.set_level(level));
+  });
+
+  scenes.forEach(function (s) {
+    cmd_defers.push(s.on());
+  });
+
+  q.allSettled(cmd_defers).then(function () {
+    defer.resolve();
+  });
+
+  return defer.promise;
   return defer.promise;
 };
 
