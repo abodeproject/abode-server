@@ -180,16 +180,26 @@ angular.module('rooms', ['ui.router','ngResource'])
         $scope.on_counts = {};
         $scope.room_temperature = '?';
 
+          var filters = {
+            'light': ['light', 'dimmer'],
+            'motion_sensor': ['motion_sensor'],
+            'window': ['window'],
+            'door': ['door'],
+            'temperature_sensor': ['conditioner', 'temperature_sensor', 'fan', 'humidity_sensor']
+          };
+
+
         $scope.filter = function (filter) {
           $scope.filter_condition = (filter !== $scope.filter_condition) ? filter : '';
         }
 
         $scope.check_filter = function (device) {
-          if ($scope.filter_condition === '') {
+
+          if ($scope.filter_condition === '' || $scope.filter_condition === undefined) {
             return true;
           }
 
-          return device.capabilities.indexOf($scope.filter_condition) !== -1;
+          return $scope.has_capability(device, filters[$scope.filter_condition]);
         };
 
         $scope.devices_on = function (c) {
@@ -220,13 +230,6 @@ angular.module('rooms', ['ui.router','ngResource'])
 
 
         $scope.default_filter = function () {
-          var filters = [
-            'light',
-            'motion_sensor',
-            'window',
-            'door',
-            'conditioner'
-          ];
 
           var temp = 0;
           var temp_count = 0;
@@ -244,11 +247,11 @@ angular.module('rooms', ['ui.router','ngResource'])
 
           $scope.room_temperature = parseInt(temp / temp_count, 10) || ' ';
 
-          filters.forEach(function (f) {
+          Object.keys(filters).forEach(function (f) {
 
 
             var match = $scope.devices.filter(function (d) {
-              return (d.capabilities.indexOf(f) !== -1);
+              return $scope.has_capability(d, filters[f]);
             });
 
             $scope.filter_counts[f] = match.length;
