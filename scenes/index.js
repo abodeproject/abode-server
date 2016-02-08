@@ -451,7 +451,7 @@ SceneSchema.methods.start = function () {
     };
 
     //Process our delay;
-    var stepTimer = setTimeout(startStep, step.delay);
+    var stepTimer = setTimeout(startStep, step.delay * 1000);
     timers.push(stepTimer);
   };
 
