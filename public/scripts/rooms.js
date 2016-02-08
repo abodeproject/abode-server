@@ -181,11 +181,11 @@ angular.module('rooms', ['ui.router','ngResource'])
         $scope.room_temperature = '?';
 
         var filters = {
-          'temperature_sensor': ['conditioner', 'temperature_sensor', 'fan', 'humidity_sensor'],
           'light': ['light'],
           'motion_sensor': ['motion_sensor'],
           'window': ['window'],
           'door': ['door'],
+          'temperature_sensor': ['conditioner', 'temperature_sensor', 'fan', 'humidity_sensor'],
         };
 
 
