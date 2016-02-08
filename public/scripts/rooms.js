@@ -176,8 +176,28 @@ angular.module('rooms', ['ui.router','ngResource'])
         $scope.devices = [];
         $scope.scenes = [];
         $scope.open = devices.openDevice;
+        $scope.filter_counts = {};
+        $scope.on_counts = {};
+        $scope.room_temperature = '?';
 
+        $scope.filter = function (filter) {
+          $scope.filter_condition = (filter !== $scope.filter_condition) ? filter : '';
+        }
 
+        $scope.check_filter = function (device) {
+          if ($scope.filter_condition === '') {
+            return true;
+          }
+          return device.capabilities.indexOf($scope.filter_condition) !== -1;
+        };
+
+        $scope.devices_on = function (c) {
+          var devs = $scope.devices.filter(function (d) {
+            return (d._on === true && d.capabilities.indexOf(c) !== 0);
+          });
+
+          return (devs.length > 0);
+        };
 
         $scope.open = function (device) {
           var modal = devices.openDevice(device);
@@ -197,6 +217,56 @@ angular.module('rooms', ['ui.router','ngResource'])
           $state.go('index.rooms.edit', {'name': room.name});
         };
 
+
+        $scope.default_filter = function () {
+          var filters = [
+            'light',
+            'motion_sensor',
+            'window',
+            'door',
+            'conditioner'
+          ];
+
+          var temp = 0;
+          var temp_count = 0;
+
+          var temps = $scope.devices.filter(function (d) {
+            if (d.capabilities.indexOf('temperature_sensor') !== -1) {
+              if (d._temperature > 0) {
+                temp += d._temperature ;
+                temp_count += 1;
+              }
+              return true;
+            }
+            return false;
+          });
+
+          console.log(temp);
+          $scope.room_temperature = parseInt(temp / temp_count, 10);
+
+          filters.forEach(function (f) {
+
+
+            var match = $scope.devices.filter(function (d) {
+              return (d.capabilities.indexOf(f) !== -1);
+            });
+
+            $scope.filter_counts[f] = match.length;
+            $scope.on_counts[f] = match.filter(function (d) {return d._on}).length;
+
+            if ($scope.filter_condition !== undefined) return;
+
+            if (match.length > 0) {
+              $scope.filter_condition = f;
+            }
+          });
+
+          if ($scope.filter_condition !== undefined) return;
+          if ($scope.scenes.length > 0) {
+            $scope.filter_condition = 'scenes';
+          }
+        }
+
         $scope.reload = function () {
 
           $scope.processing = true;
@@ -211,6 +281,8 @@ angular.module('rooms', ['ui.router','ngResource'])
               $scope.scenes = scenes;
               $scope.processing = false;
               $scope.errors = false;
+              $scope.filter_counts.scenes = $scope.scenes.length;
+              $scope.on_counts.scenes = $scope.scenes.filter(function (d) { return d._on});
             }, function () {
               $scope.processing = false;
               $scope.errors = true;
@@ -220,6 +292,8 @@ angular.module('rooms', ['ui.router','ngResource'])
               $scope.devices = devices;
               $scope.processing = false;
               $scope.errors = false;
+              $scope.default_filter();
+
             }, function () {
               $scope.processing = false;
               $scope.errors = true;

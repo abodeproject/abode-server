@@ -185,3 +185,44 @@
 .notifier.peak {
   height: 2.5em;
 }
+
+.room_filter {
+  font-size: 4em;
+  border: solid .1em #444;
+  border-radius: 1em;
+  width: 1.8em;
+  height: 1.8em;
+  line-height: 1.7em;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  color: #444;
+  position: relative;
+}
+
+.room_filter.selected {
+  border-color: #777;
+  color: #ddd;
+}
+
+.room_filter .on-count {
+  position: absolute;
+  bottom: -.3em;
+  right: -.3em;
+  font-size: .4em;
+  height: 1.75em;
+  width: 1.75em;
+  background-color: #333;
+  color: #fff;
+  border-radius: .75em;
+  line-height: 1.7em;
+
+}
+
+.on-ok {
+  background-color: #00bc8c !important;
+}
+
+.on-danger {
+  background-color: rgb(231, 76, 60) !important;
+}
