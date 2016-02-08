@@ -188,6 +188,7 @@ angular.module('rooms', ['ui.router','ngResource'])
           if ($scope.filter_condition === '') {
             return true;
           }
+
           return device.capabilities.indexOf($scope.filter_condition) !== -1;
         };
 
@@ -241,8 +242,7 @@ angular.module('rooms', ['ui.router','ngResource'])
             return false;
           });
 
-          console.log(temp);
-          $scope.room_temperature = parseInt(temp / temp_count, 10);
+          $scope.room_temperature = parseInt(temp / temp_count, 10) || ' ';
 
           filters.forEach(function (f) {
 
@@ -312,7 +312,7 @@ angular.module('rooms', ['ui.router','ngResource'])
           }
 
           cap.forEach(function (c) {
-            has = (device.capabilities.indexOf(c) !== -1) ? true : has;
+            has = (device.capbilities && device.capabilities.indexOf(c) !== -1) ? true : has;
           });
 
           return has;
