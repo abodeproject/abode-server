@@ -168,7 +168,7 @@ angular.module('rooms', ['ui.router','ngResource'])
       animation: true,
       templateUrl: 'views/rooms/rooms.view.html',
       size: 'lg',
-      controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, rooms, room, devices) {
+      controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, rooms, room, devices, scenes) {
         var intervals = [];
 
         $scope.name = room.name;
@@ -210,10 +210,19 @@ angular.module('rooms', ['ui.router','ngResource'])
           return (devs.length > 0);
         };
 
+        $scope.openScene = function (scene) {
+          var modal = scenes.view(scene._id);
+          modal.result.then(function(config) {
+            if (config && config.recurse) {
+              $uibModalInstance.close(config);
+            }
+          });
+        };
+
         $scope.open = function (device) {
           var modal = devices.openDevice(device);
           modal.result.then(function(config) {
-            if (config.recurse) {
+            if (config && config.recurse) {
               $uibModalInstance.close(config);
             }
           });

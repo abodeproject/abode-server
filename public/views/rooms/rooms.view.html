@@ -21,7 +21,7 @@
     <div class="col-sm-2"><div class="room_filter" ng-click="filter('temperature_sensor')" ng-class="{selected: filter_condition =='temperature_sensor'}">{{room_temperature}}</div></div>
   </div>
   <ul class="list-group">
-    <li class="list-group-item" style="cursor: pointer" ng-repeat="scene in scenes | orderBy: ['-_on', '+age', '+name']" ng-class="{'list-group-item-success': scene._on}" ng-show="filter_condition=='scenes' || filter_conditions==''">
+    <li class="list-group-item" style="cursor: pointer" ng-repeat="scene in scenes | orderBy: ['-_on', '+age', '+name']" ng-class="{'list-group-item-success': scene._on}" ng-show="filter_condition=='scenes' || filter_conditions==''" ng-click="openScene(scene)">
       <h5 class="list-group-item-heading"><i class="icon-picture"></i> {{scene.name}}</h5>
       <p style="font-size: 1.2em;" class="list-group-item-text ">{{scene.age | ageHumanReadable}}</p>
     </li>
