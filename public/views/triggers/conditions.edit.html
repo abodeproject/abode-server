@@ -24,9 +24,7 @@
         <ul class="list-group bg-muted select-list" style="font-size: 1.5em;">
           <li class="list-group-item" style="cursor: pointer;" ng-repeat="c in condition.and" ng-click="editCondition(c)" ng-class="{'or-conditions': c.or.length, 'and-conditions': c.and.length}">
             <i class="glyphicon glyphicon-th-large" ng-class="{'text-warning': c.or.length, 'text-success': c.and.length}" ng-show="c.or.length || c.and.length"></i>
-            {{c.name}}
-
-            {{c.key}} {{c.condition}} {{c.lookup}}
+            {{c | conditionReadable}}
             <button class="pull-right btn btn-xs btn-danger" ng-click="removeCondition(condition.and, $index)" stop-event><i class="icon-trash"></i></button>
           </li>
         </ul>
@@ -39,9 +37,7 @@
         <ul class="list-group bg-muted select-list" style="font-size: 1.5em;">
           <li class="list-group-item" style="cursor: pointer;" ng-repeat="c in condition.or" ng-click="editCondition(c)" ng-class="{'or-conditions': c.or.length, 'and-conditions': c.and.length}">
             <i class="glyphicon glyphicon-th-large" ng-class="{'text-warning': c.or.length, 'text-success': c.and.length}" ng-show="c.or.length || c.and.length"></i>
-            {{c.name}}
-
-            {{c.key}} {{c.condition}} {{c.lookup}}
+            {{c | conditionReadable}}
             <button class="pull-right btn btn-xs btn-danger" ng-click="removeCondition(condition.or, $index)" stop-event><i class="icon-trash"></i></button>
           </li>
         </ul>
