@@ -180,13 +180,13 @@ angular.module('rooms', ['ui.router','ngResource'])
         $scope.on_counts = {};
         $scope.room_temperature = '?';
 
-          var filters = {
-            'light': ['light', 'dimmer'],
-            'motion_sensor': ['motion_sensor'],
-            'window': ['window'],
-            'door': ['door'],
-            'temperature_sensor': ['conditioner', 'temperature_sensor', 'fan', 'humidity_sensor']
-          };
+        var filters = {
+          'temperature_sensor': ['conditioner', 'temperature_sensor', 'fan', 'humidity_sensor']
+          'light': ['light', 'dimmer'],
+          'motion_sensor': ['motion_sensor'],
+          'window': ['window'],
+          'door': ['door'],
+        };
 
 
         $scope.filter = function (filter) {
