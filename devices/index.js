@@ -245,12 +245,15 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
           self[key] = config[key];
 
           self.last_on = new Date();
-          if (self.capabilities.indexOf('openclose') === -1) {
-            abode.events.emit('ON', {'type': 'device', 'name': self.name});
-            log.info('Emitting ON for', {'type': 'device', 'name': self.name});
-          } else {
+          if (self.capabilities.indexOf('motion_sensor') !== -1) {
+            abode.events.emit('MOTION_ON', {'type': 'device', 'name': self.name});
+            log.info('Emitting MOTION_ON for', {'type': 'device', 'name': self.name});
+          } else if (self.capabilities.indexOf('openclose') !== -1) {
             abode.events.emit('OPEN', {'type': 'device', 'name': self.name});
             log.info('Emitting OPEN for', {'type': 'device', 'name': self.name});
+          } else {
+            abode.events.emit('ON', {'type': 'device', 'name': self.name});
+            log.info('Emitting ON for', {'type': 'device', 'name': self.name});
           }
         }
         if (config[key] === false && self[key] !== false) {
@@ -258,12 +261,15 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
           self[key] = config[key];
 
           self.last_off = new Date();
-          if (self.capabilities.indexOf('openclose') === -1) {
-            abode.events.emit('OFF', {'type': 'device', 'name': self.name});
-            log.info('Emitting OFF for', {'type': 'device', 'name': self.name});
-          } else {
+          if (self.capabilities.indexOf('motion_sensor') !== -1) {
+            abode.events.emit('MOTION_OFF', {'type': 'device', 'name': self.name});
+            log.info('Emitting MOTION_OFF for', {'type': 'device', 'name': self.name});
+          } else if (self.capabilities.indexOf('openclose') !== -1) {
             abode.events.emit('CLOSED', {'type': 'device', 'name': self.name});
             log.info('Emitting CLOSED for', {'type': 'device', 'name': self.name});
+          } else {
+            abode.events.emit('OFF', {'type': 'device', 'name': self.name});
+            log.info('Emitting OFF for', {'type': 'device', 'name': self.name});
           }
         }
         made_event = true;
