@@ -753,7 +753,6 @@ RoomSchema.methods.set_level = function (level) {
   });
 
   return defer.promise;
-  return defer.promise;
 };
 
 Rooms.model = mongoose.model('Rooms', RoomSchema);

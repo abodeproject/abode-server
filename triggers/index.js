@@ -143,8 +143,8 @@ Triggers.lookupAction = function (key) {
   //Loop through each key and lookup against the providers (lookupObj)
   keys.forEach(function (key) {
     if (lookupObj === undefined) { return; }
-    if (is_scene && key === 'on') key = 'start';
-    if (is_scene && key === 'off') key = 'stop';
+    if (is_scene && key === 'on') { key = 'start'; }
+    if (is_scene && key === 'off') { key = 'stop'; }
 
     log.debug('Looking up action:', key);
     if (lookupObj[key] !== undefined) {
