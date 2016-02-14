@@ -144,4 +144,8 @@ router.get('/triggers', function (req, res) {
   res.send(abode.triggers.types);
 });
 
+router.all('/sources/:source/:uri', function (req, res) {
+  res.send(req.params);
+});
+
 module.exports = router;

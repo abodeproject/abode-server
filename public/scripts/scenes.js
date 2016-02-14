@@ -70,10 +70,11 @@ angular.module('scenes', ['ui.router','ngResource'])
     return defer.promise;
   };
 
-  var getScene = function (scene) {
+  var getScene = function (scene, source) {
     var defer = $q.defer();
+    var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
-    $http({ url: '/api/scenes/' + scene }).then(function (response) {
+    $http({ url: source_uri + '/scenes/' + scene }).then(function (response) {
       defer.resolve(response.data);
     }, function (err) {
       defer.reject(err);
@@ -96,7 +97,7 @@ angular.module('scenes', ['ui.router','ngResource'])
     return defer.promise;
   };
 
-  var viewScene = function (scene) {
+  var viewScene = function (scene, source) {
 
     return $uibModal.open({
       animation: true,
@@ -104,6 +105,7 @@ angular.module('scenes', ['ui.router','ngResource'])
       size: 'sm',
       controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, scenes, scene) {
         var intervals = [];
+        var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
         $scope.name = scene.name;
         $scope.scene = scene;
@@ -125,7 +127,7 @@ angular.module('scenes', ['ui.router','ngResource'])
             action = 'on';
           }
 
-          $http.post('/api/scenes/' + $scope.scene.name + '/' + action).then(function () {
+          $http.post(source_uri + '/scenes/' + $scope.scene.name + '/' + action).then(function () {
             $scope.processing = false;
             $scope.errors = false;
             $scope.scene._state = 'pending';
@@ -143,7 +145,7 @@ angular.module('scenes', ['ui.router','ngResource'])
           $scope.processing = true;
           $scope.errors = false;
 
-          $http.get('/api/scenes/' + $scope.scene.name).then(function (response) {
+          $http.get(source_uri + '/scenes/' + $scope.scene.name).then(function (response) {
             $scope.processing = false;
             $scope.errors = false;
             $scope.scene = response.data;
@@ -165,8 +167,11 @@ angular.module('scenes', ['ui.router','ngResource'])
       },
       resolve: {
         scene: function () {
-          return getScene(scene);
-        }
+          return getScene(scene, source);
+        },
+        source: function () {
+          return source;
+        },
       }
     });
 

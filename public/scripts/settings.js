@@ -4,6 +4,7 @@ angular.module('settings', ['ui.router'])
 .config(function($stateProvider, $urlRouterProvider) {
 
   $urlRouterProvider.when('/settings', '/settings/list');
+  $urlRouterProvider.when('/settings/sources', '/settings/sources/list');
 
   $stateProvider
   .state('index.settings', {
@@ -56,6 +57,38 @@ angular.module('settings', ['ui.router'])
     url: '/sources',
     templateUrl: '/views/settings/settings.sources.html',
   })
+  .state('index.settings.sources.list', {
+    url: '/list',
+    templateUrl: '/views/settings/settings.sources.list.html',
+    controller: 'sourceSettings',
+    resolve: {
+      sources: function (settings) {
+        return settings.get_sources();
+      }
+    }
+  })
+  .state('index.settings.sources.add', {
+    url: '/add',
+    templateUrl: '/views/settings/settings.sources.add.html',
+    controller: 'addSourceSettings',
+    resolve: {
+      sources: function (settings) {
+        return settings.get_sources();
+      }
+    }
+  })
+  .state('index.settings.sources.edit', {
+    url: '/:name',
+    templateUrl: '/views/settings/settings.sources.edit.html',
+    controller: 'editSourceSettings',
+    resolve: {
+      'source': function ($stateParams, $state, settings) {
+
+        return settings.get_source($stateParams.name);
+
+      }
+    }
+  })
   .state('index.settings.sensors', {
     url: '/sensors',
     templateUrl: '/views/settings/settings.sensors.html',
@@ -78,6 +111,66 @@ angular.module('settings', ['ui.router'])
   });
 })
 .service('settings', function ($q, $http, $templateCache) {
+
+  var get_sources = function () {
+    var defer = $q.defer();
+
+    $http.get('/api/sources').then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  };
+
+  var get_source = function (name) {
+    var defer = $q.defer();
+
+    $http.get('/api/sources/' + name).then(function (response) {
+      defer.resolve(response.data);
+    }, function (err) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
+  };
+
+  var save_source = function (source) {
+    var defer = $q.defer();
+
+    $http.put('/api/sources/' + source._id, source).then(function () {
+      defer.resolve();
+    }, function () {
+      defer.reject();
+    });
+
+    return defer.promise;
+  };
+
+  var add_source = function (source) {
+    var defer = $q.defer();
+
+    $http.post('/api/sources', source).then(function () {
+      defer.resolve();
+    }, function () {
+      defer.reject();
+    });
+
+    return defer.promise;
+  };
+
+  var remove_source = function (source) {
+    var defer = $q.defer();
+
+    $http.delete('/api/sources/' + source._id).then(function () {
+      defer.resolve();
+    }, function () {
+      defer.reject();
+    });
+
+    return defer.promise;
+  };
 
   var get_config = function (provider) {
     var defer = $q.defer();
@@ -151,6 +244,59 @@ angular.module('settings', ['ui.router'])
     write_config: write_config,
     get_view: get_view,
     save_view: save_view,
+    get_sources: get_sources,
+    get_source: get_source,
+    save_source: save_source,
+    add_source: add_source,
+    remove_source: remove_source,
+  };
+
+})
+.controller('sourceSettings', function ($scope, $state, settings, sources) {
+  $scope.sources = sources;
+
+  $scope.view = function (source) {
+    $state.go('index.settings.sources.edit', {'name': source.name});
+  };
+
+})
+.controller('addSourceSettings', function ($scope, $state, notifier, settings) {
+  $scope.source = {};
+
+
+  $scope.add = function () {
+    settings.add_source($scope.source).then(function () {
+      notifier.notify({'status': 'success', 'message': 'Source Added'});
+      $scope.source = {};
+    }, function (err) {
+        notifier.notify({'status': 'failed', 'message': 'Failed to add Source', 'details': err});
+      $scope.errors = err;
+    });
+  };
+
+})
+.controller('editSourceSettings', function ($scope, $state, notifier, settings, source, confirm) {
+  $scope.source = source;
+
+  $scope.save = function () {
+    settings.save_source($scope.source).then(function () {
+      notifier.notify({'status': 'success', 'message': 'Source Saved'});
+    }, function (err) {
+        notifier.notify({'status': 'failed', 'message': 'Failed to save Source', 'details': err});
+      $scope.errors = err;
+    });
+  };
+
+  $scope.remove = function () {
+    confirm('Are you sure you want to remove this Source?').then(function () {
+      settings.remove_source($scope.source).then(function () {
+        notifier.notify({'status': 'success', 'message': 'Source Removed'});
+        $state.go('index.settings.sources.list');
+      }, function (err) {
+        notifier.notify({'status': 'failed', 'message': 'Failed to remove Source', 'details': err});
+        $scope.errors = err;
+      });
+    });
   };
 
 })

@@ -89,6 +89,7 @@ Abode.init = function (config) {
     //Load out modules
     Abode.providers = require('../providers');
     Abode.auth = require('../auth');
+    Abode.sources = require('../sources');
     Abode.rooms = require('../rooms');
     Abode.devices = require('../devices');
     Abode.triggers = require('../triggers');
@@ -101,6 +102,7 @@ Abode.init = function (config) {
     loadModule('providers')(Abode.config.providers)
     .then(loadModule('web'))
     .then(loadModule('auth'))
+    .then(loadModule('sources'))
     .then(loadModule('rooms'))
     .then(loadModule('devices'))
     .then(loadModule('triggers'))
