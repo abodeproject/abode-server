@@ -10,7 +10,8 @@ angular.module('background', [])
       format: '@',
       bgA: '@',
       bgB: '@',
-      interval: '@'
+      interval: '@',
+      url: '@'
     },
     controller: function ($scope, $interval, $timeout, $state) {
 
@@ -39,7 +40,7 @@ angular.module('background', [])
 
 
         var random = new Date();
-        var uri = 'images/day.jpg?' + random.getTime();
+        var uri = $scope.url + '?' + random.getTime();
 
         $scope[bgStyles[next]]['background-image'] = 'url("' + uri + '")';
         $scope[bgStyles[previous]].transition = 'opacity 5s';
