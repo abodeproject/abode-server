@@ -625,7 +625,7 @@ angular.module('rooms', ['ui.router','ngResource'])
       };
       $scope.temperature = '?';
       $scope.temperatures = [];
-      $scope.interval = $scope.interval || 5;
+      $scope.interval = $scope.interval || 10;
 
       if ($scope.left !== undefined || $scope.right !== undefined || $scope.top !== undefined || $scope.bottom !== undefined) {
         $scope.styles.position = 'absolute;'
