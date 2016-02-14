@@ -97,8 +97,6 @@ SourceSchema.methods.proxy = function (method, uri, body) {
     'uri': uri,
   };
 
-  console.log(options);
-
   request(options, function (err, response, body) {
     if (err) {
       defer.reject({'status': 'failed', 'message': 'Failed to proxy request to source', 'details': err});
