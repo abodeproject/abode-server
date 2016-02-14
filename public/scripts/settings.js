@@ -77,7 +77,7 @@ angular.module('settings', ['ui.router'])
     templateUrl: '/views/settings/settings.advanced.html',
   });
 })
-.service('settings', function ($q, $http) {
+.service('settings', function ($q, $http, $templateCache) {
 
   var get_config = function (provider) {
     var defer = $q.defer();
@@ -136,6 +136,7 @@ angular.module('settings', ['ui.router'])
     var defer = $q.defer();
 
     $http.put('/api/abode/views/home.html', view, {headers: {'Content-Type': 'text/plain'}}).then(function (response) {
+      $templateCache.put('/api/abode/views/home.html', view);
       defer.resolve(response.data);
     }, function (err) {
       defer.reject(err);
