@@ -42,10 +42,26 @@ angular.module('abodeMonitor', [
           });
 
           return defer.promise;
+        },
+        sources: function ($q, $http) {
+          var defer = $q.defer();
+
+          $http.get('/api/sources').then(function (response) {
+            defer.resolve(response.data);
+          }, function () {
+            defer.resolve([]);
+          });
+
+          return defer.promise;
         }
       },
-      controller: function ($scope, $state, notifier) {
+      controller: function ($scope, $state, notifier, sources) {
         $scope.notifications = notifier.notifications;
+        $scope.sources = sources;
+
+        $scope.changeSource = function (source) {
+          document.location.href = source.url;
+        };
 
         $scope.goSettings = function () {
           $state.go('index.settings');

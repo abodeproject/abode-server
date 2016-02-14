@@ -93,7 +93,7 @@ SourceSchema.methods.proxy = function (method, uri, body) {
 
   var options = {
     'method': method,
-    'baseUrl': self.url,
+    'baseUrl': self.url + '/api',
     'uri': uri,
   };
 

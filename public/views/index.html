@@ -7,7 +7,23 @@
 
     </div>
     <div class="anav-top">
-    <img src="./images/home.png" style="height: 5em;">
+
+        <div class="row">
+          <div class="col-xs-4"><img src="./images/home.png" style="height: 5em;"></div>
+          <div class="col-xs-8" style="text-align: right">
+
+    <div class="btn-group" uib-dropdown is-open="status.isopen">
+      <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle ng-disabled="disabled">
+        <i class="icon-map-marker"></i> <span class="caret"></span>
+      </button>
+      <ul uib-dropdown-menu role="menu" aria-labelledby="single-button">
+        <li role="menuitem" ng-repeat="source in sources" ng-click="changeSource(source)"><a href="#">{{source.name}}</a></li>
+      </ul>
+    </div>
+
+          </div>
+        </div>
+
     </div>
     <div class="anav-mid">
       <ul>
