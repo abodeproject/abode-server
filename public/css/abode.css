@@ -252,6 +252,15 @@
   background-color: #111;
 }
 
+.room-icon-display {
+  position: absolute;
+  top: -1.5em;
+  left: 0em;
+  right: 0em;
+  text-align: center;
+  font-size: .5em;
+}
+
 .room-icon-status {
   position: absolute;
   top: -.5em;
