@@ -103,10 +103,16 @@ SourceSchema.methods.proxy = function (method, uri, body) {
       return;
     }
 
+    try {
+      var body = JSON.parse(body);
+    } catch (e) {
+      var body = '';
+    }
     defer.resolve({
       'status': response.statusCode,
-      'body': JSON.parse(body || {}),
-    })
+      'body': body,
+    });
+
   });
 
   return defer.promise;
