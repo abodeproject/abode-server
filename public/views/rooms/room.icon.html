@@ -1,6 +1,6 @@
 <div class="room-icon" ng-style="styles" ng-class="{'room-motion': state.is_motion, 'room-light': state.is_light}" ng-click="view()">
   <div class="room-icon-display" ng-show="icon && tempType"><i class="{{icon}}"></i></div>
-  <span ng-show="tempType">{{temperature}}</span>
+  <div class="room-icon-temp" ng-show="tempType">{{temperature}}</div>
   <span ng-show="icon && !tempType"><i class="{{icon}}"></i></span>
   <div class="room-icon-status room-icon-loading" ng-class="{'room-loading': state.loading}"><i class="icon-loadingalt spin"></i></div>
   <div class="room-icon-status room-icon-error" ng-class="{'room-error': state.error}"><i class="icon-warning-sign"></i></div>
