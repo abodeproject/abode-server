@@ -4,6 +4,11 @@
   z-index: 10;
 }
 
+
+.night {
+  color: #5b130b;
+}
+
 .spin {
   display: inline-block;
     -webkit-animation:spin 2s linear infinite;
@@ -25,7 +30,6 @@
     -moz-animation: spin-stop 2s ease-out;
     animation: spin-stop 2s ease-out;
 }
-
 
 .bg-dark {
   background-color: #333;
@@ -225,4 +229,137 @@
 
 .on-danger {
   background-color: rgb(231, 76, 60) !important;
+}
+
+.room-icon {
+  position: relative;
+  height: 3em;
+  width: 3em;
+  border: .2em solid #444;
+  border-radius: 1.5em;
+  line-height: 2.5em;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+  background-color: #222;
+  transition: .5s ease;
+  text-shadow: 0em 0em .3em black;
+  cursor: pointer;
+}
+
+.night .room-icon {
+  border-color: #222;
+  background-color: #111;
+}
+
+.room-icon-status {
+  position: absolute;
+  top: -.5em;
+  font-size: .5em;
+  height: 2em;
+  width: 2em;
+  line-height: 2em;
+  background-color: #333;
+  border-radius: 1em;
+  text-align: center;
+  text-shadow: 0em 0em .3em black;
+  opacity: 0;
+  color: white;
+  transition: .5s ease;
+}
+
+.room-icon-loading {
+  left: -.5em;
+}
+
+.room-loading {
+  opacity: .5;
+}
+
+.room-icon-error {
+  color: gray;
+  text-shadow: 0em 0em .2em #5b130b;
+  right: -.5em;
+}
+
+.room-error {
+  opacity: 1;
+}
+
+.room-icon-badge {
+  position: absolute;
+  bottom: -1em;
+  font-size: .5em;
+  height: 2em;
+  width: 2em;
+  line-height: 2em;
+  background-color: #333;
+  border-radius: 1em;
+  text-align: center;
+  text-shadow: 0em 0em .3em black;
+  opacity: 0;
+  transition: .5s ease;
+}
+
+.night .room-icon-badge {
+  color: #666;
+}
+
+.room-icon-openclose {
+  left: -.75em;
+}
+
+.room-icon-fan {
+  left: 1.66em;
+}
+
+.room-icon-conditioner {
+  right: -.75em;
+}
+
+.room-light {
+  background-color: #333300;
+}
+
+.room-motion {
+  border-color: #5b130b;
+}
+
+.room-openclose {
+  background-color: rgb(231, 76, 60);
+  font-weight: bold;
+  opacity: 1;
+}
+
+.night .room-openclose {
+  background-color: #5a100c;
+}
+
+.room-fan {
+  background-color: #00805f;
+  opacity: 1;
+}
+
+.night .room-fan {
+  background-color: #003326;
+}
+
+.room-heat {
+  background-color: rgb(231, 76, 60);
+  opacity: 1;
+}
+
+.night .room-heat {
+  background-color: #5a100c;
+}
+
+.room-cool {
+  background-color: #3498DB;
+  opacity: 1;
+}
+
+
+.night .room-cool {
+  background-color: #0f3a57;
+  opacity: 1;
 }

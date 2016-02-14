@@ -412,7 +412,7 @@ angular.module('rooms', ['ui.router','ngResource'])
     'remove': removeRoom,
     'getDevices': getRoomDevices,
     'addDevice': addRoomDevice,
-    'removeDevice': removeRoomDevice
+    'removeDevice': removeRoomDevice,
   };
 })
 .controller('roomsList', function ($scope, $state, rooms) {
@@ -581,5 +581,175 @@ angular.module('rooms', ['ui.router','ngResource'])
 
 })
 .controller('room', function () {
+
+})
+.directive('roomIcon', function () {
+
+  return {
+    restrict: 'E',
+    transclude: true,
+    scope: {
+      'left': '@',
+      'right': '@',
+      'top': '@',
+      'bottom': '@',
+      'width': '@',
+      'height': '@',
+      'align': '@',
+      'size': '@',
+      'room': '@',
+      'icon': '@',
+      'tempType': '@',
+      'interval': '@'
+    },
+    templateUrl: 'views/rooms/room.icon.html',
+    controller: function ($scope, $interval, $timeout, rooms) {
+      var roomTimeout,
+        cycle_timeout,
+        temp_maps = {},
+        intervals = [],
+        temp_index = -1;
+
+      $scope.loading = false;
+      $scope.devices = [];
+      $scope.styles =  {};
+      $scope.state = {
+        'is_heat': false,
+        'is_cool': false,
+        'is_fan': false,
+        'is_openclose': false,
+        'is_light': false,
+        'is_motion': false,
+        'loading': false,
+        'error': false,
+      };
+      $scope.temperature = '?';
+      $scope.temperatures = [];
+      $scope.interval = $scope.interval || 5;
+
+      if ($scope.left !== undefined || $scope.right !== undefined || $scope.top !== undefined || $scope.bottom !== undefined) {
+        $scope.styles.position = 'absolute;'
+      }
+      if ($scope.left) { $scope.styles.left = $scope.left + 'em'; }
+      if ($scope.right) { $scope.styles.right = $scope.right + 'em'; }
+      if ($scope.top) { $scope.styles.top = $scope.top + 'em'; }
+      if ($scope.bottom) { $scope.styles.bottom = $scope.bottom + 'em'; }
+
+      if ($scope.width) { $scope.styles.width = $scope.width + 'em'; }
+      if ($scope.height) { $scope.styles.height = $scope.height + 'em'; }
+      if ($scope.align) { $scope.styles['text-align'] = $scope.align; }
+      if ($scope.size) { $scope.styles['font-size'] = $scope.size + 'em'; }
+
+      if ($scope.icon) { $scope.show_icon = true}
+
+      $scope.view = function () {
+        rooms.view($scope.room);
+      };
+
+      temp_maps.cycle = function () {
+        if (cycle_timeout !== undefined) {
+          return;
+        }
+
+        var next = function () {
+          temp_index += 1;
+          if ($scope.temperatures.length <= temp_index) { temp_index = 0; }
+
+          $scope.temperature = parseInt($scope.temperatures[temp_index], 10);
+        }
+
+        next();
+        cycle_timeout = $interval(next, 4000);
+      };
+
+      temp_maps.average = function () {
+        var total = $scope.temperatures.length;
+        var sum = 0;
+
+        $scope.temperatures.forEach(function (t) { sum += t; });
+
+        $scope.temperature = parseInt(sum / total, 10);
+      };
+
+      temp_maps.high = function () {
+        var high = 0;
+
+        $scope.temperatures.forEach(function (temp) {
+          if (temp > high) { high = temp; }
+        });
+
+        $scope.temperature = parseInt(high, 10);
+      };
+
+      temp_maps.low = function () {
+        var low = 1000;
+
+        $scope.temperatures.forEach(function (temp) {
+          if (temp < low) { low = temp; }
+        });
+
+        $scope.temperature = parseInt(low, 10);
+      };
+
+      var check_state = function (capability, key, value) {
+        var is_state = $scope.devices.filter(function (dev) {
+          return (dev.capabilities.indexOf(capability) !== -1 && dev[key] === value);
+        });
+
+        return is_state.length;
+      };
+
+      var get_temps = function () {
+        var temps = $scope.devices.filter(function (dev) {
+          return (dev.capabilities.indexOf('temperature_sensor') !== -1);
+        });
+
+        temps = temps.map(function (d) {
+          return d._temperature || 0;
+        });
+
+        return temps;
+      }
+
+      var getRoom = function () {
+        $scope.state.loading = true;
+        rooms.getDevices($scope.room).then(function (devices) {
+          $scope.devices = devices;
+          $scope.state.is_light = check_state('light', '_on', true);
+          $scope.state.is_motion = check_state('motion_sensor', '_on', true);
+          $scope.state.is_fan = check_state('fan', '_on', true);
+          $scope.state.is_heat = check_state('conditioner', '_mode', 'HEAT');
+          $scope.state.is_cool = check_state('conditioner', '_mode', 'COOL');
+          $scope.state.is_openclose = check_state('openclose', '_on', true);
+
+          if (temp_maps[$scope.tempType]) {
+            $scope.temperatures = get_temps();
+            temp_maps[$scope.tempType]();
+          }
+
+          $scope.state.loading = false;
+          $scope.state.error = false;
+
+          roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
+        }, function () {
+          $scope.state.loading = false;
+          $scope.state.error = true;
+          roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
+        });
+      };
+
+      getRoom();
+
+      roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
+
+      $scope.$on('$destroy', function () {
+        $timeout.cancel(roomTimeout);
+        $interval.cancel(cycle_timeout);
+        intervals.forEach($interval.cancel);
+      });
+
+    },
+    replace: true,
+  };
 
 });
