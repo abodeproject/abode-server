@@ -15,17 +15,20 @@ angular.module('weather', ['datetime'])
 
   };
 
-  var parseWeather = function (device) {
+  var parseWeather = function (device, source) {
 
     return function (response) {
-      devices[device] = response.data;
+      devices[source][device] = response.data;
     };
 
   };
 
-  var getWeather = function (device) {
+  var getWeather = function (device, source) {
 
-    $http({ url: '/api/devices/' + device }).then(parseWeather(device), errorResponse(device));
+
+    var source_uri = (source === undefined || source === 'local') ? '/api' : '/api/sources/' + source;
+
+    $http.get(source_uri +  '/devices/' + device ).then(parseWeather(device, source), errorResponse(device));
 
   };
 
@@ -35,7 +38,11 @@ angular.module('weather', ['datetime'])
       return;
     }
 
-    Object.keys(devices).forEach(getWeather);
+    Object.keys(devices).forEach(function (source) {
+      Object.keys(devices[source]).forEach(function (device) {
+        getWeather(device, source);
+      });
+    });
   };
 
   var register_state = function(state) {
@@ -47,10 +54,14 @@ angular.module('weather', ['datetime'])
   updater = $interval(load, 1000 * 60);
 
   return {
-    add_device: function (device) {
+    add_device: function (device, source) {
+      var src = (source) ? source : 'local';
 
-      if (devices[device] === undefined) {
-        devices[device] = {};
+      if (devices[src] === undefined) {
+        devices[src] = {};
+      }
+      if (devices[src][device] === undefined) {
+        devices[src][device] = {};
       }
 
       if (loader !== undefined) {
@@ -59,8 +70,9 @@ angular.module('weather', ['datetime'])
 
       loader = $timeout(load, 500);
     },
-    get: function (device) {
-      return devices[device];
+    get: function (device, source) {
+      var src = (source) ? source : 'local';
+      return devices[src][device];
     },
     register: register_state
   };
@@ -84,6 +96,7 @@ angular.module('weather', ['datetime'])
       height: '@',
       size: '@',
       align: '@',
+      source: '@',
     },
     controllerAs: 'weather',
     controller: function ($scope, $interval, $http, $element, $transclude, $state, weather, datetime) {
@@ -96,7 +109,7 @@ angular.module('weather', ['datetime'])
         current: {},
         forecast: {},
       };
-      weather.add_device($scope.device);
+      weather.add_device($scope.device, $scope.source);
       weather.register($state.current.name);
 
       if ($scope.left !== undefined) {
@@ -191,7 +204,7 @@ angular.module('weather', ['datetime'])
         $scope.time = datetime.get();
         var tod = ($scope.time.is.night) ? 'night' : 'day';
 
-        var data = weather.get($scope.device);
+        var data = weather.get($scope.device, $scope.source);
 
         $scope.current = data._weather;
         $scope.forecast = data._forecast;
