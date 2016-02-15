@@ -332,10 +332,18 @@
 }
 
 .room-light {
+  background-color: #f39c12 !important;
+}
+
+.night .room-light {
   background-color: #333300 !important;
 }
 
 .room-motion {
+  border-color: #5a100c !important;
+}
+
+.night .room-motion {
   border-color: #5b130b !important;
 }
 
