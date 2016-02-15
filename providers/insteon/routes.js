@@ -1,6 +1,6 @@
 'use strict';
 
-var device = require('../../devices'),
+var devices = require('../../devices'),
   insteon = require('../insteon'),
   express = require('express'),
   router = express.Router();
