@@ -105,6 +105,29 @@ angular.module('devices', ['ui.router','ngResource'])
     return defer.promise;
   };
 
+  var openCamera = function (device, source) {
+    return $uibModal.open({
+      animation: true,
+      templateUrl: 'views/devices/devices.camera.html',
+      size: 'lg',
+      controller: function ($scope, $uibModalInstance) {
+        var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
+
+        $scope.device = device;
+
+        $scope.ok = function () {
+          $uibModalInstance.close();
+        };
+
+        if (device.config.video_url) {
+          $scope.camera_url = source_uri + '/devices/' + device._id + '/video';
+        } else {
+          $scope.camera_url = source_uri + '/devices/' + device._id + '/image';
+        }
+      }
+    });
+  }
+
   var openDevice =function (device, source) {
 
     return $uibModal.open({
@@ -143,6 +166,10 @@ angular.module('devices', ['ui.router','ngResource'])
           return (c.name.indexOf('_sensor') === -1);
 
         });
+
+        $scope.openVideo = function (device) {
+          openCamera(device, source);
+        }
 
         $scope.has_capability = function (capability) {
           var match = $scope.capabilities.filter(function (c) {
