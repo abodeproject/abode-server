@@ -114,7 +114,8 @@ angular.module('abodeMonitor', [
       }
     });
   })
-  .controller('main', function($rootScope, $scope, $http, $interval) {
+  .controller('main', function($rootScope, $scope, $http, $interval, confirm) {
+    var attempt = 0;
     $scope.anav_visible = false;
 
     $scope.anav_hide = function () {
@@ -128,9 +129,10 @@ angular.module('abodeMonitor', [
       $scope.anav_hide();
     });
 
-    $rootScope.$on('$stateChangeError', function () {
-      console.log('state change error');
-      console.dir(arguments);
+    $rootScope.$on('$stateChangeError', function (from, to) {
+      confirm('Failed to load page, retry?').then(function () {
+        document.location.reload();
+      });
     });
 
     $rootScope.$on('$stateNotFound', function () {

@@ -240,13 +240,70 @@ html, body, .container-table {
   100% { color: #aaa; -webkit-transform: rotate(360deg); transform:rotate(360deg); }
 }
 
+.fader1 {
+    -webkit-animation:fader1 3s linear infinite;
+    -moz-animation:fader1 3s linear infinite;
+    animation:fader1 3s linear infinite;
+}
+
+.fader2 {
+    -webkit-animation:fader2 3s linear infinite;
+    -moz-animation:fader2 3s linear infinite;
+    animation:fader2 3s linear infinite;
+}
+
+.fader3 {
+    -webkit-animation:fader2 3s linear infinite;
+    -moz-animation:fader2 3s linear infinite;
+    animation:fader2 3s linear infinite;
+}
+
+@-moz-keyframes fader1 {
+  25% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@-webkit-keyframes fader1 {
+  25% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes fader1 {
+  25% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+
+@-moz-keyframes fader2 {
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@-webkit-keyframes fader2 {
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes fader2 {
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@-moz-keyframes fader3 {
+  75% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@-webkit-keyframes fader3 {
+  75% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes fader3 {
+  75% { opacity: 0; }
+  100% { opacity: 1; }
+}
 </style>
 </head>
 <body ng-controller="main" ng-swipe-right="anav_show()" ng-swipe-left="anav_hide()" ui-view>
   <div class="view">
     <div class="vertical-align">
-      <div><i class="icon-loadingflowcw loader"></i> Loading...</div>
-      <div><button onclick="document.location.href=document.location.href" class="btn btn-default"><i class="icon-refresh"></i> Reload</button></div>
+      <div><i class="icon-loadingflowcw loader"></i> Loading<span class="fader1">.</span><span class="fader2">.</span><span class="fader3">.</span></div>
+      <div><button onclick="document.location.reload();" class="btn btn-default"><i class="icon-refresh"></i> Reload</button></div>
     </div>
   </div>
 </body>
