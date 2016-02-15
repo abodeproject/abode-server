@@ -632,7 +632,7 @@ angular.module('rooms', ['ui.router','ngResource'])
         var camera = $scope.cameras[$scope.index];
         var device = $scope.devices.filter(function (dev) {return dev._id === camera._id});
 
-        devices.openCamera(device[0]);
+        devices.openCamera(device[0], $scope.source);
       }
 
       $scope.$watch('devices', function () {
