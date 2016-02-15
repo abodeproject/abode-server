@@ -71,11 +71,8 @@ router.all(/^\/([^\/]+)\/(.+)$/, function (req, res) {
     return;
   }
 
-  source.proxy(req.method, req.params[1], req.body).then(function (response) {
-    res.status(response.status).send(response.body);
-  }, function (err) {
-    res.status(422).send(err);
-  });
+  source.proxy(req.method, req.params[1], req.body).pipe(res);
+
 });
 
 module.exports = router;

@@ -97,25 +97,7 @@ SourceSchema.methods.proxy = function (method, uri, body) {
     'uri': uri,
   };
 
-  request(options, function (err, response, body) {
-    if (err) {
-      defer.reject({'status': 'failed', 'message': 'Failed to proxy request to source', 'details': err});
-      return;
-    }
-
-    try {
-      var body = JSON.parse(body);
-    } catch (e) {
-      var body = '';
-    }
-    defer.resolve({
-      'status': response.statusCode,
-      'body': body,
-    });
-
-  });
-
-  return defer.promise;
+  return request(options);
 };
 
 Sources.model = mongoose.model('Sources', SourceSchema);

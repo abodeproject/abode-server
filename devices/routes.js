@@ -8,6 +8,7 @@ var fs = require('fs'),
   express = require('express'),
   logger = require('log4js'),
   log = logger.getLogger('devices'),
+  request = require('request'),
   router = express.Router();
 
 router.get('/logs', function (req, res) {
@@ -76,6 +77,34 @@ router.get('/:id/image', function (req, res) {
 
   var path = fs.realpathSync(device._image);
   res.sendFile(path);
+
+});
+
+router.get('/:id/video', function (req, res) {
+  var auth,
+    device = devices.get(req.params.id);
+
+  if (!device) {
+    log.debug('Record not found: ', req.params.id);
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  if (!device.config.video_url) {
+    res.status(404).send({'status': 'failed', 'message': 'No Video Path Found'});
+    return;
+  }
+
+  if (device.config.username) {
+    auth = {
+      auth: {
+        user: device.config.username,
+        pass: device.config.password,
+      }
+    };
+  }
+
+  request.get(device.config.video_url, auth).pipe(res);
 
 });
 
