@@ -8,6 +8,46 @@ var actions = function (config, provider) {
   insteon = provider;
 
   return {
+    DIRECT_START_LINKING: {
+      'arguments': [
+        {
+          'name': 'Device',
+          'type': 'options',
+          'options': insteon.dev_names
+        }
+      ],
+      'handler': function (dev) {
+        var config;
+
+        config = {
+          'to': dev,
+          'cmd_1': 0x09,
+          'cmd_2': 0x00
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
+      }
+    },
+    DIRECT_START_UNLINKING: {
+      'arguments': [
+        {
+          'name': 'Device',
+          'type': 'options',
+          'options': insteon.dev_names
+        }
+      ],
+      'handler': function (dev) {
+        var config;
+
+        config = {
+          'to': dev,
+          'cmd_1': 0x0A,
+          'cmd_2': 0x00
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
+      }
+    },
     LIGHT_LEVEL: {
       'arguments': [
         {
