@@ -595,6 +595,70 @@ angular.module('rooms', ['ui.router','ngResource'])
 .controller('room', function () {
 
 })
+.directive('roomCameras', function () {
+
+  return {
+    restrict: 'E',
+    transclude: true,
+    replace: true,
+    scope: {
+      'devices': '=',
+      'source': '=',
+    },
+    templateUrl: 'views/rooms/rooms.cameras.html',
+    controller: function ($scope, devices) {
+      var source_uri = ($scope.source === undefined) ? '/api' : '/api/sources/' + $scope.source;
+
+      $scope.devices = $scope.devices || [];
+      $scope.cameras = [];
+      $scope.index = 0;
+
+      $scope.next = function () {
+        if ($scope.index >= $scope.cameras.length - 1) {
+          $scope.index = 0;
+        } else {
+          $scope.index += 1;
+        }
+      }
+      $scope.previous = function () {
+        if ($scope.index == 0) {
+          $scope.index = $scope.cameras.length - 1;
+        } else {
+          $scope.index -= 1;
+        }
+      }
+
+      $scope.play = function () {
+        var camera = $scope.cameras[$scope.index];
+        var device = $scope.devices.filter(function (dev) {return dev._id === camera._id});
+
+        devices.openCamera(device[0]);
+      }
+
+      $scope.$watch('devices', function () {
+        var cameras = [];
+        $scope.devices.forEach(function (device) {
+          if (device.config.image_url) {
+            var camera = {
+              '_id': device._id,
+              'name': device.name,
+              'image': source_uri + '/devices/' + device._id + '/image'
+            };
+
+            if (device.config.video_url) {
+              camera.video = source_uri + '/devices/' + device._id + '/video';
+            }
+
+            cameras.push(camera);
+          }
+        });
+
+        $scope.cameras = cameras;
+      });
+
+    }
+  }
+})
 .directive('roomIcon', function () {
 
   return {

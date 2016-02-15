@@ -478,7 +478,8 @@ angular.module('devices', ['ui.router','ngResource'])
     'getRooms': getDeviceRooms,
     'addRoom': addDeviceRoom,
     'removeRoom': removeDeviceRoom,
-    'openDevice': openDevice
+    'openDevice': openDevice,
+    'openCamera': openCamera
   };
 })
 .controller('devicesList', function ($scope, $state, devices) {
