@@ -10,6 +10,7 @@
         <ul class="list-group" ng-hide="loading">
           <li class="list-group-item" style="cursor: pointer;" ng-click="view(device)" ng-repeat="device in devices | orderBy: '+name'">
             <i class="icon-fan" ng-show="has_capability(device, 'fan')"></i>
+            <i class="icon-videocamerathree" ng-show="has_capability(device, 'camera')"></i>
             <i class="icon-lightbulb-idea" ng-show="has_capability(device, 'light')"></i>
             <i class="icon-monitor" ng-show="has_capability(device, 'display')"></i>
             <i class="fi-window" ng-show="has_capability(device, 'window')"></i>

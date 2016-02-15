@@ -7,6 +7,9 @@
     </h4>
 </div>
 <div class="modal-body">
+  <div>
+    <img ng-repeat="camera in cameras" src="/api/devices/{{camera.name}}/image" style="width: 100%">
+  </div>
   <div class="row">
     <div class="col-xs-2">
       <div class="room_filter" ng-click="filter('light')" ng-class="{selected: filter_condition =='light'}">

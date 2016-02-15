@@ -179,6 +179,7 @@ angular.module('rooms', ['ui.router','ngResource'])
         $scope.room = room;
         $scope.devices = [];
         $scope.scenes = [];
+        $scope.cameras = [];
         $scope.open = devices.openDevice;
         $scope.filter_counts = {};
         $scope.on_counts = {};
@@ -258,6 +259,8 @@ angular.module('rooms', ['ui.router','ngResource'])
             }
             return false;
           });
+
+          $scope.cameras = $scope.devices.filter(function (d) { return d.capabilities.indexOf('camera') !== -1});
 
           $scope.room_temperature = parseInt(temp / temp_count, 10) || ' ';
 

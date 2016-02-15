@@ -1,6 +1,7 @@
 'use strict';
 
-var abode = require('../abode'),
+var fs = require('fs'),
+  abode = require('../abode'),
   devices = abode.devices,
   rooms = abode.rooms,
   web = require('../web'),
@@ -63,6 +64,19 @@ router.get('/:id', function (req, res) {
   res.send(device);
 
   res.end();
+});
+
+router.get('/:id/image', function (req, res) {
+  var device = devices.get(req.params.id);
+  if (!device) {
+    log.debug('Record not found: ', req.params.id);
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  var path = fs.realpathSync(device._image);
+  res.sendFile(path);
+
 });
 
 router.get('/:id/logs', function (req, res) {

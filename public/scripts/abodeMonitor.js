@@ -17,6 +17,7 @@ angular.module('abodeMonitor', [
   'ifttt',
   'rad',
   'video',
+  'camera',
   'radiothermostat',
   'ui.router',
   'ngTouch'])

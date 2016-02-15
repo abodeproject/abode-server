@@ -34,11 +34,12 @@ var Scenes = function () {
     Scenes._scenes.forEach(function (scene) {
       if (scene._on) {
         log.info('Scene was previously on, restarting:', scene.name);
-        scene.on();
+        scene.start();
       }
     });
     defer.resolve();
   }, function (err) {
+    console.log(err);
     defer.reject(err);
   });
 
@@ -324,6 +325,14 @@ SceneSchema.methods.start = function () {
       if (!self.onoff) {
         self._state = 'stopped';
         self._on = false;
+
+        self._save().then(function () {
+          log.info('Scene completed, updating:', self.name);
+          defer.resolve({'status': 'success'});
+        }, function (err) {
+          log.error('Failed to update scene after completing: ', err);
+        });
+
       } else {
 
         self._state = 'active';

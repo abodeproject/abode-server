@@ -1,6 +1,7 @@
 node_modules/*
 public/vendor/*
 config.ini
+public/cameras/*
 public/webcam*
 public/images/day.jpg
 views/*.html

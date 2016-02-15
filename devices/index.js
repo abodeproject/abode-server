@@ -54,6 +54,7 @@ Devices.capabilities = [
   'video',
   'onoff',
   'display',
+  'camera',
 ];
 Devices._devices = [];
 Devices.logs = mongoose.model('DeviceLogs', DeviceLogSchema);
@@ -77,6 +78,8 @@ var DeviceSchema = mongoose.Schema({
     }
   }]},
   'provider': String,
+  '_image': String,
+  '_video': String,
   'last_on': Date,
   'last_off': Date,
   'active': {'type': Boolean, 'default': true},
