@@ -77,6 +77,10 @@ var Web = function () {
 Web.check_auth = function (ip, uri, auth, session) {
   var allowed = false;
 
+  if (ip === '::1') {
+    return true;
+  }
+
   abode.config.allow_networks.forEach(function (net) {
 
     allowed = (addr(net).contains(addr(ip))) ? true : allowed;
