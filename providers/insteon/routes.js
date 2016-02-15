@@ -62,7 +62,7 @@ router.get('/linking/last', function (req, res) {
 
 router.post('/devices/:id/start_linking', function (req, res) {
 
-  var device = devices.get(req.param.id);
+  var device = devices.get(req.params.id);
 
   if (!device) {
     log.debug('Device not found: ', req.params.id);
@@ -80,7 +80,7 @@ router.post('/devices/:id/start_linking', function (req, res) {
 
 router.post('/devices/:id/start_unlinking', function (req, res) {
 
-  var device = devices.get(req.param.id);
+  var device = devices.get(req.params.id);
 
   if (!device) {
     log.debug('Device not found: ', req.params.id);
