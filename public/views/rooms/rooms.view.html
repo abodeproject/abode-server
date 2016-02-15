@@ -28,6 +28,7 @@
     </li>
     <li class="list-group-item" style="cursor: pointer" ng-repeat="device in devices | orderBy: ['-_on', '+age', '+name']" ng-class="{'list-group-item-success': device_state(device, '_on', true, ['light', 'display', 'fan']), 'list-group-item-danger': device_state(device, '_on', true, ['door', 'window', 'motion_sensor']) || device._mode == 'HEAT', 'list-group-item-info': device._mode == 'COOL'}" ng-click="open(device.name)" ng-show="check_filter(device)">
       <h5 class="list-group-item-heading">
+        <i class="icon-videocamerathree" ng-show="has_capability(device, 'camera')"></i>
         <i class="icon-fan" ng-show="has_capability(device, 'fan')"></i>
         <i class="icon-lightbulb-idea" ng-show="has_capability(device, 'light')"></i>
         <i class="icon-monitor" ng-show="has_capability(device, 'display')"></i>
