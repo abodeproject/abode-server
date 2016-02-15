@@ -332,11 +332,11 @@
 }
 
 .room-light {
-  background-color: #333300;
+  background-color: #333300 !important;
 }
 
 .room-motion {
-  border-color: #5b130b;
+  border-color: #5b130b !important;
 }
 
 .room-openclose {
