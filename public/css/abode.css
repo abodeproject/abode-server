@@ -245,6 +245,13 @@
   transition: .5s ease;
   text-shadow: 0em 0em .3em black;
   cursor: pointer;
+  color: #777;
+  margin: 0em .1em;
+  box-shadow: 0em 0em .2em black;
+}
+
+.room-icon.active {
+  color: inherit;
 }
 
 .night .room-icon {
@@ -320,7 +327,7 @@
 }
 
 .room-icon-openclose {
-  left: -.75em;
+  left: -.4em;
 }
 
 .room-icon-fan {
@@ -328,11 +335,11 @@
 }
 
 .room-icon-conditioner {
-  right: -.75em;
+  right: -.4em;
 }
 
 .room-light {
-  background-color: #f39c12 !important;
+  background-color: #c27b0a !important;
 }
 
 .night .room-light {
@@ -341,6 +348,7 @@
 
 .room-motion {
   border-color: #5a100c !important;
+  box-shadow: 0em 0em .2em white;
 }
 
 .night .room-motion {
