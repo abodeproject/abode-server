@@ -101,6 +101,10 @@ angular.module('abodeMonitor', [
       controller: function ($scope, $state, auth) {
         $scope.user = {};
 
+        $scope.home = function () {
+          $state.go('index.home');
+        };
+
         $scope.login = function () {
 
           auth.login($scope.user).then(function () {
