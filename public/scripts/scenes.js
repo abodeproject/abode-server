@@ -291,6 +291,7 @@ angular.module('scenes', ['ui.router','ngResource'])
   $scope.alerts = [];
   $scope.rooms = [];
   $scope.loading = false;
+  $scope.section = 'general';
 
   if (!scene) {
     $state.go('index.scenes.list');

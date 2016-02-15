@@ -477,6 +477,7 @@ angular.module('rooms', ['ui.router','ngResource'])
   $scope.alerts = [];
   $scope.devices = [];
   $scope.loading = false;
+  $scope.section = 'general';
 
   if (!room) {
     $state.go('index.rooms.list');

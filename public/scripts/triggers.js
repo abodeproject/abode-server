@@ -685,6 +685,7 @@ angular.module('triggers', ['ui.router','ngResource'])
   $scope.delay = ($scope.trigger.delay && $scope.trigger.delay.time > 0) ? true : false;
   $scope.duration = ($scope.trigger.duration && $scope.trigger.duration.time > 0) ? true : false;
   $scope.devices_loading = true;
+  $scope.section = 'general';
 
   $scope.addAction = triggers.addAction;
   $scope.editAction = triggers.editAction;

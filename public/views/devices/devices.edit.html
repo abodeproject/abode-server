@@ -78,7 +78,7 @@
                   <div ng-show="section=='triggers'">
                     <div ng-show="loading_triggers"><i class="icon-refresh spin"></i> Loading Triggers</div>
                     <div class="form-group" ng-hide="loading">
-                      <label for="name">Scenes </label>
+                      <label for="name">Triggers </label>
                       <button class="btn btn-success btn-xs pull-right" ng-click="addTrigger()"><i class="icon-plus-sign"></i> Assign</button>
                       <ul class="list-group">
                         <li class="list-group-item" ng-repeat="trigger in triggers">{{trigger.name}} <button class="pull-right btn btn-default btn-xs" ng-click="removeScene(trigger._id)"><i class="icon-remove-sign"></i> Unassign</button></li>
