@@ -4,6 +4,8 @@ var devices = require('../../devices'),
   insteon = require('../insteon'),
   express = require('express'),
   router = express.Router();
+var logger = require('log4js'),
+  log = logger.getLogger('insteon');
 
 router.get('/', function (req, res) {
 
