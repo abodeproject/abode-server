@@ -78,14 +78,16 @@ Web.check_auth = function (ip, uri, auth, session) {
   var allowed = false;
 
   if (ip === '::1') {
-    return true;
+    allowed = true;
+  } else {
+
+    abode.config.allow_networks.forEach(function (net) {
+
+      allowed = (addr(net).contains(addr(ip))) ? true : allowed;
+
+    });
+
   }
-
-  abode.config.allow_networks.forEach(function (net) {
-
-    allowed = (addr(net).contains(addr(ip))) ? true : allowed;
-
-  });
 
   if (allowed) { session.auth = true; return true; }
 
