@@ -1,6 +1,7 @@
 'use strict';
 
-var insteon = require('../insteon'),
+var device = require('../../devices'),
+  insteon = require('../insteon'),
   express = require('express'),
   router = express.Router();
 
@@ -54,6 +55,42 @@ router.get('/linking/last', function (req, res) {
   } else {
     res.status(404).status({'status': 'failed'});
   }
+
+});
+
+router.post('/devices/:id/start_linking', function (req, res) {
+
+  var device = devices.get(req.param.id);
+
+  if (!device) {
+    log.debug('Device not found: ', req.params.id);
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  insteon.queue('DIRECT_START_LINKING', device).then(function () {
+    res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).status({'status': 'failed', 'message': 'Failed to start linking on device', 'details': err});
+  });
+
+});
+
+router.post('/devices/:id/start_unlinking', function (req, res) {
+
+  var device = devices.get(req.param.id);
+
+  if (!device) {
+    log.debug('Device not found: ', req.params.id);
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  insteon.queue('DIRECT_START_UNLINKING', device).then(function () {
+    res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).status({'status': 'failed', 'message': 'Failed to stop linking on device', 'details': err});
+  });
 
 });
 
