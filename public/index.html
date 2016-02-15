@@ -210,12 +210,44 @@ html, body, .container-table {
     bottom: 0em;
     left: 0em;
     right: 0em;
+    text-align: center;
+    font-size: 3em;
+    color: #aaa;
   }
+  .vertical-align {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+.loader {
+  display: inline-block;
+    -webkit-animation:loader 1.5s linear infinite;
+    -moz-animation:loader 1.5s linear infinite;
+    animation:loader 1.5s linear infinite;
+}
+
+@-moz-keyframes loader {
+  50% { color: #3498DB; -moz-transform: rotate(180); }
+  100% { color: #aaa; -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes loader {
+  50% { color: #3498DB; -webkit-transform: rotate(180); }
+  100% { color: #aaa; -webkit-transform: rotate(360deg); }
+}
+@keyframes loader {
+  50% { color: #3498DB; -webkit-transform: rotate(180); transform:rotate(1808); }
+  100% { color: #aaa; -webkit-transform: rotate(360deg); transform:rotate(360deg); }
+}
+
 </style>
 </head>
 <body ng-controller="main" ng-swipe-right="anav_show()" ng-swipe-left="anav_hide()" ui-view>
   <div class="view">
-    <i class="glyphicon glyphicon-refresh"></i> Loading...
+    <div class="vertical-align">
+      <div><i class="icon-loadingflowcw loader"></i> Loading...</div>
+      <div><button onclick="document.location.href=document.location.href" class="btn btn-default"><i class="icon-refresh"></i> Reload</button></div>
+    </div>
   </div>
 </body>
 </html>
