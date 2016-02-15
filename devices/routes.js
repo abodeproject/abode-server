@@ -104,7 +104,20 @@ router.get('/:id/video', function (req, res) {
     };
   }
 
-  request.get(device.config.video_url, auth).pipe(res);
+  try {
+    request.get(device.config.video_url, auth)
+    .on('error', function (err) {
+      log.error('Error proxying connection to device:', device.name, err);
+      try {
+        res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
+      } catch (e) {
+        res.end();
+      }
+    })
+    .pipe(res);
+  } catch (e) {
+    log.error('Video proxy died:', e);
+  }
 
 });
 

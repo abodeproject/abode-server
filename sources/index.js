@@ -97,7 +97,11 @@ SourceSchema.methods.proxy = function (method, uri, body) {
     'uri': uri,
   };
 
+  try {
   return request(options);
+} catch (e) {
+  return false;
+}
 };
 
 Sources.model = mongoose.model('Sources', SourceSchema);

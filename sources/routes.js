@@ -4,6 +4,8 @@ var sources = require('../sources'),
   web = require('../web'),
   express = require('express'),
   router = express.Router();
+var logger = require('log4js'),
+  log = logger.getLogger('sources');
 
 router.get('/', function (req, res) {
   res.send(sources.list());
@@ -71,7 +73,20 @@ router.all(/^\/([^\/]+)\/(.+)$/, function (req, res) {
     return;
   }
 
-  source.proxy(req.method, req.params[1], req.body).pipe(res);
+  try {
+    source.proxy(req.method, req.params[1], req.body)
+    .on('error', function (err) {
+      log.error('Error proxying connection to source:', source.name, err);
+      try {
+        res.status(502).send({'status': 'failed', 'message': 'Error connecting to source', 'details': err});
+      } catch (e) {
+        res.end();
+      }
+    })
+    .pipe(res);
+  } catch (e) {
+    log.error('Proxy connection died:', e);
+  }
 
 });
 

@@ -6,6 +6,8 @@ var fs = require('fs'),
   abode = require('../../abode'),
   express = require('express'),
   router = express.Router();
+var logger = require('log4js'),
+  log = logger.getLogger('camera');
 
 router.get('/', function (req, res) {
 
@@ -56,7 +58,17 @@ router.get('/:id/video', function (req, res) {
     };
   }
 
-  request.get(camera.video_url, auth).pipe(res);
+
+  request.get(camera.video_url, auth)
+  .on('error', function (err) {
+    log.error('Error proxying connection to camera:', camera.name, err);
+    try {
+      res.status(502).send({'status': 'failed', 'message': 'Error connecting to camera', 'details': err});
+    } catch (e) {
+      res.end();
+    }
+  })
+  .pipe(res);
 
 });
 

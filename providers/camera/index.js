@@ -92,27 +92,31 @@ Camera.get_status = function (device) {
     };
   }
 
-  request.get(device.config.image_url, auth)
-    .on('response', function(response) {
+  try {
+    request.get(device.config.image_url, auth)
+      .on('response', function(response) {
 
-      if (response.statusCode === 401) {
-        log.error('Failed to authorize with camera:', device.name);
-        defer.reject({'status': 'failed', 'message': 'Failed to authorize with camera:' + device.name});
-        return;
-      }
+        if (response.statusCode === 401) {
+          log.error('Failed to authorize with camera:', device.name);
+          defer.reject({'status': 'failed', 'message': 'Failed to authorize with camera:' + device.name});
+          return;
+        }
 
-      if (response.statusCode !== 200) {
-        log.error('Failed to request camera snapshot:', device.name);
-        defer.reject({'status': 'failed', 'message': 'Failed to request with camera snapshot:' + device.name});
-        return;
-      }
-      device._image = config.image_path + '/' + device._id + '.jpg';
-      device._save();
-    })
-    .on('error', function (err) {
-      console.log(err);
-    })
-    .pipe(fs.createWriteStream(config.image_path + '/' + device._id + '.jpg'));
+        if (response.statusCode !== 200) {
+          log.error('Failed to request camera snapshot:', device.name);
+          defer.reject({'status': 'failed', 'message': 'Failed to request with camera snapshot:' + device.name});
+          return;
+        }
+        device._image = config.image_path + '/' + device._id + '.jpg';
+        device._save();
+      })
+      .on('error', function (err) {
+        console.log(err);
+      })
+      .pipe(fs.createWriteStream(config.image_path + '/' + device._id + '.jpg'));
+  } catch (e) {
+    log.error('Connection died getting image:', e);
+  }
   defer.resolve();
 
 
