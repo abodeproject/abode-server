@@ -34,7 +34,9 @@ router.get('/:id/image', function (req, res) {
 
 router.get('/:id/video', function (req, res) {
 
-  var camera = cameras.get(req.params.id);
+  var auth,
+    camera = cameras.get(req.params.id);
+
   if (!camera) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
     return;
