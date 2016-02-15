@@ -78,6 +78,24 @@ router.post('/devices/:id/start_linking', function (req, res) {
 
 });
 
+router.post('/devices/:id/add_to_group', function (req, res) {
+
+  var device = devices.get(req.params.id);
+
+  if (!device) {
+    log.debug('Device not found: ', req.params.id);
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  insteon.queue('DIRECT_ADD_TO_GROUP', device).then(function () {
+    res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).status({'status': 'failed', 'message': 'Failed to start linking on device', 'details': err});
+  });
+
+});
+
 router.post('/devices/:id/start_unlinking', function (req, res) {
 
   var device = devices.get(req.params.id);
@@ -92,6 +110,24 @@ router.post('/devices/:id/start_unlinking', function (req, res) {
     res.send({'status': 'success'});
   }, function (err) {
     res.status(400).status({'status': 'failed', 'message': 'Failed to stop linking on device', 'details': err});
+  });
+
+});
+
+router.post('/devices/:id/remove_from_group', function (req, res) {
+
+  var device = devices.get(req.params.id);
+
+  if (!device) {
+    log.debug('Device not found: ', req.params.id);
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  insteon.queue('DIRECT_REMOVE_FROM_GROUP', device).then(function () {
+    res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).status({'status': 'failed', 'message': 'Failed to start linking on device', 'details': err});
   });
 
 });

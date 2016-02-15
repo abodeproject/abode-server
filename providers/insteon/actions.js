@@ -28,6 +28,31 @@ var actions = function (config, provider) {
         return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
       }
     },
+    DIRECT_ADD_TO_GROUP: {
+      'arguments': [
+        {
+          'name': 'Device',
+          'type': 'options',
+          'options': insteon.dev_names
+        },
+        {
+          'name': 'Group',
+          'type': 'number'
+        }
+      ],
+      'handler': function (dev, level) {
+        var config;
+
+        level = (level === undefined) ? 0 : level;
+        config = {
+          'to': dev,
+          'cmd_1': 0x01,
+          'cmd_2': level
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
+      }
+    },
     DIRECT_START_UNLINKING: {
       'arguments': [
         {
@@ -43,6 +68,31 @@ var actions = function (config, provider) {
           'to': dev,
           'cmd_1': 0x0A,
           'cmd_2': 0x00
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
+      }
+    },
+    DIRECT_REMOVE_FROM_GROUP: {
+      'arguments': [
+        {
+          'name': 'Device',
+          'type': 'options',
+          'options': insteon.dev_names
+        },
+        {
+          'name': 'Group',
+          'type': 'number'
+        }
+      ],
+      'handler': function (dev, level) {
+        var config;
+
+        level = (level === undefined) ? 0 : level;
+        config = {
+          'to': dev,
+          'cmd_1': 0x02,
+          'cmd_2': level
         };
 
         return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
