@@ -204,7 +204,7 @@ html, body, .container-table {
     z-index: 9999;
     background: transparent;
   }
-  .view {
+  .loadingPage {
     position: absolute;
     top: 0em;
     bottom: 0em;
@@ -300,7 +300,7 @@ html, body, .container-table {
 </style>
 </head>
 <body ng-controller="main" ng-swipe-right="anav_show()" ng-swipe-left="anav_hide()" ui-view>
-  <div class="view">
+  <div class="loadingPage">
     <div class="vertical-align">
       <div><i class="icon-loadingflowcw loader"></i> Loading<span class="fader1">.</span><span class="fader2">.</span><span class="fader3">.</span></div>
       <div><button onclick="document.location.reload();" class="btn btn-default"><i class="icon-refresh"></i> Reload</button></div>
