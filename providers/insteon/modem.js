@@ -310,9 +310,11 @@ Modem.read = function (data) {
           }
 
           if (cleanup) {
-            log.info('Cleanup message recieved and device not in expected state: ', device.name);
+            log.info('Cleanup message recieved and device not in expected state: ', device.name, Modem.message.cmd);
           } else {
-            log.info('Cleanup message recieved but device is correct: ', device.name, Modem.message.cmd);
+            log.info('Cleanup message recieved but device is correct: ', device.name);
+            Modem.resetMsg();
+            return;
           }
         }
 
