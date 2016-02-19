@@ -353,7 +353,11 @@ DeviceSchema.methods.logs = function (config) {
   config.limit = config.limit || 10;
   config.sort = config.sort || '-created';
 
-  Devices.logs.find({'device': self._id}, {'limit': config.limit, 'sort': config.sort}, function (err, logs) {
+  var q = models.Post.find({'device': self._id})
+  .sort(config.sort)
+  .limit(config.limit);
+
+  q.execFind(function (err, logs) {
     if (err) {
       defer.reject(err);
       return defer.promise;
