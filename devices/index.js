@@ -353,11 +353,11 @@ DeviceSchema.methods.logs = function (config) {
   config.limit = config.limit || 10;
   config.sort = config.sort || '-created';
 
-  var q = models.Post.find({'device': self._id})
+  var query = models.Post.find({'device': self._id})
   .sort(config.sort)
   .limit(config.limit);
 
-  q.execFind(function (err, logs) {
+  query.execFind(function (err, logs) {
     if (err) {
       defer.reject(err);
       return defer.promise;
