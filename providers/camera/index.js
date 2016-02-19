@@ -108,17 +108,21 @@ Camera.get_status = function (device) {
           return;
         }
         device._image = config.image_path + '/' + device._id + '.jpg';
-        device._save();
+        device._save().then(function () {
+          defer.resolve();
+        }, function () {
+          defer.reject(err);
+        });
       })
       .on('error', function (err) {
         console.log(err);
+        defer.reject();
       })
       .pipe(fs.createWriteStream(config.image_path + '/' + device._id + '.jpg'));
   } catch (e) {
     log.error('Connection died getting image:', e);
+    defer.reject();
   }
-  defer.resolve();
-
 
   return defer.promise;
 };

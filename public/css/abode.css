@@ -414,6 +414,18 @@
   display: inline-block;
 }
 
+.room-cameras-refresh {
+  position: absolute;
+  text-align: center;
+  text-shadow: 0em 0em .2em black;
+  font-size: 4em;
+  top: 1em;
+  opacity: .3;
+  left: 40%;
+  right: 40%;
+  cursor: pointer;
+}
+
 .room-cameras-controls.previous {
   left: 0em;
   width: 1em;

@@ -68,15 +68,41 @@ router.get('/:id', function (req, res) {
 });
 
 router.get('/:id/image', function (req, res) {
-  var device = devices.get(req.params.id);
+  var auth,
+    device = devices.get(req.params.id);
   if (!device) {
     log.debug('Record not found: ', req.params.id);
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
     return;
   }
 
-  var path = fs.realpathSync(device._image);
-  res.sendFile(path);
+  if (req.query.live) {
+
+    if (device.config.username) {
+      auth = {
+        auth: {
+          user: device.config.username,
+          pass: device.config.password,
+        }
+      };
+    }
+
+    request.get(device.config.image_url, auth)
+    .on('error', function (err) {
+      log.error('Error proxying connection to device:', device.name, err);
+      try {
+        res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
+      } catch (e) {
+        res.end();
+      }
+    })
+    .pipe(res);
+
+    device.status();
+  } else {
+    var path = fs.realpathSync(device._image);
+    res.sendFile(path);
+  }
 
 });
 
