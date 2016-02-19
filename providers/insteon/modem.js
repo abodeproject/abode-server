@@ -310,6 +310,8 @@ Modem.read = function (data) {
               log_msg.command = 'Light Detected';
               device.set_state(state, log_msg);
 
+            } else {
+              log.warn('Unhandled Motion Command:', Modem.message);
             }
 
           } else if (Modem.message.to.addr === '00.00.03'){
@@ -334,9 +336,9 @@ Modem.read = function (data) {
               state._on = false;
               device.set_state(state, log_msg);
 
+            } else {
+              log.warn('Unhandled Motion Command:', Modem.message);
             }
-          } else {
-            log.warning('Unhandled Motion Command:', Modem.message);
           }
 
         } else if (device.capabilities instanceof Array && device.capabilities.indexOf('openclose') !== -1) {
@@ -362,9 +364,9 @@ Modem.read = function (data) {
               log_msg.command = 'CLOSED';
               device.set_state(state, log_msg);
 
+            } else {
+              log.warn('Unhandled Openclose Command:', Modem.message);
             }
-          } else {
-            log.warning('Unhandled Openclose Command:', Modem.message);
           }
 
         } else {
