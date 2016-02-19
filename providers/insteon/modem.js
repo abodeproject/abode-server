@@ -335,6 +335,8 @@ Modem.read = function (data) {
               device.set_state(state, log_msg);
 
             }
+          } else {
+            log.warning('Unhandled Motion Command:', Modem.message);
           }
 
         } else if (device.capabilities instanceof Array && device.capabilities.indexOf('openclose') !== -1) {
@@ -361,6 +363,8 @@ Modem.read = function (data) {
               device.set_state(state, log_msg);
 
             }
+          } else {
+            log.warning('Unhandled Openclose Command:', Modem.message);
           }
 
         } else {
