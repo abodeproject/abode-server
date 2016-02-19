@@ -300,10 +300,12 @@ Modem.read = function (data) {
               cleanup = true;
             }
           } else if (cleanup_message[0] === '13') { //LIGHT OFF
-            if (device._on !== true) {
+            if (device._on === true) {
               Modem.message.cmd === 'LIGHT_OFF';
               cleanup = true;
             }
+          } else {
+            log.warn('Unknown cleanup message: ', cleanup_message[0]);
           }
 
           if (cleanup) {
