@@ -345,11 +345,15 @@ DeviceSchema.methods.log_entry = function (msg) {
   return defer.promise;
 };
 
-DeviceSchema.methods.logs = function () {
+DeviceSchema.methods.logs = function (config) {
   var self = this,
     defer = q.defer();
 
-  Devices.logs.find({'device': self._id}, function (err, logs) {
+  config = config || {};
+  config.limit = config.limit || 10;
+  config.sort = config.sort || '-created';
+
+  Devices.logs.find({'device': self._id}, {'limit': config.limit, 'sort': config.sort}, function (err, logs) {
     if (err) {
       defer.reject(err);
       return defer.promise;

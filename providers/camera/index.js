@@ -110,7 +110,7 @@ Camera.get_status = function (device) {
         device._image = config.image_path + '/' + device._id + '.jpg';
         device._save().then(function () {
           defer.resolve();
-        }, function () {
+        }, function (err) {
           defer.reject(err);
         });
       })
