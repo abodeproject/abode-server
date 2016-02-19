@@ -293,7 +293,7 @@ Modem.read = function (data) {
           };
 
         if (device && Modem.message.cmd === 'BROADCAST_CLEANUP') {
-          var cleanup_message = Modem.message.to.split('.');
+          var cleanup_message = Modem.message.to.addr.split('.');
           if (cleanup_message[0] === '11') { //LIGHT ON
             if (device._on !== true) {
               Modem.message.cmd === 'LIGHT_ON';
@@ -305,10 +305,12 @@ Modem.read = function (data) {
               cleanup = true;
             }
           }
-        }
 
-        if (cleanup) {
-          log.info('Cleanup message recieved and device not in expected state: ', device.name, Modem.message.cmd);
+          if (cleanup) {
+            log.info('Cleanup message recieved and device not in expected state: ', device.name, Modem.message.cmd);
+          } else {
+            log.info('Cleanup message recieved but device is correct: ', device.name, Modem.message.cmd);
+          }
         }
 
         if (!device) {
