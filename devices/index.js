@@ -357,7 +357,7 @@ DeviceSchema.methods.logs = function (config) {
   .sort(config.sort)
   .limit(config.limit);
 
-  query.execFind(function (err, logs) {
+  query.exec(function (err, logs) {
     if (err) {
       defer.reject(err);
       return defer.promise;
