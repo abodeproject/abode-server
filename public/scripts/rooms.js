@@ -78,11 +78,6 @@ angular.module('rooms', ['ui.router','ngResource'])
 
   });
 
-  var test = model.get({'id': 'Living Room'});
-  test.$promise.then(function (out) {
-    console.dir(out);
-    console.dir(out.$lights_on());
-  });
   var loadRooms = function () {
     var defer = $q.defer();
 

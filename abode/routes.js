@@ -151,7 +151,7 @@ router.all('/sources/:source/:uri', function (req, res) {
 router.get('/events', function (req, res) {
 
   // set timeout as high as possible
-  req.socket.setTimeout(Infinity);
+  req.socket.setTimeout(0);
 
   // send headers for event-stream connection
   // see spec for more information
