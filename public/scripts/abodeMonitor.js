@@ -128,7 +128,7 @@ angular.module('abodeMonitor', [
       var eventSource;
 
       if (!source) {
-        source = 'local';
+        source = {'name': 'local'};
         eventSource = new EventSource('/api/abode/events');
       } else {
         eventSource = new EventSource('/api/sources/' + source.name + '/abode/events');
@@ -136,7 +136,7 @@ angular.module('abodeMonitor', [
 
       eventSource.addEventListener('message', function (msg) {
         var event = JSON.parse(msg.data);
-        event.source = source;
+        event.source = source.name;
 
         if (event.type) {
           $rootScope.$broadcast(event.type.toUpperCase() + '_CHANGE', event);
@@ -145,6 +145,10 @@ angular.module('abodeMonitor', [
         }
 
       }, false);
+
+      eventSource.onerror = function (err) {
+        console.log(err);
+      };
 
       events.push(eventSource);
     }
