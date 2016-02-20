@@ -34,6 +34,7 @@ var InsteonHub = function () {
     InsteonHub._token = cache.token;
     InsteonHub._devices = cache.devices || [];
     InsteonHub._scenes = cache.scenes || [];
+    InsteonHub._rooms = cache.rooms || [];
 
     log.info('Loaded authorization token cache');
   });
@@ -61,7 +62,7 @@ InsteonHub.call = function (config, authorize) {
 
   var attempt = function () {
     config = config || {};
-    config.method = config.method || 'GET',
+    config.method = config.method || 'GET';
 
     url = InsteonHub.config.base_url;
     url += config.url;
@@ -90,7 +91,7 @@ InsteonHub.call = function (config, authorize) {
 
       defer.resolve({'response': response, 'body': body});
     });
-  }
+  };
 
   if (authorize && !InsteonHub.token.access) {
     InsteonHub.token().then(attempt, function (err) {
@@ -139,7 +140,7 @@ InsteonHub.token = function () {
       'refresh': response.body.refresh_token,
       'type': response.body.token_type,
       'expires': response.body.expires_in,
-    }
+    };
 
     InsteonHub.write_cache().then(function () {
       defer.resolve(InsteonHub._token);
@@ -166,6 +167,7 @@ InsteonHub.write_cache = function () {
     'token': InsteonHub._token,
     'devices': InsteonHub._devices,
     'scenes': InsteonHub._scenes,
+    'rooms': InsteonHub._rooms,
   };
 
   fs.writeFile('/dev/shm/insteonhub.json', JSON.stringify(data), 'utf8', function (err) {
@@ -181,12 +183,23 @@ InsteonHub.write_cache = function () {
 
 InsteonHub.devices = function () { return InsteonHub._devices; };
 InsteonHub.scenes = function () { return InsteonHub._scenes; };
+InsteonHub.rooms = function () { return InsteonHub._rooms; };
 
 InsteonHub.refresh = function () {
   var defer = q.defer();
 
   var fail = function (err) {
-    defer.reject(err)
+    defer.reject(err);
+  };
+
+  var rooms = function () {
+    log.debug('Getting InsteonHub Rooms');
+    InsteonHub.call({'url': '/rooms'})
+    .then(function (response) {
+      InsteonHub._rooms = response.body.RoomList;
+      InsteonHub.write_cache();
+      defer.resolve();
+    }, fail);
   };
 
   var scenes = function () {
@@ -194,8 +207,7 @@ InsteonHub.refresh = function () {
     InsteonHub.call({'url': '/scenes'})
     .then(function (response) {
       InsteonHub._scenes = response.body.SceneList;
-      InsteonHub.write_cache();
-      defer.resolve();
+      rooms();
     }, fail);
   };
 
@@ -290,7 +302,7 @@ InsteonHub.set_level = function (device, level) {
   } else if (device.config.type === 'room') {
     command.room_id = device.config.RoomID;
   }
-  InsteonHub.send_command(command).then(function (details) {
+  InsteonHub.send_command(command).then(function () {
     var update = {};
     if (level === 0) {
       update._on = false;
@@ -311,7 +323,7 @@ InsteonHub.set_level = function (device, level) {
 
 };
 
-InsteonHub.get_status = function (device, level) {
+InsteonHub.get_status = function (device) {
   var defer = q.defer(),
     command = {
       'command': 'get_status',
@@ -428,6 +440,8 @@ InsteonHub.get_by_id = function (type, id) {
     matches = InsteonHub._devices.filter(function (item) { return (String(item.DeviceID) === String(id)); });
   } else if (type === 'scene') {
     matches = InsteonHub._scenes.filter(function (item) { return (String(item.SceneID) === String(id)); });
+  } else if (type === 'room') {
+    matches = InsteonHub._scenes.filter(function (item) { return (String(item.RoomID) === String(id)); });
   }
 
   if (matches.length === 0) {
@@ -445,6 +459,8 @@ InsteonHub.get_by_name = function (type, id) {
     matches = InsteonHub._devices.filter(function (item) { return (String(item.DeviceName) === String(id)); });
   } else if (type === 'scene') {
     matches = InsteonHub._scenes.filter(function (item) { return (String(item.SceneName) === String(id)); });
+  } else if (type === 'room') {
+    matches = InsteonHub._rooms.filter(function (item) { return (String(item.RoomName) === String(id)); });
   }
 
   if (matches.length === 0) {
@@ -460,6 +476,10 @@ InsteonHub.get_device = function (id) {
 
 InsteonHub.get_scene = function (id) {
   return InsteonHub.get_by_id('scene', id) || InsteonHub.get_by_name('scene', id);
+};
+
+InsteonHub.get_room = function (id) {
+  return InsteonHub.get_by_id('room', id) || InsteonHub.get_by_name('room', id);
 };
 
 module.exports = InsteonHub;

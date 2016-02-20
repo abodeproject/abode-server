@@ -72,6 +72,7 @@ angular.module('insteonhub', [])
 .controller('insteonhubAdd', function ($scope, $http, $timeout) {
   $scope.device = $scope.$parent.device;
   $scope.loading = false;
+  $scope.processing = false;
   $scope.device_types = [
     {
       'name': 'Device',
@@ -89,7 +90,7 @@ angular.module('insteonhub', [])
       'name': 'Room',
       'capabilities': ['onoff'],
       'active': false,
-      'type': 'room'
+      'type': 'rooms'
     },
   ];
 
@@ -124,48 +125,24 @@ angular.module('insteonhub', [])
     }
   };
 
-  $scope.get_last = function () {
-    $http.get('api/insteonhub/linking/last').then(function (response) {
-      $scope.device.config = response.data;
-      $scope.link_status = 'idle';
-    }, function (err) {
-      $scope.error = err;
-    });
-  }
-  $scope.check_linking = function () {
-    $http.get('api/insteonhub/linking/status').then(function (response) {
-      if (!response.data.linking) {
-        $scope.link_status = 'idle';
-        $scope.get_last();
-
-      } else {
-        $timeout($scope.check_linking, 2000);
-      }
-    }, function (err) {
-      $scope.error = err;
-    });
+  $scope.selectRoom = function (d) {
+    $scope.device.name = d.RoomName;
+    $scope.device.config = {
+      'type': 'room',
+      'RoomID': d.RoomID
+    }
   };
 
-  $scope.start_linking = function () {
-    $scope.link_status = 'linking';
+  $scope.reload = function () {
+    $scope.processing = true;
 
-    $http.post('api/insteonhub/linking/start', {'auto_add': false, 'type': $scope.type.link_mode}).then(function (response) {
-      $timeout($scope.check_linking, 2000);
+    $http.post('api/insteonhub/refresh').then(function (response) {
+      $scope.processing = false;
+      $scope.changeType($scope.type);
     }, function (err) {
       $scope.error = err;
-      $scope.link_status = 'idle';
+      $scope.processing = false;
     });
-
-  };
-
-  $scope.cancel_linking = function () {
-
-    $http.post('api/insteonhub/linking/stop').then(function (response) {
-      $scope.link_status = 'idle';
-    }, function (err) {
-      $scope.link_status = 'linking';
-    });
-
   };
 
 });

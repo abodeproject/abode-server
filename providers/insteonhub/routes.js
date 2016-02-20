@@ -191,6 +191,29 @@ router.get('/scenes/:id', function (req, res) {
 
 });
 
+router.get('/rooms', function (req, res) {
+
+  res.status(200).send(insteonhub.rooms());
+
+});
+
+router.get('/rooms/:id', function (req, res) {
+
+  var room = insteonhub.get_room(req.params.id);
+
+  if (!room) {
+    res.status(404).send({'status': 'failed', 'message': 'Room not found'});
+    return;
+  }
+
+  insteonhub.details('room', room).then(function (details) {
+    res.status(200).send(details);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 
 router.post('/refresh', function (req, res) {
 
