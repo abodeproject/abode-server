@@ -88,7 +88,7 @@ angular.module('devices', ['ui.router','ngResource'])
     devices[args.source] = devices[args.source] || {};
     devices[args.source][args.object._id] = args.object;
 
-    console.log('Device event from %s: %s', args.source, args);
+    //console.log('Device event from %s: %s', args.source, args);
   });
 
   var get_by_name = function (name, source) {
@@ -139,7 +139,6 @@ angular.module('devices', ['ui.router','ngResource'])
     var lookup = get_by_name(device, source);
 
     if (lookup) {
-      console.log('Using room cache');
 
       defer.resolve(makeAges(lookup));
       return defer.promise;

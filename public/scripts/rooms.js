@@ -74,7 +74,7 @@ angular.module('rooms', ['ui.router','ngResource'])
     args.source = args.source || 'local';
     rooms[args.source] = rooms[args.source] || {};
     rooms[args.source][args.object._id] = args.object;
-    console.log('Room event from %s: %s', args.source, args);
+    //console.log('Room event from %s: %s', args.source, args);
 
   });
 
