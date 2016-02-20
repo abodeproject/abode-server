@@ -100,6 +100,7 @@ Triggers.types = [
   {'name': 'LUMACITY_CHANGE'},
   {'name': 'LUMACITY_UP'},
   {'name': 'LUMACITY_DOWN'},
+  {'name': 'UPDATED'},
 ];
 
 Triggers.lookupAction = function (key) {
