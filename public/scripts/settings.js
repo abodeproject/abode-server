@@ -336,7 +336,8 @@ angular.module('settings', ['ui.router'])
   ];
 
   $scope.providers = [
-    {'name': 'Insteon', 'route': 'index.settings.insteon'},
+    {'name': 'Insteon PLM', 'route': 'index.settings.insteon'},
+    {'name': 'Insteon Hub', 'route': 'index.settings.insteonhub'},
     {'name': 'Rad', 'route': 'index.settings.rad'},
     {'name': 'Wunderground', 'route': 'index.settings.wunderground'},
     {'name': 'IFTTT', 'route': 'index.settings.ifttt'},

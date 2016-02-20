@@ -13,6 +13,7 @@ angular.module('abodeMonitor', [
   'scenes',
   'settings',
   'insteon',
+  'insteonhub',
   'wunderground',
   'ifttt',
   'rad',
