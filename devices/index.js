@@ -132,7 +132,26 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
 
   //Call the function and expect a promise back
   providers[self.provider][cmd].apply(self, args).then(function (status) {
-    var changes = false;
+
+    // Update the last_seen field
+    self.last_seen = new Date();
+
+    if (status.update) {
+      self.set_state(status.update).then(function () {
+        defer.resolve(status.response);
+      }, function (err) {
+        defer.reject(err);
+      });
+    } else {
+      self._save(false).then(function () {
+        defer.resolve(status.response);
+      }, function (err) {
+        defer.reject(err);
+      });
+
+    }
+
+    /*
     status.update = status.update || {};
 
     // If our status contained an "update" flag, update the device
@@ -153,6 +172,7 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
     }, function (err) {
       defer.reject(err);
     });
+    */
   }, function (err) {
     defer.reject(err);
   });
