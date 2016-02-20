@@ -29,6 +29,7 @@ Abode.init = function (config) {
 
   Abode.save_needed = false;
   Abode.views = {};
+  Abode.clients = [];
 
   //Create a new event emitter
   Abode.events = new events.EventEmitter();

@@ -33,7 +33,9 @@ angular.module('rooms', ['ui.router','ngResource'])
     }
   });
 })
-.service('rooms', function ($http, $q, $uibModal, $resource) {
+.service('rooms', function ($http, $q, $uibModal, $resource, $rootScope, devices) {
+  var rooms = {};
+
   var model = $resource('/api/rooms/:id/:action', {id: '@_id'}, {
     'update': { method: 'PUT' },
     'get_temperature': { method: 'GET' , params: { action: 'get_temperature'}},
@@ -67,6 +69,15 @@ angular.module('rooms', ['ui.router','ngResource'])
     'play': { method: 'POST' , params: { action: 'play'}},
   });
 
+  $rootScope.$on('ROOM_CHANGE', function (event, args) {
+
+    args.source = args.source || 'local';
+    rooms[args.source] = rooms[args.source] || {};
+    rooms[args.source][args.object._id] = args.object;
+    console.log('Room event from %s: %s', args.source, args);
+
+  });
+
   var test = model.get({'id': 'Living Room'});
   test.$promise.then(function (out) {
     console.dir(out);
@@ -96,11 +107,45 @@ angular.module('rooms', ['ui.router','ngResource'])
     return defer.promise;
   };
 
+  var get_by_name = function (name, source) {
+    var found;
+
+    source = source || 'local';
+
+    if (!rooms[source]) {
+      return;
+    }
+
+    if (rooms[source][name]) {
+      return rooms[source][name];
+    }
+
+    Object.keys(rooms[source]).forEach(function (id) {
+      if (rooms[source][id].name === name) {
+        found = rooms[source][id];
+      }
+    });
+
+    return found;
+  };
+
   var getRoom = function (room, source) {
     var defer = $q.defer();
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
+    source = source || 'local';
+
+    var lookup = get_by_name(room, source);
+
+    if (lookup) {
+      defer.resolve(lookup)
+      return defer.promise;
+    }
+
     $http({ url: source_uri + '/rooms/' + room }).then(function (response) {
+      rooms[source] = rooms[source] || {};
+      rooms[source][response.data._id] = response.data;
+
       defer.resolve(response.data);
     }, function (err) {
       defer.reject(err);
@@ -140,7 +185,31 @@ angular.module('rooms', ['ui.router','ngResource'])
   var getRoomDevices = function (room, source) {
     var defer = $q.defer();
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
+    var room_devices = [];
 
+    getRoom(room, source).then(function (roomObj) {
+      var index = -1;
+
+      var done = function () {
+        defer.resolve(room_devices);
+      };
+
+      var next = function () {
+        index += 1;
+
+        if (!roomObj._devices[index]) { done(); return; }
+
+        devices.get(roomObj._devices[index], source).then(function (device) {
+          room_devices.push(device);
+          next();
+        }, function () { next(); });
+      };
+
+      next();
+
+    });
+
+    /*
     $http({ url: source_uri + '/rooms/' + room + '/devices'}).then(function (response) {
 
       response.data.forEach(function (device) {
@@ -161,6 +230,7 @@ angular.module('rooms', ['ui.router','ngResource'])
     }, function (err) {
       defer.reject(err);
     });
+    */
 
     return defer.promise;
   };

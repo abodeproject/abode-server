@@ -23,6 +23,8 @@ var InsteonHub = function () {
   InsteonHub._token = {};
   InsteonHub._devices = [];
   InsteonHub._scenes = [];
+  InsteonHub._rooms = [];
+  InsteonHub._houses = [];
 
   fs.readFile('/dev/shm/insteonhub.json', function (err, data) {
     if (err) {
@@ -35,6 +37,7 @@ var InsteonHub = function () {
     InsteonHub._devices = cache.devices || [];
     InsteonHub._scenes = cache.scenes || [];
     InsteonHub._rooms = cache.rooms || [];
+    InsteonHub._houses = cache.houses || [];
 
     log.info('Loaded authorization token cache');
   });
@@ -168,6 +171,7 @@ InsteonHub.write_cache = function () {
     'devices': InsteonHub._devices,
     'scenes': InsteonHub._scenes,
     'rooms': InsteonHub._rooms,
+    'houses': InsteonHub._houses,
   };
 
   fs.writeFile('/dev/shm/insteonhub.json', JSON.stringify(data), 'utf8', function (err) {
@@ -184,6 +188,8 @@ InsteonHub.write_cache = function () {
 InsteonHub.devices = function () { return InsteonHub._devices; };
 InsteonHub.scenes = function () { return InsteonHub._scenes; };
 InsteonHub.rooms = function () { return InsteonHub._rooms; };
+InsteonHub.houses = function () { return InsteonHub._houses; };
+
 
 InsteonHub.refresh = function () {
   var defer = q.defer();
@@ -192,13 +198,22 @@ InsteonHub.refresh = function () {
     defer.reject(err);
   };
 
+  var houses = function () {
+    log.debug('Getting InsteonHub Houses');
+    InsteonHub.call({'url': '/houses'})
+    .then(function (response) {
+      InsteonHub._houses = response.body.HouseList;
+      InsteonHub.write_cache();
+      defer.resolve();
+    }, fail);
+  };
+
   var rooms = function () {
     log.debug('Getting InsteonHub Rooms');
     InsteonHub.call({'url': '/rooms'})
     .then(function (response) {
       InsteonHub._rooms = response.body.RoomList;
-      InsteonHub.write_cache();
-      defer.resolve();
+      houses();
     }, fail);
   };
 
@@ -433,35 +448,64 @@ InsteonHub.command_status = function (command) {
   return defer.promise;
 };
 
-InsteonHub.get_by_id = function (type, id) {
-  var matches;
+InsteonHub.stream = function (houseid) {
+  var url,
+    stream,
+    headers,
+    options,
+    defer = q.defer();
 
-  if (type === 'device') {
-    matches = InsteonHub._devices.filter(function (item) { return (String(item.DeviceID) === String(id)); });
-  } else if (type === 'scene') {
-    matches = InsteonHub._scenes.filter(function (item) { return (String(item.SceneID) === String(id)); });
-  } else if (type === 'room') {
-    matches = InsteonHub._scenes.filter(function (item) { return (String(item.RoomID) === String(id)); });
-  }
+  url = InsteonHub.config.base_url;
+  url += '/houses/' + houseid + '/stream';
 
-  if (matches.length === 0) {
-    return false;
+  var attempt = function () {
+
+    headers = {
+      'Content-Type': 'text/event-stream',
+      'Authentication': 'APIKey ' + InsteonHub.config.api_key,
+      'Authorization': InsteonHub._token.type + ' ' + InsteonHub._token.access,
+    };
+
+    options = {
+      'method': 'GET',
+      'url': url,
+      'headers': headers,
+    };
+
+    log.info('Starting activity stream');
+    stream = request.get(url);
+
+    stream.on('response', function (response) {
+      log.info('Stream Response:', response);
+    });
+
+    stream.on('data', function(data) {
+      // decompressed data as it is received
+      log.info('Stream Data:', data);
+    });
+
+    stream.on('error', function (err) {
+      log.error('Error with activity stream', err);
+    });
+
+    defer.resolve();
+  };
+
+  if (!InsteonHub.token.access) {
+    InsteonHub.token().then(attempt, function (err) {
+      defer.reject(err);
+    });
   } else {
-    return matches[0];
+    attempt();
   }
 
+  return defer.promise;
 };
 
-InsteonHub.get_by_name = function (type, id) {
+InsteonHub.get_by_key = function (list, key, id) {
   var matches;
 
-  if (type === 'device') {
-    matches = InsteonHub._devices.filter(function (item) { return (String(item.DeviceName) === String(id)); });
-  } else if (type === 'scene') {
-    matches = InsteonHub._scenes.filter(function (item) { return (String(item.SceneName) === String(id)); });
-  } else if (type === 'room') {
-    matches = InsteonHub._rooms.filter(function (item) { return (String(item.RoomName) === String(id)); });
-  }
+  matches = InsteonHub[list].filter(function (item) { return (String(item[key]) === String(id)); });
 
   if (matches.length === 0) {
     return false;
@@ -471,15 +515,19 @@ InsteonHub.get_by_name = function (type, id) {
 };
 
 InsteonHub.get_device = function (id) {
-  return InsteonHub.get_by_id('device', id) || InsteonHub.get_by_name('device', id);
+  return InsteonHub.get_by_key('_devices', 'DeviceID', id) || InsteonHub.get_by_key('_device', 'DeviceName', id);
 };
 
 InsteonHub.get_scene = function (id) {
-  return InsteonHub.get_by_id('scene', id) || InsteonHub.get_by_name('scene', id);
+  return InsteonHub.get_by_key('_scenes', 'SceneID', id) || InsteonHub.get_by_key('_scenes', 'SceneName', id);
 };
 
 InsteonHub.get_room = function (id) {
-  return InsteonHub.get_by_id('room', id) || InsteonHub.get_by_name('room', id);
+  return InsteonHub.get_by_key('_rooms', 'RoomID', id) || InsteonHub.get_by_key('_rooms', 'RoomName', id);
+};
+
+InsteonHub.get_house = function (id) {
+  return InsteonHub.get_by_key('_houses', 'HouseID', id) || InsteonHub.get_by_key('_houses', 'HouseName', id);
 };
 
 module.exports = InsteonHub;

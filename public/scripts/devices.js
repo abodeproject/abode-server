@@ -78,16 +78,80 @@ angular.module('devices', ['ui.router','ngResource'])
     }
   });
 })
-.service('devices', function ($q, $http, $uibModal) {
+.service('devices', function ($q, $http, $uibModal, $rootScope) {
+
+  var devices = {};
+
+  $rootScope.$on('DEVICE_CHANGE', function (event, args) {
+
+    args.source = args.source || 'local';
+    devices[args.source] = devices[args.source] || {};
+    devices[args.source][args.object._id] = args.object;
+
+    console.log('Device event from %s: %s', args.source, args);
+  });
+
+  var get_by_name = function (name, source) {
+    var found;
+
+    source = source || 'local';
+
+    if (!devices[source]) {
+      return;
+    }
+
+    if (devices[source][name]) {
+      return devices[source][name];
+    }
+
+    Object.keys(devices[source]).forEach(function (id) {
+      if (devices[source][id].name === name) {
+        found = devices[source][id];
+      }
+    });
+
+    return found;
+  };
+
+  var makeAges = function (device) {
+
+    if (device._on === true) {
+      device.age = new Date() - new Date(device.last_on);
+    } else {
+      device.age = new Date() - new Date(device.last_off);
+    }
+
+    if (!isNaN(device.age)) {
+      device.age = device.age / 1000;
+    } else {
+      device.age = 0;
+    }
+
+    return device;
+  }
 
   var getDevice = function (device, source) {
     var defer = $q.defer();
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
-    $http({ url: source_uri + '/devices/' + device }).then(function (response) {
-      defer.resolve(response.data);
-    }, function () {
+    source = source || 'local';
 
+    var lookup = get_by_name(device, source);
+
+    if (lookup) {
+      console.log('Using room cache');
+
+      defer.resolve(makeAges(lookup));
+      return defer.promise;
+    }
+
+    $http({ url: source_uri + '/devices/' + device }).then(function (response) {
+      devices[source] = devices[source] || {};
+      devices[source][response.data._id] = makeAges(response.data);
+
+      defer.resolve(devices[source][response.data._id]);
+    }, function (err) {
+      defer.reject(err);
     });
 
     return defer.promise;

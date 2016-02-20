@@ -74,7 +74,7 @@ angular.module('abodeMonitor', [
     .state('index.home', {
       url: '/home',
       templateUrl: '/api/abode/views/home.html',
-      controller: function ($scope, $state, $interval, datetime) {
+      controller: function ($scope, $state, $interval, datetime, abode) {
         $scope.is = datetime.get().is;
         $scope.goSettings = function () {
           $state.go('index.settings');
@@ -119,6 +119,63 @@ angular.module('abodeMonitor', [
 
       }
     });
+  })
+  .service('abode', function ($rootScope, $http) {
+    var sources = [];
+    var events = [];
+
+    var get_events = function (source) {
+      var eventSource;
+
+      if (!source) {
+        source = 'local';
+        eventSource = new EventSource('/api/abode/events');
+      } else {
+        eventSource = new EventSource('/api/sources/' + source.name + '/abode/events');
+      }
+
+      eventSource.addEventListener('message', function (msg) {
+        var event = JSON.parse(msg.data);
+        event.source = source;
+
+        if (event.type) {
+          $rootScope.$broadcast(event.type.toUpperCase() + '_CHANGE', event);
+        } else {
+          $rootScope.$broadcast(event.type, event);
+        }
+
+      }, false);
+
+      events.push(eventSource);
+    }
+
+
+    var initEvents = function () {
+
+      events.forEach(function (event) {
+        event.close();
+      });
+
+      events = [];
+
+      $http.get('/api/sources').then(function (response) {
+        sources = response.data;
+
+        get_events();
+
+        sources.forEach(function (source) {
+          get_events(source)
+        })
+      });
+
+    }
+
+    initEvents();
+
+    return {
+      'initEvents': initEvents,
+    }
+
   })
   .controller('main', function($rootScope, $scope, $http, $interval, confirm) {
     var attempt = 0;

@@ -148,4 +148,35 @@ router.all('/sources/:source/:uri', function (req, res) {
   res.send(req.params);
 });
 
+router.get('/events', function (req, res) {
+
+  // set timeout as high as possible
+  req.socket.setTimeout(Infinity);
+
+  // send headers for event-stream connection
+  // see spec for more information
+  res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+  });
+  res.write('\n');
+
+
+  // push this res object to our global variable
+  abode.clients.push(res);
+
+  req.on("close", function() {
+    var toRemove;
+    for (var j =0 ; j < abode.clients.length ; j++) {
+        if (abode.clients[j] == res) {
+            toRemove =j;
+            break;
+        }
+    }
+    abode.clients.splice(j,1);
+    console.log(abode.clients.length);
+  });
+});
+
 module.exports = router;

@@ -214,6 +214,28 @@ router.get('/rooms/:id', function (req, res) {
 
 });
 
+router.get('/houses', function (req, res) {
+
+  res.status(200).send(insteonhub.houses());
+
+});
+
+router.get('/houses/:id', function (req, res) {
+
+  var house = insteonhub.get_house(req.params.id);
+
+  if (!house) {
+    res.status(404).send({'status': 'failed', 'message': 'House not found'});
+    return;
+  }
+
+  insteonhub.details('house', house).then(function (details) {
+    res.status(200).send(details);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
 
 router.post('/refresh', function (req, res) {
 
@@ -225,5 +247,11 @@ router.post('/refresh', function (req, res) {
 
 });
 
+router.get('/stream/:houseid', function (req, res) {
+
+  insteonhub.stream(req.params.houseid);
+  res.send({'status': 'success'});
+
+});
 
 module.exports = router;
