@@ -86,7 +86,8 @@ angular.module('devices', ['ui.router','ngResource'])
 
     args.source = args.source || 'local';
     devices[args.source] = devices[args.source] || {};
-    devices[args.source][args.object._id] = args.object;
+    devices[args.source][args.object._id] = makeAges(args.object)
+    devices[args.source][args.object._id].$updated = new Date();
 
     //console.log('Device event from %s: %s', args.source, args);
   });
@@ -137,16 +138,21 @@ angular.module('devices', ['ui.router','ngResource'])
     source = source || 'local';
 
     var lookup = get_by_name(device, source);
-
+    var now = new Date();
     if (lookup) {
 
-      defer.resolve(makeAges(lookup));
-      return defer.promise;
+      if ( ((now - lookup.$updated) < 1000 * 60) ) {
+
+        defer.resolve(makeAges(lookup));
+        return defer.promise;
+
+      }
     }
 
     $http({ url: source_uri + '/devices/' + device }).then(function (response) {
       devices[source] = devices[source] || {};
       devices[source][response.data._id] = makeAges(response.data);
+      devices[source][response.data._id].$updated = new Date();
 
       defer.resolve(devices[source][response.data._id]);
     }, function (err) {
