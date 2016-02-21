@@ -74,6 +74,7 @@ angular.module('rooms', ['ui.router','ngResource'])
     args.source = args.source || 'local';
     rooms[args.source] = rooms[args.source] || {};
     rooms[args.source][args.object._id] = args.object;
+    rooms[args.source][args.object._id].$updated = new Date();
     //console.log('Room event from %s: %s', args.source, args);
 
   });
@@ -131,15 +132,20 @@ angular.module('rooms', ['ui.router','ngResource'])
     source = source || 'local';
 
     var lookup = get_by_name(room, source);
+    var now = new Date();
 
     if (lookup) {
-      defer.resolve(lookup)
-      return defer.promise;
+
+      if ( ((now - lookup.$updated) < 1000 * 60) ) {
+        defer.resolve(lookup);
+        return defer.promise;
+      }
     }
 
     $http({ url: source_uri + '/rooms/' + room }).then(function (response) {
       rooms[source] = rooms[source] || {};
       rooms[source][response.data._id] = response.data;
+      rooms[source][response.data._id].$updated = new Date();
 
       defer.resolve(response.data);
     }, function (err) {
@@ -357,11 +363,11 @@ angular.module('rooms', ['ui.router','ngResource'])
           $scope.processing = true;
           $scope.errors = false;
 
-          $http.get(source_uri + '/rooms/' + $scope.room.name).then(function (response) {
+          getRoom($scope.room.name, source).then(function (room) {
 
 
 
-            $scope.room = response.data;
+            $scope.room = room;
             getRoomScenes(room.name, source).then(function (scenes) {
               $scope.scenes = scenes;
               $scope.processing = false;
@@ -784,7 +790,7 @@ angular.module('rooms', ['ui.router','ngResource'])
       };
       $scope.temperature = '?';
       $scope.temperatures = [];
-      $scope.interval = $scope.interval || 10;
+      $scope.interval = $scope.interval || 2;
 
       if ($scope.left !== undefined || $scope.right !== undefined || $scope.top !== undefined || $scope.bottom !== undefined) {
         $scope.styles.position = 'absolute;'

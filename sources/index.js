@@ -87,21 +87,26 @@ SourceSchema.methods.delete = function () {
   return defer.promise;
 };
 
-SourceSchema.methods.proxy = function (method, uri, body) {
+SourceSchema.methods.proxy = function (method, headers, uri, body) {
   var self = this,
     defer = q.defer();
 
   var options = {
     'method': method,
     'baseUrl': self.url + '/api',
+    'headers': headers,
     'uri': uri,
   };
 
+  if (body) {
+    options.body = body
+    options.json = true;
+  }
   try {
-  return request(options);
-} catch (e) {
-  return false;
-}
+    return request(options);
+  } catch (e) {
+    return false;
+  }
 };
 
 Sources.model = mongoose.model('Sources', SourceSchema);

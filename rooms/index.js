@@ -184,13 +184,15 @@ var filterDevices = function(type) {
 
 // Wrapper function that returns a promise instead of requiring a callback
 RoomSchema.methods._save = function () {
-  var defer = q.defer();
+  var self = this,
+    defer = q.defer();
 
   this.save(function (err) {
     if (err) {
       defer.reject(err);
     } else {
-      log.debug('Room saved');
+      log.info('Room saved successfully: ' + self.name);
+      abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
       defer.resolve();
     }
   });

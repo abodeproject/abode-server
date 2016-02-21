@@ -74,7 +74,7 @@ router.all(/^\/([^\/]+)\/(.+)$/, function (req, res) {
   }
 
   try {
-    source.proxy(req.method, req.params[1], req.body)
+    source.proxy(req.method, req.headers, req.params[1], req.body)
     .on('error', function (err) {
       log.error('Error proxying connection to source:', source.name, err);
       try {

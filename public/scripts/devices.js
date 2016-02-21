@@ -131,13 +131,18 @@ angular.module('devices', ['ui.router','ngResource'])
     return device;
   }
 
-  var getDevice = function (device, source) {
+  var getDevice = function (device, source, force) {
     var defer = $q.defer();
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
     source = source || 'local';
 
     var lookup = get_by_name(device, source);
+
+    if (force && lookup) {
+      lookup.$updated = 0;
+    }
+
     var now = new Date();
     if (lookup) {
 
@@ -203,7 +208,7 @@ angular.module('devices', ['ui.router','ngResource'])
       animation: true,
       templateUrl: 'views/devices/devices.view.html',
       size: 'sm',
-      controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, devices, device, source) {
+      controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, device, source) {
         var intervals = [];
         var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
@@ -258,18 +263,20 @@ angular.module('devices', ['ui.router','ngResource'])
           $scope.errors = false;
 
           if ($scope.device.active === false) {
-            $http.get(source_uri + '/devices/' + $scope.device.name).then(function (response) {
-              $scope.device = response.data;
-              $scope.processing = false;
-              $scope.errors = false;
+            getDevice(source, $scope.device.name, true).then(function (device) {
+              $scope.device = device;
             }, function () {
               $scope.processing = false;
               $scope.errors = true;
             });
           } else {
             $http.post(source_uri + '/devices/' + $scope.device.name + '/status').then(function (response) {
+              var src_key = source || 'local';
               if (response.data.device) {
-                $scope.device = response.data.device;
+
+                devices[src_key][response.data.device._id] = makeAges(response.data.device);
+                devices[src_key][response.data.device._id].$updated = new Date();
+                $scope.device = devices[source || 'local'][response.data.device._id];
               }
               $scope.processing = false;
               $scope.errors = false;
