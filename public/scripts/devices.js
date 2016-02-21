@@ -296,7 +296,8 @@ angular.module('devices', ['ui.router','ngResource'])
               $http.put(source_uri + '/devices/' + $scope.device.name, {'_on': false}).then(function () {
                 $scope.processing = false;
                 $scope.errors = false;
-              }, function () {
+              }, function (err) {
+                console.log(err);
                 $scope.processing = false;
                 $scope.errors = true;
               });
@@ -304,7 +305,8 @@ angular.module('devices', ['ui.router','ngResource'])
               $http.put(source_uri + '/devices/' + $scope.device.name, {'_on': true}).then(function () {
                 $scope.processing = false;
                 $scope.errors = false;
-              }, function () {
+              }, function (err) {
+                console.log(err);
                 $scope.processing = false;
                 $scope.errors = true;
               });
@@ -314,7 +316,8 @@ angular.module('devices', ['ui.router','ngResource'])
               $http.post(source_uri + '/devices/' + $scope.device.name + '/off').then(function () {
                 $scope.processing = false;
                 $scope.errors = false;
-              }, function () {
+              }, function (err) {
+                console.log(err);
                 $scope.processing = false;
                 $scope.errors = true;
               });
@@ -322,7 +325,8 @@ angular.module('devices', ['ui.router','ngResource'])
               $http.post(source_uri + '/devices/' + $scope.device.name + '/on').then(function () {
                 $scope.processing = false;
                 $scope.errors = false;
-              }, function () {
+              }, function (err) {
+                console.log(err);
                 $scope.processing = false;
                 $scope.errors = true;
               });
@@ -341,7 +345,8 @@ angular.module('devices', ['ui.router','ngResource'])
             }
             $scope.processing = false;
             $scope.errors = false;
-          }, function () {
+          }, function (err) {
+            console.log(err);
             $scope.processing = false;
             $scope.errors = true;
           });
