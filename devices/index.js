@@ -311,7 +311,6 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
   if (changes) {
     return self._save();
   } else {
-    log.info('State set but no changes detected:', self.name);
     var defer = q.defer();
     defer.resolve();
     return defer.promise;
@@ -400,8 +399,8 @@ DeviceSchema.methods._save = function (log_save) {
     } else {
       if (log_save) {
         log.info('Device saved successfully: ' + self.name);
-        abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
       }
+      abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
 
       defer.resolve();
     }
