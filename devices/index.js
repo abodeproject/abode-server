@@ -311,6 +311,7 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
   if (changes) {
     return self._save();
   } else {
+    abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
     var defer = q.defer();
     defer.resolve();
     return defer.promise;
