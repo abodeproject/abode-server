@@ -150,6 +150,10 @@ Abode.update_config = function (data, section) {
   var defer = q.defer();
 
   Abode.save_needed = true;
+  Abode.config[section] = Abode.config[section] || {};
+  if (Abode.config.providers.indexOf(section) === -1) {
+    Abode.config.providers.push(section);
+  }
 
   Object.keys(data).forEach(function (key) {
     if (section) {

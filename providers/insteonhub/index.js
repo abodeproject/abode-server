@@ -45,6 +45,7 @@ var InsteonHub = function () {
   if (InsteonHub.config.enabled === true) {
 
 
+    log.warn('InsteonHub started.  Not enabled');
     defer.resolve();
 
   } else {
