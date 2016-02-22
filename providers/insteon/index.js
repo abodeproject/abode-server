@@ -320,7 +320,7 @@ Insteon.queue = function (cmd, device, args) {
   }
 
   var queue_timeout = setTimeout(function () {
-    log.error('Timeout waiting for queued item to complete');
+    log.error('Timeout waiting for %s command to complete for device %s', cmd, device.name);
     defer.reject({'status': 'failed', 'message': 'Timeout waiting for queued item'});
 
   }, Insteon.config.queue_timeout);
@@ -563,7 +563,7 @@ Insteon.get_records = function () {
 
   //Process the records
   var complete = function () {
-    console.log(records);
+    log.info(records);
     defer.resolve();
   };
 
@@ -685,6 +685,8 @@ Insteon.stop_linking = function () {  //Reset the record index
 };
 
 Insteon.link_complete = function (message) {
+  var defer = q.defer();
+
   log.info('Link Complete');
 
   clearTimeout(Insteon.link_timer);
@@ -695,7 +697,7 @@ Insteon.link_complete = function (message) {
 
   if (device === undefined) {
 
-    console.log({
+    log.info({
       'name': 'New Device',
       'capabilities': message.capabilities,
       'provider': 'insteon',
@@ -703,6 +705,7 @@ Insteon.link_complete = function (message) {
     });
 
     if (Insteon.auto_add) {
+
       abode.devices.create({
         'name': 'New Device',
         'capabilities': message.capabilities,
@@ -711,9 +714,12 @@ Insteon.link_complete = function (message) {
       }).then(function (device) {
         Insteon.last_device = device;
         log.info('Successfully added new device: ', message.address);
+        defer.resolve();
       }, function (err) {
         log.error(err);
+        defer.reject(err);
       });
+
     } else {
       log.info('Device linked but auto_add is disabled: ', message.address);
       Insteon.last_device = {
@@ -721,16 +727,27 @@ Insteon.link_complete = function (message) {
         'provider': 'insteon',
         'config': message
       };
+
+      defer.resolve();
+      return defer.promise;
+
     }
   } else {
+
     Insteon.last_device = device;
     device.config = merge(device.config, message);
+
     device._save().then(function () {
       log.info('Successfully saved existing device: ', message.address);
+      defer.resolve();
     }, function (err) {
       log.error(err);
+      defer.reject(err);
     });
+
   }
+
+  return defer.promise;
 };
 
 module.exports = Insteon;

@@ -71,8 +71,6 @@ var serialize_send_insteon_standard = function (config) {
   config.to = config.to || '';
   to_addr = (config.to === '') ? '00.00.01': insteon.lookupByName(config.to);
 
-  console.log(config);
-
   config.type = config.type || ((to_addr.indexOf('00.00') === 0) ? 0x06 : 0x00);
   config.hops = config.hops || 0x03;
   config.cmd_1 = config.cmd_1 || 0x00;

@@ -53,8 +53,11 @@ var Modem = function (insteon) {
   };
 
   Modem.command_queue = [];
+  Modem.message_queue = [];
   Modem.expecting = [];
+  Modem.processing_message = false;
   Modem.queueInterval = setInterval(Modem.queue_processor, insteon.config.delay);
+  Modem.message_processor();
 
   Modem.dev = new SerialPort(insteon.config.serial_device, {
     baudrate: insteon.config.serial_baudrate,
@@ -80,15 +83,266 @@ Modem.queue_processor = function () {
   log.debug('Processing send queue command');
 
   var job = Modem.command_queue.shift();
-  Modem.send_handler(job.type, job.config, job.expect, job.defer);
+  Modem.send_handler(job.type, job.config, job.expect, job.expect_from, job.defer);
 };
 
-Modem.send = function (type, config, expect) {
+Modem.message_processor = function () {
+  var message_timeout;
+  var monitor_count;
+  log.info('Starting message processor');
+
+  var wait = function () {
+    clearTimeout(message_timeout);
+    setTimeout(next, 100);
+  };
+
+  var monitor = function () {
+    message_timeout = setTimeout(function () {
+      monitor_count += 1;
+
+      log.warn('Waiting for message to parse over %s seconds, queue: %s', monitor_count, Modem.message_queue.filter(function (x) { return (x !== undefined); }).length);
+      if (monitor_count >= 3) { next(); } else { monitor(); }
+
+
+    }, 1000);
+  };
+
+  var next = function () {
+    monitor_count = 0;
+    clearTimeout(message_timeout);
+
+    if (Modem.message_queue.length === 0) {
+      wait();
+      return;
+    }
+
+    var message = Modem.message_queue.shift();
+    monitor();
+    Modem.message_handler(message).then(next, next);
+
+  };
+
+  next();
+};
+
+Modem.message_handler = function (message, handler) {
+  var expectation,
+    defer = q.defer();
+
+  if (!message) {
+    defer.reject();
+    return defer.promise;
+  }
+
+  var to_name = message.to,
+    to_name = (to_name !== undefined) ? to_name.name : 'undefined';
+  var from_name = message.from,
+    from_name = (from_name !== undefined) ? from_name.name : 'undefined';
+
+  expectation = Modem.expecting[message.type + ':' + from_name] || Modem.expecting[message.type];
+  log.debug('Processing %s message: ', message.type, message);
+
+  if (expectation !== undefined) {
+    log.debug('Resolving expectations promise from %s to %s:', from_name, to_name, message.type);
+    expectation.resolve({
+      'command': Modem.type.name,
+      'status': message.status,
+      'message': message
+    });
+
+    delete Modem.expecting[Modem.type];
+
+    defer.resolve();
+    return defer.promise;
+
+  } else if (message.type === 'ALL_LINKING_COMPLETED') {
+
+    Modem.insteon.link_complete(message).then(defer.resolve, defer.reject);
+    return defer.promise;
+
+  } else {
+    log.debug('Message not expected: ' + Modem.type.name);
+  }
+
+  //Is this needed?
+  if (handler) {
+    handler(message);
+  }
+
+  if (message.from) {
+    var device = Modem.insteon.getDevice(message.from.addr);
+    var state = {};
+
+    var log_msg = {
+        'from': message.from,
+        'to': message.to,
+        'command': message.cmd,
+        'extra': message
+      };
+
+    if (device && message.cmd === 'BROADCAST_CLEANUP') {
+      var cleanup = false;
+      var cleanup_message = message.to.addr.split('.');
+
+      if (cleanup_message[0] === '11') { //LIGHT ON
+        if (device._on !== true) {
+          message.cmd = 'LIGHT_ON';
+          cleanup = true;
+        }
+      } else if (cleanup_message[0] === '13') { //LIGHT OFF
+        if (device._on === true) {
+          message.cmd = 'LIGHT_OFF';
+          cleanup = true;
+        }
+      } else {
+        log.warn('Unknown cleanup message: ', cleanup_message[0]);
+      }
+
+      if (cleanup) {
+        log.info('Cleanup message recieved and device not in expected state: ', device.name, message.cmd);
+      } else {
+        log.info('Cleanup message recieved but device is correct: ', device.name, message.cmd);
+
+        defer.resolve();
+        return defer.promise;
+      }
+    }
+
+    if (!device) {
+
+      log.warn('Unknown device: %s (%s)', message.from.addr, message.cmd);
+      defer.resolve();
+
+    } else if (device.capabilities instanceof Array && device.capabilities.indexOf('motion_sensor') !== -1) {
+
+      if (message.to.addr === '00.00.02') {
+
+      //Dawn/Dusk Detection
+        if (message.cmd === 'LIGHT_ON') {
+
+          log.info('DARK detected by device: ', device.name);
+          log_msg.command = 'Dark Detected';
+          device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+        } else if (message.cmd === 'LIGHT_OFF') {
+
+          log.info('LIGHT detected by device: ', device.name);
+          log_msg.command = 'Light Detected';
+          device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+        } else {
+          log.warn('Unhandled Motion Command:', message);
+          defer.resolve();
+        }
+
+      } else if (message.to.addr === '00.00.03'){
+
+      //Low battery detection
+        state.low_battery = true;
+        log.info('LOW BATTERY detected by device: ', device.name);
+        log_msg.command = 'Low Battery Detected';
+        device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+      } else if (message.to.addr.slice(0,5) !== '00.00') {
+        if (message.cmd === 'LIGHT_ON') {
+
+        //Emit global event for LIGHT_ON
+          log.info('MOTION ON detected by device: ', device.name);
+          log_msg.command = 'MOTION_ON';
+          state._on = true;
+          device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+        } else if (message.cmd === 'LIGHT_OFF') {
+
+        //Emit global event for LIGHT_OFF
+          log_msg.command = 'MOTION_OFF';
+          log.info('MOTION OFF detected by device: ', device.name);
+          state._on = false;
+          device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+        } else {
+          log.warn('Unhandled Motion Command:', message);
+          defer.resolve();
+        }
+      }
+
+    } else if (device.capabilities instanceof Array && device.capabilities.indexOf('openclose') !== -1) {
+      if (message.to.addr === '00.00.03'){
+
+      //Low battery detection
+        state.low_battery = true;
+        log_msg.command = 'Low Battery Detected';
+        log.info('Low Battery detected by device: ', device.name);
+        device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+      } else if (message.to.addr.slice(0,5) !== '00.00') {
+        if (message.cmd === 'LIGHT_ON') {
+
+        //Emit global event for LIGHT_ON
+          log.info('OPEN detected by device: ', device.name);
+          state._on = true;
+          log_msg.command = 'OPENED';
+          device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+        } else if (message.cmd === 'LIGHT_OFF') {
+
+        //Emit global event for LIGHT_OFF
+          log.info('CLOSE detected by device: ', device.name);
+          state._on = false;
+          log_msg.command = 'CLOSED';
+          device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+        } else {
+          log.warn('Unhandled Openclose Command:', message);
+          defer.resolve();
+        }
+      }
+
+    } else {
+      if (device && message.cmd === 'LIGHT_ON') {
+
+      //Emit global event for LIGHT_ON
+        log.info('ON detected by device: ', device.name);
+        state._on = true;
+        device.set_state({'_on': true}, log_msg).then(defer.resolve, defer.reject);
+
+      } else if (device && message.cmd === 'LIGHT_OFF') {
+
+      //Emit global event for LIGHT_OFF
+        log.info('OFF detected by device: ', device.name);
+        state._on = false;
+        device.set_state(state, log_msg).then(defer.resolve, defer.reject);
+
+      } else if (device) {
+        log.info('Command received from device %s: %s (%s)', device.name, message.cmd,  message.cmd_1);
+      // Catchall log
+        device.log_entry({
+          'from': message.from,
+          'to': message.to,
+          'command': message.cmd,
+          'extra': message
+        });
+        defer.resolve();
+
+      } else  {
+        log.warn('Unknown device: %s (%s)', message.from.addr, message.cmd);
+        defer.resolve();
+      }
+    }
+  } else {
+    defer.resolve();
+  }
+
+  return defer.promise;
+};
+
+Modem.send = function (type, config, expect, expect_from) {
   var defer = q.defer(),
     data = {
       type: type,
       config: config,
       expect: expect,
+      expect_from: expect_from || [],
       defer: defer
     };
 
@@ -102,7 +356,7 @@ Modem.send = function (type, config, expect) {
   };
 };
 
-Modem.send_handler = function (type, config, expect, defer) {
+Modem.send_handler = function (type, config, expect, expect_from, defer) {
   var cmd_buf,
     type_buf,
     index,
@@ -180,6 +434,33 @@ Modem.send_handler = function (type, config, expect, defer) {
         }, Modem.insteon.config.timeout * index);
     });
 
+    expect_from.forEach(function (expectation) {
+        var time;
+        var expectation_key = expectation + ':' + config.to;
+        index += 1;
+        log.debug('Adding from response expectation:', expectation_key);
+        //Add the expection with new promise to the global list
+        Modem.expecting[expectation_key] = q.defer();
+
+        //Add the promise to the status
+        status.expectations[expectation_key] = Modem.expecting[expectation_key].promise;
+        status.settled.push(Modem.expecting[expectation_key].promise);
+
+        time = setTimeout(function () {
+          if (Modem.expecting[expectation_key] === undefined) {
+            return;
+          }
+          Modem.expecting[expectation_key].reject({
+            'command': expectation,
+            'from': config.to,
+            'status': 'timeout',
+            'message': 'Timeout after ' + Modem.insteon.config.timeout + ' second'
+          });
+
+          delete Modem.expecting[expectation_key];
+        }, Modem.insteon.config.timeout * index);
+    });
+
     q.all(status.settled).then(function (results) {
       defer.resolve(results);
     }, function (err) {
@@ -200,8 +481,7 @@ Modem.send_handler = function (type, config, expect, defer) {
 
 Modem.read = function (data) {
   var i,
-    tmp,
-    expectation;
+    tmp;
 
 
   for (i = 0; i < data.length; i += 1) {
@@ -251,181 +531,16 @@ Modem.read = function (data) {
       Modem.message = Modem.message.slice(2, Modem.message.length);
 
       if (Modem.type.deserialize) {
-        Modem.message = Modem.type.deserialize(Modem.message);
+        var message = Modem.type.deserialize(Modem.message)
+        message.type = Modem.type.name;
+        Modem.message_queue.push(message, Modem.type.handler);
+
       } else {
         log.warn('No deserializer for message:', Modem.type.name);
       }
-      //console.log('Message Type Parsed: ', type.name);
-
-      expectation = Modem.expecting[Modem.type.name];
-
-      if (expectation !== undefined) {
-        log.debug('Resolving expectations promise:', Modem.type.name);
-        expectation.resolve({
-          'command': Modem.type.name,
-          'status': Modem.message.status,
-          'message': Modem.message
-        });
-
-        delete Modem.expecting[Modem.type.name];
-
-        Modem.resetMsg();
-        return true;
-      } else if (Modem.type.name === 'ALL_LINKING_COMPLETED') {
-        Modem.insteon.link_complete(Modem.message);
-      } else {
-        log.debug('Message not expected: ' + Modem.type.name);
-      }
-      if (Modem.type.handler) {
-        Modem.type.handler(Modem.message);
-      }
-
-      if (Modem.message.from) {
-        var device = Modem.insteon.getDevice(Modem.message.from.addr);
-        var state = {};
-
-        var log_msg = {
-            'from': Modem.message.from,
-            'to': Modem.message.to,
-            'command': Modem.message.cmd,
-            'extra': Modem.message
-          };
-
-        if (device && Modem.message.cmd === 'BROADCAST_CLEANUP') {
-          var cleanup = false;
-          var cleanup_message = Modem.message.to.addr.split('.');
-
-          if (cleanup_message[0] === '11') { //LIGHT ON
-            if (device._on !== true) {
-              Modem.message.cmd = 'LIGHT_ON';
-              cleanup = true;
-            }
-          } else if (cleanup_message[0] === '13') { //LIGHT OFF
-            if (device._on === true) {
-              Modem.message.cmd = 'LIGHT_OFF';
-              cleanup = true;
-            }
-          } else {
-            log.warn('Unknown cleanup message: ', cleanup_message[0]);
-          }
-
-          if (cleanup) {
-            log.info('Cleanup message recieved and device not in expected state: ', device.name, Modem.message.cmd);
-          } else {
-            log.info('Cleanup message recieved but device is correct: ', device.name);
-            Modem.resetMsg();
-            return;
-          }
-        }
-
-        if (!device) {
-          log.warn('Unknown device: %s (%s)', Modem.message.from.addr, Modem.message.cmd);
-        } else if (device.capabilities instanceof Array && device.capabilities.indexOf('motion_sensor') !== -1) {
-
-          if (Modem.message.to.addr === '00.00.02') {
-
-          //Dawn/Dusk Detection
-            if (Modem.message.cmd === 'LIGHT_ON') {
-
-              log.debug('Dark detected by device: ', device.name);
-              log_msg.command = 'Dark Detected';
-              device.set_state(state, log_msg);
-
-            } else if (Modem.message.cmd === 'LIGHT_OFF') {
-
-              log.debug('Light detected by device: ', device.name);
-              log_msg.command = 'Light Detected';
-              device.set_state(state, log_msg);
-
-            } else {
-              log.warn('Unhandled Motion Command:', Modem.message);
-            }
-
-          } else if (Modem.message.to.addr === '00.00.03'){
-
-          //Low battery detection
-            state.low_battery = true;
-            log_msg.command = 'Low Battery Detected';
-            device.set_state(state, log_msg);
-
-          } else if (Modem.message.to.addr.slice(0,5) !== '00.00') {
-            if (Modem.message.cmd === 'LIGHT_ON') {
-
-            //Emit global event for LIGHT_ON
-              log_msg.command = 'MOTION_ON';
-              state._on = true;
-              device.set_state(state, log_msg);
-
-            } else if (Modem.message.cmd === 'LIGHT_OFF') {
-
-            //Emit global event for LIGHT_OFF
-              log_msg.command = 'MOTION_OFF';
-              state._on = false;
-              device.set_state(state, log_msg);
-
-            } else {
-              log.warn('Unhandled Motion Command:', Modem.message);
-            }
-          }
-
-        } else if (device.capabilities instanceof Array && device.capabilities.indexOf('openclose') !== -1) {
-          if (Modem.message.to.addr === '00.00.03'){
-
-          //Low battery detection
-            state.low_battery = true;
-            log_msg.command = 'Low Battery Detected';
-            device.set_state(state, log_msg);
-
-          } else if (Modem.message.to.addr.slice(0,5) !== '00.00') {
-            if (Modem.message.cmd === 'LIGHT_ON') {
-
-            //Emit global event for LIGHT_ON
-              state._on = true;
-              log_msg.command = 'OPENED';
-              device.set_state(state, log_msg);
-
-            } else if (Modem.message.cmd === 'LIGHT_OFF') {
-
-            //Emit global event for LIGHT_OFF
-              state._on = false;
-              log_msg.command = 'CLOSED';
-              device.set_state(state, log_msg);
-
-            } else {
-              log.warn('Unhandled Openclose Command:', Modem.message);
-            }
-          }
-
-        } else {
-          if (device && Modem.message.cmd === 'LIGHT_ON') {
-
-          //Emit global event for LIGHT_ON
-            state._on = true;
-            device.set_state({'_on': true}, log_msg);
-
-          } else if (device && Modem.message.cmd === 'LIGHT_OFF') {
-
-          //Emit global event for LIGHT_OFF
-            state._on = false;
-            device.set_state(state, log_msg);
-
-          } else if (device) {
-            log.info('Command received from device %s: %s', device.name, Modem.message.cmd);
-          // Catchall log
-            device.log_entry({
-              'from': Modem.message.from,
-              'to': Modem.message.to,
-              'command': Modem.message.cmd,
-              'extra': Modem.message
-            });
-
-          } else  {
-            log.warn('Unknown device: %s (%s)', Modem.message.from.addr, Modem.message.cmd);
-          }
-        }
-      }
 
       Modem.resetMsg();
+
     }
   }
 };
@@ -452,15 +567,15 @@ Modem.addrToBuffer = function (addr) {
 };
 
 Modem.open = function () {
-  console.log('open');
+  log.debug('connected');
   Modem.insteon.status = 'connected';
 };
 Modem.close = function () {
-  console.log('closed');
+  log.debug('closed');
   Modem.insteon.status = 'disconnected';
 };
 Modem.error = function () {
-  console.log('error');
+  log.debug('error');
   Modem.insteon.status = 'error';
 };
 
