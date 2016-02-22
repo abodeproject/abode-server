@@ -33,7 +33,7 @@ angular.module('rooms', ['ui.router','ngResource'])
     }
   });
 })
-.service('rooms', function ($http, $q, $uibModal, $resource, $rootScope, devices) {
+.service('rooms', function ($http, $q, $uibModal, $resource, $rootScope, $timeout, devices) {
   var rooms = {};
 
   var model = $resource('/api/rooms/:id/:action', {id: '@_id'}, {
@@ -81,12 +81,25 @@ angular.module('rooms', ['ui.router','ngResource'])
 
   var loadRooms = function () {
     var defer = $q.defer();
+    var req_timeout;
 
-    $http.get('api/rooms').then(function (response) {
+    var config = {
+      'method': 'GET',
+      'url': 'api/rooms',
+      'timeout': defer.promise,
+    };
+
+    $http(config).then(function (response) {
+      $timeout.cancel(req_timeout);
       defer.resolve(response.data);
     }, function (err) {
+      $timeout.cancel(req_timeout);
       defer.reject(err);
     });
+
+    req_timeout = $timeout(function () {
+      defer.reject('Request timed out');
+    }, 10000);
 
     return defer.promise;
   };
@@ -244,6 +257,7 @@ angular.module('rooms', ['ui.router','ngResource'])
       size: 'lg',
       controller: function ($scope, $uibModalInstance, $interval, $timeout, $state, rooms, room, devices, scenes, source) {
         var intervals = [];
+        var reload_timer;
         var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
         $scope.name = room.name;
@@ -360,39 +374,56 @@ angular.module('rooms', ['ui.router','ngResource'])
 
         $scope.reload = function () {
 
+          var errors = false;
           $scope.processing = true;
           $scope.errors = false;
 
-          getRoom($scope.room.name, source).then(function (room) {
+          $timeout.cancel(reload_timer);
 
+          var done = function () {
+            $scope.errors = errors;
+            $scope.processing = false;
 
+            reload_timer = $timeout($scope.reload, 5000);
+          };
 
-            $scope.room = room;
-            getRoomScenes(room.name, source).then(function (scenes) {
+          var room_scenes = function () {
+            getRoomScenes($scope.room.name, source).then(function (scenes) {
               $scope.scenes = scenes;
-              $scope.processing = false;
-              $scope.errors = false;
               $scope.filter_counts.scenes = $scope.scenes.length;
               $scope.on_counts.scenes = $scope.scenes.filter(function (d) { return d._on});
-            }, function () {
-              $scope.processing = false;
-              $scope.errors = true;
-            });
 
-            getRoomDevices(room.name, source).then(function (devices) {
+              done();
+            }, function () {
+              errors = true;
+              done();
+            });
+          };
+
+          var room_devices = function () {
+
+            getRoomDevices($scope.room.name, source).then(function (devices) {
               $scope.devices = devices;
-              $scope.processing = false;
-              $scope.errors = false;
               $scope.default_filter();
 
+              room_scenes();
+
             }, function () {
-              $scope.processing = false;
-              $scope.errors = true;
+              errors = true;
+              room_scenes();
             });
+
+          };
+
+          getRoom($scope.room.name, source).then(function (room) {
+
+            $scope.room = room;
+            room_devices();
           }, function () {
-            $scope.processing = false;
-            $scope.errors = true;
+            errors = true;
+            done();
           });
+
 
         };
 
@@ -419,9 +450,8 @@ angular.module('rooms', ['ui.router','ngResource'])
 
         $scope.reload();
 
-        intervals.push($interval($scope.reload, 5000));
-
         $scope.$on('$destroy', function () {
+          $timeout.cancel(reload_timer);
           intervals.forEach($interval.cancel);
         });
       },
@@ -877,6 +907,8 @@ angular.module('rooms', ['ui.router','ngResource'])
       }
 
       var getRoom = function () {
+        var roomTimer;
+
         $scope.state.loading = true;
         rooms.getDevices($scope.room, $scope.source).then(function (devices) {
           $scope.devices = devices;
@@ -895,12 +927,21 @@ angular.module('rooms', ['ui.router','ngResource'])
           $scope.state.loading = false;
           $scope.state.error = false;
 
+          $timeout.cancel(roomTimer);
           roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
         }, function () {
           $scope.state.loading = false;
           $scope.state.error = true;
+          $timeout.cancel(roomTimer);
           roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
         });
+
+        roomTimer = $timeout(function () {
+          console.log('Timeout waiting for room to load');
+          $scope.state.loading = false;
+          $scope.state.error = true;
+          roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
+        }, 30 * 1000);
       };
 
       getRoom();

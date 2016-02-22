@@ -100,8 +100,6 @@ SourceSchema.methods.proxy = function (method, headers, uri, body) {
     'uri': uri,
   };
 
-  console.log(headers);
-
   if (body) {
     options.body = body
     options.json = true;

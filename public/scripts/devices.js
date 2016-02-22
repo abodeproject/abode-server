@@ -78,7 +78,7 @@ angular.module('devices', ['ui.router','ngResource'])
     }
   });
 })
-.service('devices', function ($q, $http, $uibModal, $rootScope) {
+.service('devices', function ($q, $http, $uibModal, $rootScope, $timeout) {
 
   var devices = {};
 
@@ -133,6 +133,7 @@ angular.module('devices', ['ui.router','ngResource'])
 
   var getDevice = function (device, source, force) {
     var defer = $q.defer();
+    var req_timeout;
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
     source = source || 'local';
@@ -154,15 +155,27 @@ angular.module('devices', ['ui.router','ngResource'])
       }
     }
 
-    $http({ url: source_uri + '/devices/' + device }).then(function (response) {
+    var config = {
+      'method': 'GET',
+      'url': source_uri + '/devices/' + device,
+      'timeout': defer.promise
+    };
+
+    $http(config).then(function (response) {
+      $timeout.cancel(req_timeout);
       devices[source] = devices[source] || {};
       devices[source][response.data._id] = makeAges(response.data);
       devices[source][response.data._id].$updated = new Date();
 
       defer.resolve(devices[source][response.data._id]);
     }, function (err) {
+      $timeout.cancel(req_timeout);
       defer.reject(err);
     });
+
+    req_timeout = $timeout(function () {
+      defer.reject('Request timed out');
+    }, 10000);
 
     return defer.promise;
   };

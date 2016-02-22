@@ -734,7 +734,7 @@ angular.module('abodeMonitor', [
 
     var notify = function (config) {
       notifications.push(config);
-      $timeout(shiftNotifications, 2000);
+      $timeout(shiftNotifications, 4000);
     };
 
     return {
