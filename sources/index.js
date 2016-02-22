@@ -91,12 +91,16 @@ SourceSchema.methods.proxy = function (method, headers, uri, body) {
   var self = this,
     defer = q.defer();
 
+  delete headers['x-forwarded-for'];
+
   var options = {
     'method': method,
     'baseUrl': self.url + '/api',
     'headers': headers,
     'uri': uri,
   };
+
+  console.log(headers);
 
   if (body) {
     options.body = body
