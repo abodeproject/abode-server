@@ -140,6 +140,7 @@ angular.module('rooms', ['ui.router','ngResource'])
 
   var getRoom = function (room, source) {
     var defer = $q.defer();
+    var req_timeout;
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
     source = source || 'local';
@@ -155,7 +156,14 @@ angular.module('rooms', ['ui.router','ngResource'])
       }
     }
 
-    $http({ url: source_uri + '/rooms/' + room }).then(function (response) {
+    var config = {
+      'method': 'GET',
+      'url': source_uri + '/rooms/' + room,
+      'timeout': 9000
+    };
+
+    $http(config).then(function (response) {
+      $timeout.cancel(req_timeout);
       rooms[source] = rooms[source] || {};
       rooms[source][response.data._id] = response.data;
       rooms[source][response.data._id].$updated = new Date();
@@ -164,6 +172,10 @@ angular.module('rooms', ['ui.router','ngResource'])
     }, function (err) {
       defer.reject(err);
     });
+
+    req_timeout = $timeout(function () {
+      defer.reject('Request timed out');
+    }, 10000);
 
     return defer.promise;
   };
@@ -940,7 +952,7 @@ angular.module('rooms', ['ui.router','ngResource'])
           console.log('Timeout waiting for room to load');
           $scope.state.loading = false;
           $scope.state.error = true;
-          roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
+          roomTimeout = $timeout(getRoom, 1000 * 60);
         }, 30 * 1000);
       };
 

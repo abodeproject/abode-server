@@ -158,7 +158,7 @@ angular.module('devices', ['ui.router','ngResource'])
     var config = {
       'method': 'GET',
       'url': source_uri + '/devices/' + device,
-      'timeout': defer.promise
+      'timeout': 9000
     };
 
     $http(config).then(function (response) {
