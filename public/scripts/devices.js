@@ -85,9 +85,7 @@ angular.module('devices', ['ui.router','ngResource'])
   $rootScope.$on('DEVICE_CHANGE', function (event, args) {
 
     args.source = args.source || 'local';
-    devices[args.source] = devices[args.source] || {};
-    devices[args.source][args.object._id] = makeAges(args.object)
-    devices[args.source][args.object._id].$updated = new Date();
+    setDevice(args.object, args.source);
 
     //console.log('Device event from %s: %s', args.source, args);
   });
@@ -131,29 +129,41 @@ angular.module('devices', ['ui.router','ngResource'])
     return device;
   }
 
+  var setDevice = function (device, source) {
+
+    source = source || 'local';
+
+    if (device._on === true) {
+      device.age = new Date() - new Date(device.last_on);
+    } else {
+      device.age = new Date() - new Date(device.last_off);
+    }
+
+    if (!isNaN(device.age)) {
+      device.age = device.age / 1000;
+    } else {
+      device.age = 0;
+    }
+
+    if (!devices[source]) { devices[source] = {}; }
+    if (!devices[source][device._id]) {
+      devices[source][device._id] = {};
+    }
+
+    Object.keys(device).forEach(function (key) {
+      devices[source][device._id][key] = device[key];
+    });
+
+    return devices[source][device._id];
+
+  };
+
   var getDevice = function (device, source, force) {
     var defer = $q.defer();
     var req_timeout;
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
     source = source || 'local';
-
-    var lookup = get_by_name(device, source);
-
-    if (force && lookup) {
-      lookup.$updated = 0;
-    }
-
-    var now = new Date();
-    if (lookup) {
-
-      if ( ((now - lookup.$updated) < 1000 * 60) ) {
-
-        defer.resolve(makeAges(lookup));
-        return defer.promise;
-
-      }
-    }
 
     var config = {
       'method': 'GET',
@@ -163,9 +173,7 @@ angular.module('devices', ['ui.router','ngResource'])
 
     $http(config).then(function (response) {
       $timeout.cancel(req_timeout);
-      devices[source] = devices[source] || {};
-      devices[source][response.data._id] = makeAges(response.data);
-      devices[source][response.data._id].$updated = new Date();
+      setDevice(response.data, source);
 
       defer.resolve(devices[source][response.data._id]);
     }, function (err) {
@@ -180,10 +188,15 @@ angular.module('devices', ['ui.router','ngResource'])
     return defer.promise;
   };
 
-  var load = function () {
+  var load = function (source) {
     var defer = $q.defer();
+    var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
-    $http.get('api/devices').then(function (response) {
+    $http.get(source_uri + '/devices').then(function (response) {
+      response.forEach(function (device) {
+        setDevice(device, source);
+      });
+
       defer.resolve(response.data);
     }, function (err) {
       defer.reject(err);
@@ -564,6 +577,7 @@ angular.module('devices', ['ui.router','ngResource'])
 
   return {
     'load': load,
+    'set': setDevice,
     'add': addDevice,
     'view': openDevice,
     'get': getDevice,

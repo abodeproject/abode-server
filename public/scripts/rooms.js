@@ -213,6 +213,7 @@ angular.module('rooms', ['ui.router','ngResource'])
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
     var room_devices = [];
 
+    /*
     getRoom(room, source).then(function (roomObj) {
       var index = -1;
 
@@ -234,29 +235,22 @@ angular.module('rooms', ['ui.router','ngResource'])
       next();
 
     });
+    */
 
-    /*
     $http({ url: source_uri + '/rooms/' + room + '/devices'}).then(function (response) {
+      var devs = [];
 
       response.data.forEach(function (device) {
-        if (device._on === true) {
-          device.age = new Date() - new Date(device.last_on);
-        } else {
-          device.age = new Date() - new Date(device.last_off);
-        }
 
-        if (!isNaN(device.age)) {
-          device.age = device.age / 1000;
-        } else {
-          device.age = 0;
-        }
+        devs.push(devices.set(device));
+
       });
 
-      defer.resolve(response.data);
+      defer.resolve(devs);
+
     }, function (err) {
       defer.reject(err);
     });
-    */
 
     return defer.promise;
   };
@@ -832,7 +826,7 @@ angular.module('rooms', ['ui.router','ngResource'])
       };
       $scope.temperature = '?';
       $scope.temperatures = [];
-      $scope.interval = $scope.interval || 5;
+      $scope.interval = $scope.interval || 30;
 
       if ($scope.left !== undefined || $scope.right !== undefined || $scope.top !== undefined || $scope.bottom !== undefined) {
         $scope.styles.position = 'absolute;'
