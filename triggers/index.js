@@ -318,10 +318,10 @@ Triggers.type_handler = function (trigger) {
 
   return function(matcher) {
     matcher = matcher || '';
-    log.info('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
 
     //Let any connect clients now if an item was updated
     if (trigger === 'UPDATED') {
+      log.debug('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
       abode.clients.forEach(function (res) {
         var d = new Date();
         var message = {
@@ -334,7 +334,10 @@ Triggers.type_handler = function (trigger) {
         res.write('id: ' + d.getTime() + '\n');
         res.write('data:' + JSON.stringify(message) + '\n\n'); // Note the extra newline
       });
+
+      return;
     }
+    log.info('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
 
     //Loop through each trigger for the given type
     Triggers.get_by_type(trigger).forEach(function (t) {
