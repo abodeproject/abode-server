@@ -953,6 +953,7 @@ angular.module('rooms', ['ui.router','ngResource'])
       getRoom();
 
       $scope.$on('$destroy', function () {
+        $timeout.cancel(roomTimer);
         $timeout.cancel(roomTimeout);
         $interval.cancel(cycle_timeout);
         intervals.forEach($interval.cancel);

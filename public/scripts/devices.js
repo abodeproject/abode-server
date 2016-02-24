@@ -87,7 +87,8 @@ angular.module('devices', ['ui.router','ngResource'])
     args.source = args.source || 'local';
     setDevice(args.object, args.source);
 
-    //console.log('Device event from %s: %s', args.source, args);
+
+    //console.log('Device event from %s: %s', args.source, args.object.name);
   });
 
   var get_by_name = function (name, source) {
@@ -193,11 +194,12 @@ angular.module('devices', ['ui.router','ngResource'])
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
     $http.get(source_uri + '/devices').then(function (response) {
-      response.forEach(function (device) {
-        setDevice(device, source);
+      var devs = [];
+      response.data.forEach(function (device) {
+        devs.push(setDevice(device, source));
       });
 
-      defer.resolve(response.data);
+      defer.resolve(devs);
     }, function (err) {
       defer.reject(err);
     });
