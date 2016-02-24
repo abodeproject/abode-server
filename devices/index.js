@@ -325,6 +325,7 @@ DeviceSchema.methods.log_entry = function (msg) {
 
   log.debug('Adding log entry for device: ', self.name);
 
+  /*
   entry.device = this._id;
   entry.created = new Date();
 
@@ -342,6 +343,8 @@ DeviceSchema.methods.log_entry = function (msg) {
       defer.resolve();
     }
   });
+  */
+  defer.resolve();
 
   return defer.promise;
 };
