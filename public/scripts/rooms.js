@@ -912,8 +912,8 @@ angular.module('rooms', ['ui.router','ngResource'])
         return temps;
       }
 
+      var roomTimer;
       var getRoom = function () {
-        var roomTimer;
 
         $scope.state.loading = true;
         rooms.getDevices($scope.room, $scope.source).then(function (devices) {
