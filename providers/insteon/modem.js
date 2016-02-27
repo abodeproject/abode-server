@@ -134,9 +134,9 @@ Modem.message_handler = function (message, handler) {
     return defer.promise;
   }
 
-  var to_name = message.to,
+  var to_name = message.to;
     to_name = (to_name !== undefined) ? to_name.name : 'undefined';
-  var from_name = message.from,
+  var from_name = message.from;
     from_name = (from_name !== undefined) ? from_name.name : 'undefined';
 
   expectation = Modem.expecting[message.type + ':' + from_name] || Modem.expecting[message.type];
@@ -531,7 +531,7 @@ Modem.read = function (data) {
       Modem.message = Modem.message.slice(2, Modem.message.length);
 
       if (Modem.type.deserialize) {
-        var message = Modem.type.deserialize(Modem.message)
+        var message = Modem.type.deserialize(Modem.message);
         message.type = Modem.type.name;
         Modem.message_queue.push(message, Modem.type.handler);
 
