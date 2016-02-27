@@ -495,7 +495,11 @@ angular.module('devices', ['ui.router','ngResource'])
       },
       resolve: {
         device: function () {
-          return getDevice(device, source);
+          if (typeof device === 'object') {
+            return device;
+          } else {
+            return getDevice(device, source);
+          }
         },
         source: function () {
           return source;

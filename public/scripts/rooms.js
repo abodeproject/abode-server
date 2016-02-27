@@ -159,7 +159,7 @@ angular.module('rooms', ['ui.router','ngResource'])
     var config = {
       'method': 'GET',
       'url': source_uri + '/rooms/' + room,
-      'timeout': 9000
+      'timeout': 20000
     };
 
     $http(config).then(function (response) {
@@ -175,7 +175,7 @@ angular.module('rooms', ['ui.router','ngResource'])
 
     req_timeout = $timeout(function () {
       defer.reject('Request timed out');
-    }, 10000);
+    }, 25000);
 
     return defer.promise;
   };
@@ -463,7 +463,11 @@ angular.module('rooms', ['ui.router','ngResource'])
       },
       resolve: {
         room: function () {
-          return getRoom(room, source);
+          if (typeof room === 'object') {
+            return room;
+          } else {
+            return getRoom(room, source);
+          }
         },
         source: function () {
           return source;
