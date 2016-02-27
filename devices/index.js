@@ -318,10 +318,10 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
   }
 };
 
-DeviceSchema.methods.log_entry = function (msg) {
+DeviceSchema.methods.log_entry = function () {
   var self = this,
-    defer = q.defer(),
-    entry = new Devices.logs();
+    defer = q.defer();
+  //var entry = new Devices.logs();
 
   log.debug('Adding log entry for device: ', self.name);
 
