@@ -8,6 +8,7 @@ var fs = require('fs'),
   logger = require('log4js'),
   log = logger.getLogger('abode'),
   extend = require('util')._extend,
+  exec = require('child_process').exec,
   router = express.Router();
 
 
@@ -144,7 +145,53 @@ router.get('/triggers', function (req, res) {
   res.send(abode.triggers.types);
 });
 
+router.post('/restart', function (req, res) {
+  var b_handler = function (err, stdout, stderr) {
+    if (err) {
+      res.status(400).send({'status': 'failed', 'message': stdout, 'error': stderr});
+      return;
+    }
+
+
+    res.send({'status': 'success'});
+  };
+
+  exec('/usr/bin/pkill chromium', b_handler);
+});
+
+router.post('/reboot', function (req, res) {
+  var b_handler = function (err, stdout, stderr) {
+    if (err) {
+      res.status(400).send({'status': 'failed', 'message': stdout, 'error': stderr});
+      return;
+    }
+
+
+    res.send({'status': 'success'});
+  };
+
+  exec('/usr/bin/sudo /sbin/shutdown -r now', b_handler);
+});
+
+router.post('/shutdown', function (req, res) {
+  var b_handler = function (err, stdout, stderr) {
+    if (err) {
+      res.status(400).send({'status': 'failed', 'message': stdout, 'error': stderr});
+      return;
+    }
+
+
+    res.send({'status': 'success'});
+  };
+
+  exec('/usr/bin/sudo /sbin/shutdown -h now', b_handler);
+});
+
 router.all('/sources/:source/:uri', function (req, res) {
+  res.send(req.params);
+});
+
+router.post('/reboot', function (req, res) {
   res.send(req.params);
 });
 
