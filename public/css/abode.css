@@ -240,7 +240,7 @@
   position: relative;
   height: 3em;
   width: 3em;
-  border: .2em solid #444;
+  border: .25em solid #444;
   border-radius: 1.5em;
   line-height: 2.5em;
   text-align: center;
@@ -262,6 +262,7 @@
 .night .room-icon {
   border-color: #222;
   background-color: #111;
+  color: #71180e;
 }
 
 .room-icon-temp {
@@ -348,16 +349,14 @@
 }
 
 .night .room-light {
-  background-color: #333300 !important;
+  color: #fff;
 }
 
 .room-motion {
   border-color: #5a100c !important;
   box-shadow: 0em 0em .2em white;
-}
-
-.night .room-motion {
-  border-color: #5b130b !important;
+  border-color: #fff !important;
+  box-shadow: 0em 0em .3em rgb(231, 76, 60);
 }
 
 .room-openclose {
@@ -376,7 +375,7 @@
 }
 
 .night .room-fan {
-  background-color: #003326;
+  color: white;
 }
 
 .room-heat {
@@ -385,7 +384,7 @@
 }
 
 .night .room-heat {
-  background-color: #5a100c;
+  color: white;
 }
 
 .room-cool {
@@ -395,8 +394,7 @@
 
 
 .night .room-cool {
-  background-color: #0f3a57;
-  opacity: 1;
+  color: white;
 }
 
 .room-cameras {
