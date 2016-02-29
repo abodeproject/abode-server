@@ -248,7 +248,7 @@
   vertical-align: middle;
   background-color: #222;
   transition: .5s ease;
-  text-shadow: 0em 0em .3em black;
+  text-shadow: 0em 0em .2em black;
   cursor: pointer;
   color: #777;
   margin: 0em .1em;
@@ -268,6 +268,14 @@
 .room-icon-temp {
   font-size: 1.3em;
   margin-top: .1em
+}
+
+.night .room-icon-temp {
+  color: #e3301c;
+}
+
+.night .room-light .room-icon-temp {
+  color: white;
 }
 
 .room-icon-display {
@@ -356,7 +364,7 @@
   border-color: #5a100c !important;
   box-shadow: 0em 0em .2em white;
   border-color: #fff !important;
-  box-shadow: 0em 0em .3em rgb(231, 76, 60);
+  box-shadow: inset 0em 0em .2em black;
 }
 
 .room-openclose {
@@ -367,6 +375,7 @@
 
 .night .room-openclose {
   background-color: #5a100c;
+  color: white;
 }
 
 .room-fan {
