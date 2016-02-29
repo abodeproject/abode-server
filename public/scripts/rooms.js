@@ -237,7 +237,13 @@ angular.module('rooms', ['ui.router','ngResource'])
     });
     */
 
-    $http({ url: source_uri + '/rooms/' + room + '/devices'}).then(function (response) {
+    var config = {
+      'method': 'GET',
+      'url': source_uri + '/rooms/' + room + '/devices',
+      'timeout': 20000
+    };
+
+    $http(config).then(function (response) {
       var devs = [];
 
       response.data.forEach(function (device) {
@@ -943,14 +949,14 @@ angular.module('rooms', ['ui.router','ngResource'])
           $scope.state.loading = false;
           $scope.state.error = true;
           $timeout.cancel(roomTimer);
-          roomTimeout = $timeout(getRoom, 1000 * $scope.interval);
+          roomTimeout = $timeout(getRoom, 1000 * $scope.interval * 2);
         });
 
         roomTimer = $timeout(function () {
           console.log('Timeout waiting for room to load');
           $scope.state.loading = false;
           $scope.state.error = true;
-          roomTimeout = $timeout(getRoom, 1000 * 60);
+          roomTimeout = $timeout(getRoom, 1000 * $scope.interval * 5);
         }, 30 * 1000);
       };
 
