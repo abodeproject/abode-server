@@ -98,7 +98,6 @@ router.get('/:id/image', function (req, res) {
     })
     .pipe(res);
 
-    device.status();
   } else {
     var path = fs.realpathSync(device._image);
     res.sendFile(path);
