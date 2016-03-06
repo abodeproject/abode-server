@@ -3,6 +3,7 @@
 var abode;
 var sources;
 var routes;
+var http = require('http');
 var q = require('q');
 var logger = require('log4js'),
   log = logger.getLogger('sources');
@@ -22,6 +23,10 @@ var Sources = function () {
   }, function (err) {
     defer.reject(err);
   });
+
+  Sources.request_pool = new http.Agent();
+  Sources.request_pool.maxSockets = 10;
+  Sources.request_pool._maxListeners = 20;
 
   return defer.promise;
 };
@@ -98,6 +103,7 @@ SourceSchema.methods.proxy = function (method, headers, uri, body) {
     'baseUrl': self.url + '/api',
     'headers': headers,
     'uri': uri,
+    'pool': Sources.request_pool,
   };
 
   if (body) {
