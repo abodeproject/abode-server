@@ -814,12 +814,25 @@ angular.module('rooms', ['ui.router','ngResource'])
       'source': '@',
     },
     templateUrl: 'views/rooms/room.icon.html',
-    controller: function ($scope, $interval, $timeout, rooms) {
+    controller: function ($scope, $interval, $timeout, $rootScope, rooms) {
       var roomTimeout,
         cycle_timeout,
         temp_maps = {},
         intervals = [],
         temp_index = -1;
+
+      $rootScope.$on('ROOM_CHANGE', function (event, args) {
+        if (args.source == $scope.source && $scope.room === args.object.name) {
+
+          if (!$scope.state.loading) {
+            $timeout.cancel(roomTimer);
+            $timeout.cancel(roomTimeout);
+
+            getRoom();
+          }
+        }
+
+      });
 
       $scope.loading = false;
       $scope.devices = [];
