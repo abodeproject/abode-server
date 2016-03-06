@@ -192,7 +192,7 @@ RoomSchema.methods._save = function () {
       defer.reject(err);
     } else {
       log.info('Room saved successfully: ' + self.name);
-      abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
+      abode.events.emit('UPDATED', {'type': 'room', 'name': self.name, 'object': self});
       defer.resolve();
     }
   });
