@@ -116,7 +116,7 @@ SceneSchema.methods._save = function () {
       log.error('Failed to save room:', err)
       defer.reject(err);
     } else {
-      log.info('Room saved successfully');
+      log.info('Scene saved successfully');
       defer.resolve();
     }
   });
