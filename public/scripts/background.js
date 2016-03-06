@@ -11,7 +11,8 @@ angular.module('background', [])
       bgA: '@',
       bgB: '@',
       interval: '@',
-      url: '@'
+      url: '@',
+      refresh: '@',
     },
     controller: function ($scope, $interval, $timeout, $state) {
 
@@ -19,6 +20,7 @@ angular.module('background', [])
 
       $scope.interval = $scope.interval || 60;
       $scope.interval = ($scope.interval < 5) ? 5 : $scope.interval;
+      $scope.refresh = ($scope.refresh === undefined || $scope.refresh === true) ? true : false;
       $scope.bgA = {};
       $scope.bgB = {};
 
@@ -32,6 +34,10 @@ angular.module('background', [])
 
       var updateBackground = function () {
 
+        if ($state.current.name != 'index.home') {
+          return;
+        }
+
         next = (next === 0) ? 1 : 0;
         previous = (next === 0) ? 1 : 0;
 
@@ -41,27 +47,35 @@ angular.module('background', [])
           uri += ($scope.url.indexOf('?') > 0) ? '&' : '?';
           uri += random.getTime();
 
-        var img = new Image();
-        img.onerror = function () {
-          console.log('Error loading image:', uri);
-          $timeout(updateBackground, 1000 * $scope.interval * 2);
-        };
-        img.onload = function () {
+
+        if ($scope.refresh) {
+          var img = new Image();
+          img.onerror = function () {
+            console.log('Error loading image:', uri);
+            $timeout(updateBackground, 1000 * $scope.interval * 2);
+          };
+
+          img.onload = function () {
+            $scope[bgStyles[next]]['background-image'] = 'url("' + uri + '")';
+            $scope[bgStyles[previous]].transition = 'opacity 5s';
+            $scope[bgStyles[previous]].opacity = 0;
+
+            $timeout(function () {
+              $scope[bgStyles[next]]['z-index'] = 2;
+              $scope[bgStyles[previous]]['z-index'] = 1;
+              $scope[bgStyles[previous]].transition = '';
+              $scope[bgStyles[previous]].opacity = 1;
+            }, (1000 * 4 ) );
+
+            $timeout(updateBackground, 1000 * $scope.interval);
+
+          };
+          img.src = uri;
+
+        } else {
           $scope[bgStyles[next]]['background-image'] = 'url("' + uri + '")';
-          $scope[bgStyles[previous]].transition = 'opacity 5s';
-          $scope[bgStyles[previous]].opacity = 0;
-
-          $timeout(function () {
-            $scope[bgStyles[next]]['z-index'] = 2;
-            $scope[bgStyles[previous]]['z-index'] = 1;
-            $scope[bgStyles[previous]].transition = '';
-            $scope[bgStyles[previous]].opacity = 1;
-          }, (1000 * 4 ) );
-
-          $timeout(updateBackground, 1000 * $scope.interval);
-
-        };
-        img.src = uri;
+          $scope[bgStyles[next]].opacity = 1;
+        }
 
       };
 
