@@ -18,6 +18,7 @@ angular.module('background', [])
       var updater;
 
       $scope.interval = $scope.interval || 60;
+      $scope.interval = ($scope.interval < 5) ? 5 : $scope.interval;
       $scope.bgA = {};
       $scope.bgB = {};
 
@@ -30,32 +31,41 @@ angular.module('background', [])
       var previous = 0;
 
       var updateBackground = function () {
-        if ($state.current.name !== 'index.home') {
-          $interval.cancel(updater);
-          return;
-        }
 
         next = (next === 0) ? 1 : 0;
         previous = (next === 0) ? 1 : 0;
 
 
         var random = new Date();
-        var uri = $scope.url + '?' + random.getTime();
+        var uri = $scope.url;
+          uri += ($scope.url.indexOf('?') > 0) ? '&' : '?';
+          uri += random.getTime();
 
-        $scope[bgStyles[next]]['background-image'] = 'url("' + uri + '")';
-        $scope[bgStyles[previous]].transition = 'opacity 5s';
-        $scope[bgStyles[previous]].opacity = 0;
+        var img = new Image();
+        img.onerror = function () {
+          console.log('Error loading image:', uri);
+          $timeout(updateBackground, 1000 * $scope.interval * 2);
+        };
+        img.onload = function () {
+          $scope[bgStyles[next]]['background-image'] = 'url("' + uri + '")';
+          $scope[bgStyles[previous]].transition = 'opacity 5s';
+          $scope[bgStyles[previous]].opacity = 0;
 
-        $timeout(function () {
-          $scope[bgStyles[next]]['z-index'] = 2;
-          $scope[bgStyles[previous]]['z-index'] = 1;
-          $scope[bgStyles[previous]].transition = '';
-          $scope[bgStyles[previous]].opacity = 1;
-        }, (1000 * 7 ) );
+          $timeout(function () {
+            $scope[bgStyles[next]]['z-index'] = 2;
+            $scope[bgStyles[previous]]['z-index'] = 1;
+            $scope[bgStyles[previous]].transition = '';
+            $scope[bgStyles[previous]].opacity = 1;
+          }, (1000 * 4 ) );
+
+          $timeout(updateBackground, 1000 * $scope.interval);
+
+        };
+        img.src = uri;
 
       };
 
-      updater = $interval(updateBackground, (1000 * $scope.interval));
+      //updater = $interval(updateBackground, (1000 * $scope.interval));
       updateBackground();
 
     },
