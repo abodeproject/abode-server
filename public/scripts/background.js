@@ -31,6 +31,7 @@ angular.module('background', [])
 
       var next = 1;
       var previous = 0;
+      var delay;
 
       var updateBackground = function () {
 
@@ -50,12 +51,18 @@ angular.module('background', [])
 
         if ($scope.refresh) {
           var img = new Image();
+
+          var transition = function () {
+
+          };
+
           img.onerror = function () {
             console.log('Error loading image:', uri);
             $timeout(updateBackground, 1000 * $scope.interval * 2);
           };
 
           img.onload = function () {
+            $timeout.cancel(delay);
             $scope[bgStyles[next]]['background-image'] = 'url("' + uri + '")';
             $scope[bgStyles[previous]].transition = 'opacity 5s';
             $scope[bgStyles[previous]].opacity = 0;
@@ -67,7 +74,7 @@ angular.module('background', [])
               $scope[bgStyles[previous]].opacity = 1;
             }, (1000 * 4 ) );
 
-            $timeout(updateBackground, 1000 * $scope.interval);
+            delay = $timeout(updateBackground, 1000 * $scope.interval);
 
           };
           img.src = uri;
