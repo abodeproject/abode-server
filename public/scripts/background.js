@@ -121,7 +121,7 @@ angular.module('background', [])
           checker = setTimeout(start, 10 * 1000);
         };
 
-        img.onerror = function () {
+        $scope.img.onerror = function () {
           if (checker) {
             clearTimeout(checker);
           }
