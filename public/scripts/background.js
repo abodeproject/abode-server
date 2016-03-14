@@ -13,6 +13,7 @@ angular.module('background', [])
       interval: '@',
       url: '@',
       refresh: '@',
+      video: '@',
     },
     controller: function ($scope, $interval, $timeout, $state) {
 
@@ -87,7 +88,43 @@ angular.module('background', [])
       };
 
       //updater = $interval(updateBackground, (1000 * $scope.interval));
-      updateBackground();
+      if ($scope.video === undefined) {
+        updateBackground();
+      }
+
+    },
+    link: function($scope, element, attrs) {
+
+      if ($scope.video !== undefined) {
+
+        var checker;
+
+        $scope.interval = $scope.interval || 60;
+        $scope.interval = ($scope.interval < 5) ? 5 : $scope.interval;
+
+        $scope.img = document.createElement('img');
+        $scope.img.style.height = '100%';
+
+        var start = function () {
+          var random = new Date();
+          var uri = $scope.url;
+            uri += ($scope.url.indexOf('?') > 0) ? '&' : '?';
+            uri += random.getTime();
+
+          $scope.img.src = uri;
+        };
+
+        $scope.img.onload = function () {
+          if (checker) {
+            clearTimeout(checker);
+          }
+          checker = setTimeout(start, 10 * 1000);
+        }
+
+        element[0].appendChild($scope.img);
+
+        start();
+      }
 
     },
     template: '<div style="z-index: 1; position: absolute; top: 0px; bottom: 0px; left: 0px; right: 0px;">  <div ng-style="bgA" class="background"></div><div ng-style="bgB" class="background"></div></div>',
