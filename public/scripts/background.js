@@ -29,10 +29,76 @@ angular.module('background', [])
         'bgA',
         'bgB',
       ];
+      var bgImages = [
+        'imgA',
+        'imgB',
+      ];
 
       var next = 1;
       var previous = 0;
       var delay;
+
+      $timeout(function () {
+        $scope.imgA.onload = function () {
+          if (delay) {
+            $timeout.cancel(delay);
+          }
+
+          if ($scope.imgA.style.opacity !== 0) {
+            $scope.imgA.style.opacity = 1;
+            $scope.imgB.style.opacity = 0;
+          }
+
+          delay = $timeout(transition, 1000 * $scope.interval);
+        };
+
+        $scope.imgB.onload = function () {
+          if (delay) {
+            $timeout.cancel(delay);
+          }
+
+
+          if ($scope.imgB.style.opacity !== 0) {
+            $scope.imgA.style.opacity = 0;
+            $scope.imgB.style.opacity = 1;
+          }
+
+          delay = $timeout(transition, 1000 * $scope.interval);
+        };
+
+
+        $scope.imgA.onerror = $scope.imgB.onerror = function () {
+          if (delay) {
+            $timeout.cancel(delay);
+          }
+
+          console.log('error loading', next);
+          delay = $timeout(function () {
+            transition(false);
+          }, 1000 * $scope.interval)
+        };
+
+        transition();
+      }, 5000);
+
+      var transition = function (increment) {
+        increment = (increment === undefined) ? true : false;
+
+        if (increment) {
+          next = (next === 0) ? 1 : 0;
+          previous = (next === 0) ? 1 : 0;
+        }
+        console.log('loading', next);
+
+        var random = new Date();
+        var uri = $scope.url;
+          uri += ($scope.url.indexOf('?') > 0) ? '&' : '?';
+          uri += random.getTime();
+
+        $scope[bgImages[next]].src = uri;
+
+
+      };
 
       var updateBackground = function () {
 
@@ -52,10 +118,6 @@ angular.module('background', [])
 
         if ($scope.refresh) {
           var img = new Image();
-
-          var transition = function () {
-
-          };
 
           img.onerror = function () {
             console.log('Error loading image:', uri);
@@ -88,9 +150,10 @@ angular.module('background', [])
       };
 
       //updater = $interval(updateBackground, (1000 * $scope.interval));
-      if ($scope.video === undefined) {
-        updateBackground();
-      }
+      //if ($scope.video === undefined) {
+      //  updateBackground();
+      //}
+      $timeout(function () { console.log($scope.img); }, 5000);
 
     },
     link: function($scope, element, attrs) {
@@ -127,10 +190,27 @@ angular.module('background', [])
           }
           checker = setTimeout(start, 10 * 1000);
         };
-
         element[0].appendChild($scope.img);
 
         start();
+      } else {
+
+
+        $scope.imgA = document.createElement('img');
+        $scope.imgA.style.height = '100%';
+        //$scope.imgA.style.transition = 'opacity 5s';
+        $scope.imgA.style.opacity = 0;
+        $scope.imgA.className = 'background';
+
+        $scope.imgB = document.createElement('img');
+        $scope.imgB.style.height = '100%';
+        //$scope.imgB.style.transition = 'opacity 5s';
+        $scope.imgB.style.opacity = 0;
+        $scope.imgB.className = 'background';
+
+        element[0].appendChild($scope.imgA);
+        element[0].appendChild($scope.imgB);
+
       }
 
     },
