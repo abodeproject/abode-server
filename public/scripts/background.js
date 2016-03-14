@@ -119,7 +119,14 @@ angular.module('background', [])
             clearTimeout(checker);
           }
           checker = setTimeout(start, 10 * 1000);
-        }
+        };
+
+        img.onerror = function () {
+          if (checker) {
+            clearTimeout(checker);
+          }
+          checker = setTimeout(start, 10 * 1000);
+        };
 
         element[0].appendChild($scope.img);
 
