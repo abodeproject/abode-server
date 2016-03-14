@@ -82,13 +82,17 @@ angular.module('background', [])
       }, 5000);
 
       var transition = function (increment) {
+
+        if ($state.current.name != 'index.home') {
+          return;
+        }
+
         increment = (increment === undefined) ? true : false;
 
         if (increment) {
           next = (next === 0) ? 1 : 0;
           previous = (next === 0) ? 1 : 0;
         }
-        console.log('loading', next);
 
         var random = new Date();
         var uri = $scope.url;
