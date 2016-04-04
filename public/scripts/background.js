@@ -15,7 +15,7 @@ angular.module('background', [])
       refresh: '@',
       video: '@',
     },
-    controller: function ($scope, $interval, $timeout, $state) {
+    controller: function ($scope, $interval, $timeout, $state, $window) {
 
       var updater;
 
@@ -38,11 +38,43 @@ angular.module('background', [])
       var previous = 0;
       var delay;
 
+      var sizeImages = function () {
+        var clientWidth = document.body.clientWidth;
+        var clientHeight = document.body.clientHeight;
+
+        var clientRatio = parseInt(document.body.clientWidth) / parseInt(document.body.clientHeight);
+        var imgAratio = parseInt($scope.imgA.naturalWidth) / parseInt($scope.imgA.naturalHeight);
+        var imgBratio = parseInt($scope.imgB.naturalWidth) / parseInt($scope.imgB.naturalHeight);
+
+        if (clientRatio > imgAratio) {
+          $scope.imgA.style.width = '100%';
+          $scope.imgA.style.height = '';
+        } else {
+          $scope.imgA.style.width = '';
+          $scope.imgA.style.height = '100%';
+        }
+        if (clientRatio > imgBratio) {
+          $scope.imgB.style.width = '100%';
+          $scope.imgB.style.height = '';
+        } else {
+          $scope.imgB.style.width = '';
+          $scope.imgB.style.height = '100%';
+        }
+
+      };
+
+      $scope.$watch(function(){
+          return $window.innerWidth + $window.innerHeight;
+      }, sizeImages);
+
       $timeout(function () {
+
         $scope.imgA.onload = function () {
           if (delay) {
             $timeout.cancel(delay);
           }
+
+          sizeImages();
 
           if ($scope.imgA.style.opacity !== 0) {
             $scope.imgA.style.opacity = 1;
@@ -57,6 +89,7 @@ angular.module('background', [])
             $timeout.cancel(delay);
           }
 
+          sizeImages();
 
           if ($scope.imgB.style.opacity !== 0) {
             $scope.imgA.style.opacity = 0;
@@ -105,6 +138,8 @@ angular.module('background', [])
       };
 
       var updateBackground = function () {
+        var clientWidth = document.body.clientWidth;
+        var clientHeight = document.body.clientHeight;
 
         if ($state.current.name != 'index.home') {
           return;
@@ -128,7 +163,16 @@ angular.module('background', [])
             $timeout(updateBackground, 1000 * $scope.interval * 2);
           };
 
+        console.dir(document.body.clientWidth);
+
           img.onload = function () {
+            if (clientWidth > clientHeight) {
+              $scope[bgStyles[next]].width = '100%';
+              $scope[bgStyles[next]].height = '';
+            } else {
+              $scope[bgStyles[next]].width = '';
+              $scope[bgStyles[next]].height = '100%';
+            }
             $timeout.cancel(delay);
             $scope[bgStyles[next]]['background-image'] = 'url("' + uri + '")';
             $scope[bgStyles[previous]].transition = 'opacity 5s';
@@ -161,6 +205,7 @@ angular.module('background', [])
 
     },
     link: function($scope, element, attrs) {
+
 
       if ($scope.video !== undefined) {
 
@@ -201,13 +246,17 @@ angular.module('background', [])
 
 
         $scope.imgA = document.createElement('img');
-        $scope.imgA.style.height = '100%';
+        //$scope.imgA.style.height = '100%';
+        //$scope.imgA.style.minHeight = '100%';
+        //$scope.imgA.style.minWidth = '100%';
         //$scope.imgA.style.transition = 'opacity 5s';
         $scope.imgA.style.opacity = 0;
         $scope.imgA.className = 'background';
 
         $scope.imgB = document.createElement('img');
-        $scope.imgB.style.height = '100%';
+        //$scope.imgB.style.height = '100%';
+        //$scope.imgB.style.minHeight = '100%';
+        //$scope.imgB.style.minWidth = '100%';
         //$scope.imgB.style.transition = 'opacity 5s';
         $scope.imgB.style.opacity = 0;
         $scope.imgB.className = 'background';
