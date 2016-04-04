@@ -120,9 +120,10 @@ angular.module('abodeMonitor', [
       }
     });
   })
-  .service('abode', function ($rootScope, $http, notifier) {
+  .service('abode', function ($rootScope, $http, $timeout, notifier) {
     var sources = [];
     var events = [];
+    var sourceErrors = {};
 
     var get_events = function (source) {
       var eventSource;
@@ -146,8 +147,14 @@ angular.module('abodeMonitor', [
 
       }, false);
 
+      eventSource.onopen = function () {
+        $timeout.cancel(sourceErrors[source.name]);
+      };
+
       eventSource.onerror = function (err) {
-        notifier.notify({'status': 'failed', 'message': 'Connection to source died: ' + source.name, 'details': err});
+        sourceErrors[source.name] = $timeout(function () {
+          notifier.notify({'status': 'failed', 'message': 'Connection to source died: ' + source.name, 'details': err});
+        }, 10 * 1000);
       };
 
       events.push(eventSource);
