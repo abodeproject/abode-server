@@ -7,6 +7,7 @@
 
 .night {
   color: #e64533;
+  text-shadow: 0 0 .3em white;
 }
 
 .spin {
@@ -272,10 +273,12 @@
 
 .night .room-icon-temp {
   color: #e3301c;
+  text-shadow: 0 0 .1em white;
 }
 
 .night .room-light .room-icon-temp {
   color: white;
+  text-shadow: 0 0 .1em black;
 }
 
 .room-icon-display {
