@@ -39,3 +39,14 @@ Grunt can be used for development.  It will start the server and watch for chang
 
 ## API Documentation
 All API is auto generated using apidoc syntax and can be viewed at the `/apidoc` path of the running application.  A markdown version is also available (here)[apidoc.md].
+
+## Future Plans
+* Use Bower for client JS (seriously, why do I include vendor libs)
+* Docker Image
+* Use Node's cluster functionality
+* Move to etcd from mongo
+* Server-less installation (just pass in etcd via browser or even use discovery and go)
+* Client SSL for authentication
+* API Tokens
+* Move to Ansible for Pi configuration
+* Boot to Abode? PXE Boot to a browser
