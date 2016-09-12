@@ -122,7 +122,7 @@ Abode.init = function (config) {
 
   //Register our event handlers for the database
   Abode.db.on('error', function (err) {
-    log.error('Connection error: %s', err);
+    log.error('Connection error: %s', err.message || err);
     process.exit(1);
   });
   Abode.db.once('open', start);
