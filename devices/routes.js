@@ -11,6 +11,10 @@ var fs = require('fs'),
   request = require('request'),
   router = express.Router();
 
+/**
+ * @api {get} /devices/logs
+ * @apiGroup Devices
+ */
 router.get('/logs', function (req, res) {
   var opts = {
     skip: req.params.skip || 0,
