@@ -44,6 +44,8 @@ angular.module('scenes', ['ui.router','ngResource'])
 .service('scenes', function ($http, $q, $uibModal, $resource) {
   var model = $resource('/api/scenes/:id/:action', {id: '@_id'}, {
     'update': { method: 'PUT' },
+    'on': { method: 'POST', params: {'action': 'on'}},
+    'off': { method: 'POST', params: {'action': 'off'}}
   });
 
   var loadScenes = function () {
@@ -75,6 +77,16 @@ angular.module('scenes', ['ui.router','ngResource'])
     var source_uri = (source === undefined) ? '/api' : '/api/sources/' + source;
 
     $http({ url: source_uri + '/scenes/' + scene }).then(function (response) {
+
+      response.data.$on = function () {
+        return $http.post(source_uri + '/scenes/' + scene + '/on');
+      };
+      response.data.$off = function () {
+        return $http.post(source_uri + '/scenes/' + scene + '/off');
+      };
+      response.data.$open = function () {
+        return viewScene(scene, source);
+      };
       defer.resolve(response.data);
     }, function (err) {
       defer.reject(err);

@@ -174,6 +174,17 @@ angular.module('devices', ['ui.router','ngResource'])
 
     $http(config).then(function (response) {
       $timeout.cancel(req_timeout);
+
+      response.data.$on = function () {
+        return $http.post(source_uri + '/devices/' + device + '/on');
+      };
+      response.data.$off = function () {
+        return $http.post(source_uri + '/devices/' + device + '/off');
+      };
+      response.data.$open = function () {
+        return openDevice(device, source);
+      };
+
       setDevice(response.data, source);
 
       defer.resolve(devices[source][response.data._id]);

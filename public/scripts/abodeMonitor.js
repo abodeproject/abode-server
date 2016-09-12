@@ -762,5 +762,99 @@ angular.module('abodeMonitor', [
 
       }
     };
+  }])
+  .directive('controller', [function () {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        type: '@',
+        name: '@',
+        title: '@',
+        icon: '@',
+        showTitle: '@',
+        source: '@',
+        action: '@'
+      },
+      templateUrl: '/views/controller.html',
+      controller: ['$scope', '$timeout', '$interval', 'devices', 'scenes', function ($scope, $timeout, $interval, devices, scenes) {
+        var types = {
+          'device': devices,
+          'scene': scenes
+        };
+
+        $scope.title = $scope.title || $scope.name;
+        $scope.loading = true;
+        $scope.failed = false;
+        $scope.error = false;
+        $scope.pending = false;
+        $scope.type = $scope.type || 'device';
+        $scope.action = $scope.action || 'open';
+
+        $scope.load = function () {
+          $scope.loading = true;
+          types[$scope.type].get($scope.name, $scope.source).then(function (obj) {
+            $scope.obj = obj;
+            $scope.loading = false;
+            $scope.error = false;
+          }, function () {
+            $scope.loading = false;
+            $scope.error = true;
+          });
+        };
+
+        $scope.do_action = function () {
+          if (!$scope.obj || $scope.failed) {
+            $scope.failed = true;
+            $timeout(function () {
+              $scope.failed = false;
+            }, 2000);
+
+            return;
+          }
+
+          var func;
+
+          if ($scope.action === 'on') {
+            func = $scope.obj.$on;
+          } else if ($scope.action === 'off') {
+            func = $scope.obj.$off;
+          } else if ($scope.action === 'toggle') {
+            func = ($scope.obj._on) ? $scope.obj.$off : $scope.obj.$on;
+          } else {
+            func = $scope.obj.$open;
+          }
+
+          $scope.pending = true;
+          var result = func()
+          if (result.then) {
+              result.then(function () {
+              $scope.pending = false;
+              $scope.success = true;
+              $timeout(function () {
+                $scope.success = false;
+              }, 4000);
+            }, function (err) {
+              $scope.pending = false;
+              $scope.failed = true;
+              $timeout(function () {
+                $scope.failed = false;
+              }, 4000);
+            });
+          } else {
+            $scope.pending = false;
+          }
+        };
+
+        $scope.load();
+
+        $scope.loader = $interval($scope.load, 5000);
+
+        $scope.$on('$destroy', function () {
+          $interval.cancel($scope.loader);
+        });
+
+      }]
+    }
   }]);
 
