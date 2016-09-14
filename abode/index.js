@@ -172,7 +172,7 @@ Abode.read_view = function (file) {
 
   var read_default = function () {
 
-    fs.readFile('views/defaults/' + file, 'utf8', function (err, data) {
+    fs.readFile('views/defaults/home.html', 'utf8', function (err, data) {
       if (err) {
         defer.reject(err);
         return;
@@ -225,10 +225,10 @@ Abode.get_view = function (view) {
 
   Abode.default_views().then(function (views) {
 
-    if (views.indexOf(view) === -1) {
-      defer.reject({'status': 'failed', 'message': 'View not found'});
-      return;
-    }
+    //if (views.indexOf(view) === -1) {
+    //  defer.reject({'status': 'failed', 'message': 'View not found'});
+    //  return;
+    //}
 
     Abode.read_view(view).then(function (data) {
       defer.resolve(data);
@@ -250,10 +250,10 @@ Abode.write_view = function (view, data) {
 
   Abode.default_views().then(function (views) {
 
-    if (views.indexOf(view) === -1) {
-      defer.reject({'status': 'failed', 'message': 'View not found'});
-      return;
-    }
+    //if (views.indexOf(view) === -1) {
+    //  defer.reject({'status': 'failed', 'message': 'View not found'});
+    //  return;
+    //}
 
     fs.writeFile('views/' + view, data, function (err) {
       if (err) {
