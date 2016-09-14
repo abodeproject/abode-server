@@ -53,6 +53,16 @@ router.post('/save', function (req, res) {
   });
 });
 
+router.get('/views', function (req, res) {
+
+  abode.list_views().then(function (views) {
+    res.status(200).send(views);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.get('/views/:view', function (req, res) {
 
   abode.get_view(req.params.view).then(function (view) {

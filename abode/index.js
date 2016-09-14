@@ -167,6 +167,25 @@ Abode.update_config = function (data, section) {
 
   return defer.promise;
 };
+Abode.list_views = function () {
+  var defer = q.defer();
+
+  fs.readdir('views/', function (err, files) {
+    if (err) {
+      defer.reject(err);
+      return;
+    }
+
+    files = files.filter(function (file) {
+      return (file.indexOf('.html') > 0);
+    });
+
+    defer.resolve(files);
+  });
+
+
+  return defer.promise;
+};
 Abode.read_view = function (file) {
   var defer = q.defer();
 
