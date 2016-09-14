@@ -31,9 +31,9 @@ router.delete('/', function (req, res) {
 
 router.post('/', web.isJson, function (req, res) {
 
-  auth.login(req.body).then(function () {
+  auth.login(req.body).then(function (auth) {
     req.session.auth = true;
-    res.status(200).send({'status': 'success'});
+    res.status(200).send({'status': 'success', 'user': auth.user, 'client_token': auth.client_token, 'auth_token': auth.auth_token });
   }, function () {
     res.status(401).send({'status': 'failed', 'message': 'Login Failed'});
   });

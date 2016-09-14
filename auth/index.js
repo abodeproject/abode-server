@@ -6,6 +6,7 @@ var config;
 
 var mongoose = require('mongoose');
 var q = require('q');
+var hat = require('hat');
 var crypto = require('crypto');
 var logger = require('log4js'),
   log = logger.getLogger('auth');
@@ -16,6 +17,14 @@ var AuthSchema = mongoose.Schema({
   'email': { 'type': String, 'required': true, 'unique': true },
   'password': { 'type': String, 'required': true, 'unique': true },
   'created': { 'type': Date, 'default': Date.now },
+});
+
+var TokenSchema = mongoose.Schema({
+  'user': { 'type': String, 'required': true },
+  'client_token': { 'type': String, 'required': true, 'unique': false },
+  'auth_token': { 'type': String, 'required': true, 'unique': true },
+  'created': { 'type': Date, 'default': Date.now },
+  'expires': { 'type': Date, 'required': true },
 });
 
 // Build the devices object
@@ -109,7 +118,16 @@ Auth.login = function (data) {
 
   Auth.list(search).then(function (results) {
     if (results.length > 0) {
-      defer.resolve(results[0]);
+
+      Auth.gen_token(data.user).then(function (token) {
+        results[0].client_token = token.client_token;
+        results[0].auth_token = token.auth_token;
+        results[0].expires = token.expires;
+
+        defer.resolve(results[0]);
+      }, function () {
+        defer.reject();
+      });
     } else {
       defer.reject();
     }
@@ -120,5 +138,38 @@ Auth.login = function (data) {
   return defer.promise;
 };
 
+Auth.gen_token = function (user, expires) {
+
+
+  var token,
+    defer = q.defer(),
+    token_expiration = new Date();
+
+  expires = expires || 1;
+  token_expiration.setDate(token_expiration.getDate() + expires);
+
+  token = new Auth.tokens({
+    'client_token': hat(256, 16),
+    'auth_token': hat(512, 32),
+    'expires': token_expiration,
+    'user': user
+  });
+
+  token.save( function (err) {
+    if (err) {
+      log.error(err.message || err);
+      defer.reject(err);
+      return defer.promise;
+    }
+
+    log.info('Token created: ', token._id);
+    defer.resolve(token);
+  });
+
+  return defer.promise;
+};
+
 Auth.model = mongoose.model('Auth', AuthSchema);
+Auth.tokens = mongoose.model('Tokens', TokenSchema);
+
 module.exports = Auth;

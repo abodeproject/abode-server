@@ -97,6 +97,11 @@ Abode.init = function (config) {
     Abode.scenes = require('../scenes');
     Abode.web = require('../web');
     Abode.web.init();
+    Abode.web.server.use(function (req, res, next) {
+      res.set('Access-Control-Allow-Origin','*');
+      res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
+      next();
+    });
     Abode.web.server.use('/api/abode', require('./routes'));
 
     //Start initializing our modules

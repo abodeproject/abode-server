@@ -11,6 +11,9 @@ var fs = require('fs'),
   exec = require('child_process').exec,
   router = express.Router();
 
+router.get('/status', function (req, res) {
+  res.status(200).send({'name': abode.config.name, 'url': abode.config.url});
+});
 
 router.get('/config', function (req, res) {
   var config = extend({}, abode.config);
