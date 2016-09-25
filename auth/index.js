@@ -169,6 +169,23 @@ Auth.gen_token = function (user, expires) {
   return defer.promise;
 };
 
+Auth.check_token = function (client_token, auth_token) {
+  var defer = q.defer();
+
+  var search = {
+    'client_token': client_token,
+    'auth_token': auth_token,
+  };
+
+  Auth.tokens.find(search, function (err, tokens) {
+    if (err) { defer.reject(err); return; }
+
+    defer.resolve(tokens[0]);
+  });
+
+  return defer.promise;
+};
+
 Auth.model = mongoose.model('Auth', AuthSchema);
 Auth.tokens = mongoose.model('Tokens', TokenSchema);
 
