@@ -100,8 +100,10 @@ Abode.init = function (config) {
     Abode.web.server.use(function (req, res, next) {
       res.set('Access-Control-Allow-Origin','*');
       res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
+      res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
       next();
     });
+
     Abode.web.server.use('/api/abode', require('./routes'));
 
     //Start initializing our modules
@@ -222,7 +224,11 @@ Abode.read_view = function (file) {
 
   };
 
-  read_custom();
+  if (!file) {
+    read_default();
+  } else {
+    read_custom();
+  }
 
   return defer.promise;
 };
@@ -272,25 +278,14 @@ Abode.write_view = function (view, data) {
   var defer = q.defer();
 
 
-  Abode.default_views().then(function (views) {
+  fs.writeFile('views/' + view, data, function (err) {
+    if (err) {
+      defer.reject({'status': 'failed', 'message': err});
+      return;
+    }
 
-    //if (views.indexOf(view) === -1) {
-    //  defer.reject({'status': 'failed', 'message': 'View not found'});
-    //  return;
-    //}
+    defer.resolve({'status': 'success', 'view': view});
 
-    fs.writeFile('views/' + view, data, function (err) {
-      if (err) {
-        defer.reject({'status': 'failed', 'message': err});
-        return;
-      }
-
-      defer.resolve({'status': 'success'});
-
-    });
-
-  }, function (err) {
-    defer.reject({'status': 'failed', 'message': err});
   });
 
   return defer.promise;
