@@ -9,8 +9,8 @@ var web = require('../web'),
 
 
 router.get('/', function (req, res) {
-  if (req.session.auth) {
-    res.status(200).send({'user': 'guest', 'authorized': true});
+  if (req.auth) {
+    res.status(200).send({'user': req.auth.user, 'authorized': true, 'client_token': req.auth.client_token, 'expires': req.auth.expires});
   } else {
     res.status(401).send({'authorized': false});
   }
