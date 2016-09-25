@@ -77,6 +77,8 @@ var Web = function () {
 Web.check_auth = function (ip, uri, auth, session) {
   var allowed = false;
 
+
+
   if (ip === '::1') {
     allowed = true;
   } else {
@@ -89,7 +91,7 @@ Web.check_auth = function (ip, uri, auth, session) {
 
   }
 
-  if (allowed) { session.auth = true; return true; }
+  if (allowed) { session.auth = true; session.user = 'guest'; return true; }
 
   if (auth) {
     return true;
@@ -126,12 +128,29 @@ Web.init = function () {
     store: new MongoStore(store_config)
   }));
   Web.server.use(function (req, res, next) {
-    var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
 
-    if (Web.check_auth(ip, req.path, req.session.auth, req.session)) {
-      next();
+    var alt_method = function() {
+      var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
+
+      if (Web.check_auth(ip, req.path, req.session.auth, req.session)) {
+        req.auth = {'user': req.session.user}
+        next();
+      } else {
+        res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
+      }
+
+    };
+
+    if (req.headers.client_token && req.headers.auth_token) {
+      abode.auth.check_token(req.headers.client_token, req.headers.auth_token).then(function (auth) {
+        req.auth = auth;
+        req.session.auth = true;
+        next();
+      }, function () {
+        alt_method();
+      })
     } else {
-      res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
+      alt_method();
     }
 
   });
