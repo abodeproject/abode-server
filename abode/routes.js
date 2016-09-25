@@ -68,6 +68,9 @@ router.get('/views', function (req, res) {
 
 router.get('/views/:view', function (req, res) {
 
+  if (req.params.view.indexOf('.html') === -1) {
+    req.params.view += '.html';
+  }
   abode.get_view(req.params.view).then(function (view) {
     res.status(200).send(view);
   }, function (err) {
@@ -78,11 +81,29 @@ router.get('/views/:view', function (req, res) {
 
 router.put('/views/:view', function (req, res) {
 
-  abode.write_view(req.params.view, req.body).then(function (response) {
-    res.status(200).send(response);
-  }, function (err) {
-    res.status(400).send(err);
-  });
+  if (req.params.view.indexOf('.html') === -1) {
+    req.params.view += '.html';
+  }
+
+  var write_view = function (content) {
+    abode.write_view(req.params.view, content).then(function (response) {
+      res.status(200).send(response);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+  }
+
+  console.log(req.body);
+  if (!req.body) {
+
+    abode.read_view().then(write_view, function (err) {
+      res.status(400).send(err);
+    });
+
+  } else {
+    console.log('getting default view');
+    write_view(req.body);
+  }
 
 });
 
