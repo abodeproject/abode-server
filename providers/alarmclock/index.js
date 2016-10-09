@@ -37,8 +37,8 @@ AlarmClock.trigger_to_alarm = function (trigger) {
   ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].forEach(function (day) {
     var day_condition = trigger.conditions.filter(function (condition) {
       return (
-        condition.left_type === 'time' &&
-        condition.left_key === 'is.' + day &&
+        condition.left_type === 'time.is' &&
+        condition.left_key === day &&
         condition.condition === 'eq' &&
         condition.right_type === 'boolean' &&
         (condition.right_key === true || condition.right_key === 'true')
@@ -66,7 +66,7 @@ AlarmClock.alarm_to_trigger = function (config) {
 
   ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].forEach(function (day) {
     if (config[day] === true || config[day] === 'true') {
-      trigger.conditions.push({'left_type': 'time', 'left_key': 'is.' + day, 'condition': 'eq', 'right_type': 'boolean', 'right_key': true});
+      trigger.conditions.push({'left_type': 'time.is', 'left_key': day, 'condition': 'eq', 'right_type': 'boolean', 'right_key': true});
     }
   });
 
