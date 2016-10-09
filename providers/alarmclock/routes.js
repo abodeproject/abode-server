@@ -46,7 +46,7 @@ router.put('/:id', function (req, res) {
 
 router.delete('/:id', function (req, res) {
 
-  alarmclocks.delete(req.params.id).then(function (response) {
+  alarmclocks.delete(req.params.id).then(function () {
     res.status(204).send();
   }, function (err) {
     res.status(404).send(err);
