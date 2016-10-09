@@ -95,6 +95,7 @@ Abode.init = function (config) {
     Abode.devices = require('../devices');
     Abode.triggers = require('../triggers');
     Abode.scenes = require('../scenes');
+    Abode.interfaces = require('../interfaces');
     Abode.web = require('../web');
     Abode.web.init();
     Abode.web.server.use(function (req, res, next) {
@@ -115,6 +116,7 @@ Abode.init = function (config) {
     .then(loadModule('devices'))
     .then(loadModule('triggers'))
     .then(loadModule('scenes'))
+    .then(loadModule('interfaces'))
     .then(function() {
       Abode.events.emit('ABODE_STARTED');
       defer.resolve();
