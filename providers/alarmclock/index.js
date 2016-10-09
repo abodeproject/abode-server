@@ -41,7 +41,7 @@ AlarmClock.trigger_to_alarm = function (trigger) {
         condition.left_key === 'is.' + day &&
         condition.condition === 'eq' &&
         condition.right_type === 'boolean' &&
-        condition.right_key === true
+        (condition.right_key === true || condition.right_key === 'true')
       );
     });
 
@@ -65,7 +65,7 @@ AlarmClock.alarm_to_trigger = function (config) {
   trigger.conditions = [];
 
   ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].forEach(function (day) {
-    if (config[day] === true) {
+    if (config[day] === true || config[day] === 'true') {
       trigger.conditions.push({'left_type': 'time', 'left_key': 'is.' + day, 'condition': 'eq', 'right_type': 'boolean', 'right_key': true});
     }
   });
@@ -104,8 +104,9 @@ AlarmClock.create = function (config) {
   var defer = q.defer();
 
   var trigger = AlarmClock.alarm_to_trigger(config);
+
   abode.triggers.create(trigger).then(function (alarm) {
-    defer.resolve(AlarmClock.trigger_to_alarm(alarm));
+    defer.resolve(AlarmClock.trigger_to_alarm(alarm.trigger));
   }, function (err) {
     defer.reject(err);
   });
@@ -130,6 +131,8 @@ AlarmClock.update = function (config, id) {
     trigger[key] = trigger_update[key];
     }
   });
+
+  console.dir(trigger.conditions);
 
   trigger._save().then(function () {
     defer.resolve(AlarmClock.trigger_to_alarm(trigger));
