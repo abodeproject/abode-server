@@ -39,6 +39,7 @@ var RoomSchema = mongoose.Schema({
     'unique': true,
     'index': true
   },
+  'tags': {'type': Array, 'default': []},
   '_devices': Array,
   '_scenes': Array,
   '_temperature': Number,
