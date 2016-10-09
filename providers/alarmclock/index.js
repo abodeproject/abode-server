@@ -46,7 +46,7 @@ AlarmClock.trigger_to_alarm = function (trigger) {
     });
 
     if (day_condition.length > 0) {
-      alarm[day] = 'true';
+      alarm[day] = true;
     }
   });
 
