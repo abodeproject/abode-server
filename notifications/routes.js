@@ -25,6 +25,26 @@ router.post('/', function (req, res) {
 
 });
 
+router.get('/active', function (req, res) {
+
+  notifications.query({'active': true}).then(function (results) {
+    res.send(results);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.get('/inactive', function (req, res) {
+
+  notifications.query({'active': false}).then(function (results) {
+    res.send(results);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.get('/:id', function (req, res) {
 
   notifications.get(req.params.id).then(function (results) {

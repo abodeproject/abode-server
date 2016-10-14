@@ -75,10 +75,11 @@ NotificationsSchema.methods.do_action = function (id) {
 
 Notifications.model = mongoose.model('Notifications', NotificationsSchema);
 
-Notifications.query = function () {
+Notifications.query = function (config) {
   var defer = q.defer();
+  config = config || {};
 
-  Notifications.model.find({}, function (err, results) {
+  Notifications.model.find(config, function (err, results) {
     if (err) {
       defer.reject(err);
       return;
