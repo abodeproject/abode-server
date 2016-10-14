@@ -9,8 +9,10 @@ var mongoose = require('mongoose');
 
 var ActionsSchema = mongoose.Schema({
   'title': {'type': String, 'required': true},
+  'type': {'type': String, 'required': true},
   'name': {'type': String, 'required': true},
-  'args': {'type': Array, 'default': []}
+  'icon': {'type': String, 'required': true},
+  'action': {'type': String, 'required': true},
 });
 
 var NotificationsSchema = mongoose.Schema({

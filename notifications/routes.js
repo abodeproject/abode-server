@@ -1,6 +1,7 @@
 'use strict';
 
-var notifications = require('../notifications'),
+var q = require('q'),
+  notifications = require('../notifications'),
   web = require('../web'),
   express = require('express'),
   router = express.Router();
@@ -28,7 +29,15 @@ router.post('/', function (req, res) {
 router.get('/active', function (req, res) {
 
   notifications.query({'active': true}).then(function (results) {
-    res.send(results);
+
+    var rendered = [];
+
+    results.forEach(function (record) {
+      rendered.push({'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': record.expires, 'actions': record.actions});
+    });
+
+    res.status(200).send(rendered);
+
   }, function (err) {
     res.status(400).send(err);
   });
@@ -72,6 +81,7 @@ router.put('/:id', function (req, res) {
 router.post('/:id/activate', function (req, res) {
 
   notifications.activate(req.params.id, req.body).then(function (result) {
+
     res.status(200).send(result);
   }, function (err) {
     res.status(err.http_code || 400).send(err);
