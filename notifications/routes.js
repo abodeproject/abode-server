@@ -33,7 +33,7 @@ router.get('/active', function (req, res) {
     var rendered = [];
 
     results.forEach(function (record) {
-      rendered.push({'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': record.expires, 'actions': record.actions});
+      rendered.push({'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': record.expires, 'actions': record.actions, 'active_date': record.active_date});
     });
 
     res.status(200).send(rendered);
