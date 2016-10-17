@@ -323,6 +323,7 @@ Triggers.activate_notifications = function (notifications) {
     var notifcation_defer = q.defer();
     notifcation_defers.push(notifcation_defer.promise);
 
+    log.info('Activating notification: ' + id);
     abode.notifications.activate(id).then(function (msg) {
       notifcation_defer.resolve(msg);
     }, function (err) {
