@@ -11,6 +11,8 @@ router.get('/', function (req, res) {
 });
 
 router.post('/', web.isJson, function (req, res) {
+  delete req.body.notifications;
+
   triggers.create(req.body).then(function (response) {
     res.status(201).send(response);
   }, function (err) {
@@ -29,6 +31,8 @@ router.get('/:id', function (req, res) {
 });
 
 router.put('/:id', web.isJson, function (req, res) {
+  delete req.body.notifications;
+
   var trigger = triggers.get(req.params.id);
   if (!trigger) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -54,6 +58,29 @@ router.delete('/:id', function (req, res) {
   }
   trigger.delete().then(function (response) {
     res.send(response);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+});
+
+router.get('/:id/notifications', function (req, res) {
+  var trigger = triggers.get(req.params.id);
+  if (!trigger) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  res.send(triggers.get(req.params.id).notifications);
+  res.end();
+});
+
+router.post('/:id/check', function (req, res) {
+  var trigger = triggers.get(req.params.id);
+  if (!trigger) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  trigger.check().then(function (response) {
+    res.status(200).send(response);
   }, function (err) {
     res.status(400).send(err);
   });

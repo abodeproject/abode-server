@@ -179,6 +179,7 @@ var conditionCheck = function (condition) {
     //If we have any undefined, fail the condition
     if (expanded.key === undefined || expanded.check === undefined || expanded.value === undefined) {
       log.debug('Failed to expand condition:', expanded);
+      defer.reject();
       return false;
     }
 
@@ -245,7 +246,7 @@ orCheck = function (conditions) {
       andCheck(condition.and).then(function (r) {
         response = (r) ? true : response;
         c_defer.resolve();
-      });
+      }, function () { c_defer.reject(); });
         return;
     }
 
@@ -254,7 +255,7 @@ orCheck = function (conditions) {
       orCheck(condition.or).then(function (r) {
         response = (r) ? true : response;
         c_defer.resolve();
-      });
+      }, function () { c_defer.reject(); });
         return;
     }
 
@@ -265,6 +266,7 @@ orCheck = function (conditions) {
       c_defer.resolve();
     }, function () {
       log.debug('Failed to resolve condition: ', condition);
+      c_defer.reject();
     });
 
   });
@@ -292,7 +294,7 @@ andCheck = function (conditions) {
       andCheck(condition.and).then(function (r) {
         response = (r) ? r : false;
         c_defer.resolve();
-      });
+      }, function () { c_defer.reject(); });
         return;
     }
 
@@ -301,7 +303,7 @@ andCheck = function (conditions) {
       orCheck(condition.or).then(function (r) {
         response = (r) ? r : false;
         c_defer.resolve();
-      });
+      }, function () { c_defer.reject(); });
         return;
     }
 
@@ -312,6 +314,7 @@ andCheck = function (conditions) {
       c_defer.resolve();
     }, function () {
       log.debug('Failed to resolve condition: ', condition);
+      c_defer.reject();
     });
   });
 

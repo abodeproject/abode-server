@@ -66,6 +66,7 @@ var TriggersSchema = mongoose.Schema({
   ],
   'duration': Object,
   'delay': Object,
+  'notifications': {'type': Array},
   'created': { 'type': Date, 'default': Date.now },
   'updated': { 'type': Date, 'default': Date.now },
 });
@@ -302,6 +303,9 @@ Triggers.fire_trigger = function (config) {
     } else {
       log.info('Firing trigger actions:', config.name);
 
+      //Activate any notifications
+      Triggers.enable_notifications(config.notifications);
+
       //Handle Actions (Move this to a function so it can be called easier depending on delay)
       Triggers.fire_actions(config.actions);
 
@@ -309,6 +313,29 @@ Triggers.fire_trigger = function (config) {
       Triggers.trigger_duration(config.duration);
     }
   });
+};
+
+Triggers.activate_notifications = function (notifications) {
+  var defer = q.defer,
+    notifcation_defers = [];
+
+  notifications.forEach(function (id) {
+    var notifcation_defer = q.defer();
+    notifcation_defers.push(notifcation_defer.promise);
+
+    abode.notifications.activate(id).then(function (msg) {
+      notifcation_defer.resolve(msg);
+    }, function (err) {
+      notifcation_defer.reject(err);
+    });
+
+  });
+
+  q.allSettled(notifcation_defers).then(function () {
+    defer.resolve();
+  });
+
+  return defer.promise;
 };
 
 Triggers.type_handler = function (trigger) {
@@ -445,6 +472,36 @@ TriggersSchema.methods.delete = function () {
     });
 
     return defer.promise;
+};
+
+TriggersSchema.methods.check = function () {
+  var self = this,
+    defer = q.defer();
+
+  //Process conditions
+  conditions.check(self.conditions).then(function (result) {
+
+    if (!result) {
+      log.debug('Conditions not met, skipping:', self.name);
+
+      defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions});
+      return;
+    }
+
+    //If the trigger is disable, skip
+    if (self.enabled === false) {
+      log.info('Conditions met but disabled, skipping:', self.name);
+
+      defer.reject({'status': 'failed', 'message': 'Conditions met but trigger disabled', 'conditions': self.conditions});
+      return;
+    }
+
+    defer.resolve({'status': 'success', 'message': 'Trigger conditions met', 'conditions': self.conditions});
+  }, function (err) {
+    defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions});
+  });
+
+  return defer.promise;
 };
 
 Triggers.model = mongoose.model('Triggers', TriggersSchema);

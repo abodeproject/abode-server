@@ -18,6 +18,8 @@ router.get('/', function (req, res) {
 
 router.post('/', function (req, res) {
 
+  delete req.body.triggers;
+
   notifications.create(req.body).then(function (results) {
     res.status(201).send(results);
   }, function (err) {
@@ -64,8 +66,73 @@ router.get('/:id', function (req, res) {
 
 });
 
+router.get('/:id/actions', function (req, res) {
+
+  notifications.get(req.params.id).then(function (results) {
+    res.send(results.actions);
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.get('/:id/triggers', function (req, res) {
+
+  notifications.get(req.params.id).then(function (results) {
+    res.send(results.triggers);
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.post('/:id/triggers', function (req, res) {
+
+  notifications.get(req.params.id).then(function (record) {
+
+    record.add_trigger(req.body).then(function () {
+      res.status(201).send();
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.get('/:id/triggers/:trigger_id', function (req, res) {
+
+  notifications.get(req.params.id).then(function (results) {
+    results.get_trigger(req.params.trigger_id).then(function (result) {
+      res.send(result);
+    }, function (err) {
+      res.status(404).send(err);
+    });
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.delete('/:id/triggers/:trigger_id', function (req, res) {
+
+  notifications.get(req.params.id).then(function (results) {
+    results.delete_trigger(req.params.trigger_id).then(function (result) {
+      res.status(204).send(result);
+    }, function () {
+      res.status(404).send(err);
+    });
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
 router.put('/:id', function (req, res) {
 
+  delete req.body.triggers;
   delete req.body.active;
   delete req.body.active_vars;
   delete req.body.active_date;
