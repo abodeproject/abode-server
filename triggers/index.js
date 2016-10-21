@@ -498,7 +498,7 @@ TriggersSchema.methods.check = function () {
     }
 
     defer.resolve({'status': 'success', 'message': 'Trigger conditions met', 'conditions': self.conditions});
-  }, function (err) {
+  }, function () {
     defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions});
   });
 
