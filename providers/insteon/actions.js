@@ -123,6 +123,39 @@ var actions = function (config, provider) {
         return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
       }
     },
+    LIGHT_LEVEL_RATE: {
+      'arguments': [
+        {
+          'name': 'Device',
+          'type': 'options',
+          'options': insteon.dev_names
+        },
+        {
+          'name': 'Level',
+          'type': 'percent'
+        },
+        {
+          'name': 'Rate',
+          'type': 'percent'
+        }
+      ],
+      'handler': function (dev, level, rate) {
+        var config,
+          cmd_2;
+
+        level = (15 * parseInt(level, 10) / 100);
+        rate = (15 * parseInt(level, 10) / 100);
+        cmd_2 = ~~ ((level << 4) + rate);
+
+        config = {
+          'to': dev,
+          'cmd_1': 0x2e,
+          'cmd_2': cmd_2
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
+      }
+    },
     START_BRIGHTEN: {
       'arguments': [
         {
