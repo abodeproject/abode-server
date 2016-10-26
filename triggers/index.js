@@ -182,7 +182,7 @@ Triggers.fire_actions = function(actions) {
   */
 
   actions.forEach(function (a) {
-    log.info('Firing action %s: %s', a.name, a.args);
+    log.debug('Firing action %s: %s', a.name, a.args);
 
     //Lookup the action
     var action = Triggers.lookupAction(a.name);
@@ -234,7 +234,7 @@ Triggers.trigger_duration = function (duration) {
 
   //Set the timeout
   if (duration.time) {
-    log.debug('Trigger duration configured for %s seconds', duration.time);
+    log.info('Trigger duration configured for %s seconds', duration.time);
     setTimeout(duration_handler, duration.time * 1000);
   }
 };
@@ -246,7 +246,7 @@ Triggers.fire_trigger = function (config) {
 
   //Specify the delay handler
   var delay_handler = function () {
-    log.debug('Firing delayed action after %s seconds:', config.delay.time, config.name);
+    log.info('Firing delayed action after %s seconds:', config.delay.time, config.name);
 
     // Check conditions again
     if (config.delay.force !== true && config.conditions.length > 0) {
