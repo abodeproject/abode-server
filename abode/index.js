@@ -26,6 +26,7 @@ Abode.init = function (config) {
   config.database.database = config.database.database || 'abode';
   config.providers = config.providers || [];
   config.fail_on_provider = config.fail_on_provider || true;
+  config.hearbeat_interval = config.hearbeat_interval || 10;
 
   Abode.save_needed = false;
   Abode.views = {};
@@ -121,6 +122,7 @@ Abode.init = function (config) {
     .then(loadModule('notifications'))
     .then(function() {
       Abode.events.emit('ABODE_STARTED');
+      setInterval(Abode.event_heartbeat, 1000 * config.hearbeat_interval);
       defer.resolve();
     }, function (err) {
       log.error(err);
@@ -139,6 +141,22 @@ Abode.init = function (config) {
   Abode.db.once('open', start);
 
   return defer.promise;
+};
+
+Abode.event_heartbeat = function () {
+  Abode.clients.forEach(function (res) {
+    var d = new Date();
+    var message = {
+      'event': 'HEARTBEAT',
+      'type': 'abode',
+      'name': 'heartbeat',
+      'timestamp': new Date(),
+      'object': {}
+    };
+
+    res.write('id: ' + d.getTime() + '\n');
+    res.write('data:' + JSON.stringify(message) + '\n\n'); // Note the extra newline
+  });
 };
 
 Abode.write_config = function () {

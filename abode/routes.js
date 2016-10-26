@@ -256,7 +256,6 @@ router.get('/events', function (req, res) {
         }
     }
     abode.clients.splice(j,1);
-    console.log(abode.clients.length);
   });
 });
 
