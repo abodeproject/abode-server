@@ -93,7 +93,7 @@ router.get('/:id/image', function (req, res) {
 
     request.get(device.config.image_url, auth)
     .on('error', function (err) {
-      log.error('Error proxying connection to device:', device.name);
+      log.debug('Error proxying connection to device:', device.name);
       try {
         res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
       } catch (e) {
@@ -136,7 +136,7 @@ router.get('/:id/video', function (req, res) {
   try {
     request.get(device.config.video_url, auth)
     .on('error', function (err) {
-      log.error('Error proxying connection to device:', device.name);
+      log.debug('Error proxying connection to device:', device.name);
       try {
         res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
       } catch (e) {

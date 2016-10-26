@@ -100,7 +100,7 @@ Modem.message_processor = function () {
     message_timeout = setTimeout(function () {
       monitor_count += 1;
 
-      log.warn('Waiting for message to parse over %s seconds, queue: %s', monitor_count, Modem.message_queue.filter(function (x) { return (x !== undefined); }).length);
+      log.debug('Waiting for message to parse over %s seconds, queue: %s', monitor_count, Modem.message_queue.filter(function (x) { return (x !== undefined); }).length);
       if (monitor_count >= 3) { next(); } else { monitor(); }
 
 
