@@ -372,13 +372,23 @@ Insteon.off = function (device) {
   return defer.promise;
 };
 
-Insteon.set_level = function (device, level) {
-  var defer = q.defer();
+Insteon.set_level = function (device, level, rate) {
+  var cmd,
+    defer = q.defer();
 
   //Add the command to the queue
-  Insteon.queue('LIGHT_LEVEL', device, [level]).then(function () {
+  if (rate) {
+    cmd = Insteon.queue('LIGHT_LEVEL_RATE', device, [level, rate]);
+  } else {
+    cmd = Insteon.queue('LIGHT_LEVEL', device, [level]);
+  }
+  cmd.then(function () {
 
-    log.debug('Successfully sent LIGHT_LEVEL to ' + device.name);
+    if (rate) {
+      log.debug('Successfully sent LIGHT_LEVEL_RAMP to ' + device.name);
+    } else {
+      log.debug('Successfully sent LIGHT_LEVEL to ' + device.name);
+    }
 
     //Resolve our defer with the correct _on and _level values
     var state = (level > 0) ? true : false;
