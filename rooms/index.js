@@ -542,37 +542,37 @@ RoomSchema.methods.set_state = function (config, log_msg) {
     if (onoff_events[key]) {
       if (config[key] === true && self[key] !== config[key]) {
         abode.events.emit(onoff_events[key] + '_ON', {'name': self.name, 'type': 'room', 'object': self});
-        log.info('Emitting ' + onoff_events[key] + '_ON for', {'name': self.name, 'type': 'room'});
+        log.debug('Emitting ' + onoff_events[key] + '_ON for', {'name': self.name, 'type': 'room'});
       }
       if (config[key] === false && self[key] !== config[key]) {
         abode.events.emit(onoff_events[key] + '_OFF', {'name': self.name, 'type': 'room', 'object': self});
-        log.info('Emitting ' + onoff_events[key] + '_OFF for', {'name': self.name, 'type': 'room'});
+        log.debug('Emitting ' + onoff_events[key] + '_OFF for', {'name': self.name, 'type': 'room'});
       }
     }
 
     if (openclose_events[key]) {
       if (config[key] === true && self[key] !== config[key]) {
         abode.events.emit(openclose_events[key] + '_OPEN', {'name': self.name, 'type': 'room', 'object': self});
-        log.info('Emitting ' + openclose_events[key] + '_OPEN for', {'name': self.name, 'type': 'room'});
+        log.debug('Emitting ' + openclose_events[key] + '_OPEN for', {'name': self.name, 'type': 'room'});
       }
       if (config[key] === false && self[key] !== config[key]) {
         abode.events.emit(openclose_events[key] + '_CLOSED', {'name': self.name, 'type': 'room', 'object': self});
-        log.info('Emitting ' + openclose_events[key] + '_CLOSED for', {'name': self.name, 'type': 'room'});
+        log.debug('Emitting ' + openclose_events[key] + '_CLOSED for', {'name': self.name, 'type': 'room'});
       }
     }
 
     if (int_events[key]) {
       if (Math.floor(self[key]) !== Math.floor(config[key])) {
         abode.events.emit(int_events[key] + '_CHANGE', {'name': self.name, 'type': 'room', 'object': self});
-        log.info('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'room'});
+        log.debug('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'room'});
       }
       if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) < Math.floor(config[key])) {
         abode.events.emit(int_events[key] + '_UP', {'name': self.name, 'type': 'room', 'object': self});
-        log.info('Emitting ' + int_events[key] + '_UP for', {'name': self.name, 'type': 'room'});
+        log.debug('Emitting ' + int_events[key] + '_UP for', {'name': self.name, 'type': 'room'});
       }
       if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) > Math.floor(config[key])) {
         abode.events.emit(int_events[key] + '_DOWN', {'name': self.name, 'type': 'room', 'object': self});
-        log.info('Emitting ' + int_events[key] + '_DOWN for', {'name': self.name, 'type': 'room'});
+        log.debug('Emitting ' + int_events[key] + '_DOWN for', {'name': self.name, 'type': 'room'});
       }
     }
 

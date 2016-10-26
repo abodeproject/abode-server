@@ -229,15 +229,15 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
         self[key] = config[key];
 
         abode.events.emit(int_events[key] + '_CHANGE', {'name': self.name, 'type': 'device', 'object': self});
-        log.info('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'device'});
+        log.debug('Emitting ' + int_events[key] + '_CHANGE for', {'name': self.name, 'type': 'device'});
       }
       if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) < Math.floor(config[key])) {
         abode.events.emit(int_events[key] + '_UP', {'name': self.name, 'type': 'device', 'object': self});
-        log.info('Emitting ' + int_events[key] + '_UP for', {'name': self.name, 'type': 'device'});
+        log.debug('Emitting ' + int_events[key] + '_UP for', {'name': self.name, 'type': 'device'});
       }
       if (Math.floor(self[key]) !== Math.floor(config[key]) && Math.floor(self[key]) > Math.floor(config[key])) {
         abode.events.emit(int_events[key] + '_DOWN', {'name': self.name, 'type': 'device', 'object': self});
-        log.info('Emitting ' + int_events[key] + '_DOWN for', {'name': self.name, 'type': 'device'});
+        log.debug('Emitting ' + int_events[key] + '_DOWN for', {'name': self.name, 'type': 'device'});
       }
     }
 
@@ -251,13 +251,13 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
           self.last_on = new Date();
           if (self.capabilities.indexOf('motion_sensor') !== -1) {
             abode.events.emit('MOTION_ON', {'type': 'device', 'name': self.name, 'object': self});
-            log.info('Emitting MOTION_ON for', {'type': 'device', 'name': self.name});
+            log.debug('Emitting MOTION_ON for', {'type': 'device', 'name': self.name});
           } else if (self.capabilities.indexOf('openclose') !== -1) {
             abode.events.emit('OPEN', {'type': 'device', 'name': self.name, 'object': self});
-            log.info('Emitting OPEN for', {'type': 'device', 'name': self.name});
+            log.debug('Emitting OPEN for', {'type': 'device', 'name': self.name});
           } else {
             abode.events.emit('ON', {'type': 'device', 'name': self.name, 'object': self});
-            log.info('Emitting ON for', {'type': 'device', 'name': self.name});
+            log.debug('Emitting ON for', {'type': 'device', 'name': self.name});
           }
         }
         if (config[key] === false && self[key] !== false) {
@@ -267,13 +267,13 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
           self.last_off = new Date();
           if (self.capabilities.indexOf('motion_sensor') !== -1) {
             abode.events.emit('MOTION_OFF', {'type': 'device', 'name': self.name, 'object': self});
-            log.info('Emitting MOTION_OFF for', {'type': 'device', 'name': self.name});
+            log.debug('Emitting MOTION_OFF for', {'type': 'device', 'name': self.name});
           } else if (self.capabilities.indexOf('openclose') !== -1) {
             abode.events.emit('CLOSE', {'type': 'device', 'name': self.name, 'object': self});
-            log.info('Emitting CLOSE for', {'type': 'device', 'name': self.name});
+            log.debug('Emitting CLOSE for', {'type': 'device', 'name': self.name});
           } else {
             abode.events.emit('OFF', {'type': 'device', 'name': self.name, 'object': self});
-            log.info('Emitting OFF for', {'type': 'device', 'name': self.name});
+            log.debug('Emitting OFF for', {'type': 'device', 'name': self.name});
           }
         }
         made_event = true;
