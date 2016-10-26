@@ -220,13 +220,13 @@ Modem.message_handler = function (message, handler) {
       //Dawn/Dusk Detection
         if (message.cmd === 'LIGHT_ON') {
 
-          log.info('DARK detected by device: ', device.name);
+          log.debug('DARK detected by device: ', device.name);
           log_msg.command = 'Dark Detected';
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
 
         } else if (message.cmd === 'LIGHT_OFF') {
 
-          log.info('LIGHT detected by device: ', device.name);
+          log.debug('LIGHT detected by device: ', device.name);
           log_msg.command = 'Light Detected';
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
 
@@ -247,7 +247,7 @@ Modem.message_handler = function (message, handler) {
         if (message.cmd === 'LIGHT_ON') {
 
         //Emit global event for LIGHT_ON
-          log.info('MOTION ON detected by device: ', device.name);
+          log.debug('MOTION ON detected by device: ', device.name);
           log_msg.command = 'MOTION_ON';
           state._on = true;
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
@@ -256,7 +256,7 @@ Modem.message_handler = function (message, handler) {
 
         //Emit global event for LIGHT_OFF
           log_msg.command = 'MOTION_OFF';
-          log.info('MOTION OFF detected by device: ', device.name);
+          log.debug('MOTION OFF detected by device: ', device.name);
           state._on = false;
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
 
@@ -279,7 +279,7 @@ Modem.message_handler = function (message, handler) {
         if (message.cmd === 'LIGHT_ON') {
 
         //Emit global event for LIGHT_ON
-          log.info('OPEN detected by device: ', device.name);
+          log.debug('OPEN detected by device: ', device.name);
           state._on = true;
           log_msg.command = 'OPENED';
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
@@ -287,7 +287,7 @@ Modem.message_handler = function (message, handler) {
         } else if (message.cmd === 'LIGHT_OFF') {
 
         //Emit global event for LIGHT_OFF
-          log.info('CLOSE detected by device: ', device.name);
+          log.debug('CLOSE detected by device: ', device.name);
           state._on = false;
           log_msg.command = 'CLOSED';
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
@@ -302,14 +302,14 @@ Modem.message_handler = function (message, handler) {
       if (device && message.cmd === 'LIGHT_ON') {
 
       //Emit global event for LIGHT_ON
-        log.info('ON detected by device: ', device.name);
+        log.debug('ON detected by device: ', device.name);
         state._on = true;
         device.set_state({'_on': true}, log_msg).then(defer.resolve, defer.reject);
 
       } else if (device && message.cmd === 'LIGHT_OFF') {
 
       //Emit global event for LIGHT_OFF
-        log.info('OFF detected by device: ', device.name);
+        log.debug('OFF detected by device: ', device.name);
         state._on = false;
         device.set_state(state, log_msg).then(defer.resolve, defer.reject);
 
