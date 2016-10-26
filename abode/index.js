@@ -27,6 +27,7 @@ Abode.init = function (config) {
   config.providers = config.providers || [];
   config.fail_on_provider = config.fail_on_provider || true;
   config.hearbeat_interval = config.hearbeat_interval || 10;
+  config.event_cache_size = 100;
 
   Abode.save_needed = false;
   Abode.views = {};
@@ -34,6 +35,7 @@ Abode.init = function (config) {
 
   //Create a new event emitter
   Abode.events = new events.EventEmitter();
+  Abode.event_cache = [];
 
   //Load the config.ini
   if (fs.existsSync(config.path) && config.read_config === true) {

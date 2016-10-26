@@ -348,22 +348,27 @@ Triggers.type_handler = function (trigger) {
   return function(matcher) {
     matcher = matcher || '';
 
+    var event_object = {
+      'event': trigger,
+      'type': matcher.type,
+      'name': matcher.name || matcher,
+      'timestamp': new Date(),
+      'object': matcher.object,
+    };
     //Let any connect clients now if an item was updated
     //if (trigger === 'UPDATED') {
     //  log.debug('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
       abode.clients.forEach(function (res) {
         var d = new Date();
-        var message = {
-          'event': trigger,
-          'type': matcher.type,
-          'name': matcher.name || matcher,
-          'timestamp': new Date(),
-          'object': matcher.object,
-        };
 
         res.write('id: ' + d.getTime() + '\n');
-        res.write('data:' + JSON.stringify(message) + '\n\n'); // Note the extra newline
+        res.write('data:' + JSON.stringify(event_object) + '\n\n'); // Note the extra newline
       });
+
+    abode.event_cache.unshift(event_object);
+    if (abode.event_cache.length > abode.config.event_cache_size) {
+      abode.event_cache.pop();
+    }
 
     //  return;
     //}

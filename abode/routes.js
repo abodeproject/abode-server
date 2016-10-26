@@ -231,6 +231,12 @@ router.post('/reboot', function (req, res) {
 
 router.get('/events', function (req, res) {
 
+  if (req.query.cache) {
+    console.log('here');
+    res.send(abode.event_cache);
+    return;
+  }
+
   // set timeout as high as possible
   req.socket.setTimeout(0);
 
