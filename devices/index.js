@@ -396,20 +396,24 @@ DeviceSchema.methods._save = function (log_save) {
 
   log_save = (log_save === undefined) ? true : log_save;
 
-  this.save(function (err) {
-    if (err) {
-      log.error('Device failed to save:', self.name);
-      log.debug(err.message || err);
-      defer.reject(err);
-    } else {
-      if (log_save) {
-        log.info('Device saved successfully: ' + self.name);
-      }
-      abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
+  if (this.isModified()) {
+    defer.resolve();
+  } else {
+    this.save(function (err) {
+      if (err) {
+        log.error('Device failed to save:', self.name);
+        log.debug(err.message || err);
+        defer.reject(err);
+      } else {
+        if (log_save) {
+          log.info('Device saved successfully: ' + self.name);
+        }
+        abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
 
-      defer.resolve();
-    }
-  });
+        defer.resolve();
+      }
+    });
+  }
 
   return defer.promise;
 };

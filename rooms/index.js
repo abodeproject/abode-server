@@ -188,15 +188,19 @@ RoomSchema.methods._save = function () {
   var self = this,
     defer = q.defer();
 
-  this.save(function (err) {
-    if (err) {
-      defer.reject(err);
-    } else {
-      log.info('Room saved successfully: ' + self.name);
-      abode.events.emit('UPDATED', {'type': 'room', 'name': self.name, 'object': self});
-      defer.resolve();
-    }
-  });
+  if (this.isModified()) {
+    defer.resolve();
+  } else {
+    this.save(function (err) {
+      if (err) {
+        defer.reject(err);
+      } else {
+        log.info('Room saved successfully: ' + self.name);
+        abode.events.emit('UPDATED', {'type': 'room', 'name': self.name, 'object': self});
+        defer.resolve();
+      }
+    });
+  }
 
   return defer.promise;
 };
