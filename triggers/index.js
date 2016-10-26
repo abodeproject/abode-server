@@ -357,6 +357,7 @@ Triggers.type_handler = function (trigger) {
           'event': trigger,
           'type': matcher.type,
           'name': matcher.name || matcher,
+          'timestamp': new Date(),
           'object': matcher.object,
         };
 
