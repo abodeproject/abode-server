@@ -308,6 +308,9 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
     });
   }
 
+  return self._save();
+
+  /*
   //Save if changes have been made, otherwise return a resolve defer
   if (changes) {
     return self._save();
@@ -317,6 +320,7 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
     defer.resolve();
     return defer.promise;
   }
+  */
 };
 
 DeviceSchema.methods.log_entry = function () {
@@ -392,27 +396,31 @@ DeviceSchema.methods.get_rooms = function () {
 // Define a save function that returns an promise instead of using a callback
 DeviceSchema.methods._save = function (log_save) {
   var self = this,
-    before = parseInt(self.__v),
+    changed = self.modifiedPaths(),
     defer = q.defer();
 
   log_save = (log_save === undefined) ? true : log_save;
 
-  this.save(function (err) {
-    if (err) {
-      log.error('Device failed to save:', self.name);
-      log.debug(err.message || err);
-      defer.reject(err);
-    } else if (before === parseInt(self.__v)) {
-      defer.resolve();
-    } else {
-      if (log_save) {
-        log.info('Device saved successfully: ' + self.name);
-      }
-      abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
+  if (self.isModified()) {
 
-      defer.resolve();
-    }
-  });
+    this.save(function (err) {
+      if (err) {
+        log.error('Device failed to save:', self.name);
+        log.debug(err.message || err);
+        defer.reject(err);
+      } else {
+        if (changed.length !== 1 && changed.indexOf('last_seen') !== 0) {
+          log.debug('Device saved successfully: ' + self.name);
+          abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
+        }
+
+        defer.resolve();
+      }
+    });
+
+  } else {
+    defer.resolve();
+  }
 
   return defer.promise;
 };
