@@ -229,7 +229,7 @@ router.delete('/:id/rooms/:roomid', function (req, res) {
   }
 
   device.remove_room(room).then(function () {
-    res.status(200).send({'status': 'success'});
+    res.status(204).send({'status': 'success'});
   }, function (err) {
     res.status(422).send(err);
   });
@@ -246,7 +246,7 @@ router.put('/:id', web.isJson, function (req, res) {
 
   //That way it will trigger events on changes
   device.set_state(req.body).then(function () {
-    res.status(200).send({'status': 'success'});
+    res.status(204).send({'status': 'success'});
   }, function (err) {
     res.status(422).send(err);
   });
