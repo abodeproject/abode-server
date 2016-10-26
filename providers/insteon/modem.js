@@ -199,9 +199,9 @@ Modem.message_handler = function (message, handler) {
       }
 
       if (cleanup) {
-        log.info('Cleanup message recieved and device not in expected state: ', device.name, message.cmd);
+        log.debug('Cleanup message recieved and device not in expected state: ', device.name, message.cmd);
       } else {
-        log.info('Cleanup message recieved but device is correct: ', device.name, message.cmd);
+        log.debug('Cleanup message recieved but device is correct: ', device.name, message.cmd);
 
         defer.resolve();
         return defer.promise;
