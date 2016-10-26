@@ -304,7 +304,7 @@ Triggers.fire_trigger = function (config) {
       log.info('Firing trigger actions:', config.name);
 
       //Activate any notifications
-      Triggers.enable_notifications(config.notifications);
+      Triggers.activate_notifications(config.notifications);
 
       //Handle Actions (Move this to a function so it can be called easier depending on delay)
       Triggers.fire_actions(config.actions);
@@ -498,7 +498,7 @@ TriggersSchema.methods.check = function () {
     }
 
     defer.resolve({'status': 'success', 'message': 'Trigger conditions met', 'conditions': self.conditions});
-  }, function (err) {
+  }, function () {
     defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions});
   });
 
