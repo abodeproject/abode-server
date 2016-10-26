@@ -392,28 +392,27 @@ DeviceSchema.methods.get_rooms = function () {
 // Define a save function that returns an promise instead of using a callback
 DeviceSchema.methods._save = function (log_save) {
   var self = this,
+    before = parseInt(self.__v),
     defer = q.defer();
 
   log_save = (log_save === undefined) ? true : log_save;
 
-  if (this.isModified()) {
-    defer.resolve();
-  } else {
-    this.save(function (err) {
-      if (err) {
-        log.error('Device failed to save:', self.name);
-        log.debug(err.message || err);
-        defer.reject(err);
-      } else {
-        if (log_save) {
-          log.info('Device saved successfully: ' + self.name);
-        }
-        abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
-
-        defer.resolve();
+  this.save(function (err) {
+    if (err) {
+      log.error('Device failed to save:', self.name);
+      log.debug(err.message || err);
+      defer.reject(err);
+    } else if (before === parseInt(self.__v)) {
+      defer.resolve();
+    } else {
+      if (log_save) {
+        log.info('Device saved successfully: ' + self.name);
       }
-    });
-  }
+      abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
+
+      defer.resolve();
+    }
+  });
 
   return defer.promise;
 };
