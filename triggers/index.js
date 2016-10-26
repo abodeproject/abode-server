@@ -365,9 +365,9 @@ Triggers.type_handler = function (trigger) {
         res.write('data:' + JSON.stringify(event_object) + '\n\n'); // Note the extra newline
       });
 
-    abode.event_cache.unshift(event_object);
+    abode.event_cache.push(event_object);
     if (abode.event_cache.length > abode.config.event_cache_size) {
-      abode.event_cache.pop();
+      abode.event_cache.shift();
     }
 
     //  return;
