@@ -254,7 +254,7 @@ Insteon.command = function (command, device, args) {
       } else {
 
         // Wait the configured ms, then try again
-        log.warn('Failed to send command, retrying in ' + Insteon.config.delay + 'ms');
+        log.debug('Failed to send command, retrying in ' + Insteon.config.delay + 'ms');
         setTimeout(attempt, Insteon.config.delay);
 
       }
