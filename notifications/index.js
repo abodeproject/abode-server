@@ -70,7 +70,7 @@ Notifications.check = function () {
 
   Notifications.checking = true;
 
-  log.info('Checking notifications');
+  log.debug('Checking notifications');
   Notifications.query({'active': true}).then(function (records) {
 
     records.forEach(function(record) {
