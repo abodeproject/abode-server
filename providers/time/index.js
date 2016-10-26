@@ -93,15 +93,15 @@ var processTime = function () {
 
     if (Time.current === Time.sunset) {
       log.debug('sunset');
-      events.emit('SUNSET');
+      events.emit('SUNSET', {'type': 'time', 'name': 'Sunset', 'object': Time});
     }
     if (Time.current === Time.sunrise) {
       log.debug('sunrise');
-      events.emit('SUNRISE');
+      events.emit('SUNRISE', {'type': 'time', 'name': 'Sunset', 'object': Time});
     }
     if (Time.current === Time.solar_noon) {
       log.debug('solar_noon');
-      events.emit('SOLAR_NOON');
+      events.emit('SOLAR_NOON', {'type': 'time', 'name': 'Sunset', 'object': Time});
     }
   }
 
@@ -109,11 +109,13 @@ var processTime = function () {
   if (day_change) {
     log.debug('Day changed');
 
-    events.emit('DAY_CHANGE', Time.day);
+    //events.emit('DAY_CHANGE', Time.day);
+    events.emit('DAY_CHANGE', {'type': 'time', 'name': Time.day, 'object': Time});
   }
   if (time_change) {
     log.debug('Time changed');
-    events.emit('TIME_CHANGE', Time.time);
+    //events.emit('TIME_CHANGE', Time.time);
+    events.emit('TIME_CHANGE', {'type': 'time', 'name': Time.time, 'object': Time});
   }
 };
 
