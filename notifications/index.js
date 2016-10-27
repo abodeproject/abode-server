@@ -179,10 +179,33 @@ NotificationsSchema.methods.add_action = function (action) {
     defer = q.defer();
 
 
+  action._id = mongoose.Types.ObjectId();
   self.actions.push(action);
+
   self.save(function (err) {
     if (err) {
       log.error('Error adding action to notification: ', err);
+      defer.reject(err);
+      return;
+    }
+
+    log.debug('Notification Saved: ', self._id);
+    defer.resolve(action);
+  });
+
+  return defer.promise;
+};
+
+NotificationsSchema.methods.delete_action = function (action) {
+  var self = this,
+    defer = q.defer();
+
+
+  self.actions.pull({'_id': action});
+
+  self.save(function (err) {
+    if (err) {
+      log.error('Error removing action to notification: ', err);
       defer.reject(err);
       return;
     }

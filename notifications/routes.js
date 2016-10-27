@@ -81,6 +81,54 @@ router.post('/:id/actions', function (req, res) {
   notifications.get(req.params.id).then(function (record) {
 
     record.add_action(req.body).then(function (result) {
+      res.status(200).send(result);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.get('/:id/actions/:action_id', function (req, res) {
+
+  notifications.get(req.params.id).then(function (record) {
+
+    record.get_action(req.params.action_id).then(function (result) {
+      res.status(204).send(req.body);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.put('/:id/actions/:action_id', function (req, res) {
+
+  notifications.get(req.params.id).then(function (record) {
+
+    record.update_action(req.params.action_id).then(function (result) {
+      res.status(204).send(req.body);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.delete('/:id/actions/:action_id', function (req, res) {
+
+  notifications.get(req.params.id).then(function (record) {
+
+    record.delete_action(req.params.action_id).then(function (result) {
       res.status(204).send(req.body);
     }, function (err) {
       res.status(400).send(err);
