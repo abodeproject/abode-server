@@ -183,9 +183,11 @@ var conditionCheck = function (condition) {
       return false;
     }
 
+    var left_condition = condition.left_type + '.' + condition.left_key;
+    var right_condition = condition.right_type + '.' + condition.right_key;
     var result = expanded.check(expanded.key, expanded.value);
     defer.resolve(result);
-    log.debug('Expanded: %s %s %s is %s', expanded.key, condition.condition, expanded.value, result);
+    log.debug('Expanded: %s (%s) %s %s (%s) is %s', left_condition, expanded.key, condition.condition, right_condition, expanded.value, result);
   };
 
   //Function to lookup our value
@@ -286,6 +288,7 @@ andCheck = function (conditions) {
 
   log.debug('Processing AND conditions: ', conditions);
   conditions.forEach(function (condition) {
+    log.debug('Processing condition: ', condition);
     var c_defer = q.defer();
     condition_defers.push(c_defer.promise);
 
@@ -294,7 +297,7 @@ andCheck = function (conditions) {
       andCheck(condition.and).then(function (r) {
         response = (r) ? r : false;
         c_defer.resolve();
-      }, function () { c_defer.reject(); });
+      }, function () { response = false; c_defer.reject(); });
         return;
     }
 
@@ -303,16 +306,17 @@ andCheck = function (conditions) {
       orCheck(condition.or).then(function (r) {
         response = (r) ? r : false;
         c_defer.resolve();
-      }, function () { c_defer.reject(); });
+      }, function () { response = false; c_defer.reject(); });
         return;
     }
 
     //Process the condition
     log.debug('Checking AND condition: ', condition);
     conditionCheck(condition).then(function (r) {
-      response = (r) ? r : false;
+      response = (r === false) ? false : response;
       c_defer.resolve();
     }, function () {
+      response = false;
       log.debug('Failed to resolve condition: ', condition);
       c_defer.reject();
     });
