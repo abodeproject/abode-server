@@ -13,6 +13,7 @@ var ActionsSchema = mongoose.Schema({
   'name': {'type': String, 'required': true},
   'icon': {'type': String, 'required': true},
   'action': {'type': String, 'required': true},
+  'args': {'type': Array},
 });
 
 var NotificationsSchema = mongoose.Schema({
@@ -171,6 +172,26 @@ NotificationsSchema.methods.render = function () {
   });
 
   return self.message;
+};
+
+NotificationsSchema.methods.add_action = function (action) {
+  var self = this,
+    defer = q.defer();
+
+
+  self.actions.push(action);
+  self.save(function (err) {
+    if (err) {
+      log.error('Error adding action to notification: ', err);
+      defer.reject(err);
+      return;
+    }
+
+    log.debug('Notification Saved: ', self._id);
+    defer.resolve(action);
+  });
+
+  return defer.promise;
 };
 
 NotificationsSchema.methods.do_action = function (id) {

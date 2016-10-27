@@ -76,6 +76,22 @@ router.get('/:id/actions', function (req, res) {
 
 });
 
+router.post('/:id/actions', function (req, res) {
+
+  notifications.get(req.params.id).then(function (record) {
+
+    record.add_action(req.body).then(function (result) {
+      res.status(204).send(req.body);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
 router.get('/:id/triggers', function (req, res) {
 
   notifications.get(req.params.id).then(function (result) {
