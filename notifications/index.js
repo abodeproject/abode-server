@@ -273,6 +273,21 @@ NotificationsSchema.methods.get_trigger = function (id) {
   return defer.promise;
 };
 
+NotificationsSchema.methods.list_triggers = function () {
+  var self = this,
+    defer = q.defer();
+
+
+  abode.triggers.model.find({'_id': {'$in': self.triggers}}).then(function (results) {
+    defer.resolve(results);
+  }, function (err) {
+    defer.reject(err);
+    console.log(err);
+  });
+
+  return defer.promise;
+};
+
 NotificationsSchema.methods.delete_trigger = function (id) {
   var self = this,
     defer = q.defer(),
