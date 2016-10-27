@@ -32,6 +32,7 @@ router.get('/:id', function (req, res) {
 
 router.put('/:id', web.isJson, function (req, res) {
   delete req.body.notifications;
+  delete req.body.__v;
 
   var trigger = triggers.get(req.params.id);
   if (!trigger) {
