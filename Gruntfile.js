@@ -97,7 +97,7 @@ module.exports = function(grunt) {
     },
     exec: {
       apidoc: {
-        cmd: 'node_modules/apidoc/bin/apidoc -e node_modules/ -e src/public/ -o public/apidoc'
+        cmd: 'node_modules/apidoc/bin/apidoc -e node_modules/ -e public/ -o public/apidoc'
       },
       markdown: {
         cmd: 'node_modules/apidoc-markdown/index.js -o apidoc.md -p public/apidoc/'
