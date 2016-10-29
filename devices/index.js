@@ -55,6 +55,8 @@ Devices.capabilities = [
   'onoff',
   'display',
   'camera',
+  'client',
+  'browser'
 ];
 Devices._devices = [];
 Devices.logs = mongoose.model('DeviceLogs', DeviceLogSchema);
@@ -402,7 +404,6 @@ DeviceSchema.methods._save = function (log_save) {
   log_save = (log_save === undefined) ? true : log_save;
 
   if (self.isModified()) {
-
     this.save(function (err) {
       if (err) {
         log.error('Device failed to save:', self.name);
