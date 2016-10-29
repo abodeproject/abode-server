@@ -128,6 +128,34 @@ Web.init = function () {
     store: new MongoStore(store_config)
   }));
   Web.server.use(function (req, res, next) {
+    req.client_ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
+
+    abode.auth.check(req.headers['client_token'], req.headers['auth_token'], req.client_ip, req.headers['user-agent']).then(function (response) {
+
+      req.token = response;
+      next();
+
+    }, function (err) {
+      next();
+    });
+
+  });
+  Web.server.use(function (req, res, next) {
+
+    if (!req.token) {
+      next();
+      return;
+    }
+
+    req.token.get_device().then(function (device) {
+      req.device = device;
+      next();
+    }, function () {
+      next();
+    })
+
+  });
+  Web.server.use(function (req, res, next) {
 
     var alt_method = function() {
       var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
