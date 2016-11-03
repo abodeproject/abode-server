@@ -120,7 +120,6 @@ Web.init = function () {
   Web.server.use(logger.connectLogger(http_logger));
   Web.server.use(bodyParser.json());
   Web.server.use(bodyParser.text());
-  Web.server.use(cookieParser());
   Web.server.use(session({
     name: 'abode-auth',
     saveUninitialized: true,
