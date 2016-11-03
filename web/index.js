@@ -142,7 +142,7 @@ Web.init = function () {
   });
   Web.server.use(function (req, res, next) {
     req.client_ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
-    abode.auth.check(req.headers['client_token'] || req.query.client_token, req.headers['auth_token'] || req.query.client_token, req.client_ip, req.headers['user-agent']).then(function (response) {
+    abode.auth.check(req.headers['client_token'] || req.query.client_token, req.headers['auth_token'] || req.query.auth_token, req.client_ip, req.headers['user-agent']).then(function (response) {
 
       req.token = response;
       next();
