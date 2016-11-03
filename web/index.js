@@ -9,6 +9,7 @@ var abode,
   https = require('https'),
   addr = require('netaddr').Addr,
   read = require('fs').readFileSync,
+  cookieParser = require('cookie-parser'),
   bodyParser = require('body-parser'),
   session = require('express-session'),
   MongoStore = require('connect-mongo')(session),
@@ -120,6 +121,7 @@ Web.init = function () {
   Web.server.use(logger.connectLogger(http_logger));
   Web.server.use(bodyParser.json());
   Web.server.use(bodyParser.text());
+  Web.server.use(cookieParser());
   Web.server.use(session({
     name: 'abode-auth',
     saveUninitialized: true,
@@ -142,8 +144,7 @@ Web.init = function () {
   });
   Web.server.use(function (req, res, next) {
     req.client_ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
-
-    abode.auth.check(req.headers['client_token'], req.headers['auth_token'], req.client_ip, req.headers['user-agent']).then(function (response) {
+    abode.auth.check(req.headers['client_token'] || req.query.client_token, req.headers['auth_token'] || req.query.client_token, req.client_ip, req.headers['user-agent']).then(function (response) {
 
       req.token = response;
       next();
