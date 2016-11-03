@@ -20,7 +20,7 @@ Abode.init = function (config) {
   config.read_config = config.read_config || true;
   config.allow_networks = config.allow_networks || ['127.0.0.1'];
   config.ip_header = config.ip_header;
-  config.allow_uris = config.allow_uris || ['/', '/api/auth', '/scripts/*', '/css/*', '/images/*', '/views/*', '/fonts/*', '/webcam/*', 'favicon.ico', '/font/*'];
+  config.allow_uris = config.allow_uris || ['/', '/api/auth', '/api/auth/login', '/scripts/*', '/css/*', '/images/*', '/views/*', '/fonts/*', '/webcam/*', 'favicon.ico', '/font/*'];
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
   config.database.database = config.database.database || 'abode';
@@ -102,12 +102,6 @@ Abode.init = function (config) {
     Abode.notifications = require('../notifications');
     Abode.web = require('../web');
     Abode.web.init();
-    Abode.web.server.use(function (req, res, next) {
-      res.set('Access-Control-Allow-Origin','*');
-      res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
-      res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
-      next();
-    });
 
     Abode.web.server.use('/api/abode', require('./routes'));
 
