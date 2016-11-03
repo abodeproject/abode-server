@@ -128,6 +128,19 @@ Web.init = function () {
     store: new MongoStore(store_config)
   }));
   Web.server.use(function (req, res, next) {
+    res.set('Access-Control-Allow-Origin','*');
+    res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
+    res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
+    next();
+  });
+  Web.server.use(function (req, res, next) {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send();
+      return;
+    }
+    next();
+  });
+  Web.server.use(function (req, res, next) {
     req.client_ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
 
     abode.auth.check(req.headers['client_token'], req.headers['auth_token'], req.client_ip, req.headers['user-agent']).then(function (response) {
