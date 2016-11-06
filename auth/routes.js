@@ -224,6 +224,27 @@ router.get('/device', function (req, res) {
 
 });
 
+router.put('/device', function (req, res) {
+
+  if (req.token.status === 'active') {
+
+
+    req.device.set_state(req.body).then(function () {
+      res.status(200).send(req.device);
+    }, function (err) {
+      res.status(422).send(err);
+    });
+
+  } else if (req.token.status === 'nodevice' || req.token.status === 'unassigned') {
+    res.status(404).send({'status': token.status});
+  } else if (req.token) {
+    res.status(403).send({'status': token.status});
+  } else {
+    res.status(401).send({'status': 'unauthenticated'});
+  }
+
+});
+
 /**
  * @api {get} /device Get assigned device
  * @apiGroup Auth
