@@ -6,6 +6,7 @@ var q = require('q');
 var logger = require('log4js'),
   log = logger.getLogger('notifications');
 var mongoose = require('mongoose');
+var webPush = require('web-push');
 
 var ActionsSchema = mongoose.Schema({
   'title': {'type': String, 'required': true},
@@ -53,6 +54,10 @@ var Notifications = function () {
   routes = require('./routes');
 
   abode.web.server.use('/api/notifications', routes);
+
+  if (abode.config.notifications.gcmapikey) {
+    Notifications.gcmAPIKey = abode.config.notifications.gcmapikey;
+  }
   log.info('Started Notifications');
 
   Notifications.checking = false;
@@ -484,6 +489,61 @@ Notifications.delete = function (id) {
   return defer.promise;
 };
 
+Notifications.push_notifications = function (payload) {
+  var defer = q.defer(),
+    device_defers = [];
+
+
+  if (payload) {
+    payload.type = 'new';
+    payload = JSON.stringify(payload);
+  } else {
+    payload = JSON.stringify({'type': 'new'});
+  }
+
+  abode.devices.list().forEach(function (device) {
+    var dev_defer,
+      options,
+      subscription;
+
+    if (!device.config || !device.config.push_notifications) {
+      return;
+    }
+
+    dev_defer = q.defer();
+    device_defers.push(dev_defer.promise);
+
+    subscription = {
+      'endpoint': device.config.push_endpoint,
+      'keys': {
+        'p256dh': device.config.push_key,
+        'auth': device.config.push_auth,
+      }
+    };
+
+    options = {
+      'TTL': 200,
+      'gcmAPIKey': Notifications.gcmAPIKey
+    };
+
+    webPush.sendNotification(subscription, payload, options).then(function () {
+      defer.resolve({'device': device.name, 'status': 'success', });
+      log.info('Sent push notification to %s', device.name);
+    }, function (err) {
+      defer.resolve({'device': device.name, 'status': 'failed', 'error': err});
+      log.error('Failed to send to %s: %s', device.name, err);
+      console.log(err);
+    });
+
+  });
+
+  q.allSettled(device_defers).then(function (results) {
+    defer.resolve(results);
+  });
+
+  return defer.promise;
+};
+
 Notifications.activate = function (id, body) {
   var data = {},
     defer = q.defer();
@@ -504,10 +564,12 @@ Notifications.activate = function (id, body) {
     Notifications.update(id, data).then(function (record) {
       var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions};
       abode.events.emit('NOTIFICATION_ACTIVATED', response);
+      Notifications.push_notifications(response);
 
       response.status = 'success';
       response.message = 'Notification Activated';
       log.info('Notification activated: ' + response.name);
+
 
       defer.resolve(response);
     }, function (err) {

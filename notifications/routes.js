@@ -28,6 +28,16 @@ router.post('/', function (req, res) {
 
 });
 
+router.post('/test_push', function (req, res) {
+
+  notifications.push_notifications(req.body).then(function (results) {
+    res.status(200).send(results);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.get('/active', function (req, res) {
 
   notifications.query({'active': true}).then(function (results) {
