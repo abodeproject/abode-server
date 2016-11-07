@@ -2,6 +2,7 @@
 
 var web = require('../web'),
   auth = require('../auth'),
+  abode = require('../abode'),
   express = require('express'),
   logger = require('log4js'),
   log = logger.getLogger('auth'),
@@ -231,6 +232,7 @@ router.put('/device', function (req, res) {
 
     req.device.set_state(req.body).then(function () {
       res.status(200).send(req.device);
+      abode.devices.load()
     }, function (err) {
       res.status(422).send(err);
     });
