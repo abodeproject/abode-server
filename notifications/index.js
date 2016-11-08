@@ -495,7 +495,7 @@ Notifications.push_notifications = function (payload) {
 
 
   if (payload) {
-    payload.type = 'new';
+    payload.type = payload.type || 'new';
     payload = JSON.stringify(payload);
   } else {
     payload = JSON.stringify({'type': 'new'});
@@ -599,6 +599,7 @@ Notifications.deactivate = function (id, body) {
     Notifications.update(id, data).then(function () {
       var response = {'_id': record.id, 'name': record.name};
       abode.events.emit('NOTIFICATION_DEACTIVATED', response);
+      Notifications.push_notifications({'_id': record.id, 'name': record.name, 'type': 'acknowledge'});
 
       response.status = 'success';
       response.message = 'Notification De-Activated';
