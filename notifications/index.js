@@ -89,12 +89,22 @@ Notifications.check = function () {
       var trigger_defers = [];
       check_defers.push(check_defer.promise);
 
+      if (record.triggers.length === 0) {
+        return;
+      }
 
       log.debug('Checking if notification is still active: ' + record.name);
       //Check each notification trigger
       record.triggers.forEach(function (id) {
         var trigger_defer = q.defer(),
           trigger = abode.triggers.get(id);
+
+        //Only check if we have conditions
+        if (trigger.conditions.length === 0) {
+          log.debug('No conditions for trigger, skipping check: ' + trigger.name);
+          active = true;
+          return;
+        }
 
         log.debug('Checking if trigger is still matching: ' + trigger.name);
         trigger_defers.push(trigger_defer.promise);
