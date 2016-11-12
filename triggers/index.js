@@ -281,7 +281,7 @@ Triggers.fire_trigger = function (config) {
   log.debug('Checking trigger conditions:', config.name);
 
   //Process conditions
-  conditions.check(config.conditions).then(function (condition) {
+  conditions.check(config.conditions, config.match_all).then(function (condition) {
 
     if (!condition) {
       log.debug('Conditions not met, skipping:', config.name);
@@ -487,7 +487,7 @@ TriggersSchema.methods.check = function () {
     defer = q.defer();
 
   //Process conditions
-  conditions.check(self.conditions).then(function (result) {
+  conditions.check(self.conditions, self.match_all).then(function (result) {
 
     if (!result) {
       log.debug('Conditions not met, skipping:', self.name);
