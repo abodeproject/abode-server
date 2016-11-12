@@ -498,9 +498,10 @@ Notifications.push_notifications = function (payload) {
 
   if (payload) {
     payload.type = payload.type || 'new';
+    payload.url = abode.config.url;
     payload = JSON.stringify(payload);
   } else {
-    payload = JSON.stringify({'type': 'new'});
+    payload = JSON.stringify({'type': 'new', 'url': abode.config.url});
   }
 
   abode.devices.list().forEach(function (device) {
