@@ -43,6 +43,7 @@ var NotificationsSchema = mongoose.Schema({
       'message': '{VALUE} is not a valid thing'
     }
   },
+  'deactive_token': {'type': String},
   'expires': {'type': Date},
   'active_date': {'type': Date},
   'active_last': {'type': Date},
@@ -568,10 +569,12 @@ Notifications.activate = function (id, body) {
       action.token = hat(256, 16);
     });
 
+
+    data.deactive_token = hat(256, 16);
     data.actions = record.actions;
 
     Notifications.update(id, data).then(function (record) {
-      var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions};
+      var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions, 'deactive_token': record.deactive_token};
       abode.events.emit('NOTIFICATION_ACTIVATED', response);
       Notifications.push_notifications(response);
 
@@ -660,9 +663,10 @@ Notifications.do_action = function (id, actionid) {
 };
 
 Notifications.secure_action = function (token) {
-  var defer = q.defer();
+  var action_defer,
+    defer = q.defer();
 
-  Notifications.model.findOne({'actions.token': token, 'active': true}, function (err, result) {
+  Notifications.model.findOne({'$or': [{'actions.token': token, 'active': true}, {'deactive_token': token, 'active': true}]}, function (err, result) {
     if (err || result === null) {
       defer.reject({'status': 'failed', 'message': 'Action not found', 'http_code': 404});
       return;
@@ -670,7 +674,14 @@ Notifications.secure_action = function (token) {
 
     var action = result.actions.filter(function (action) { return (String(action.token) === String(token))});
 
-    Notifications.do_action(result._id, action[0]._id).then(function (result) {
+    //If no action found, deactivate
+    if (action.length === 0) {
+      action_defer = Notifications.deactivate(result._id);
+    } else {
+      action_defer = Notifications.do_action(result._id, action[0]._id)
+    }
+
+    action_defer.then(function (result) {
       defer.resolve(result);
     }, function (err) {
       defer.reject(err);
