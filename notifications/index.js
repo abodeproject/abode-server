@@ -15,7 +15,7 @@ var ActionsSchema = mongoose.Schema({
   'name': {'type': String, 'required': true},
   'icon': {'type': String, 'required': true},
   'action': {'type': String, 'required': true},
-  'args': {'type': Array},
+  'args': {'type': Array, 'default': []},
   'token': {'type': String},
 });
 
