@@ -3,6 +3,7 @@
 var abode;
 var routes;
 var q = require('q');
+var hat = require('hat');
 var logger = require('log4js'),
   log = logger.getLogger('notifications');
 var mongoose = require('mongoose');
@@ -15,6 +16,7 @@ var ActionsSchema = mongoose.Schema({
   'icon': {'type': String, 'required': true},
   'action': {'type': String, 'required': true},
   'args': {'type': Array},
+  'token': {'type': String},
 });
 
 var NotificationsSchema = mongoose.Schema({
@@ -561,6 +563,12 @@ Notifications.activate = function (id, body) {
     }
     data.expires = (body.expires) ? new Date(body.expires) : new Date();
 
+    record.actions.forEach(function (action) {
+      action.token = hat(256, 16);
+    });
+
+    data.actions = record.actions;
+
     Notifications.update(id, data).then(function (record) {
       var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions};
       abode.events.emit('NOTIFICATION_ACTIVATED', response);
@@ -645,6 +653,28 @@ Notifications.do_action = function (id, actionid) {
 
   }, function (err) {
     defer.reject(err)
+  });
+
+  return defer.promise;
+};
+
+Notifications.secure_action = function (token) {
+  var defer = q.defer();
+
+  Notifications.model.findOne({'actions.token': token, 'active': true}, function (err, result) {
+    if (err || result === null) {
+      defer.reject({'status': 'failed', 'message': 'Action not found', 'http_code': 404});
+      return;
+    }
+
+    var action = result.actions.filter(function (action) { return (String(action.token) === String(token))});
+
+    Notifications.do_action(result._id, action[0]._id).then(function (result) {
+      defer.resolve(result);
+    }, function (err) {
+      defer.reject(err);
+    });
+
   });
 
   return defer.promise;

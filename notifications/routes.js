@@ -38,6 +38,16 @@ router.post('/test_push', function (req, res) {
 
 });
 
+router.post('/action/:id', function (req, res) {
+
+  notifications.secure_action(req.params.id).then(function (result) {
+    res.status(result.http_code || 200).send(result);
+  }, function (err) {
+    res.status(err.http_code || 400).send(err);
+  });
+
+});
+
 router.get('/active', function (req, res) {
 
   notifications.query({'active': true}).then(function (results) {
