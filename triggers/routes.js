@@ -45,7 +45,7 @@ router.put('/:id', web.isJson, function (req, res) {
   });
 
   trigger._save().then(function (response) {
-    res.status(200).send(response);
+    res.status(204).send(response);
   }, function (err) {
     res.status(422).send(err);
   });
