@@ -330,7 +330,7 @@ andCheck = function (conditions) {
   return defer.promise;
 };
 
-var checkConditions = function (conditions) {
+var checkConditions = function (conditions, match_all) {
   var defer = q.defer();
 
   log.debug('Checking conditions: ', conditions);
@@ -339,6 +339,10 @@ var checkConditions = function (conditions) {
     log.debug('No conditions to check');
     defer.resolve(true);
     return defer.promise;
+  }
+
+  if (match_all === true) {
+    return andCheck(conditions);
   }
 
   return orCheck(conditions);

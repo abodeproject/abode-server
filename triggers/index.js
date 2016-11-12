@@ -67,6 +67,7 @@ var TriggersSchema = mongoose.Schema({
   'duration': Object,
   'delay': Object,
   'notifications': {'type': Array},
+  'match_all': {'type': Boolean, 'default': false},
   'created': { 'type': Date, 'default': Date.now },
   'updated': { 'type': Date, 'default': Date.now },
 });
@@ -252,7 +253,7 @@ Triggers.fire_trigger = function (config) {
     if (config.delay.force !== true && config.conditions.length > 0) {
       log.debug('Forcing check of conditions after delay');
 
-      conditions.check(config.conditions).then(function (condition) {
+      conditions.check(config.conditions, config.match_all).then(function (condition) {
         if (!condition) {
           log.debug('Conditions not met, skipping:', config.name);
 
