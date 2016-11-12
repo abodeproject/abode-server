@@ -293,18 +293,18 @@ andCheck = function (conditions) {
     condition_defers.push(c_defer.promise);
 
     //Process any nested AND conditions
-    if (condition.and instanceof Array) {
+    if (condition.and instanceof Array && condition.and.length > 0) {
       andCheck(condition.and).then(function (r) {
-        response = (r) ? r : false;
+        response = (r === false) ? false : response;
         c_defer.resolve();
       }, function () { response = false; c_defer.reject(); });
         return;
     }
 
     //Process any nested OR conditions
-    if (condition.or instanceof Array) {
+    if (condition.or instanceof Array && condition.or.length > 0) {
       orCheck(condition.or).then(function (r) {
-        response = (r) ? r : false;
+        response = (r === false) ? false : response;
         c_defer.resolve();
       }, function () { response = false; c_defer.reject(); });
         return;
