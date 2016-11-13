@@ -35,7 +35,7 @@ var lookupValue = function (type, object, key) {
     case 'number':
       return Number(key);
     case 'boolean':
-      return Boolean(key);
+      return (key === 'true' || key === true || key === 1);
     default:
       var parts = type.split('.');
       lookupObj = abode.providers;
