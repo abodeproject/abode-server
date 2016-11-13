@@ -155,7 +155,7 @@ Wunderground.load = function () {
         log.error('Weather data is stale, ignoring: %s', current.observation_time_rfc822);
         return;
       } else {
-        log.info('Weather data from: %s' % current.observation_time_rfc822);
+        log.info('Weather data from: %s', current.observation_time_rfc822);
       }
 
       device.set_state({
