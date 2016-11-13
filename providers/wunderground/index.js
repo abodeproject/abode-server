@@ -80,7 +80,6 @@ Wunderground.get = function (location) {
         data = JSON.parse(data || {});
         defer.resolve(data);
         log.debug('Parsed weather data: %s\n%s', location, data);
-        log.info('Parsed weather: ', location);
 
       } catch (e) {
 
@@ -137,7 +136,6 @@ Wunderground.load = function () {
 
   devices.forEach(function (device) {
     Wunderground.get(device.config.location).then(function (data) {
-      device.config.raw = data;
 
       var current = data.current_observation || {};
       var forecast = data.forecast || {};
@@ -152,11 +150,13 @@ Wunderground.load = function () {
       var weather_age = (now - observation_time) / 1000 / 60;
 
       if (weather_age > 10) {
-        log.error('Weather data is stale, ignoring: %s', current.observation_time_rfc822);
+        log.error('Weather data is stale for %s, ignoring: %s', device.config.location, current.observation_time_rfc822);
         return;
       } else {
-        log.info('Weather data from: %s', current.observation_time_rfc822);
+        log.info('Retrieved weather data for %s: %s', device.config.location, current.observation_time_rfc822);
       }
+
+      device.config.raw = data;
 
       device.set_state({
         _temperature: current['temp_' + config.temp_units],
