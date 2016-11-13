@@ -147,13 +147,15 @@ Wunderground.load = function () {
       var alerts = data.alerts || [];
 
       //Check if our data is current
-      var observation_time = new Date(current.local_time_rfc822);
+      var observation_time = new Date(current.observation_time_rfc822);
       var now = new Date();
       var weather_age = (now - observation_time) / 1000 / 60;
 
       if (weather_age > 10) {
-        log.error('Weather data is stale, ignoring: %s', current.local_time_rfc822);
+        log.error('Weather data is stale, ignoring: %s', current.observation_time_rfc822);
         return;
+      } else {
+        log.info('Weather data from: %s' % current.observation_time_rfc822);
       }
 
       device.set_state({
