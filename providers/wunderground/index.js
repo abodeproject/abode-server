@@ -146,6 +146,16 @@ Wunderground.load = function () {
       var moon = data.moon_phase || {};
       var alerts = data.alerts || [];
 
+      //Check if our data is current
+      var observation_time = new Date(current.local_time_rfc822);
+      var now = new Date();
+      var weather_age = (now - observation_time) / 1000 / 60;
+
+      if (weather_age > 10) {
+        log.error('Weather data is stale, ignoring: %s', current.local_time_rfc822);
+        return;
+      }
+
       device.set_state({
         _temperature: current['temp_' + config.temp_units],
         _humidity: parseInt(current.relative_humidity, 10),
