@@ -252,9 +252,9 @@ NotificationsSchema.methods.do_action = function (id) {
   }
 
   action = action[0];
-  abode.triggers.fire_actions([action]);
+  abode.triggers.fire_actions([{'args': action.args, 'name': action.type + '.' + action.name + '.' + action.action}]);
 
-  defer.resolve({'stauts': 'success'});
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };
