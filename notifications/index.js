@@ -94,7 +94,7 @@ Notifications.check = function () {
       check_defers.push(check_defer.promise);
 
       //If not triggers exist, assume we are active
-      if (record.triggers.length === 0) {
+      if (record.triggers.length === 0 || record.expire_after > 0) {
         active = true;
       }
 
@@ -140,6 +140,7 @@ Notifications.check = function () {
           });
         //If the record was not previously active, reset the check_count
         } else if (!record.active && !active) {
+          log.debug('Resetting check count: ' + record.name);
           Notifications.update(record.id, {'check_count': 0}).then(function () {
             check_defer.resolve();
           }, function () {
