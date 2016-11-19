@@ -717,8 +717,10 @@ Notifications.secure_action = function (token) {
 
     //If no action found, deactivate
     if (action.length === 0) {
+      log.info('Received %s action from notification: %s', action[0].name, result.name);
       action_defer = Notifications.deactivate(result._id);
     } else {
+      log.info('Received de-activation action from notification: %s', result.name);
       action_defer = Notifications.do_action(result._id, action[0]._id)
     }
 
