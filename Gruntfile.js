@@ -88,6 +88,12 @@ module.exports = function(grunt) {
       }
     },
     concurrent: {
+      dev: {
+        tasks: ['watch:scripts', 'watch:static',, 'nodemon:dev'],
+        options: {
+          logConcurrentOutput: true
+        }
+      },
       apidoc: {
         tasks: ['watch:apidoc', 'nodemon:apidoc'],
         options: {
@@ -112,6 +118,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-exec');
   grunt.loadNpmTasks('grunt-concurrent');
 
-  grunt.registerTask('default', ['jshint', 'nodemon:dev']);
+  grunt.registerTask('default', ['jshint', 'concurrent:dev']);
   grunt.registerTask('apidoc', ['concurrent:apidoc']);
 };
