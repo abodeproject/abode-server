@@ -45,6 +45,7 @@ var NotificationsSchema = mongoose.Schema({
   },
   'deactive_token': {'type': String},
   'expires': {'type': Date},
+  'expire_after': {'type': Number, 'default': 0},
   'hold_off_time': {'type': Number, 'default': 10},
   'check_count': {'type': Number, 'default': 0},
   'check_threshold': {'type': Number, 'default': 1},
@@ -92,34 +93,39 @@ Notifications.check = function () {
       var trigger_defers = [];
       check_defers.push(check_defer.promise);
 
+      //If not triggers exist, assume we are active
       if (record.triggers.length === 0) {
-        return;
+        active = true;
       }
 
-      log.debug('Checking if notification is still active: ' + record.name);
-      //Check each notification trigger
-      record.triggers.forEach(function (id) {
-        var trigger_defer = q.defer(),
-          trigger = abode.triggers.get(id);
+      //If notification doesn't expire, check if triggers still match
+      if (record.expire_after === 0) {
+        log.debug('Checking if notification is still active: ' + record.name);
 
-        //Only check if we have conditions
-        if (trigger.conditions.length === 0) {
-          log.debug('No conditions for trigger, skipping check: ' + trigger.name);
-          active = true;
-          return;
-        }
+        record.triggers.forEach(function (id) {
+          var trigger_defer = q.defer(),
+            trigger = abode.triggers.get(id);
 
-        log.debug('Checking if trigger is still matching: ' + trigger.name);
-        trigger_defers.push(trigger_defer.promise);
+          //Only check if we have conditions
+          if (trigger.conditions.length === 0) {
+            log.debug('No conditions for trigger, skipping check: ' + trigger.name);
+            active = true;
+            return;
+          }
 
-        trigger.check().then(function () {
-          active = true;
-          trigger_defer.resolve();
-        }, function () {
-          trigger_defer.reject();
+          log.debug('Checking if trigger is still matching: ' + trigger.name);
+          trigger_defers.push(trigger_defer.promise);
+
+          trigger.check().then(function () {
+            active = true;
+            trigger_defer.resolve();
+          }, function () {
+            trigger_defer.reject();
+          });
+
         });
 
-      });
+      }
 
       //Once all our checks are complete see if we are still active
       q.allSettled(trigger_defers).then(function () {
@@ -139,6 +145,21 @@ Notifications.check = function () {
           }, function () {
             check_defer.reject();
           });
+        } else if (record.expire_after > 0) {
+          log.debug('Checking if notification has expired: ' + record.name);
+          var now = new Date();
+          var notification_age = (now - record.active_date) / 1000 / 60;
+
+          if (notification_age >= record.expire_after) {
+            log.info('Notification expired, de-activating: ' + record.name);
+            Notifications.deactivate(record._id).then(function () {
+              check_defer.resolve();
+            }, function () {
+              check_defer.reject();
+            });
+          } else {
+            check_defer.resolve();
+          }
         } else {
           check_defer.resolve();
         }
@@ -623,7 +644,7 @@ Notifications.deactivate = function (id, body) {
 
     data.active = false;
     data.message_vars = undefined;
-    data.active_last = record.active_date;
+    data.active_last = new Date();
     data.active_date = undefined;
     data.expires = undefined;
 
