@@ -158,38 +158,6 @@ Notifications.check = function () {
   return defer.promise;
 };
 
-NotificationsSchema.post('save', function (record, next) {
-  var trigger_defers = [];
-
-  record.triggers.forEach(function (id) {
-    var trigger = abode.triggers.get(id);
-    var defer = q.defer();
-    trigger_defers.push(defer.promise);
-
-    if (trigger.notifications.indexOf(record._id) === -1) {
-
-
-      trigger.notifications.push(record._id);
-
-      trigger._save().then(function () {
-        log.debug('Added notification to trigger: ' + trigger._id);
-        defer.resolve();
-      }, function (err) {
-        defer.reject();
-      });
-
-    } else {
-      defer.resolve();
-    }
-
-  });
-
-  q.allSettled(trigger_defers).then(function () {
-    next();
-  });
-
-});
-
 NotificationsSchema.methods.render = function () {
 
   var self = this;
