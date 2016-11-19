@@ -571,6 +571,7 @@ Notifications.activate = function (id, body) {
       active_age = (now - record.active_last) / 1000 / 60;
 
       if (active_age < record.hold_off_time) {
+        log.info('Hold off time not met for notification: %s (%s remaining)', record.name, (record.hold_off_time - active_age).toFixed(2));
         defer.reject({
           'status': 'failed',
           'message': 'Hold off time not met for notification: ' + (record.hold_off_time - active_age).toFixed(2) + 'm remaining',
@@ -583,6 +584,7 @@ Notifications.activate = function (id, body) {
     if (!record.active) {
       record.check_count += 1;
       if (record.check_count < record.check_threshold) {
+        log.info('Check threshold not met:: %s (%s/%s)', record.name, record.check_count, record.check_threshold);
         Notifications.update(id, {'check_count': record.check_count}).then(function (record) {
           defer.reject({
             'status': 'failed',
