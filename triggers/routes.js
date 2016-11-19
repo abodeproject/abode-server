@@ -84,6 +84,60 @@ router.get('/:id/notifications', function (req, res) {
 
 });
 
+router.post('/:id/notifications', function (req, res) {
+
+  var record = triggers.get(req.params.id);
+
+  if (record) {
+
+    record.add_notification(req.body).then(function () {
+      res.status(201).send();
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  } else {
+    res.status(404).send({'status': 'failed', 'message': 'Not Found'});
+  }
+
+});
+
+router.get('/:id/notifications/:notification_id', function (req, res) {
+
+  var record = triggers.get(req.params.id);
+
+  if (record) {
+
+    record.get_notification(req.params.notification_id).then(function (result) {
+      res.send(result);
+    }, function (err) {
+      res.status(404).send(err);
+    });
+
+  } else {
+    res.status(404).send({'status': 'failed', 'message': 'Not Found'});
+  }
+
+});
+
+router.delete('/:id/notifications/:notification_id', function (req, res) {
+
+  var record = triggers.get(req.params.id);
+
+  if (record) {
+
+    record.delete_notification(req.params.notification_id).then(function (result) {
+      res.status(204).send(result);
+    }, function (err) {
+      res.status(404).send(err);
+    });
+
+  } else {
+    res.status(404).send({'status': 'failed', 'message': 'Not Found'});
+  }
+
+});
+
 router.post('/:id/check', function (req, res) {
   var trigger = triggers.get(req.params.id);
   if (!trigger) {
