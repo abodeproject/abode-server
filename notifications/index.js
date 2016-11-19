@@ -45,6 +45,9 @@ var NotificationsSchema = mongoose.Schema({
   },
   'deactive_token': {'type': String},
   'expires': {'type': Date},
+  'hold_off_time': {'type': Number, 'default': 10},
+  'check_count': {'type': Number, 'default': 0},
+  'check_threshold': {'type': Number, 'default': 1},
   'active_date': {'type': Date},
   'active_last': {'type': Date},
   'updated': { 'type': Date, 'required': true, 'default': Date.now },
@@ -80,7 +83,7 @@ Notifications.check = function () {
   Notifications.checking = true;
 
   log.debug('Checking notifications');
-  Notifications.query({'active': true}).then(function (records) {
+  Notifications.query({'$or': [{'active': true}, {'check_count': {'$gt': 0}}]}).then(function (records) {
 
     records.forEach(function(record) {
       log.debug('Checking notification: ' + record.name);
@@ -121,13 +124,21 @@ Notifications.check = function () {
       //Once all our checks are complete see if we are still active
       q.allSettled(trigger_defers).then(function () {
         log.debug('All triggers checked for notification: ' + record.name);
-        if (!active) {
+        //If the record was previously active but is no longer active, deactivate it
+        if (record.active && !active) {
           log.debug('De-activating notification: ' + record.name);
           Notifications.deactivate(record._id).then(function () {
             check_defer.resolve();
           }, function () {
             check_defer.reject();
-          })
+          });
+        //If the record was not previously active, reset the check_count
+        } else if (!record.active && !active) {
+          Notifications.update(record.id, {'check_count': 0}).then(function () {
+            check_defer.resolve();
+          }, function () {
+            check_defer.reject();
+          });
         } else {
           check_defer.resolve();
         }
@@ -174,7 +185,6 @@ NotificationsSchema.post('save', function (record, next) {
   });
 
   q.allSettled(trigger_defers).then(function () {
-    console.log('here');
     next();
   });
 
@@ -326,7 +336,6 @@ NotificationsSchema.methods.get_trigger = function (id) {
 
   if (self.triggers.indexOf(id) === -1 || !trigger) {
     defer.reject({'status': 'failed', 'message': 'Trigger not found'});
-    console.log('here');
     return defer.promise;
   }
 
@@ -559,14 +568,47 @@ Notifications.push_notifications = function (payload) {
 };
 
 Notifications.activate = function (id, body) {
-  var data = {},
+  var now,
+    active_age,
+    data = {},
     defer = q.defer();
 
   body = body || {};
 
   Notifications.get(id).then(function (record) {
 
+    if (!record.active && record.active_last) {
+      now = new Date();
+      active_age = (now - record.active_last) / 1000 / 60;
+
+      if (active_age < record.hold_off_time) {
+        defer.reject({
+          'status': 'failed',
+          'message': 'Hold off time not met for notification: ' + (record.hold_off_time - active_age).toFixed(2) + 'm remaining',
+        });
+        return;
+      }
+    };
+
+    //If we are not active, increment our check out and check against the threshold
+    if (!record.active) {
+      record.check_count += 1;
+      if (record.check_count < record.check_threshold) {
+        Notifications.update(id, {'check_count': record.check_count}).then(function (record) {
+          defer.reject({
+            'status': 'failed',
+            'message': 'Check threshold not met: ' + record.check_count + '/' + record.check_threshold,
+          });
+        }, function (err) {
+          defer.reject(err);
+        });
+
+        return;
+      }
+    }
+
     data.active = true;
+    data.check_count = 0;
     data.message_vars = body.message_vars;
     data.active_date = new Date();
     if (!body.expires) {
