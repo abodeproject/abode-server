@@ -64,14 +64,24 @@ router.delete('/:id', function (req, res) {
   });
 });
 
+
+
 router.get('/:id/notifications', function (req, res) {
-  var trigger = triggers.get(req.params.id);
-  if (!trigger) {
-    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
-    return;
+
+  var result = triggers.get(req.params.id);
+
+  if (result) {
+
+    result.list_notifications().then(function (results) {
+      res.send(results);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  } else {
+    res.status(404).send({'status': 'failed', 'message': 'Not Found'});
   }
-  res.send(triggers.get(req.params.id).notifications);
-  res.end();
+
 });
 
 router.post('/:id/check', function (req, res) {
