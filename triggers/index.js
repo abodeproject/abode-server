@@ -254,7 +254,7 @@ Triggers.fire_trigger = function (config) {
       log.debug('Forcing check of conditions after delay');
 
       conditions.check(config.conditions, config.match_all).then(function (condition) {
-        if (!condition) {
+        if (!condition.matches) {
           log.debug('Conditions not met, skipping:', config.name);
 
           return false;
@@ -283,7 +283,7 @@ Triggers.fire_trigger = function (config) {
   //Process conditions
   conditions.check(config.conditions, config.match_all).then(function (condition) {
 
-    if (!condition) {
+    if (!condition.matches) {
       log.debug('Conditions not met, skipping:', config.name);
 
       return false;
@@ -489,10 +489,10 @@ TriggersSchema.methods.check = function () {
   //Process conditions
   conditions.check(self.conditions, self.match_all).then(function (result) {
 
-    if (!result) {
+    if (!result.matches) {
       log.debug('Conditions not met, skipping:', self.name);
 
-      defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions});
+      defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions, 'results': result});
       return;
     }
 
@@ -500,13 +500,13 @@ TriggersSchema.methods.check = function () {
     if (self.enabled === false) {
       log.info('Conditions met but disabled, skipping:', self.name);
 
-      defer.reject({'status': 'failed', 'message': 'Conditions met but trigger disabled', 'conditions': self.conditions});
+      defer.reject({'status': 'failed', 'message': 'Conditions met but trigger disabled', 'conditions': self.conditions, 'results': result});
       return;
     }
 
-    defer.resolve({'status': 'success', 'message': 'Trigger conditions met', 'conditions': self.conditions});
-  }, function () {
-    defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions});
+    defer.resolve({'status': 'success', 'message': 'Trigger conditions met', 'conditions': self.conditions, 'results': result});
+  }, function (err) {
+    defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions, 'error': err});
   });
 
   return defer.promise;
