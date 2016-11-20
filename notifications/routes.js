@@ -165,7 +165,7 @@ router.get('/:id/triggers', function (req, res) {
   notifications.get(req.params.id).then(function (result) {
 
     result.list_triggers().then(function (results) {
-      res.send(results)
+      res.send(results);
     }, function (err) {
       res.status(400).send(err);
     });

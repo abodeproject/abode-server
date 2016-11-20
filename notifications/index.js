@@ -45,6 +45,10 @@ var NotificationsSchema = mongoose.Schema({
   },
   'deactive_token': {'type': String},
   'expires': {'type': Date},
+  'expire_after': {'type': Number, 'default': 0},
+  'hold_off_time': {'type': Number, 'default': 10},
+  'check_count': {'type': Number, 'default': 0},
+  'check_threshold': {'type': Number, 'default': 1},
   'active_date': {'type': Date},
   'active_last': {'type': Date},
   'updated': { 'type': Date, 'required': true, 'default': Date.now },
@@ -80,7 +84,7 @@ Notifications.check = function () {
   Notifications.checking = true;
 
   log.debug('Checking notifications');
-  Notifications.query({'active': true}).then(function (records) {
+  Notifications.query({'$or': [{'active': true}, {'check_count': {'$gt': 0}}]}).then(function (records) {
 
     records.forEach(function(record) {
       log.debug('Checking notification: ' + record.name);
@@ -89,45 +93,74 @@ Notifications.check = function () {
       var trigger_defers = [];
       check_defers.push(check_defer.promise);
 
-      if (record.triggers.length === 0) {
-        return;
+      //If not triggers exist, assume we are active
+      if (record.triggers.length === 0 || record.expire_after > 0) {
+        active = true;
       }
 
-      log.debug('Checking if notification is still active: ' + record.name);
-      //Check each notification trigger
-      record.triggers.forEach(function (id) {
-        var trigger_defer = q.defer(),
-          trigger = abode.triggers.get(id);
+      //If notification doesn't expire, check if triggers still match
+      if (record.expire_after === 0) {
+        log.debug('Checking if notification is still active: ' + record.name);
 
-        //Only check if we have conditions
-        if (trigger.conditions.length === 0) {
-          log.debug('No conditions for trigger, skipping check: ' + trigger.name);
-          active = true;
-          return;
-        }
+        record.triggers.forEach(function (id) {
+          var trigger_defer = q.defer(),
+            trigger = abode.triggers.get(id);
 
-        log.debug('Checking if trigger is still matching: ' + trigger.name);
-        trigger_defers.push(trigger_defer.promise);
+          //Only check if we have conditions
+          if (trigger.conditions.length === 0) {
+            log.debug('No conditions for trigger, skipping check: ' + trigger.name);
+            active = true;
+            return;
+          }
 
-        trigger.check().then(function () {
-          active = true;
-          trigger_defer.resolve();
-        }, function () {
-          trigger_defer.reject();
+          log.debug('Checking if trigger is still matching: ' + trigger.name);
+          trigger_defers.push(trigger_defer.promise);
+
+          trigger.check().then(function () {
+            active = true;
+            trigger_defer.resolve();
+          }, function () {
+            trigger_defer.reject();
+          });
+
         });
 
-      });
+      }
 
       //Once all our checks are complete see if we are still active
       q.allSettled(trigger_defers).then(function () {
         log.debug('All triggers checked for notification: ' + record.name);
-        if (!active) {
+        //If the record was previously active but is no longer active, deactivate it
+        if (record.active && !active) {
           log.debug('De-activating notification: ' + record.name);
           Notifications.deactivate(record._id).then(function () {
             check_defer.resolve();
           }, function () {
             check_defer.reject();
-          })
+          });
+        //If the record was not previously active, reset the check_count
+        } else if (!record.active && !active) {
+          log.debug('Resetting check count: ' + record.name);
+          Notifications.update(record.id, {'check_count': 0}).then(function () {
+            check_defer.resolve();
+          }, function () {
+            check_defer.reject();
+          });
+        } else if (record.expire_after > 0) {
+          log.debug('Checking if notification has expired: ' + record.name);
+          var now = new Date();
+          var notification_age = (now - record.active_date) / 1000 / 60;
+
+          if (notification_age >= record.expire_after) {
+            log.info('Notification expired, de-activating: ' + record.name);
+            Notifications.deactivate(record._id).then(function () {
+              check_defer.resolve();
+            }, function () {
+              check_defer.reject();
+            });
+          } else {
+            check_defer.resolve();
+          }
         } else {
           check_defer.resolve();
         }
@@ -146,39 +179,6 @@ Notifications.check = function () {
 
   return defer.promise;
 };
-
-NotificationsSchema.post('save', function (record, next) {
-  var trigger_defers = [];
-
-  record.triggers.forEach(function (id) {
-    var trigger = abode.triggers.get(id);
-    var defer = q.defer();
-    trigger_defers.push(defer.promise);
-
-    if (trigger.notifications.indexOf(record._id) === -1) {
-
-
-      trigger.notifications.push(record._id);
-
-      trigger._save().then(function () {
-        log.debug('Added notification to trigger: ' + trigger._id);
-        defer.resolve();
-      }, function (err) {
-        defer.reject();
-      });
-
-    } else {
-      defer.resolve();
-    }
-
-  });
-
-  q.allSettled(trigger_defers).then(function () {
-    console.log('here');
-    next();
-  });
-
-});
 
 NotificationsSchema.methods.render = function () {
 
@@ -326,7 +326,6 @@ NotificationsSchema.methods.get_trigger = function (id) {
 
   if (self.triggers.indexOf(id) === -1 || !trigger) {
     defer.reject({'status': 'failed', 'message': 'Trigger not found'});
-    console.log('here');
     return defer.promise;
   }
 
@@ -559,14 +558,49 @@ Notifications.push_notifications = function (payload) {
 };
 
 Notifications.activate = function (id, body) {
-  var data = {},
+  var now,
+    active_age,
+    data = {},
     defer = q.defer();
 
   body = body || {};
 
   Notifications.get(id).then(function (record) {
 
+    if (!record.active && record.active_last) {
+      now = new Date();
+      active_age = (now - record.active_last) / 1000 / 60;
+
+      if (active_age < record.hold_off_time) {
+        log.info('Hold off time not met for notification: %s (%s remaining)', record.name, (record.hold_off_time - active_age).toFixed(2));
+        defer.reject({
+          'status': 'failed',
+          'message': 'Hold off time not met for notification: ' + (record.hold_off_time - active_age).toFixed(2) + 'm remaining',
+        });
+        return;
+      }
+    };
+
+    //If we are not active, increment our check out and check against the threshold
+    if (!record.active) {
+      record.check_count += 1;
+      if (record.check_count < record.check_threshold) {
+        log.info('Check threshold not met:: %s (%s/%s)', record.name, record.check_count, record.check_threshold);
+        Notifications.update(id, {'check_count': record.check_count}).then(function (record) {
+          defer.reject({
+            'status': 'failed',
+            'message': 'Check threshold not met: ' + record.check_count + '/' + record.check_threshold,
+          });
+        }, function (err) {
+          defer.reject(err);
+        });
+
+        return;
+      }
+    }
+
     data.active = true;
+    data.check_count = 0;
     data.message_vars = body.message_vars;
     data.active_date = new Date();
     if (!body.expires) {
@@ -613,7 +647,7 @@ Notifications.deactivate = function (id, body) {
 
     data.active = false;
     data.message_vars = undefined;
-    data.active_last = record.active_date;
+    data.active_last = new Date();
     data.active_date = undefined;
     data.expires = undefined;
 
@@ -686,8 +720,10 @@ Notifications.secure_action = function (token) {
 
     //If no action found, deactivate
     if (action.length === 0) {
+      log.info('Received %s action from notification: %s', action[0].name, result.name);
       action_defer = Notifications.deactivate(result._id);
     } else {
+      log.info('Received de-activation action from notification: %s', result.name);
       action_defer = Notifications.do_action(result._id, action[0]._id)
     }
 

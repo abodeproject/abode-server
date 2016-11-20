@@ -512,6 +512,153 @@ TriggersSchema.methods.check = function () {
   return defer.promise;
 };
 
+TriggersSchema.methods.list_notifications = function () {
+  var self = this,
+    defer = q.defer();
+
+  abode.notifications.model.find({'_id': {'$in': self.notifications}}).then(function (results) {
+    defer.resolve(results);
+  }, function (err) {
+    defer.reject(err);
+    console.log(err);
+  });
+
+  return defer.promise;
+};
+
+TriggersSchema.methods.get_notification = function (id) {
+  var self = this,
+    defer = q.defer();
+
+  if (self.notifications.indexOf(id) === -1) {
+    defer.reject({'status': 'failed', 'message': 'Notification not associated with Trigger'});
+    return defer.promise;
+  }
+
+  abode.notifications.get(id).then(function (record) {
+    defer.resolve(record);
+  }, function () {
+    defer.reject({'status': 'failed', 'message': 'Notification not found'});
+  });
+
+  return defer.promise;
+};
+
+TriggersSchema.methods.add_notification = function (config) {
+
+  var self = this,
+    defer = q.defer();
+
+  var save = function (notification) {
+    //Add device to room
+    self.notifications.push(notification._id);
+
+    //Save the room
+    self.save(function (err) {
+      if (err) {
+        log.error('Failed to add notification');
+        log.debug(err.message || err);
+
+        defer.reject({'status': 'failed', 'message': 'Failed to add notification', 'error': err});
+        return;
+      }
+
+      log.info('Notification added: ', notification._id);
+
+      defer.resolve({'_id': notification._id});
+    });
+  };
+
+
+  //Check if notification is already added
+  if (self.notifications.indexOf(config._id) > -1 ) {
+    var msg = 'Notification already associated';
+    log.error(msg);
+    defer.reject({'status': 'failed', 'message': msg});
+    return defer.promise;
+  }
+
+  //Lookup the notification being requested to add
+  abode.notifications.get(config._id).then(function (notification) {
+
+    //Add notification to notification if not already added
+    if (notification.triggers.indexOf(self._id) === -1 ) {
+      notification.triggers.push(self._id);
+
+      notification.save().then(function () {
+        save(notification);
+      }, function (err) {
+        log.error('Error adding trigger to notification: ', err);
+        return defer.reject(err);
+      });
+
+    } else {
+      save(notification);
+    }
+
+  }, function () {
+    defer.reject({'status': 'failed', 'message': 'Notification not found'});
+  });
+
+  return defer.promise;
+
+};
+
+TriggersSchema.methods.delete_notification = function (id) {
+  var self = this,
+    defer = q.defer();
+
+  var save = function (notification) {
+    //Delete notification from trigger
+    self.notifications.splice(self.notifications.indexOf(notification._id), 1);
+
+    //Save the trigger
+    self.save(function (err) {
+      if (err) {
+        log.error('Failed to delete notification');
+        log.debug(err.message || err);
+
+        defer.reject({'status': 'failed', 'message': 'Failed to delete notification', 'error': err});
+        return;
+      }
+
+      log.info('Notification deleted: ', notification._id);
+
+      defer.resolve();
+    });
+  };
+
+  //Check if notification is associated with the trigger
+  if (self.notifications.indexOf(id) === -1) {
+    defer.reject({'status': 'failed', 'message': 'Notification not associated with Trigger'});
+    return defer.promise;
+  }
+
+  //Lookup the notification being requested to delete
+  abode.notifications.get(id).then(function (notification) {
+
+    //Remove trigger from notification if exists
+    if (notification.triggers.indexOf(self._id) > -1 ) {
+      notification.triggers.splice(notification.triggers.indexOf(self._id), 1);
+
+      notification.save().then(function () {
+        save(notification);
+      }, function (err) {
+        log.error('Error removing trigger from notification: ', err);
+        return defer.reject(err);
+      });
+
+    } else {
+      save(notification);
+    }
+
+  }, function () {
+    defer.reject({'status': 'failed', 'message': 'Notification not found'});
+  });
+
+  return defer.promise;
+};
+
 Triggers.model = mongoose.model('Triggers', TriggersSchema);
 
 // Return all devices
