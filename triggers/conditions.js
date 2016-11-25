@@ -11,6 +11,32 @@ var log,
   orCheck,
   andCheck;
 
+var lookupKey = function (object, key) {
+  var parts = key.split('.');
+  var lookupObj = object;
+  object = undefined;
+
+  parts.forEach(function (part) {
+    log.debug('Looking up part:', part);
+    if (lookupObj === undefined) {
+      return;
+    }
+    if (lookupObj[part]) {
+      lookupObj = lookupObj[part];
+    } else {
+      log.debug('Failed to lookup part:', part);
+      lookupObj = undefined;
+    }
+  });
+
+
+  if (lookupObj === undefined) {
+    return key;
+  }
+
+  return lookupObj;
+};
+
 var lookupValue = function (type, object, key) {
   /*
   Given a dot separated string, lookup the method/property across providers
@@ -69,11 +95,11 @@ var lookupValue = function (type, object, key) {
       return undefined;
     }
 
-    lookupObj = scope[key];
+    lookupObj = lookupKey(scope, key);
   } else {
 
     scope = lookupObj;
-    lookupObj = scope[key];
+    lookupObj = lookupKey(scope, key);
   }
 
 
@@ -183,10 +209,20 @@ var conditionCheck = function (condition) {
       return false;
     }
 
-    var left_condition = condition.left_type + '.' + condition.left_key;
-    var right_condition = condition.right_type + '.' + condition.right_key;
+    var left_condition = [];
+    var right_condition = [];
+    if (condition.left_type !== undefined) {left_condition.push(condition.left_type);}
+    if (condition.left_object !== undefined) {left_condition.push(condition.left_object);}
+    if (condition.left_key !== undefined) {left_condition.push(condition.left_key);}
+    if (condition.right_type !== undefined) {right_condition.push(condition.right_type);}
+    if (condition.right_object !== undefined) {right_condition.push(condition.right_object);}
+    if (condition.right_key !== undefined) {right_condition.push(condition.right_key);}
+    left_condition = left_condition.join('.');
+    right_condition = right_condition.join('.');
+
     var result = expanded.check(expanded.key, expanded.value);
-    defer.resolve(result);
+    var message = left_condition + ' (' + expanded.key + ') ' + condition.condition + ' ' +  right_condition + ' (' + expanded.value + ')';
+    defer.resolve({'message': message, 'matches': result});
     log.debug('Expanded: %s (%s) %s %s (%s) is %s', left_condition, expanded.key, condition.condition, right_condition, expanded.value, result);
   };
 
@@ -246,36 +282,38 @@ orCheck = function (conditions) {
     //Process any nested AND conditions
     if (condition.and instanceof Array && condition.and.length > 0) {
       andCheck(condition.and).then(function (r) {
-        response = (r) ? true : response;
-        c_defer.resolve();
-      }, function () { c_defer.reject(); });
+        response = (r.matches) ? true : response;
+        r.name = condition.name;
+        c_defer.resolve(r);
+      }, function (err) { c_defer.reject(err); });
         return;
     }
 
     //Process any nested OR conditions
     if (condition.or instanceof Array && condition.or.length > 0) {
       orCheck(condition.or).then(function (r) {
-        response = (r) ? true : response;
-        c_defer.resolve();
-      }, function () { c_defer.reject(); });
+        response = (r.matches) ? true : response;
+        r.name = condition.name;
+        c_defer.resolve(r);
+      }, function (err) { c_defer.reject(err); });
         return;
     }
 
     //Process the condition
     log.debug('Checking OR condition: ', condition);
     conditionCheck(condition).then(function (r) {
-      response = (r) ? true : response;
-      c_defer.resolve();
-    }, function () {
+      response = (r.matches) ? true : response;
+      c_defer.resolve(r);
+    }, function (err) {
       log.debug('Failed to resolve condition: ', condition);
-      c_defer.reject();
+      c_defer.reject(err);
     });
 
   });
 
   //Once all our condition defers are complete, resolve with our response
-  q.allSettled(condition_defers).then(function () {
-    defer.resolve(response);
+  q.allSettled(condition_defers).then(function (conditions) {
+    defer.resolve({'message': 'Matches Any', 'conditions': conditions, 'matches': response});
   });
 
   return defer.promise;
@@ -295,36 +333,38 @@ andCheck = function (conditions) {
     //Process any nested AND conditions
     if (condition.and instanceof Array && condition.and.length > 0) {
       andCheck(condition.and).then(function (r) {
-        response = (r === false) ? false : response;
-        c_defer.resolve();
-      }, function () { response = false; c_defer.reject(); });
+        response = (r.matches === false) ? false : response;
+        r.name = condition.name;
+        c_defer.resolve(r);
+      }, function (err) { response = false; c_defer.reject(err); });
         return;
     }
 
     //Process any nested OR conditions
     if (condition.or instanceof Array && condition.or.length > 0) {
       orCheck(condition.or).then(function (r) {
-        response = (r === false) ? false : response;
-        c_defer.resolve();
-      }, function () { response = false; c_defer.reject(); });
+        response = (r.matches === false) ? false : response;
+        r.name = condition.name;
+        c_defer.resolve(r);
+      }, function (err) { response = false; c_defer.reject(err); });
         return;
     }
 
     //Process the condition
     log.debug('Checking AND condition: ', condition);
     conditionCheck(condition).then(function (r) {
-      response = (r === false) ? false : response;
-      c_defer.resolve();
-    }, function () {
+      response = (r.matches === false) ? false : response;
+      c_defer.resolve(r);
+    }, function (err) {
       response = false;
       log.debug('Failed to resolve condition: ', condition);
-      c_defer.reject();
+      c_defer.reject(err);
     });
   });
 
   //Once all our condition defers are complete, resolve with our response
-  q.allSettled(condition_defers).then(function () {
-    defer.resolve(response);
+  q.allSettled(condition_defers).then(function (conditions) {
+    defer.resolve({'message': 'Matches All', 'conditions': conditions, 'matches': response});
   });
 
   return defer.promise;
