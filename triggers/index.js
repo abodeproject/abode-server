@@ -512,6 +512,19 @@ TriggersSchema.methods.check = function () {
   return defer.promise;
 };
 
+TriggersSchema.methods.list_notifications = function () {
+  var self = this,
+    defer = q.defer();
+
+  abode.notifications.model.find({'_id': {'$in': self.notifications}}).then(function (results) {
+    defer.resolve(results);
+  }, function (err) {
+    defer.reject({'status': 'failed', 'message': 'Trigger conditions not met', 'conditions': self.conditions, 'error': err});
+  });
+
+  return defer.promise;
+};
+
 Triggers.model = mongoose.model('Triggers', TriggersSchema);
 
 // Return all devices
