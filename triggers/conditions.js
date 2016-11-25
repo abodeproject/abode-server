@@ -377,7 +377,7 @@ var checkConditions = function (conditions, match_all) {
   //If no conditions passed, return true
   if (conditions === undefined || (conditions instanceof Array !== true) || conditions.length === 0) {
     log.debug('No conditions to check');
-    defer.resolve(true);
+    defer.resolve({'matches': true, 'message': 'No conditions to check'});
     return defer.promise;
   }
 
