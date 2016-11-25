@@ -507,11 +507,11 @@ Insteon.is_closed = Insteon.is_off = function (device) {
   return defer.promise;
 };
 
-Insteon.device_status = function (device) {
+Insteon.device_status = function (device, sensor) {
   var defer = q.defer();
 
   //Add the command to the queue
-  Insteon.queue('LIGHT_STATUS', device).then(function (message) {
+  Insteon.queue('LIGHT_STATUS', device, [sensor]).then(function (message) {
     if (message.length === 2) {
       defer.resolve(message[1].message.cmd_2);
     } else {
@@ -526,10 +526,37 @@ Insteon.device_status = function (device) {
   return defer.promise;
 };
 
-Insteon.get_status = function (device) {
+Insteon.sensor_status = function (device, sensor) {
   var defer = q.defer();
 
-  Insteon.device_status(device).then(function (state) {
+  //Add the command to the queue
+  Insteon.queue('SENSOR_STATUS', device, [sensor]).then(function (message) {
+    if (message.length === 2) {
+      console.log(message[1].message.cmd_2);
+      defer.resolve(message[1].message.cmd_2);
+    } else {
+      defer.reject({'status': 'failed', 'message': 'Failed to get sensor status'});
+    }
+
+  }, function (err) {
+    log.debug('Failed to send SENSOR_STATUS to ' + device.name);
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
+Insteon.get_status = function (device) {
+  var cmd,
+    defer = q.defer();
+
+//  if (device.capabilities && device.capabilities.indexOf('sensor') >= 0) {
+//    cmd = Insteon.sensor_status(device);
+//  } else {
+    cmd = Insteon.device_status(device);
+//  }
+
+  cmd.then(function (state) {
     defer.resolve({'update': {'_level': parseInt((state / 255) * 100, 10), '_on': (state > 0) ? true : false}, 'response': {'_level': parseInt((state / 255) * 100, 10), '_on': (state > 0) ? true : false}});
   }, function (err) {
     defer.reject(err);
