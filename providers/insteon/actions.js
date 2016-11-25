@@ -318,7 +318,6 @@ var actions = function (config, provider) {
           'cmd_1': 0x19,
           'cmd_2': 0x00
         };
-
         return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD'],['INSTEON_STANDARD_MESSAGE_RECEIVED']);
       }
     },
@@ -330,7 +329,7 @@ var actions = function (config, provider) {
         config = {
           'to': dev,
           'cmd_1': 0x4a,
-          'cmd_2': sensor || 0;
+          'cmd_2': sensor || 0,
         };
 
         return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD'],['INSTEON_STANDARD_MESSAGE_RECEIVED']);

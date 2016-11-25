@@ -328,6 +328,7 @@ dev_commands = {
   'LIGHT_START_MANUAL_CHANGE': {'cmd_1': 0x17},
   'LIGHT_STOP_MANUAL_CHANGE': {'cmd_1': 0x18},
   'LIGHT_STATUS_REQUEST': {'cmd_1': 0x19},
+  'SENSOR_STATUS_REQUEST': {'cmd_1': 0x4a},
   'GET_OPERATING_FLAGS': {'cmd_1': 0x1F},
   'LIGHT_ON_RAMP_RATE': {'cmd_1': 0x2E},
   'LIGHT_OFF_RAMP_RATE': {'cmd_1': 0x2F},
