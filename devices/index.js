@@ -57,7 +57,8 @@ Devices.capabilities = [
   'camera',
   'client',
   'browser',
-  'sensor'
+  'sensor',
+  'siren'
 ];
 Devices._devices = [];
 Devices.logs = mongoose.model('DeviceLogs', DeviceLogSchema);
