@@ -40,6 +40,64 @@ router.get('/:id/scenes', function (req, res) {
 
 });
 
+router.post('/:id/scenes', web.isJson, function (req, res) {
+  var room = rooms.get(req.params.id);
+  if (!room) {
+    res.status(404).send({'status': 'failed', 'message': 'Room not found'});
+    return;
+  }
+
+  var scene = scenes.get(req.body._id || req.body.name);
+  if (!scene) {
+    res.status(404).send({'status': 'failed', 'message': 'Scene not found'});
+    return;
+  }
+
+  room.add_scene(scene).then(function () {
+    res.status(200).send({'status': 'success'});
+  }, function (err) {
+    res.status(422).send(err);
+  });
+});
+
+router.get('/:id/scenes/:sceneid', function (req, res) {
+  var room = rooms.get(req.params.id);
+  if (!room) {
+    res.status(404).send({'status': 'failed', 'message': 'Room not found'});
+    return;
+  }
+
+  var scenes = room.get_scenes().filter(function(scene) {
+    return (String(scene._id) === String(req.params.sceneid));
+  });
+
+  if (scenes.length > 0) {
+    res.send(scenes[0]);
+  } else {
+    res.status(404).send({'status': 'failed', 'message': 'Scene not found'});
+  }
+});
+
+router.delete('/:id/scenes/:sceneid', function (req, res) {
+  var room = rooms.get(req.params.id);
+  if (!room) {
+    res.status(404).send({'status': 'failed', 'message': 'Room not found'});
+    return;
+  }
+
+  var scene = scenes.get(req.params.sceneid);
+  if (!scene) {
+    res.status(404).send({'status': 'failed', 'message': 'Scene not found'});
+    return;
+  }
+
+  room.remove_scene(scene).then(function () {
+    res.status(200).send({'status': 'success'});
+  }, function (err) {
+    res.status(422).send(err);
+  });
+});
+
 router.get('/:id/devices', function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
