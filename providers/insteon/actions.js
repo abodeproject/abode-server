@@ -322,6 +322,20 @@ var actions = function (config, provider) {
         return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD'],['INSTEON_STANDARD_MESSAGE_RECEIVED']);
       }
     },
+    SENSOR_STATUS: {
+      'arguments': [],
+      'handler': function (dev, sensor) {
+        var config;
+
+        config = {
+          'to': dev,
+          'cmd_1': 0x4a,
+          'cmd_2': sensor || 0;
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD'],['INSTEON_STANDARD_MESSAGE_RECEIVED']);
+      }
+    },
     LIGHT_BRIGHTEN: {
       'arguments': [
         {
