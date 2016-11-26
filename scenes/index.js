@@ -107,13 +107,13 @@ var SceneSchema = mongoose.Schema({
   'updated': Date
 });
 
-Schema.Schema.methods.is_on = function () {
+SceneSchema.methods.is_on = function () {
   var self = this;
 
   return (self._on === true);
 };
 
-Schema.Schema.methods.is_off = function () {
+SceneSchema.methods.is_off = function () {
   var self = this;
 
   return (self._on !== true);
