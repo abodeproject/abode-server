@@ -333,8 +333,8 @@ SceneSchema.methods.start = function () {
   self._on = true;
 
   log.info('Emitting ON for', {'name': self.name, 'type': 'scene'});
-  abode.events.emit('ON', {'type': 'scene', 'value': self.name});
-
+  abode.events.emit('ON', {'type': 'scene', 'name': self.name, 'object': self});
+  
   // When we are done, update the scene state and resolve our defer
   var done = function () {
     q.allSettled(step_defers).then(function () {
