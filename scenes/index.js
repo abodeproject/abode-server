@@ -107,6 +107,17 @@ var SceneSchema = mongoose.Schema({
   'updated': Date
 });
 
+Schema.Schema.methods.is_on = function () {
+  var self = this;
+
+  return (self._on === true);
+};
+
+Schema.Schema.methods.is_off = function () {
+  var self = this;
+
+  return (self._on !== true);
+};
 
 // Wrapper function that returns a promise instead of requiring a callback
 SceneSchema.methods._save = function () {
