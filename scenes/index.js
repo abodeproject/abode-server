@@ -108,15 +108,21 @@ var SceneSchema = mongoose.Schema({
 });
 
 SceneSchema.methods.is_on = function () {
-  var self = this;
+  var self = this,
+    defer = q.defer();
 
-  return (self._on === true);
+  defer.resolve((self._on === true));
+
+  return defer.promise;;
 };
 
 SceneSchema.methods.is_off = function () {
-  var self = this;
+  var self = this,
+    defer = q.defer();
 
-  return (self._on !== true);
+  defer.resolve((self._on !== true));
+
+  return defer.promise;
 };
 
 // Wrapper function that returns a promise instead of requiring a callback
