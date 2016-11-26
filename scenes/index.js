@@ -127,7 +127,8 @@ SceneSchema.methods.is_off = function () {
 
 // Wrapper function that returns a promise instead of requiring a callback
 SceneSchema.methods._save = function () {
-  var defer = q.defer();
+  var self = this,
+    defer = q.defer();
 
   this.save(function (err) {
     if (err) {
@@ -135,6 +136,7 @@ SceneSchema.methods._save = function () {
       defer.reject(err);
     } else {
       log.info('Scene saved successfully');
+      abode.events.emit('UPDATED', {'type': 'scene', 'name': self.name, 'object': self});
       defer.resolve();
     }
   });
