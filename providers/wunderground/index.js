@@ -6,8 +6,8 @@ var abode,
   config,
   Wunderground,
   q = require('q'),
-  http = require('http'),
   logger = require('log4js'),
+  request = require('request'),
   log = logger.getLogger('wunderground');
 
 Wunderground = function () {
@@ -53,47 +53,26 @@ Wunderground = function () {
 };
 
 Wunderground.get = function (location) {
-  var data = '',
-    defer = q.defer();
+  var defer = q.defer();
 
   var uri = '/api/' + config.key + '/conditions/forecast10day/alerts/astronomy/q/' + location + '.json';
+
   var options = {
-    host: config.server,
-    path: uri,
+    'method': 'GET',
+    'url': 'https://' + config.server + uri,
+    'json': true,
   };
 
-  var handleError = function (err) {
-    log.error('Error getting weather: %s\n%s', location, err);
-    defer.reject(err);
-  };
+  request(options, function (err, response, body) {
+    if (err) {
+      log.error('Error getting weather: %s\n%s', location, JSON.stringify(err));
+      defer.reject(err);
+      return;
+    }
 
-  var parseResponse = function (res) {
-
-    res.on('data', function (chunk) {
-      data += chunk;
-    });
-
-    res.on('end', function() {
-
-      try {
-
-        data = JSON.parse(data || {});
-        defer.resolve(data);
-        log.debug('Parsed weather data: %s\n%s', location, data);
-
-      } catch (e) {
-
-        log.error('Failed to parse %s: \n%s', location, [e]);
-        defer.reject('Failed to parse response');
-
-      }
-
-    });
-  };
-
-  http.request(options, parseResponse)
-  .on('error', handleError)
-  .end();
+    log.debug('Parsed weather data: %s\n%s', location, JSON.stringify(body));
+    defer.resolve(body);
+  });
 
   return defer.promise;
 };
