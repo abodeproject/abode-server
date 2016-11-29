@@ -23,7 +23,7 @@ module.exports = function(grunt) {
         tasks: ['exec'],
         options: {
           interrupt: true,
-          livereload: true,
+          livereload: false,
         },
       },
       scripts: {
@@ -36,7 +36,7 @@ module.exports = function(grunt) {
         ],
         tasks: ['jshint'],
         options: {
-          livereload: true,
+          livereload: false,
         }
       },
       static: {
