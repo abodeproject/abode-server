@@ -30,6 +30,7 @@ var Web = function () {
   Web.config.secureProtocol = Web.config.secureProtocol || 'TLSv1_2_server_method';
   Web.config.ciphers = Web.config.ciphers || 'AES128-GCM-SHA256:HIGH:!RC4:!MD5:!aNULL:!EDH';
   Web.config.access_log = Web.config.access_log || 'logs/abode_access.log';
+  Web.config.cors_origins = Web.config.cors_origins || ['http://localhost'];
 
   logger.addAppender(logger.appenders.file(Web.config.access_log, logger.layouts.messagePassThroughLayout, 4194304, 4), 'http_access');
 
@@ -128,9 +129,19 @@ Web.init = function () {
     store: new MongoStore(store_config)
   }));
   Web.server.use(function (req, res, next) {
-    res.set('Access-Control-Allow-Origin','*');
-    res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
-    res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
+    var trusted = false;
+
+    if (req.headers.origin) {
+      Web.config.cors_origins.forEach(function (trust) {
+        trusted = (req.headers.origin.indexOf(trust) === 0) ? trust : trusted;
+      });
+
+      if (trusted !== false) {
+        res.set('Access-Control-Allow-Origin', trusted);
+        res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
+        res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
+      }
+    }
     next();
   });
   Web.server.use(function (req, res, next) {
