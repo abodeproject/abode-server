@@ -265,4 +265,54 @@ router.get('/events', function (req, res) {
   });
 });
 
+router.post('/events', function (req, res) {
+
+  abode.make_key().then(function (key) {
+    res.send({'key': key}); 
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.get('/events/:key', function (req, res) {
+
+  abode.check_key(req.params.key).then(function () {
+
+    if (req.query.cache) {
+      res.send(abode.event_cache);
+      return;
+    }
+
+    // set timeout as high as possible
+    req.socket.setTimeout(0);
+
+    // send headers for event-stream connection
+    // see spec for more information
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+    });
+    res.write('\n');
+
+
+    // push this res object to our global variable
+    abode.clients.push(res);
+
+    req.on("close", function() {
+      var toRemove;
+      for (var j =0 ; j < abode.clients.length ; j++) {
+          if (abode.clients[j] == res) {
+              toRemove =j;
+              break;
+          }
+      }
+      abode.clients.splice(j,1);
+    });
+  }, function (err) {
+    res.status(err.http_code || 400).send(err);
+  });
+});
+
 module.exports = router;

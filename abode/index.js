@@ -3,6 +3,7 @@
 var q = require('q');
 var fs = require('fs');
 var ini = require('ini');
+var hat = require('hat');
 var merge = require('merge');
 var mongoose = require('mongoose');
 var events = require('events');
@@ -20,7 +21,7 @@ Abode.init = function (config) {
   config.read_config = config.read_config || true;
   config.allow_networks = config.allow_networks || ['127.0.0.1'];
   config.ip_header = config.ip_header;
-  config.allow_uris = config.allow_uris || ['/','/api/notifications/action/*', '/api/auth', '/api/auth/login', '/scripts/*', '/css/*', '/images/*', '/views/*', '/fonts/*', '/webcam/*', 'favicon.ico', '/font/*'];
+  config.allow_uris = config.allow_uris || ['/','/api/notifications/action/*', '/api/auth', '/api/auth/login', '/scripts/*', '/css/*', '/images/*', '/views/*', '/fonts/*', '/webcam/*', 'favicon.ico', '/font/*', '/api/abode/events/*'];
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
   config.database.database = config.database.database || 'abode';
@@ -332,6 +333,35 @@ Abode.delete_view = function (view, data) {
   }, function (err) {
     defer.reject({'status': 'failed', 'message': err});
   });
+
+  return defer.promise;
+};
+
+Abode.keys = [];
+
+Abode.check_key = function (key) {
+  var defer = q.defer();
+
+  if (Abode.keys.indexOf(key) > -1) {
+    defer.resolve();  
+  } else {
+    defer.reject({'status': 'failed', 'message': 'Invalid Token', 'http_code': 401});
+  }
+
+  return defer.promise;
+};
+
+Abode.make_key = function () {
+  var defer = q.defer();
+  var key = hat(256, 16);
+
+  Abode.keys.push(key);
+
+  setTimeout(function () {
+    Abode.keys[Abode.keys.indexOf(Abode.keys, key)] = null;
+  }, 10 * 1000);
+
+  defer.resolve(key);
 
   return defer.promise;
 };
