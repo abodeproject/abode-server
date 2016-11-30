@@ -333,6 +333,46 @@ Insteon.queue = function (cmd, device, args) {
 
 };
 
+Insteon.lock = function (device) {
+  var defer = q.defer();
+
+  //Add the command to the queue
+  Insteon.queue('LIGHT_ON_FAST', device).then(function () {
+
+    log.debug('Successfully sent LIGHT_ON_FAST to ' + device.name);
+
+    //Resolve our defer with the correct _on and _level values
+    defer.resolve({'response': true, 'update': {'_on': true, '_level': 100, 'last_on': new Date()}});
+
+  }, function (err) {
+    log.error('Failed to send LIGHT_ON_FAST to ' + device.name);
+    defer.reject(err);
+  });
+
+  return defer.promise;
+
+};
+
+Insteon.unlock = function (device) {
+  var defer = q.defer();
+
+  //Add the command to the queue
+  Insteon.queue('LIGHT_OFF_FAST', device).then(function () {
+
+    log.debug('Successfully sent LIGHT_OFF_FAST to ' + device.name);
+
+    //Resolve our defer with the correct _on and _level values
+    defer.resolve({'response': true, 'update': {'_on': false, '_level': 0, 'last_off': new Date()}});
+
+  }, function (err) {
+    log.error('Failed to send LIGHT_OFF_FAST to ' + device.name);
+    defer.reject(err);
+  });
+
+  return defer.promise;
+
+};
+
 Insteon.on = function (device) {
   var defer = q.defer();
 

@@ -270,6 +270,8 @@ var actions = [
   'off',
   'open',
   'close',
+  'lock',
+  'unlock',
   'set_level',
   'set_mode',
   'set_humidity',
