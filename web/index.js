@@ -137,7 +137,7 @@ Web.init = function () {
       });
 
       if (trusted !== false) {
-        res.set('Access-Control-Allow-Origin', trusted);
+        res.set('Access-Control-Allow-Origin', req.headers.origin);
         res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
         res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
       }
