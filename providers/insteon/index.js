@@ -337,7 +337,7 @@ Insteon.lock = function (device) {
   var defer = q.defer();
 
   //Add the command to the queue
-  Insteon.queue('LIGHT_ON_FAST', device).then(function () {
+  Insteon.queue('LIGHT_LEVEL', device, [100]).then(function () {
 
     log.debug('Successfully sent LIGHT_ON_FAST to ' + device.name);
 
@@ -357,7 +357,7 @@ Insteon.unlock = function (device) {
   var defer = q.defer();
 
   //Add the command to the queue
-  Insteon.queue('LIGHT_OFF_FAST', device).then(function () {
+  Insteon.queue('LIGHT_LEVEL', device, [0]).then(function () {
 
     log.debug('Successfully sent LIGHT_OFF_FAST to ' + device.name);
 
