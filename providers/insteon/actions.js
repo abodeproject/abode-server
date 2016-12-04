@@ -375,6 +375,46 @@ var actions = function (config, provider) {
         return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
       }
     },
+    DOOR_OPEN: {
+      'arguments': [
+        {
+          'name': 'Device',
+          'type': 'options',
+          'options': insteon.dev_names
+        }
+      ],
+      'handler': function (dev) {
+        var config;
+
+        config = {
+          'to': dev,
+          'cmd_1': 0x58,
+          'cmd_2': 0x02
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
+      }
+    },
+    DOOR_CLOSE: {
+      'arguments': [
+        {
+          'name': 'Device',
+          'type': 'options',
+          'options': insteon.dev_names
+        }
+      ],
+      'handler': function (dev) {
+        var config;
+
+        config = {
+          'to': dev,
+          'cmd_1': 0x58,
+          'cmd_2': 0x03
+        };
+
+        return insteon.modem.send('SEND_INSTEON_STANDARD', config, ['SEND_INSTEON_STANDARD']);
+      }
+    },
     LED_OFF: {
       'arguments': [],
       'handler': function () {

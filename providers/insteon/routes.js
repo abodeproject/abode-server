@@ -132,4 +132,28 @@ router.post('/devices/:id/remove_from_group', function (req, res) {
 
 });
 
+router.post('/actions', function (req, res) {
+
+  req.send(insteon.actions.keys());
+
+});
+
+router.post('/devices/:id/send_action/:action', function (req, res) {
+
+  var device = devices.get(req.params.id);
+
+  if (!device) {
+    log.debug('Device not found: ', req.params.id);
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+
+  insteon.queue(req.params.action, device, req.body).then(function () {
+    res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).status({'status': 'failed', 'message': 'Failed to start linking on device', 'details': err});
+  });
+
+});
+
 module.exports = router;
