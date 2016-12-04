@@ -134,7 +134,7 @@ router.post('/devices/:id/remove_from_group', function (req, res) {
 
 router.get('/actions', function (req, res) {
 
-  req.send(Object.keys(insteon.actions));
+  res.send(Object.keys(insteon.actions));
 
 });
 
