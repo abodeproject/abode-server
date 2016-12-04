@@ -131,6 +131,11 @@ Web.init = function () {
   Web.server.use(function (req, res, next) {
     var trusted = false;
 
+/*
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
+    res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
+*/
     if (req.headers.origin) {
       Web.config.cors_origins.forEach(function (trust) {
         trusted = (req.headers.origin.indexOf(trust) === 0) ? trust : trusted;
