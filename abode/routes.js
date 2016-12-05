@@ -221,6 +221,12 @@ router.post('/shutdown', function (req, res) {
   exec('/usr/bin/sudo /sbin/shutdown -h now', b_handler);
 });
 
+
+router.get('/events', function (req, res) {
+  abode.eventfeed.initClient(req, res);
+  abode.eventfeed.addClient(req, res);
+});
+
 router.all('/sources/:source/:uri', function (req, res) {
   res.send(req.params);
 });
