@@ -485,7 +485,10 @@ SceneSchema.methods.start = function () {
   };
 
   // Start processing the steps
-  next();
+
+  self._save().then(function () {
+    next();
+  })
 
   defer.resolve({'status': 'pending'});
 
