@@ -32,6 +32,7 @@ router.get('/', function (req, res) {
   }
 
   abode.eventfeed.query(filter).then(function (results) {
+    res.set('record-total', results.length);
     res.send(results)
   }, function (err) {
     res.status(400).send(err);
