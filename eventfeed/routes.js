@@ -63,7 +63,7 @@ router.get('/:key', function (req, res) {
   abode.check_key(req.params.key).then(function () {
 
     //Initialize our client
-    abode.initClient(req, res);
+    abode.eventfeed.initClient(req, res);
 
     //If a last parameter was specified send all events since last timestamp
     if (req.query.last) {
