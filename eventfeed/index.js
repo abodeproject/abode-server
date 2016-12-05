@@ -52,7 +52,7 @@ EventFeed.query = function (filter, options) {
   var defer = q.defer();
 
   filter = filter || {};
-  options = options || {'sort': {'timestamp': 1}, 'limit': 500};
+  options = options || {'sort': {'timestamp': -1}};
 
   EventFeed.model.find(filter, null, options, function (err, events) {
     if (err) {
@@ -61,7 +61,7 @@ EventFeed.query = function (filter, options) {
     }
 
     //Add each trigger to the _Devices array
-    defer.resolve(events);
+    defer.resolve(events.reverse());
   });
 
   return defer.promise;
