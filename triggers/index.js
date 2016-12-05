@@ -359,7 +359,10 @@ Triggers.type_handler = function (trigger) {
     //Let any connect clients now if an item was updated
     //if (trigger === 'UPDATED') {
     //  log.debug('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
-      abode.clients.forEach(function (res) {
+
+      abode.eventfeed.send(event_object);
+  /*
+      abode.eventfeed.clients.forEach(function (res) {
         var d = new Date();
 
         res.write('id: ' + d.getTime() + '\n');
@@ -370,7 +373,7 @@ Triggers.type_handler = function (trigger) {
     if (abode.event_cache.length > abode.config.event_cache_size) {
       abode.event_cache.shift();
     }
-
+  */
     //  return;
     //}
     log.info('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');

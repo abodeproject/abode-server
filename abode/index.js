@@ -32,11 +32,11 @@ Abode.init = function (config) {
 
   Abode.save_needed = false;
   Abode.views = {};
-  Abode.clients = [];
 
   //Create a new event emitter
   Abode.events = new events.EventEmitter();
   Abode.event_cache = [];
+  Abode.keys = [];
 
   //Load the config.ini
   if (fs.existsSync(config.path) && config.read_config === true) {
@@ -45,7 +45,6 @@ Abode.init = function (config) {
   } else {
     Abode.config = config;
   }
-
 
   logger.clearAppenders();
   logger.loadAppender('file');
@@ -101,6 +100,7 @@ Abode.init = function (config) {
     Abode.scenes = require('../scenes');
     Abode.interfaces = require('../interfaces');
     Abode.notifications = require('../notifications');
+    Abode.eventfeed = require('../eventfeed');
     Abode.web = require('../web');
     Abode.web.init();
 
@@ -117,9 +117,9 @@ Abode.init = function (config) {
     .then(loadModule('scenes'))
     .then(loadModule('interfaces'))
     .then(loadModule('notifications'))
+    .then(loadModule('eventfeed'))
     .then(function() {
       Abode.events.emit('ABODE_STARTED');
-      setInterval(Abode.event_heartbeat, 1000 * config.hearbeat_interval);
       defer.resolve();
     }, function (err) {
       log.error(err);
@@ -138,22 +138,6 @@ Abode.init = function (config) {
   Abode.db.once('open', start);
 
   return defer.promise;
-};
-
-Abode.event_heartbeat = function () {
-  Abode.clients.forEach(function (res) {
-    var d = new Date();
-    var message = {
-      'event': 'HEARTBEAT',
-      'type': 'abode',
-      'name': 'heartbeat',
-      'timestamp': new Date(),
-      'object': {}
-    };
-
-    res.write('id: ' + d.getTime() + '\n');
-    res.write('data:' + JSON.stringify(message) + '\n\n'); // Note the extra newline
-  });
 };
 
 Abode.write_config = function () {
@@ -336,8 +320,6 @@ Abode.delete_view = function (view, data) {
 
   return defer.promise;
 };
-
-Abode.keys = [];
 
 Abode.check_key = function (key) {
   var defer = q.defer();
