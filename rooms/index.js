@@ -221,7 +221,7 @@ var getAge = function (config) {
 
     children = self[filter]();
     children.forEach(function (child) {
-      var age = now - child[config.key];
+      var age = Math.round((now - child[config.key]) / 1000);
       ages[child.name] = {'age': age};
       ages[child.name][config.key] = child[config.key];
 
