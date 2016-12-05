@@ -13,10 +13,21 @@ var fs = require('fs'),
 
 router.get('/', function (req, res) {
   var filter = {};
+  var options = {'sort': {'timestamp': -1}};
 
-  //Otherwise allow filtering and return json
+  //If a last query param is set, use that, otherwise limit results to 100
   if (req.query.last) {
     filter.timestamp =  {'$gt': req.query.last};
+  } else {
+    options.limit = 100;
+  }
+
+  if (req.query.limit) {
+    options.limit = req.query.limit;
+  }
+
+  if (req.query.skip) {
+    options.skip = req.query.skip;
   }
 
   if (req.query.type) {
@@ -31,7 +42,7 @@ router.get('/', function (req, res) {
     filter['event.name'] =  req.query.name;
   }
 
-  abode.eventfeed.query(filter).then(function (results) {
+  abode.eventfeed.query(filter, options).then(function (results) {
     res.set('record-total', results.length);
     res.send(results)
   }, function (err) {
