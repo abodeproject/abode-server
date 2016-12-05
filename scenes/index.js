@@ -501,18 +501,19 @@ SceneSchema.methods.stop = function () {
   Scenes._timers[self.name] = Scenes._timers[self.name] || [];
   timers = Scenes._timers[self.name];
 
-  self._on = false;
-  self._state = 'stopped';
-  self.last_off = new Date();
-
   timers.forEach(function (timer) {
     log.debug('Clearing Timer');
     clearTimeout(timer);
   });
 
+  if (self._on !== false) {
+    self._on = false;
+    self.last_off = new Date();
+    log.info('Emitting OFF for', {'name': self.name, 'type': 'scene'});
+    abode.events.emit('OFF', {'type': 'scene', 'name': self.name, 'object': self});
+  }
 
-  log.info('Emitting OFF for', {'name': self.name, 'type': 'scene'});
-  abode.events.emit('OFF', {'type': 'scene', 'name': self.name, 'object': self});
+  self._state = 'stopped';
 
   timers = [];
 
