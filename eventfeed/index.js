@@ -114,8 +114,8 @@ EventFeed.addClient = function (req, res) {
 
   req.on("close", function() {
     var toRemove;
-    for (var j =0 ; j < abode.clients.length ; j++) {
-        if (abode.clients[j] == res) {
+    for (var j =0 ; j < abode.eventfeed.clients.length ; j++) {
+        if (abode.eventfeed.clients[j] == res) {
             toRemove =j;
             break;
         }
