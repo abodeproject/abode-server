@@ -67,6 +67,27 @@ var RoomSchema = mongoose.Schema({
   '_mode_heat': Boolean,
   '_mode_cool': Boolean,
   'last_seen': Date,
+  '_light_on_count': Number,
+  '_light_off_count': Number,
+  '_appliance_on_count': Number,
+  '_appliance_off_count': Number,
+  '_fan_on_count': Number,
+  '_fan_off_count': Number,
+  '_conditioner_on_count': Number,
+  '_conditioner_off_count': Number,
+  '_motion_sensor_on_count': Number,
+  '_motion_sensor_off_count': Number,
+  '_window_on_count': Number,
+  '_window_off_count': Number,
+  '_door_on_count': Number,
+  '_door_off_count': Number,
+  '_shade_on_count': Number,
+  '_shade_off_count': Number,
+  '_scene_on_count': Number,
+  '_scene_off_count': Number,
+  '_mode_off_count': Number,
+  '_mode_heat_count': Number,
+  '_mode_cool_count': Number,
 });
 
 Rooms._rooms = [];
@@ -180,6 +201,38 @@ var filterDevices = function(type) {
     return self.get_devices().filter( function (dev) {
       return (dev.capabilities.indexOf(type) >= 0);
     });
+  };
+};
+
+var getAge = function (config) {
+  return function () {
+    var last = {},
+      self = this,
+      ages = {},
+      children = [],
+      now = new Date(),
+      defer = q.defer(),
+      filter = 'get_' + config.type + 's';
+
+    if (self[filter] === undefined) {
+      defer.reject({'message': 'Invalid member filter'});
+      return defer.promise;
+    }
+
+    children = self[filter]();
+    children.forEach(function (child) {
+      var age = now - child[config.key];
+      ages[child.name] = {'age': age};
+      ages[child.name][config.key] = child[config.key];
+
+      if (last.age === undefined || age < last.age) {
+        last.age = age;
+        last[config.key] = child[config.key];
+      }
+    });
+    defer.resolve(last.age);
+
+    return defer.promise;
   };
 };
 
@@ -470,6 +523,7 @@ RoomSchema.methods.remove_scene = function (scene) {
   return defer.promise;
 };
 
+
 // Add the various status methods for the room schema
 RoomSchema.methods.get_temperature = getStatuses( {'type': 'temperature_sensors', 'key': 'temperature', 'value': 'int'} );
 RoomSchema.methods.get_humidity = getStatuses( {'type': 'humidity_sensors', 'key': 'humidity', 'value': 'int'} );
@@ -510,6 +564,20 @@ RoomSchema.methods.get_windows = filterDevices('window');
 RoomSchema.methods.get_doors = filterDevices('door');
 RoomSchema.methods.get_shades = filterDevices('shade');
 RoomSchema.methods.get_scenes = filterDevices('scene');
+
+// Get Ages
+RoomSchema.methods.light_on_age = getAge( {'type': 'light', 'key': 'last_on'} );
+RoomSchema.methods.light_off_age = getAge( {'type': 'light', 'key': 'last_off'} );
+RoomSchema.methods.motion_on_age = getAge( {'type': 'motion_sensor', 'key': 'last_on'} );
+RoomSchema.methods.motion_off_age = getAge( {'type': 'motion_sensor', 'key': 'last_off'} );
+RoomSchema.methods.window_open_age = getAge( {'type': 'window', 'key': 'last_on'} );
+RoomSchema.methods.window_close_age = getAge( {'type': 'window', 'key': 'last_off'} );
+RoomSchema.methods.door_open_age = getAge( {'type': 'door', 'key': 'last_on'} );
+RoomSchema.methods.door_close_age = getAge( {'type': 'door', 'key': 'last_off'} );
+RoomSchema.methods.fan_on_age = getAge( {'type': 'fan', 'key': 'last_on'} );
+RoomSchema.methods.fan_off_age = getAge( {'type': 'fan', 'key': 'last_off'} );
+RoomSchema.methods.conditioner_on_age = getAge( {'type': 'conditioner', 'key': 'last_on'} );
+RoomSchema.methods.conditioner_off_age = getAge( {'type': 'conditioner', 'key': 'last_off'} );
 
 // Define the function that resolves all rooms to room objects
 RoomSchema.methods.set_state = function (config, log_msg) {
@@ -617,11 +685,37 @@ var statuses = {
   'mode_cool': '_mode_cool',
 };
 
+RoomSchema.methods.get_lights = filterDevices('light');
+RoomSchema.methods.get_appliances = filterDevices('appliance');
+RoomSchema.methods.get_fans = filterDevices('fan');
+RoomSchema.methods.get_conditioners = filterDevices('conditioner');
+RoomSchema.methods.get_motion_sensors = filterDevices('motion_sensor');
+RoomSchema.methods.get_temperature_sensors = filterDevices('temperature_sensor');
+RoomSchema.methods.get_humidity_sensors = filterDevices('humidity_sensor');
+RoomSchema.methods.get_moisture_sensors = filterDevices('moisture_sensor');
+RoomSchema.methods.get_light_sensors = filterDevices('light_sensor');
+RoomSchema.methods.get_windows = filterDevices('window');
+RoomSchema.methods.get_doors = filterDevices('door');
+RoomSchema.methods.get_shades = filterDevices('shade');
+RoomSchema.methods.get_scenes = filterDevices('scene');
+
+var counts = [
+  'light',
+  'appliance',
+  'fan',
+  'conditioner',
+  'motion_sensor',
+  'window',
+  'door',
+  'shade',
+];
+
 RoomSchema.methods.status = function (cache) {
   var update = {},
     self = this,
     defer = q.defer(),
-    status_defers = [];
+    status_defers = [],
+    conditioners = self.get_conditioners();
 
   cache = (cache === undefined) ? false : cache;
 
@@ -647,6 +741,19 @@ RoomSchema.methods.status = function (cache) {
     });
 
   });
+
+  counts.forEach(function (type) {
+    var children = self['get_' + type + 's'](),
+      on_count = children.filter( function (child) { return (child._on === true); } ),
+      off_count = children.filter( function (child) { return (child._off === true); } );
+
+    update['_' + type + '_on_count'] = on_count.length;
+    update['_' + type + '_off_count'] = off_count.length;
+  });
+
+  update._mode_off_count = conditioners.filter( function (child) { return (child._mode === 'OFF'); }).length;
+  update._mode_heat_count = conditioners.filter( function (child) { return (child._mode === 'HEAT'); }).length;
+  update._mode_cool_count = conditioners.filter( function (child) { return (child._mode === 'COOL'); }).length;
 
   q.allSettled(status_defers).then(function () {
     self.set_state(update).then(function (response) {

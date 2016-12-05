@@ -269,6 +269,20 @@ var statuses = [
   'scenes_off',
 ];
 
+var ages = [
+  'light_on_age',
+  'light_off_age',
+  'motion_on_age',
+  'motion_off_age',
+  'window_open_age',
+  'window_close_age',
+  'door_open_age',
+  'door_close_age',
+  'fan_on_age',
+  'fan_off_age',
+  'conditioner_on_age',
+  'conditioner_off_age',
+];
 
 actions.forEach(function (action) {
   router.post('/:id/' + action, function (req, res) {
@@ -312,6 +326,23 @@ statuses.forEach(function (status) {
 
 });
 
+ages.forEach(function (age) {
+  router.get('/:id/' + age, function (req, res) {
+    var room = rooms.get(req.params.id);
+    if (!room) {
+      res.status(404).send({'status': 'failed', 'message': 'Room not found'});
+      return;
+    }
+
+    room[age]().then(function (response) {
+      res.send({'status': 'success', 'response': response});
+    }, function (err) {
+      res.status(400).send(err || {'status': 'failed', 'message': 'Failed to run age'});
+    });
+
+  });
+
+});
 
 router.post('/:id/status', function (req, res) {
   var room = rooms.get(req.params.id);
