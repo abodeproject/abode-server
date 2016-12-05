@@ -745,7 +745,7 @@ RoomSchema.methods.status = function (cache) {
   counts.forEach(function (type) {
     var children = self['get_' + type + 's'](),
       on_count = children.filter( function (child) { return (child._on === true); } ),
-      off_count = children.filter( function (child) { return (child._off === true); } );
+      off_count = children.filter( function (child) { return (child._on === false); } );
 
     update['_' + type + '_on_count'] = on_count.length;
     update['_' + type + '_off_count'] = off_count.length;
