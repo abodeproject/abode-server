@@ -14,14 +14,6 @@ var fs = require('fs'),
 router.get('/', function (req, res) {
   var filter = {};
 
-  //If client does not want json, start an event feed
-  //This is for legacy clients
-  if (req.headers.accept !== 'application/json') {
-    abode.eventfeed.initClient(req, res);
-    abode.eventfeed.addClient(req, res);
-    return;
-  }
-
   //Otherwise allow filtering and return json
   if (req.query.last) {
     filter.timestamp =  {'$gt': req.query.last};
