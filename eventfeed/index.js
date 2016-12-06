@@ -113,14 +113,7 @@ EventFeed.addClient = function (req, res) {
   abode.eventfeed.clients.push(res);
 
   req.on("close", function() {
-    var toRemove;
-    for (var j =0 ; j < abode.eventfeed.clients.length ; j++) {
-        if (abode.eventfeed.clients[j] == res) {
-            toRemove =j;
-            break;
-        }
-    }
-    abode.eventfeed.clients.splice(j,1);
+    abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
   });
 
 };
