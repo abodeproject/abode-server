@@ -68,7 +68,7 @@ router.get('/:key', function (req, res) {
   
 
     //If a last parameter was specified send all events since last timestamp
-    if (req.query.last) {
+    if (!isNaN(req.query.last)) {
       abode.eventfeed.query({'timestamp': {'$gt': req.query.last}}).then(function (results) {
 
         // set timeout as high as possible
