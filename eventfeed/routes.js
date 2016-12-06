@@ -63,7 +63,7 @@ router.post('/', function (req, res) {
 
 router.get('/clients', function (req, res) {
 
-  res.send({'client_count': abode.evnetfeed.clients.length});
+  res.send({'client_count': abode.eventfeed.clients.length});
 
 });
 
@@ -118,7 +118,7 @@ router.get('/:key', function (req, res) {
           'Connection': 'keep-alive'
       });
       res.write('\n');
-    
+
       abode.eventfeed.clients.push(res);
 
       req.on("close", function() {
