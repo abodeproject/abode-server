@@ -61,17 +61,33 @@ router.post('/', function (req, res) {
 
 });
 
+router.get('/clients', function (req, res) {
+
+  res.send({'client_count': abode.evnetfeed.clients.length});
+
+});
+
 router.get('/:key', function (req, res) {
 
   //Check our key for validity 
   abode.check_key(req.params.key).then(function () {
-
-    //Initialize our client
-    abode.eventfeed.initClient(req, res);
+  
 
     //If a last parameter was specified send all events since last timestamp
     if (req.query.last) {
       abode.eventfeed.query({'timestamp': {'$gt': req.query.last}}).then(function (results) {
+
+        // set timeout as high as possible
+        req.socket.setTimeout(0);
+
+        // send headers for event-stream connection
+        // see spec for more information
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        });
+        res.write('\n');
 
         //Send our previous events
         results.forEach(function (event) {
@@ -79,15 +95,36 @@ router.get('/:key', function (req, res) {
           res.write('data:' + JSON.stringify(event.event) + '\n\n'); // Note the extra newline
         });
 
-        //Add our client to the event feed
-        abode.eventfeed.addClient(req, res);
+        abode.eventfeed.clients.push(res);
+
+        req.on("close", function() {
+          abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
+        });
+
       }, function (err) {
         res.status(400).send(err);
       });
 
     } else {
-      //Add our client to the event feed
-      abode.eventfeed.addClient(req, res);
+
+    // set timeout as high as possible
+    req.socket.setTimeout(0);
+
+      // send headers for event-stream connection
+      // see spec for more information
+      res.writeHead(200, {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+      });
+      res.write('\n');
+    
+      abode.eventfeed.clients.push(res);
+
+      req.on("close", function() {
+        abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
+      });
+
     }
 
   }, function (err) {

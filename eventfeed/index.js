@@ -84,36 +84,9 @@ EventFeed.send = function (data) {
     log.debug('Event created: ', event._id);
   });
 
-  EventFeed.clients.forEach(function (res) {
+  abode.eventfeed.clients.forEach(function (res) {
     res.write('id: ' + timestamp + '\n');
     res.write('data:' + JSON.stringify(data) + '\n\n'); // Note the extra newline
-  });
-
-};
-
-EventFeed.initClient = function (req, res) {
-  
-  // set timeout as high as possible
-  req.socket.setTimeout(0);
-
-  // send headers for event-stream connection
-  // see spec for more information
-  res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-  });
-  res.write('\n');
-      
-};
-
-EventFeed.addClient = function (req, res) {
-
-  // push this res object to our global variable
-  abode.eventfeed.clients.push(res);
-
-  req.on("close", function() {
-    abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
   });
 
 };
