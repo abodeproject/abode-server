@@ -22,6 +22,7 @@ var ActionsSchema = mongoose.Schema({
 var NotificationsSchema = mongoose.Schema({
   'name': {'type': String, 'unique': true, 'required': true},
   'active': {'type': Boolean, 'default': false},
+  'push': {'type': Boolean, 'default': true},
   'message_vars': {'type': Object},
   'message': {'type': String, 'required': true},
   'actions': [ActionsSchema],
@@ -620,7 +621,9 @@ Notifications.activate = function (id, body) {
     Notifications.update(id, data).then(function (record) {
       var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions, 'deactive_token': record.deactive_token};
       abode.events.emit('NOTIFICATION_ACTIVATED', response);
-      Notifications.push_notifications(response);
+      if (record.push) {
+        Notifications.push_notifications(response);
+      }
 
       response.status = 'success';
       response.message = 'Notification Activated';
@@ -655,8 +658,9 @@ Notifications.deactivate = function (id, body) {
     Notifications.update(id, data).then(function () {
       var response = {'_id': record.id, 'name': record.name};
       abode.events.emit('NOTIFICATION_DEACTIVATED', response);
-      Notifications.push_notifications({'_id': record.id, 'name': record.name, 'type': 'acknowledge'});
-
+      if (record.push) {
+        Notifications.push_notifications({'_id': record.id, 'name': record.name, 'type': 'acknowledge'});
+      }
       response.status = 'success';
       response.message = 'Notification De-Activated';
       log.info('Notification de-activated: ' + response.name);
