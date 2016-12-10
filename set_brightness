@@ -7,4 +7,4 @@ if [ $# -ne 2 ]; then
 fi
 
 echo "echo $2 > /sys/class/backlight/$1/brightness"
-sudo sh -c "echo $2 > /sys/class/backlight/$1/brightness"
+echo $2 > /sys/class/backlight/$1/brightness

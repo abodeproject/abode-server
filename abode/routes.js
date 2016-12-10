@@ -131,7 +131,7 @@ router.get('/status/', function (req, res) {
   status.mode = abode.config.mode;
   status.capabilities = [];
 
-  if (abode.providers && abode.providers.display && abode.providers.display.power && abode.providers.display.max_brightness && abode.providers.display.brightness) {
+  if (abode.providers && abode.providers.display) {
     display = abode.providers.display;
     status._on = display.power;
     status.capabilities.push('display');
