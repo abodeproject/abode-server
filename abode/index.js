@@ -33,7 +33,7 @@ Abode.init = function (config) {
   config.event_cache_size = 100;
   config.disable_upnp = (config.disable_upnp === undefined) ? false : config.disable_upnp;
   config.upnp_client_timeout = config.upnp_client_timeout || 2;
-  config.mode = config.mode || 'bootstrap';
+  config.mode = config.mode || 'device';
   config.name = config.name || 'Local';
   config.url = config.url || 'http://localhost:8080';
 

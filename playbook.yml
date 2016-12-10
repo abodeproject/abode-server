@@ -57,6 +57,9 @@
   - name: Install Apache2
     apt:
       pkg: apache2
+  - name: Install libkrb5-dev
+    apt:
+      pkg: libkrb5-dev
   - name: node init
     notify:
     - Prep NodeJS

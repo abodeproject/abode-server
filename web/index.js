@@ -13,8 +13,7 @@ var abode,
   session = require('express-session'),
   MongoStore = require('connect-mongo')(session),
   pathspec = require('pathspec').Mask,
-  express = require('express'),
-  morgan = require('morgan');
+  express = require('express');
 
 var Web = function () {
 
@@ -123,8 +122,7 @@ Web.init = function () {
 
   //Create an express instance
   Web.server = express();
-  //Web.server.use(logger.connectLogger(http_logger));
-  Web.server.use(morgan('combined'))
+  Web.server.use(logger.connectLogger(http_logger));
   Web.server.use(bodyParser.json());
   Web.server.use(bodyParser.text());
   /*
