@@ -9,6 +9,8 @@ var mongoose = require('mongoose');
 var events = require('events');
 var logger = require('log4js'),
   log = logger.getLogger('abode');
+var ssdp = require('node-ssdp').Server;
+var ssdp_client = require('node-ssdp').Client;
 
 var Abode = function() { };
 
@@ -29,6 +31,8 @@ Abode.init = function (config) {
   config.fail_on_provider = config.fail_on_provider || true;
   config.hearbeat_interval = config.hearbeat_interval || 10;
   config.event_cache_size = 100;
+  config.disable_upnp = (config.disable_upnp === undefined) ? false : config.disable_upnp;
+  config.upnp_client_timeout = config.upnp_client_timeout || 5;
 
   Abode.save_needed = false;
   Abode.views = {};
@@ -120,6 +124,9 @@ Abode.init = function (config) {
     .then(loadModule('eventfeed'))
     .then(function() {
       Abode.events.emit('ABODE_STARTED');
+      if (!config.disable_upnp) {
+        Abode.start_upnp();
+      }
       defer.resolve();
     }, function (err) {
       log.error(err);
@@ -136,6 +143,50 @@ Abode.init = function (config) {
     process.exit(1);
   });
   Abode.db.once('open', start);
+
+  return defer.promise;
+};
+
+Abode.start_upnp = function () {
+  Abode.upnp = new ssdp({'udn': Abode.config.name, 'location': Abode.config.url});
+  Abode.upnp.addUSN('abode:server');
+  Abode.upnp.start();
+  log.info('UPNP Server Started');
+};
+
+Abode.detect_upnp = function () {
+  var results = [],
+    defer = q.defer(),
+    client = new ssdp_client();
+
+  //Set our response handler
+  client.on('response', function (headers, statusCode, rinfo) {
+    var name = headers.USN.split('::')[0];
+
+    //Do not return our self
+    if (headers.LOCATION === Abode.config.url) {
+      return;
+    }
+
+    //If a client returns localhost we won't be able to connect so ignore it
+    if (headers.LOCATION.indexOf('localhost') !== -1) {
+      return;
+    }
+
+    //Add response to our results array
+    results.push({
+      'name': name,
+      'location': headers.LOCATION
+    });
+  });
+
+  //Search for abode servers
+  client.search('abode:server');
+
+  //Timeout 
+  setTimeout(function () {
+    defer.resolve(results);
+  }, Abode.config.upnp_client_timeout * 1000);
 
   return defer.promise;
 };

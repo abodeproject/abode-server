@@ -15,6 +15,14 @@ router.get('/status', function (req, res) {
   res.status(200).send({'name': abode.config.name, 'url': abode.config.url});
 });
 
+router.get('/upnp', function (req, res) {
+  abode.detect_upnp().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+});
+
 router.get('/config', function (req, res) {
   var config = extend({}, abode.config);
   config.save_needed = abode.save_needed;
