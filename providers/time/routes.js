@@ -7,10 +7,16 @@ var time = require('../time'),
 router.get('/', function (req, res) {
 
   res.send({
+    'current': time.current,
     'time': time.time,
-    'sunset': time.getTime(time.sunset),
-    'sunrise': time.getTime(time.sunrise),
-    'solar_noon': time.getTime(time.solar_noon),
+    'dawn': time.dawn,
+    'sunrise': time.sunrise,
+    'goldenHourMorning': time.goldenHourMorning,
+    'solarNoon': time.solarNoon,
+    'goldenHourEvening': time.goldenHourEvening,
+    'sunset': time.sunset,
+    'dusk': time.dusk,
+    'night': time.night,
     'day': time.day,
     'is': time.is,
   });

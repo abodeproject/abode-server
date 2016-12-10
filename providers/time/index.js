@@ -44,20 +44,14 @@ var updateDetails = function (date) {
   //Update sun/moon times
   suncalc = SunCalc.getTimes(current, Time.config.location.lat, Time.config.location.long);
 
-  sunrise = suncalc.sunrise;
-  sunrise.setSeconds(0);
-  sunrise.setMilliseconds(0);
-  Time.sunrise = sunrise.getTime();
-
-  sunset = suncalc.sunset;
-  sunset.setSeconds(0);
-  sunset.setMilliseconds(0);
-  Time.sunset = sunset.getTime();
-
-  solar_noon = suncalc.solarNoon;
-  solar_noon.setSeconds(0);
-  solar_noon.setMilliseconds(0);
-  Time.solar_noon = solar_noon.getTime();
+  Time.sunrise = Time.getTime(suncalc.sunrise);
+  Time.sunset = Time.getTime(suncalc.sunset);
+  Time.solar_noon = Time.getTime(suncalc.solarNoon);
+  Time.goldenHourEvening = Time.getTime(suncalc.goldenHour);
+  Time.goldenHourMorning = Time.getTime(suncalc.goldenHourEnd);
+  Time.dusk = Time.getTime(suncalc.dusk);
+  Time.night = Time.getTime(suncalc.night);
+  Time.dawn = Time.getTime(suncalc.dawn);
 
   //Build hash to check for various states
   Time.is.sunday = (day_int === 0);
@@ -67,11 +61,15 @@ var updateDetails = function (date) {
   Time.is.thursday = (day_int === 4);
   Time.is.friday = (day_int === 5);
   Time.is.saturday = (day_int === 6);
-  Time.is.sunset = (Time.current === Time.sunset);
-  Time.is.sunrise = (Time.current === Time.sunrise);
-  Time.is.solar_noon = (Time.current === solar_noon);
-  Time.is.day = (current > sunrise && current < sunset);
-  Time.is.night = (current > sunset || current < sunrise);
+  Time.is.dawn = (Time.time === Time.dawn);
+  Time.is.sunrise = (Time.time === Time.sunrise);
+  Time.is.goldenHourMorning = (Time.time == Time.goldenHourMorning);
+  Time.is.solar_noon = (Time.time === solar_noon);
+  Time.is.goldenHourEvening = (Time.time == Time.goldenHourEvening);
+  Time.is.sunset = (Time.time === Time.sunset);
+  Time.is.dusk = (Time.time === Time.dusk);
+  Time.is.day = (Time.time > Time.sunrise && Time.time < Time.sunset);
+  Time.is.night = (Time.time > Time.sunset || Time.time < Time.sunrise);
 };
 
 //Primary function to fire events and update times
@@ -91,15 +89,15 @@ var processTime = function () {
   if (time_change || day_change) {
     updateDetails(newTime);
 
-    if (Time.current === Time.sunset) {
+    if (Time.time === Time.sunset) {
       log.debug('sunset');
       events.emit('SUNSET', {'type': 'time', 'name': 'Sunset', 'object': Time});
     }
-    if (Time.current === Time.sunrise) {
+    if (Time.time === Time.sunrise) {
       log.debug('sunrise');
       events.emit('SUNRISE', {'type': 'time', 'name': 'Sunset', 'object': Time});
     }
-    if (Time.current === Time.solar_noon) {
+    if (Time.time === Time.solar_noon) {
       log.debug('solar_noon');
       events.emit('SOLAR_NOON', {'type': 'time', 'name': 'Sunset', 'object': Time});
     }
@@ -150,6 +148,10 @@ Time = function () {
 Time.getTime = function (date) {
   var hour, min, sec,
     toParse = new Date(date);
+
+
+  toParse.setSeconds(0);
+  toParse.setMilliseconds(0);
 
   //Get the time, or number of seconds since midnight
   hour = toParse.getHours() * 60 * 60;
