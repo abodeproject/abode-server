@@ -162,6 +162,12 @@ Abode.detect_upnp = function () {
   //Set our response handler
   client.on('response', function (headers, statusCode, rinfo) {
     var name = headers.USN.split('::')[0];
+    var matches = results.filter(function (item) { return (item.url === headers.LOCATION); })
+
+    //If we have an existing entry, skip it
+    if (matches.length > 0) {
+      return;
+    }
 
     //Do not return our self
     if (headers.LOCATION === Abode.config.url) {
@@ -173,10 +179,11 @@ Abode.detect_upnp = function () {
       return;
     }
 
+
     //Add response to our results array
     results.push({
       'name': name,
-      'location': headers.LOCATION
+      'url': headers.LOCATION
     });
   });
 
