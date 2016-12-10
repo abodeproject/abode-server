@@ -96,7 +96,7 @@ router.put('/views/:view', function (req, res) {
       res.status(400).send(err);
     });
   }
-  
+
   if (!req.body) {
 
     abode.read_view().then(write_view, function (err) {
@@ -123,23 +123,26 @@ router.delete('/views/:view', function (req, res) {
 router.get('/status/', function (req, res) {
 
   var level,
-    status = {},
-    display = abode.providers.display;
-
+    display,
+    status = {};
 
   status.name = abode.config.name;
   status.url = abode.config.url;
-  status._on = display.power;
-  status.capabilities = [
-    'display',
-    'video',
-    'onoff',
-  ];
+  status.mode = abode.config.mode;
+  status.capabilities = [];
 
-  if (abode.providers.display.power && display.max_brightness && display.brightness) {
+  if (abode.providers && abode.providers.display && abode.providers.display.power && abode.providers.display.max_brightness && abode.providers.display.brightness) {
+    display = abode.providers.display;
+    status._on = display.power;
+    status.capabilities.push('display');
+    status.capabilities.push('onoff');
     level = Math.round((display.brightness / display.max_brightness) * 100);
     status._level = level;
     status.capabilities.push('dimmer');
+  }
+
+  if (abode.providers && abode.providers.video) {
+    status.capabilities.push('video');
   }
 
   fs.readFile('/dev/shm/sensors.json', function (err, data) {

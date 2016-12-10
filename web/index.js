@@ -13,7 +13,8 @@ var abode,
   session = require('express-session'),
   MongoStore = require('connect-mongo')(session),
   pathspec = require('pathspec').Mask,
-  express = require('express');
+  express = require('express'),
+  morgan = require('morgan');
 
 var Web = function () {
 
@@ -92,11 +93,13 @@ Web.check_auth = function (ip, uri, auth, session) {
 
   }
 
+  /*
   if (allowed) { session.auth = true; session.user = 'guest'; return true; }
 
   if (auth) {
     return true;
   }
+  */
 
   abode.config.allow_uris.forEach(function (matcher) {
 
@@ -112,15 +115,19 @@ Web.init = function () {
   //Get abode
   abode = require('../abode');
 
+  /*
   var store_config = {
     mongooseConnection: abode.db,
   };
+  */
 
   //Create an express instance
   Web.server = express();
-  Web.server.use(logger.connectLogger(http_logger));
+  //Web.server.use(logger.connectLogger(http_logger));
+  Web.server.use(morgan('combined'))
   Web.server.use(bodyParser.json());
   Web.server.use(bodyParser.text());
+  /*
   Web.server.use(session({
     name: 'abode-auth',
     saveUninitialized: true,
@@ -128,6 +135,7 @@ Web.init = function () {
     secret: abode.config.secret || 'XAj2XTOQ5TA#ybgNxl#cw6pcyDn%bKeh',
     store: new MongoStore(store_config)
   }));
+  */
   Web.server.use(function (req, res, next) {
     var trusted = false;
 
@@ -157,6 +165,12 @@ Web.init = function () {
     next();
   });
   Web.server.use(function (req, res, next) {
+
+    if (!abode.auth) {
+      next();
+      return;
+    }
+
     req.client_ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
     abode.auth.check(req.headers['client_token'] || req.query.client_token, req.headers['auth_token'] || req.query.auth_token, req.client_ip, req.headers['user-agent']).then(function (response) {
 
@@ -188,8 +202,7 @@ Web.init = function () {
     var alt_method = function() {
       var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
 
-      if (Web.check_auth(ip, req.path, req.session.auth, req.session)) {
-        req.auth = {'user': req.session.user}
+      if (Web.check_auth(ip, req.path)) {
         next();
       } else {
         res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
@@ -197,7 +210,7 @@ Web.init = function () {
 
     };
 
-    if (req.headers.client_token && req.headers.auth_token) {
+    if (abode.auth && req.headers.client_token && req.headers.auth_token) {
       abode.auth.check_token(req.headers.client_token, req.headers.auth_token).then(function (auth) {
         req.auth = auth;
         req.session.auth = true;

@@ -27,12 +27,15 @@ Abode.init = function (config) {
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
   config.database.database = config.database.database || 'abode';
-  config.providers = config.providers || [];
+  config.providers = config.providers || ['display','video'];
   config.fail_on_provider = config.fail_on_provider || true;
   config.hearbeat_interval = config.hearbeat_interval || 10;
   config.event_cache_size = 100;
   config.disable_upnp = (config.disable_upnp === undefined) ? false : config.disable_upnp;
-  config.upnp_client_timeout = config.upnp_client_timeout || 5;
+  config.upnp_client_timeout = config.upnp_client_timeout || 2;
+  config.mode = config.mode || 'bootstrap';
+  config.name = config.name || 'Local';
+  config.url = config.url || 'http://localhost:8080';
 
   Abode.save_needed = false;
   Abode.views = {};
@@ -134,22 +137,48 @@ Abode.init = function (config) {
     });
   };
 
-  //Connect to the database
-  Abode.db = mongoose.connect('mongodb://' + Abode.config.database.server + '/' + Abode.config.database.database).connection;
+  if (config.mode === 'server') {
 
-  //Register our event handlers for the database
-  Abode.db.on('error', function (err) {
-    log.error('Connection error: %s', err.message || err);
-    process.exit(1);
-  });
-  Abode.db.once('open', start);
+    //Connect to the database
+    Abode.db = mongoose.connect('mongodb://' + Abode.config.database.server + '/' + Abode.config.database.database).connection;
+
+    //Register our event handlers for the database
+    Abode.db.on('error', function (err) {
+      log.error('Connection error: %s', err.message || err);
+      process.exit(1);
+    });
+    Abode.db.once('open', start);
+
+  } else {
+    Abode.providers = require('../providers');
+    Abode.web = require('../web');
+    Abode.web.init();
+    Abode.web.server.use('/api/abode', require('./routes'));
+
+    loadModule('providers')(['display','video'])
+    .then(loadModule('web'))
+    .then(function () {
+      Abode.events.emit('ABODE_STARTED');
+      if (!config.disable_upnp) {
+        Abode.start_upnp();
+      }
+      defer.resolve();
+    }, function (err) {
+      log.error(err);
+      defer.reject(err);
+    });
+  }
 
   return defer.promise;
 };
 
 Abode.start_upnp = function () {
   Abode.upnp = new ssdp({'udn': Abode.config.name, 'location': Abode.config.url});
-  Abode.upnp.addUSN('abode:server');
+  if (Abode.config.mode === 'server') {
+    Abode.upnp.addUSN('abode:server');
+  } else {
+    Abode.upnp.addUSN('abode:device');
+  }
   Abode.upnp.start();
   log.info('UPNP Server Started');
 };
