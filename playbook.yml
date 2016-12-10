@@ -73,6 +73,9 @@
   - name: Install Node
     apt:
       pkg: nodejs
+  - name: node forever
+    notify:
+    - Install Forever
   - name: Install libkrb5-dev
     apt:
       pkg: libkrb5-dev
@@ -257,3 +260,5 @@
         state: restarted
     - name: Prep NodeJS
       shell: /tmp/nodejs.sh
+    - name: Install Forever
+      shell: /usr/bin/npm install --global forever
