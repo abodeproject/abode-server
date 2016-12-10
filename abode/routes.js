@@ -11,10 +11,6 @@ var fs = require('fs'),
   exec = require('child_process').exec,
   router = express.Router();
 
-router.get('/status', function (req, res) {
-  res.status(200).send({'name': abode.config.name, 'url': abode.config.url});
-});
-
 router.get('/upnp', function (req, res) {
   abode.detect_upnp().then(function (result) {
     res.status(200).send(result);
@@ -100,8 +96,7 @@ router.put('/views/:view', function (req, res) {
       res.status(400).send(err);
     });
   }
-
-  console.log(req.body);
+  
   if (!req.body) {
 
     abode.read_view().then(write_view, function (err) {
@@ -132,6 +127,8 @@ router.get('/status/', function (req, res) {
     display = abode.providers.display;
 
 
+  status.name = abode.config.name;
+  status.url = abode.config.url;
   status._on = display.power;
   status.capabilities = [
     'display',
