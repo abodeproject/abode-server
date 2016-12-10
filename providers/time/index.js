@@ -179,7 +179,11 @@ Time.triggers = [
   {'name': 'DAY_CHANGE'},
   {'name': 'SUNSET'},
   {'name': 'SUNRISE'},
-  {'name': 'SOLAR_NOON'}
+  {'name': 'SOLAR_NOON'},
+  {'name': 'GOLDEN_HOUR_MORNING'},
+  {'name': 'GOLDEN_HOUR_EVENING'},
+  {'name': 'DAWN'},
+  {'name': 'DUSK'}
 ];
 Time.is = {};
 
