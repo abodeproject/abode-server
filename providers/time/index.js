@@ -6,9 +6,6 @@ var routes,
   day_int,
   current,
   suncalc,
-  sunrise,
-  sunset,
-  solar_noon,
   time_interval,
   q = require('q'),
   events,
@@ -63,9 +60,9 @@ var updateDetails = function (date) {
   Time.is.saturday = (day_int === 6);
   Time.is.dawn = (Time.time === Time.dawn);
   Time.is.sunrise = (Time.time === Time.sunrise);
-  Time.is.goldenHourMorning = (Time.time == Time.goldenHourMorning);
-  Time.is.solar_noon = (Time.time === solar_noon);
-  Time.is.goldenHourEvening = (Time.time == Time.goldenHourEvening);
+  Time.is.goldenHourMorning = (Time.time === Time.goldenHourMorning);
+  Time.is.solar_noon = (Time.time === Time.solar_noon);
+  Time.is.goldenHourEvening = (Time.time === Time.goldenHourEvening);
   Time.is.sunset = (Time.time === Time.sunset);
   Time.is.dusk = (Time.time === Time.dusk);
   Time.is.day = (Time.time > Time.sunrise && Time.time < Time.sunset);
@@ -91,15 +88,31 @@ var processTime = function () {
 
     if (Time.time === Time.sunset) {
       log.debug('sunset');
-      events.emit('SUNSET', {'type': 'time', 'name': 'Sunset', 'object': Time});
+      events.emit('SUNSET', {'type': 'time', 'name': 'Sunset', 'object': Time.toJSON()});
     }
     if (Time.time === Time.sunrise) {
       log.debug('sunrise');
-      events.emit('SUNRISE', {'type': 'time', 'name': 'Sunset', 'object': Time});
+      events.emit('SUNRISE', {'type': 'time', 'name': 'Sunset', 'object': Time.toJSON()});
     }
     if (Time.time === Time.solar_noon) {
       log.debug('solar_noon');
-      events.emit('SOLAR_NOON', {'type': 'time', 'name': 'Sunset', 'object': Time});
+      events.emit('SOLAR_NOON', {'type': 'time', 'name': 'Sunset', 'object': Time.toJSON()});
+    }
+    if (Time.time === Time.goldenHourMorning) {
+      log.debug('goldenHourMorning');
+      events.emit('GOLDEN_HOUR_MORNING', {'type': 'time', 'name': 'Morning Golden Hour', 'object': Time.toJSON()});
+    }
+    if (Time.time === Time.goldenHourEvening) {
+      log.debug('goldenHourEvening');
+      events.emit('GOLDEN_HOUR_EVENING', {'type': 'time', 'name': 'Evening Golden Hour', 'object': Time.toJSON()});
+    }
+    if (Time.time === Time.dawn) {
+      log.debug('dawn');
+      events.emit('DAWN', {'type': 'time', 'name': 'Dawn', 'object': Time.toJSON()});
+    }
+    if (Time.time === Time.dusk) {
+      log.debug('dusk');
+      events.emit('DUSK', {'type': 'time', 'name': 'Dusk', 'object': Time.toJSON()});
     }
   }
 
@@ -108,12 +121,12 @@ var processTime = function () {
     log.debug('Day changed');
 
     //events.emit('DAY_CHANGE', Time.day);
-    events.emit('DAY_CHANGE', {'type': 'time', 'name': Time.day, 'object': Time});
+    events.emit('DAY_CHANGE', {'type': 'time', 'name': Time.day, 'object': Time.toJSON()});
   }
   if (time_change) {
     log.debug('Time changed');
     //events.emit('TIME_CHANGE', Time.time);
-    events.emit('TIME_CHANGE', {'type': 'time', 'name': Time.time, 'object': Time});
+    events.emit('TIME_CHANGE', {'type': 'time', 'name': Time.time, 'object': Time.toJSON()});
   }
 };
 
@@ -169,5 +182,22 @@ Time.triggers = [
   {'name': 'SOLAR_NOON'}
 ];
 Time.is = {};
+
+Time.toJSON = function () {
+  return {
+    'current': Time.current,
+    'time': Time.time,
+    'dawn': Time.dawn,
+    'sunrise': Time.sunrise,
+    'goldenHourMorning': Time.goldenHourMorning,
+    'solarNoon': Time.solarNoon,
+    'goldenHourEvening': Time.goldenHourEvening,
+    'sunset': Time.sunset,
+    'dusk': Time.dusk,
+    'night': Time.night,
+    'day': Time.day,
+    'is': Time.is
+  };
+};
 
 module.exports = Time;
