@@ -104,6 +104,8 @@ Triggers.types = [
   {'name': 'LUMACITY_UP'},
   {'name': 'LUMACITY_DOWN'},
   {'name': 'UPDATED'},
+  {'name': 'NOTIFICATION_ACTIVATED'},
+  {'name': 'NOTIFICATION_DEACTIVATED'},
 ];
 
 Triggers.lookupAction = function (key) {

@@ -620,7 +620,7 @@ Notifications.activate = function (id, body) {
 
     Notifications.update(id, data).then(function (record) {
       var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions, 'deactive_token': record.deactive_token};
-      abode.events.emit('NOTIFICATION_ACTIVATED', response);
+      abode.events.emit('NOTIFICATION_ACTIVATED', {'type': 'notification', 'name': record.name, 'object': response});
       if (record.push) {
         Notifications.push_notifications(response);
       }
@@ -657,7 +657,7 @@ Notifications.deactivate = function (id, body) {
 
     Notifications.update(id, data).then(function () {
       var response = {'_id': record.id, 'name': record.name};
-      abode.events.emit('NOTIFICATION_DEACTIVATED', response);
+      abode.events.emit('NOTIFICATION_DEACTIVATED', {'type': 'notification', 'name': record.name,, 'object': response});
       if (record.push) {
         Notifications.push_notifications({'_id': record.id, 'name': record.name, 'type': 'acknowledge'});
       }
