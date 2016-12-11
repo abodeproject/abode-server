@@ -657,7 +657,7 @@ Notifications.deactivate = function (id, body) {
 
     Notifications.update(id, data).then(function () {
       var response = {'_id': record.id, 'name': record.name};
-      abode.events.emit('NOTIFICATION_DEACTIVATED', {'type': 'notification', 'name': record.name,, 'object': response});
+      abode.events.emit('NOTIFICATION_DEACTIVATED', {'type': 'notification', 'name': record.name, 'object': response});
       if (record.push) {
         Notifications.push_notifications({'_id': record.id, 'name': record.name, 'type': 'acknowledge'});
       }
