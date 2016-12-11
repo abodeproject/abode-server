@@ -468,6 +468,8 @@ Notifications.update = function (id, data) {
         defer.reject(err);
         return;
       }
+      
+      abode.events.emit('UPDATED', {'type': 'notification', 'name': record.name, 'object': record});
 
       log.debug('Notification Saved: ', record._id);
       defer.resolve(record);
@@ -619,7 +621,7 @@ Notifications.activate = function (id, body) {
     data.actions = record.actions;
 
     Notifications.update(id, data).then(function (record) {
-      var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions, 'deactive_token': record.deactive_token};
+      var response = {'_id': record.id, 'name': record.name, 'message': record.render(), 'expires': data.expires, 'actions': record.actions, 'active_date': record.active_date, 'deactive_token': record.deactive_token};
       abode.events.emit('NOTIFICATION_ACTIVATED', {'type': 'notification', 'name': record.name, 'object': response});
       if (record.push) {
         Notifications.push_notifications(response);
