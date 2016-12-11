@@ -211,7 +211,6 @@ Web.init = function () {
     if (abode.auth && req.headers.client_token && req.headers.auth_token) {
       abode.auth.check_token(req.headers.client_token, req.headers.auth_token).then(function (auth) {
         req.auth = auth;
-        req.session.auth = true;
         next();
       }, function () {
         alt_method();
