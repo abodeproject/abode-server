@@ -89,7 +89,16 @@ router.get('/:key', function (req, res) {
           res.write('data:' + JSON.stringify(event.event) + '\n\n'); // Note the extra newline
         });
 
+
+        if (abode.providers.time) {
+          var timestamp = new Date(),
+            timestamp = timestamp.getTime();
+
+          res.write('id: ' + timestamp + '\n');
+          res.write('data:' + JSON.stringify({'type': 'TIME_CHANGE', 'name': abode.providers.time.time 'object': abode.providers.time.toJSON()}) + '\n\n'); // Note the extra newline
+        }
         abode.eventfeed.clients.push(res);
+        abode.events.emit('CLIENT_CONNECTED', {'type': 'eventfeed', 'client': res});
 
         req.on("close", function() {
           abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
@@ -113,7 +122,17 @@ router.get('/:key', function (req, res) {
       });
       res.write('\n');
 
+      if (abode.providers.time) {
+        var timestamp = new Date(),
+          timestamp = timestamp.getTime();
+          
+        res.write('id: ' + timestamp + '\n');
+        res.write('data:' + JSON.stringify({'type': 'TIME_CHANGE', 'name': abode.providers.time.time 'object': abode.providers.time.toJSON()}) + '\n\n'); // Note the extra newline
+      }
+
       abode.eventfeed.clients.push(res);
+
+      abode.events.emit('CLIENT_CONNECTED', {'type': 'eventfeed', 'client': res});
 
       req.on("close", function() {
         abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
