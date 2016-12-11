@@ -2,6 +2,7 @@
 
 var q = require('q');
 var fs = require('fs');
+var os = require('os');
 var ini = require('ini');
 var hat = require('hat');
 var merge = require('merge');
@@ -13,6 +14,26 @@ var ssdp = require('node-ssdp').Server;
 var ssdp_client = require('node-ssdp').Client;
 
 var Abode = function() { };
+
+Abode.get_ip = function () {
+  var interfaces = os.networkInterfaces();
+  var addresses = [];
+  for (var k in interfaces) {
+      for (var k2 in interfaces[k]) {
+          var address = interfaces[k][k2];
+          if (address.family === 'IPv4' && !address.internal) {
+              addresses.push(address.address);
+          }
+      }
+  }
+
+  if (addresses.length > 0) {
+    return addresses[0];
+  } else {
+    return 'localhost';
+  }
+
+};
 
 Abode.init = function (config) {
   var defer = q.defer();
@@ -35,7 +56,7 @@ Abode.init = function (config) {
   config.upnp_client_timeout = config.upnp_client_timeout || 2;
   config.mode = config.mode || 'device';
   config.name = config.name || 'Local';
-  config.url = config.url || 'http://localhost:8080';
+  config.url = config.url || 'http://' + Abode.get_ip() + ':8080';
 
   Abode.save_needed = false;
   Abode.views = {};
