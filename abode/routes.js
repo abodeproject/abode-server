@@ -142,6 +142,8 @@ router.get('/status/', function (req, res) {
   if (abode.providers && abode.providers.display) {
     display = abode.providers.display;
     status._on = display.power;
+    status.capabilities.push('client');
+    status.capabilities.push('browser');
     status.capabilities.push('display');
     status.capabilities.push('onoff');
     level = Math.round((display.brightness / display.max_brightness) * 100);
