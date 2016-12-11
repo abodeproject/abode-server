@@ -183,11 +183,13 @@ Abode.start_upnp = function () {
   log.info('UPNP Server Started');
 };
 
-Abode.detect_upnp = function () {
+Abode.detect_upnp = function (type) {
   var results = [],
     defer = q.defer(),
     client = new ssdp_client();
 
+  type = type || 'abode:server';
+  
   //Set our response handler
   client.on('response', function (headers, statusCode, rinfo) {
     var name = headers.USN.split('::')[0];
@@ -217,7 +219,7 @@ Abode.detect_upnp = function () {
   });
 
   //Search for abode servers
-  client.search('abode:server');
+  client.search(type);
 
   //Timeout 
   setTimeout(function () {

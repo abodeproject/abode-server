@@ -12,7 +12,15 @@ var fs = require('fs'),
   router = express.Router();
 
 router.get('/upnp', function (req, res) {
-  abode.detect_upnp().then(function (result) {
+  abode.detect_upnp('abode:server').then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+});
+
+router.get('/detect_devices', function (req, res) {
+  abode.detect_upnp('abode:device').then(function (result) {
     res.status(200).send(result);
   }, function (err) {
     res.status(400).send(err);

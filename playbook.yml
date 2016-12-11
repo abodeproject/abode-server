@@ -100,12 +100,12 @@
       state: present
       regexp: '^scott'
       line: 'scott ALL=(ALL) NOPASSWD: ALL'
-  - name: Aboe Sudoers
+  - name: Abobe Sudoers
     lineinfile:
       dest: /etc/sudoers
       state: present
       regexp: '^abode'
-      line: 'abode ALL=(ALL) NOPASSWD: ALL'
+      line: 'abode ALL=(ALL) NOPASSWD: /home/abode/abode-server/set_brightness'
   - name: MOTD
     copy:
       src: ansible_files/etc/motd
