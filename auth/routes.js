@@ -84,8 +84,6 @@ router.post('/login', web.isJson, function (req, res) {
  */
 router.post('/logout', function (req, res) {
 
-  req.session.destroy();
-
   if (req.token) {
     req.token.remove(function () {
 
