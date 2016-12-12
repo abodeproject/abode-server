@@ -63,6 +63,7 @@ var SceneSchema = mongoose.Schema({
     'unique': true,
     'index': true,
   },
+  'description': {'type': String},
   'tags': {'type': Array, 'default': []},
   'repeat': {'type': Boolean, 'default': false},
   'repeat_delay': {'type': Number},

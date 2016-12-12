@@ -38,6 +38,7 @@ var TriggersSchema = mongoose.Schema({
     'unique': true,
     'index': true
   },
+  'description': {'type': String},
   'tags': {'type': Array, 'default': []},
   'enabled': {'type': Boolean, 'default': true},
   'match': String,
