@@ -63,9 +63,10 @@ var Modem = function (insteon) {
     baudrate: insteon.config.serial_baudrate,
     databits: insteon.config.serial_databits,
     stopbits: insteon.config.serial_stopbits,
-    parity: insteon.config.serial_parity,
+    parity: 'none',
+    autoOpen: true,
     flowcontrol: insteon.config.serial_flowcontrol
-  }, true, processSerial);
+  }, processSerial);
 
   return defer.promise;
 };
