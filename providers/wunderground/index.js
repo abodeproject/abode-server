@@ -113,11 +113,12 @@ Wunderground.load = function () {
     return parsed;
   };
 
-  var parseHourly = function (forecast) {
+  var parseHourly = function (hourly) {
     var parsed = [];
     var t_units = (config.temp_units === 'f') ? 'english' : 'metric';
 
-    forecast.forEach(function (hour) {
+    hourly.forEach(function (hour) {
+      console.log(hour);
       parsed.push(
         {
           humidity: hour.avehumidity,
