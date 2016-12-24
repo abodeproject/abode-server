@@ -1,8 +1,12 @@
 ---
-- hosts: abode-display
+- hosts: abode2
   become_user: root
   become_method: sudo
   tasks:
+  - name: update apt cache if not done today
+    apt: update_cache=yes cache_valid_time=86400
+    notify:
+      - Upgrade Pi
   - name: Install Git
     apt:
       pkg: git
@@ -54,6 +58,9 @@
   - name: Install Dzen2
     apt:
       pkg: dzen2
+  - name: Install Python AsyncIO
+    apt:
+      pkg: python-async
   - name: Install Apache2
     apt:
       pkg: apache2
@@ -65,7 +72,7 @@
     - Prep NodeJS
     copy:
       src: ansible_files/nodejs.sh
-      dest: /tmp/nodejs.sh
+      dest: /root
       owner: root
       group: root
       mode: 0755
@@ -73,12 +80,14 @@
   - name: Install Node
     apt:
       pkg: nodejs
-  - name: node forever
-    notify:
-    - Install Forever
-  - name: Install libkrb5-dev
-    apt:
-      pkg: libkrb5-dev
+  - name: Install Bower
+    shell: npm install --global bower
+    args:
+      creates: /usr/bin/bower
+  - name: Install Forever
+    shell: npm install --global forever
+    args:
+      creates: /usr/bin/forever
   - name: Add Scott User
     user:
       name: scott
@@ -106,6 +115,10 @@
       state: present
       regexp: '^abode'
       line: 'abode ALL=(ALL) NOPASSWD: /home/abode/abode-server/set_brightness'
+  - name: Disable Pi
+    user:
+      name: pi
+      password: '!!'
   - name: MOTD
     copy:
       src: ansible_files/etc/motd
@@ -113,6 +126,41 @@
       owner: root
       group: root
       mode: 0644
+  - name: SSHD Config
+    notify:
+    - Restart SSH
+    copy:
+      src: ansible_files/etc/ssh/sshd_config
+      dest: /etc/ssh/sshd_config
+      owner: root
+      group: root
+      mode: 0644
+  - name: Abode Display
+    notify:
+      - Restart Abode Display
+    copy:
+      src: abode-display.py
+      dest: /usr/bin/abode-display.py
+      owner: root
+      group: root
+      mode: 0755
+  - name: Abode Display Service
+    copy:
+      src: abode-display.service
+      dest: /lib/systemd/system/abode-display.service
+      owner: root
+      group: root
+      mode: 0644
+  - name: Abode Display Service Link
+    file:
+      src: /lib/systemd/system/abode-display.service
+      dest: /etc/systemd/system/abode-display.service
+      state: link
+  - name: Start Abode Display
+    service:
+      name: abode-display
+      enabled: yes
+      state: started
   - name: Abode Service
     copy:
       src: abode.service
@@ -125,14 +173,14 @@
       src: /lib/systemd/system/abode.service
       dest: /etc/systemd/system/abode.service
       state: link
-  - name: Abode Monitor Service
+  - name: Abode Auto-Login Service
     copy:
       src: ansible_files/lib/systemd/system/abode-monitor@.service
       dest: /lib/systemd/system/abode-monitor@.service
       owner: root
       group: root
       mode: 0644
-  - name: getty link
+  - name: Abode Auto-Login Service Link
     file:
       src: /lib/systemd/system/abode-monitor@.service
       dest: /etc/systemd/system/getty.target.wants/getty@tty1.service
@@ -216,6 +264,29 @@
       src: ../mods-available/proxy.conf
       dest: /etc/apache2/mods-enabled/proxy.conf
       state: link
+  - name: Keyboard
+    copy:
+      src: ansible_files/etc/default/keyboard
+      dest: /etc/default/keyboard
+      owner: root
+      group: root
+      mode: 0644
+  - name: Timezone
+    file:
+      src: /usr/share/zoneinfo/America/Los_Angeles
+      dest: /etc/localtime
+      state: link
+      force: true
+  - name: Editor
+    file:
+      src: /usr/bin/vim.tiny
+      dest: /etc/alternatives/editor
+      state: link
+  - name: Pico
+    file:
+      src: /usr/bin/vim.tiny
+      dest: /etc/alternatives/pico
+      state: link
   - name: proxy_http conf
     notify:
     - Restart HTTPD
@@ -247,6 +318,32 @@
       name: mongodb
       enabled: yes
       state: started
+  - name: Clone Abode UI
+    become: yes
+    become_user: abode
+    notify:
+    - UI NPM Install
+    git:
+      repo: https://github.com/truesneel/abode-ui.git
+      dest: /home/abode/abode-ui
+      umask: '0002'
+  - name: Clone Abode Server
+    become: yes
+    become_user: abode
+    notify:
+    - Server NPM Install
+    - Restart Abode
+    git:
+      repo: https://github.com/truesneel/abode-server.git
+      dest: /home/abode/abode-server
+      umask: '0002'
+  - name: Abode Server Access Log Directory
+    file:
+      path: /home/abode/abode-server/logs
+      owner: abode
+      group: abode
+      state: directory
+      mode: 0775
   - name: Start Abode
     tags: abode
     service:
@@ -254,11 +351,36 @@
       enabled: yes
       state: started
   handlers:
+    - name: Upgrade Pi
+      shell: /usr/bin/apt-get upgrade
     - name: Restart HTTPD
       service:
         name: apache2
         state: restarted
+    - name: Restart SSH
+      service:
+        name: ssh
+        state: restarted
+    - name: UI NPM Install
+      become: yes
+      become_user: abode
+      shell: /usr/bin/npm install
+      args:
+        chdir: /home/abode/abode-ui
+    - name: Server NPM Install
+      become: yes
+      become_user: abode
+      shell: /usr/bin/npm install
+      args:
+        chdir: /home/abode/abode-server
+    - name: Restart Abode
+      service:
+        name: abode
+        state: restarted
+    - name: Restart Abode Display
+      service:
+        name: abode-display
+        state: restarted
     - name: Prep NodeJS
-      shell: /tmp/nodejs.sh
-    - name: Install Forever
-      shell: /usr/bin/npm install --global forever
+      shell: /root/nodejs.sh
+
