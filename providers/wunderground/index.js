@@ -55,7 +55,7 @@ Wunderground = function () {
 Wunderground.get = function (location) {
   var defer = q.defer();
 
-  var uri = '/api/' + config.key + '/conditions/forecast10day/alerts/astronomy/q/' + location + '.json';
+  var uri = '/api/' + config.key + '/conditions/forecast10day/alerts/astronomy/hourly/q/' + location + '.json';
 
   var options = {
     'method': 'GET',
