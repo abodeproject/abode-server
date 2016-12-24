@@ -118,30 +118,22 @@ Wunderground.load = function () {
     var t_units = (config.temp_units === 'f') ? 'english' : 'metric';
 
     hourly.forEach(function (hour) {
-      try {
-        console.log(hour);
-        var hour_parsed = {
-          humidity: hour.humidity,
-          wind: hour.wspd[t_units],
-          wind_degrees: hour.wdir.dir,
-          wind_direction: hour.wdir.degrees,
-          conditions: hour.condition,
-          icon: hour.icon,
-          temp: hour.temp[t_units],
-          rain: hour.qpf[t_units],
-          snow: hour.snow[t_units],
-          hour: hour.FCTTIME.hour,
-          epoch: hour.FCTTIME.epoch,
-        };
-        console.log(hour_parsed);
-        parsed.push(hour_parsed);
-
-
-      } catch(e) {
-        console.log(e);
-      }
+      var hour_parsed = {
+        humidity: hour.humidity,
+        wind: hour.wspd[t_units],
+        wind_degrees: hour.wdir.dir,
+        wind_direction: hour.wdir.degrees,
+        conditions: hour.condition,
+        icon: hour.icon,
+        temp: hour.temp[t_units],
+        rain: hour.qpf[t_units],
+        snow: hour.snow[t_units],
+        hour: hour.FCTTIME.hour,
+        epoch: hour.FCTTIME.epoch,
+      };
+      parsed.push(hour_parsed);
     });
-    console.dir(parsed);
+
     return parsed;
   };
 
