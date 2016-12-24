@@ -142,7 +142,7 @@ Wunderground.load = function () {
     Wunderground.get(device.config.location).then(function (data) {
 
       var current = data.current_observation || {};
-      var hourly = data.hour_forecast || {};
+      var hourly = data.hourly_forecast || [];
       var forecast = data.forecast || {};
       forecast = data.forecast.simpleforecast || {};
       forecast = data.forecast.simpleforecast.forecastday || [];
