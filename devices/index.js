@@ -102,6 +102,7 @@ var DeviceSchema = mongoose.Schema({
   '_moon': Object,
   '_weather': Object,
   '_forecast': Array,
+  '_hourly': Array,
   '_alerts': Array,
   'config': Object,
   'last_seen': Date,

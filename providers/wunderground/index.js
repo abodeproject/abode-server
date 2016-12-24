@@ -113,10 +113,35 @@ Wunderground.load = function () {
     return parsed;
   };
 
+  var parseHourly = function (forecast) {
+    var parsed = [];
+    var t_units = (config.temp_units === 'f') ? 'english' : 'metric';
+
+    forecast.forEach(function (hour) {
+      parsed.push(
+        {
+          humidity: hour.avehumidity,
+          wind: hour.wspd[t_units],
+          wind_degrees: hour.avewind.hour,
+          wind_direction: hour.wdir.degrees,
+          conditions: hour.conditions,
+          icon: hour.icon,
+          temp: hour.temp[t_units],
+          rain: hour.qpf_allday[t_units],
+          snow: hour.snow[t_units],
+          hour: hour.FCTTIME.hour,
+          epoch: hour.FCTTIME.epoch,
+        });
+    });
+
+    return parsed;
+  };
+
   devices.forEach(function (device) {
     Wunderground.get(device.config.location).then(function (data) {
 
       var current = data.current_observation || {};
+      var hourly = data.hour_forecast || {};
       var forecast = data.forecast || {};
       forecast = data.forecast.simpleforecast || {};
       forecast = data.forecast.simpleforecast.forecastday || [];
@@ -157,6 +182,7 @@ Wunderground.load = function () {
           conditions: current.weather,
         },
         _forecast: parseForecast(forecast),
+        _hourly: parseForecast(hourly),
         _moon: {
           age: moon.ageOfMoon,
           rise: timeToEpoch(moon.moonrise.hour, moon.moonrise.minute),
