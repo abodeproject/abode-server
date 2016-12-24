@@ -134,12 +134,12 @@ Wunderground.load = function () {
           hour: hour.FCTTIME.hour,
           epoch: hour.FCTTIME.epoch,
         });
-      
+
       } catch(e) {
         console.log(e);
       }
     });
-
+    console.dir(parsed);
     return parsed;
   };
 
