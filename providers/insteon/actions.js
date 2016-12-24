@@ -124,6 +124,7 @@ var actions = function (config, provider) {
       }
     },
     LIGHT_LEVEL_RATE: {
+      'cmd_1': 0x2e,
       'arguments': [
         {
           'name': 'Device',
@@ -144,7 +145,7 @@ var actions = function (config, provider) {
           cmd_2;
 
         level = (15 * parseInt(level, 10) / 100);
-        rate = (15 * parseInt(level, 10) / 100);
+        rate = (15 * parseInt(rate, 10) / 100);
         cmd_2 = ~~ ((level << 4) + rate);
 
         config = {
