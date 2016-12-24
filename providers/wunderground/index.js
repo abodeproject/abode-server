@@ -117,11 +117,10 @@ Wunderground.load = function () {
     var parsed = [];
     var t_units = (config.temp_units === 'f') ? 'english' : 'metric';
 
+    console.log(hourly);
     hourly.forEach(function (hour) {
       try {
-
-      parsed.push(
-        {
+        var hour_parsed = {
           humidity: hour.humidity,
           wind: hour.wspd[t_units],
           wind_degrees: hour.wdir.dir,
@@ -133,7 +132,10 @@ Wunderground.load = function () {
           snow: hour.snow[t_units],
           hour: hour.FCTTIME.hour,
           epoch: hour.FCTTIME.epoch,
-        });
+        };
+        console.log(hour_parsed);
+        parsed.push(hour_parsed);
+
 
       } catch(e) {
         console.log(e);
