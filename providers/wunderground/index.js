@@ -182,7 +182,7 @@ Wunderground.load = function () {
           conditions: current.weather,
         },
         _forecast: parseForecast(forecast),
-        _hourly: parseForecast(hourly),
+        _hourly: parseHourly(hourly),
         _moon: {
           age: moon.ageOfMoon,
           rise: timeToEpoch(moon.moonrise.hour, moon.moonrise.minute),
