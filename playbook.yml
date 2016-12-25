@@ -16,6 +16,9 @@
   - name: Install xinit
     apt:
       pkg: xinit
+  - name: Install xinput
+    apt:
+      pkg: xinput
   - name: Install mongodb-clients
     apt:
       pkg: mongodb-clients
@@ -67,6 +70,9 @@
   - name: Install libkrb5-dev
     apt:
       pkg: libkrb5-dev
+  - name: Install libnss3-tools
+    apt:
+      pkg: libnss3-tools
   - name: node init
     notify:
     - Prep NodeJS
@@ -135,6 +141,12 @@
       owner: root
       group: root
       mode: 0644
+  - name: Flip Display
+    lineinfile:
+      dest: /boot/config.txt
+      state: present
+      regexp: '^lcd_rotate'
+      line: 'lcd_rotate=2'
   - name: Abode Display
     notify:
       - Restart Abode Display
@@ -185,6 +197,16 @@
       src: /lib/systemd/system/abode-monitor@.service
       dest: /etc/systemd/system/getty.target.wants/getty@tty1.service
       state: link
+  - name: copy cert
+    notify:
+    - CA Trust NSS
+    - CA Trust OS
+    copy:
+      src: ca-chain.crt
+      dest: /usr/local/share/ca-certificates/ca-chain.crt
+      owner: root
+      group: root
+      mode: 0644
   - name: abode bash_profile
     copy:
       src: ansible_files/home/abode/.bash_profile
@@ -383,4 +405,10 @@
         state: restarted
     - name: Prep NodeJS
       shell: /root/nodejs.sh
+    - name: CA Trust NSS
+      become: yes
+      become_user: abode
+      shell: /usr/bin/certutil -d sql:/home/abode/.pki/nssdb -A -t "CT,C,C" -n abode -i /usr/local/share/ca-certificates/ca-chain.crt
+    - name: CA Trust OS
+      shell: /usr/sbin/update-ca-certificates
 

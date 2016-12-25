@@ -8,3 +8,4 @@ views/*.html
 ssl/*
 logs/*
 playbook.retry
+ca-chain.crt
