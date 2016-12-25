@@ -63,7 +63,7 @@ router.get('/:id/video', function (req, res) {
   .on('error', function (err) {
     log.error('Error proxying connection to camera:', camera.name, err);
     try {
-      res.status(502).send({'status': 'failed', 'message': 'Error connecting to camera', 'details': err});
+      res.status(502).send({'status': 'failed', 'url': camera.video_url, 'message': 'Error connecting to camera', 'details': err});
     } catch (e) {
       res.end();
     }

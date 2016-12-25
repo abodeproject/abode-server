@@ -1,1 +1,0 @@
-~abode/start.sh
