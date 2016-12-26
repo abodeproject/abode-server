@@ -108,19 +108,47 @@ Rad.set_level = function (device, level) {
 
 Rad.get_status = function (device) {
   var defer = q.defer();
+  var update = {};
 
   log.debug('Getting Rad status: %s', device.name);
 
-  request({uri: device.config.address + '/api/abode/status', json: true}, function (error, response, body) {
-    if (!error && response.statusCode === 200) {
-      log.debug('Received status for Rad', device.name);
-      delete body.name;
-      defer.resolve({'update': body});
-    } else {
-      log.error('Failed get Rad status for %s: %s', device.name, String(error));
-      defer.reject({'status': 'failed', 'message': String(error)});
-    }
-  });
+  var getConfig = function () {
+
+    request({uri: device.config.address + '/api/abode/config', json: true}, function (error, response, config) {
+      if (!error && response.statusCode === 200) {
+        update.config = device.config || {};
+
+        log.debug('Received display config for Rad', device.name);
+        update.config.display = config.display;
+        defer.resolve({'update': update});
+      } else {
+        log.error('Failed get Rad config for %s: %s', device.name, String(error));
+        defer.reject({'status': 'failed', 'message': String(error)});
+      }
+    });
+
+  };
+
+  var getStatus = function () {
+
+    request({uri: device.config.address + '/api/abode/status', json: true}, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+
+        log.debug('Received status for Rad', device.name);
+
+        update = body;
+        delete update.name;
+
+        getConfig();
+      } else {
+        log.error('Failed get Rad status for %s: %s', device.name, String(error));
+        defer.reject({'status': 'failed', 'message': String(error)});
+      }
+    });
+
+  }
+
+  getStatus();
 
   return defer.promise;
 };
