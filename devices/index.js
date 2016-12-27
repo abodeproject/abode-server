@@ -428,10 +428,8 @@ DeviceSchema.methods._save = function (log_save, options) {
           return;
         }
 
-        if (changed.length !== 1 && changed.indexOf('last_seen') !== 0) {
-          log.debug('Device saved successfully: ' + self.name);
-          abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
-        }
+        log.debug('Device saved successfully: ' + self.name);
+        abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
 
         if (abode.providers[self.provider] && abode.providers[self.provider].post_save && options.skip_post !== true) {
           abode.providers[self.provider].post_save(self).then(function () {
@@ -448,6 +446,7 @@ DeviceSchema.methods._save = function (log_save, options) {
       });
 
     } else {
+      log.debug('Device not modified: ' + self.name);
       defer.resolve();
     }
   };
