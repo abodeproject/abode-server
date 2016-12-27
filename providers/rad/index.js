@@ -146,7 +146,7 @@ Rad.get_status = function (device) {
       }
     });
 
-  }
+  };
 
   getStatus();
 
@@ -161,6 +161,7 @@ Rad.load = function () {
     log.info('No Rad Devices to Query');
   }
 
+  log.debug('Starting to poll devices');
   devices.forEach(function (device) {
     if (device.active !== true) {
       return;
@@ -168,12 +169,73 @@ Rad.load = function () {
     Rad.get_status(device).then(function (data) {
       if (data.update) {
 
-        device.set_state(data.update);
+        device.set_state(data.update, undefined, {'skip_pre': true, 'skip_post': true});
 
       }
     });
   });
 
+};
+
+Rad.save_config = function (url, data, section) {
+  var defer = q.defer();
+
+  section = (section === '' || section === undefined) ? '' : '/' + section;
+
+  var save_config = function () {
+
+    request.post(url + '/api/abode/save', function (error, response) {
+      if (!error && response.statusCode === 200) {
+
+        log.debug('Saved Rad config:', url);
+        defer.resolve();
+
+      } else {
+        log.error('Failed to save Rad config %s: %s', url, String(error));
+        defer.reject({'status': 'failed', 'message': String(error)});
+      }
+    });
+
+  };
+
+  var update_config = function () {
+
+    request.put({
+      'url': url + '/api/abode/config' + section,
+      'json': data
+    }, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+
+        save_config();
+
+      } else {
+        log.error('Failed to update Rad config for %s: %s', url, String(error || body.message || body));
+        defer.reject({'status': 'failed', 'message': String(error || body.message || body)});
+      }
+    });
+
+  };
+
+  update_config();
+
+  return defer.promise;
+};
+
+Rad.pre_save = function (device) {
+  var defer = q.defer();
+
+  var data = {'name': device.name};
+  if (device.config && device.config.display) {
+    data.display = device.config.display;
+  }
+  
+  Rad.save_config(device.config.address, data).then(function () {
+    defer.resolve();
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
 };
 
 module.exports = Rad;
