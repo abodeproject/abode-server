@@ -157,7 +157,7 @@ router.get('/status/', function (req, res) {
 
   fs.readFile('/dev/shm/sensors.json', function (err, data) {
     if (err) {
-      log.error('Could not read sensor file: ', err);
+      log.debug('Could not read sensor file: ', err.message || err);
       res.status(200).send(status);
 
       return;
