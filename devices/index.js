@@ -221,11 +221,12 @@ DeviceSchema.methods.moon = function (cache) { return this.send_command('moon', 
 DeviceSchema.methods.alerts = function (cache) { return this.send_command('alerts', undefined, cache, '_alerts'); };
 
 // Define the function that resolves all rooms to room objects
-DeviceSchema.methods.set_state = function (config, log_msg) {
+DeviceSchema.methods.set_state = function (config, log_msg, options) {
   var self = this,
     changes = false,
     made_event = false;
 
+  options = options || {};
   log.debug('Setting device state for %s: ', self.name, config);
 
   var int_events = {
@@ -323,7 +324,7 @@ DeviceSchema.methods.set_state = function (config, log_msg) {
     });
   }
 
-  return self._save();
+  return self._save(log_msg, options);
 
   /*
   //Save if changes have been made, otherwise return a resolve defer
@@ -409,31 +410,59 @@ DeviceSchema.methods.get_rooms = function () {
 };
 
 // Define a save function that returns an promise instead of using a callback
-DeviceSchema.methods._save = function (log_save) {
+DeviceSchema.methods._save = function (log_save, options) {
   var self = this,
     changed = self.modifiedPaths(),
     defer = q.defer();
 
+  options = options || {};
   log_save = (log_save === undefined) ? true : log_save;
 
-  if (self.isModified()) {
-    this.save(function (err) {
-      if (err) {
-        log.error('Device failed to save:', self.name);
-        log.debug(err.message || err);
-        defer.reject(err);
-      } else {
+  var doSave = function () {
+    if (self.isModified()) {
+      self.save(function (err) {
+        if (err) {
+          log.error('Device failed to save:', self.name);
+          log.debug(err.message || err);
+          defer.reject(err);
+          return;
+        }
+
         if (changed.length !== 1 && changed.indexOf('last_seen') !== 0) {
           log.debug('Device saved successfully: ' + self.name);
           abode.events.emit('UPDATED', {'type': 'device', 'name': self.name, 'object': self});
         }
 
-        defer.resolve();
-      }
-    });
+        if (abode.providers[self.provider] && abode.providers[self.provider].post_save && options.skip_post !== true) {
+          abode.providers[self.provider].post_save(self).then(function () {
+            log.debug('Provider post-save completed for %s: %s', self.provider, self.name);
+            defer.resolve();
+          }, function () {
+            log.error('Provider post-save failed for %s: %s', self.provider, self.name);
+            log.debug(err.message || err);
+            defer.reject(err);
+          });
+        } else {
+          defer.resolve();
+        }
+      });
 
+    } else {
+      defer.resolve();
+    }
+  };
+
+  if (abode.providers[self.provider] && abode.providers[self.provider].pre_save && options.skip_pre !== true) {
+    abode.providers[self.provider].pre_save(self).then(function () {
+      log.debug('Provider pre-save completed: ' + self.name);
+      doSave();
+    }, function (err) {
+      log.error('Provider pre-save failed for %s: %s', self.provider, self.name);
+      log.debug(err.message || err);
+      defer.reject(err);
+    });
   } else {
-    defer.resolve();
+    doSave();
   }
 
   return defer.promise;
