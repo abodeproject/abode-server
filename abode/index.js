@@ -10,8 +10,10 @@ var mongoose = require('mongoose');
 var events = require('events');
 var logger = require('log4js'),
   log = logger.getLogger('abode');
+var request = require('request');
 var ssdp = require('node-ssdp').Server;
 var ssdp_client = require('node-ssdp').Client;
+var exec = require('child_process').exec;
 
 var Abode = function() { };
 
@@ -454,6 +456,38 @@ Abode.make_key = function () {
   }, 10 * 1000);
 
   defer.resolve(key);
+
+  return defer.promise;
+};
+
+Abode.import_ca = function (url) {
+  var defer = q.defer();
+
+  var process_cb = function (error, stdout, stderr) {
+    if (error) {
+      defer.reject({'message': stderr});
+      return;
+    }
+
+    defer.resolve({'message': 'Successfully Import CA Certificate'});
+  };
+
+  var do_import = function () {
+    if (process.env.HOME) {
+      exec('/usr/bin/certutil -d sql:' + process.env.HOME + '/.pki/nssdb -A -t "CT,C,C" -n abode -i ' + '/tmp/ca.crt', process_cb);
+    } else {
+      defer.reject({'message': 'Could not determine nssdb path.  Missing HOME'});
+    }
+  };
+
+  request({uri: url})
+  .pipe(fs.createWriteStream('/tmp/ca.crt'))
+  .on('error', function() {
+    defer.reject({'message': 'Failed to retreive CA file'})
+  })
+  .on('close', function() {
+    do_import();
+  });
 
   return defer.promise;
 };

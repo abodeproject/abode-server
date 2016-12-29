@@ -19,6 +19,14 @@ router.get('/upnp', function (req, res) {
   });
 });
 
+router.post('/import_ca', function (req, res) {
+  abode.import_ca(req.body.ca_url).then(function (response) {
+    res.status(200).send(response);
+  }, function (err) {
+    res.status(400).send(err)
+  })
+});
+
 router.get('/detect_devices', function (req, res) {
   abode.detect_upnp('abode:device').then(function (result) {
     res.status(200).send(result);
@@ -138,6 +146,7 @@ router.get('/status/', function (req, res) {
   status.url = abode.config.url;
   status.mode = abode.config.mode;
   status.capabilities = [];
+  status.ca_url = abode.config.ca_url;
 
   if (abode.providers && abode.providers.display) {
     display = abode.providers.display;
