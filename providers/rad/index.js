@@ -159,7 +159,6 @@ Rad.get_status = function (device) {
 
         getConfig();
       } else {
-        console.log(error, response.statusCode);
         log.error('Failed get Rad status for %s: %s', device.name, String(error));
         defer.reject({'status': 'failed', 'message': String(error)});
       }

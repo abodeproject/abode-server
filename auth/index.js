@@ -95,8 +95,8 @@ TokenSchema.methods.assign_device = function (id, address) {
   var self = this,
     defer = q.defer();
 
-  if (self.status !== 'active' && self.status !== 'nodevice') {
-    defer.reject({'status': 'failed', 'message': 'Token must be either of status active or nodevice', 'http_code': 403});
+  if (self.status !== 'active' && self.status !== 'nodevice' && self.status !== 'unassigned') {
+    defer.reject({'status': 'failed', 'message': 'Token must be either of status active or nodevice: ' + self.status, 'http_code': 403});
     return defer.promise;
   }
 
