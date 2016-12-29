@@ -218,20 +218,6 @@ router.post('/restart', function (req, res) {
     res.send({'status': 'success'});
   };
 
-  exec('/usr/bin/pkill chromium', b_handler);
-});
-
-router.post('/reboot', function (req, res) {
-  var b_handler = function (err, stdout, stderr) {
-    if (err) {
-      res.status(400).send({'status': 'failed', 'message': stdout, 'error': stderr});
-      return;
-    }
-
-
-    res.send({'status': 'success'});
-  };
-
   exec('/usr/bin/sudo /sbin/shutdown -r now', b_handler);
 });
 
