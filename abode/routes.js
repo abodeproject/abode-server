@@ -144,6 +144,7 @@ router.get('/status/', function (req, res) {
 
   status.name = abode.config.name;
   status.url = abode.config.url;
+  status.ssl_url = abode.config.ssl_url;
   status.mode = abode.config.mode;
   status.capabilities = [];
   status.ca_url = abode.config.ca_url;
