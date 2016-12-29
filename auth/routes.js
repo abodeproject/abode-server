@@ -146,8 +146,9 @@ router.get('/devices', function (req, res) {
  * @apiSuccess {String} message Message describing the status
  */
 router.post('/assign', function (req, res) {
-
-  req.token.assign_device(req.body._id).then(function (response) {
+  req.body.config = req.body.config || {};
+  console.log(req.body.config.address);
+  req.token.assign_device(req.body._id, req.body.config.address).then(function (response) {
     res.send(response);
   }, function (err) {
     res.status(err.http_code || 400);
@@ -270,7 +271,7 @@ router.post('/device/set_interface', function (req, res) {
       device.config.interface = req.body.interface;
 
       device.markModified('config');
-      device._save().then(function (result) {
+      device._save(undefined, {'skip_pre': true}).then(function (result) {
         res.send(result);
       }, function (err) {
         res.status(400).send(err);

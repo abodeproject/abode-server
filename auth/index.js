@@ -91,7 +91,7 @@ var TokenSchema = mongoose.Schema({
   'expires': { 'type': Date, 'required': true },
 });
 
-TokenSchema.methods.assign_device = function (id) {
+TokenSchema.methods.assign_device = function (id, address) {
   var self = this,
     defer = q.defer();
 
@@ -114,15 +114,40 @@ TokenSchema.methods.assign_device = function (id) {
 
       self.device = device._id;
       self.status = 'active';
-
-      self.save(function (err) {
-        if (err) {
-          defer.reject(err);
-          return;
+      if (device.provider === 'rad') {
+        device.active = true;
+        device.markModified('config');
+        device.config = device.config || {};
+        device.config.token = hat(512, 32);
+        if (address) {
+          device.config.address = address;
         }
+        device._save(undefined, {'skip_pre': true}).then(function () {
+          var dumb_device = abode.devices.get(device._id);
+          dumb_device.config = device.config;
+          self.save(function (err) {
+            if (err) {
+              defer.reject(err);
+              return;
+            }
 
-        defer.resolve({'status': 'success', 'message': 'Device assigned to token'});
-      });
+            defer.resolve({'status': 'success', 'message': 'Device assigned to token', 'token': device.config.token});
+          });
+        }, function (err) {
+          defer.reject(err);
+        });
+
+      } else {
+
+        self.save(function (err) {
+          if (err) {
+            defer.reject(err);
+            return;
+          }
+
+          defer.resolve({'status': 'success', 'message': 'Device assigned to token'});
+        });
+      }
 
     });
 

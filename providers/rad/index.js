@@ -37,7 +37,10 @@ Rad.on = function (device) {
 
   log.debug('Turning on Rad display: %s', device.name);
 
-  request.post(device.config.address + '/api/display/on', function (error, response, body) {
+  request.post({
+      'url': device.config.address + '/api/display/on',
+      'headers': {'server-token': device.config.token}
+    }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
       log.debug('Successfully turned on Rad display: %s', device.name);
       defer.resolve({'status': 'success'});
@@ -55,7 +58,10 @@ Rad.off = function (device) {
 
   log.debug('Turning off Rad display: %s', device.name);
 
-  request.post(device.config.address + '/api/display/off', function (error, response, body) {
+  request.post({
+      'url': device.config.address + '/api/display/off',
+      'headers': {'server-token': device.config.token}
+    }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
       log.debug('Successfully turned on Rad display: %s', device.name);
       defer.resolve({'status': 'success'});
@@ -74,7 +80,8 @@ Rad.play = function (device, url, duration) {
   log.debug('Starting video on %s for %s seconds: %s', device.name, duration, url);
   request.post({
       uri: device.config.address + '/api/video',
-      json: {'url': url, 'duration': duration}
+      json: {'url': url, 'duration': duration},
+      'headers': {'server-token': device.config.token}
     }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
       log.debug('Successfully start video on Rad: %s', device.name);
@@ -94,7 +101,10 @@ Rad.set_level = function (device, level) {
 
   log.debug('Setting display brightness for %s: %s', device.name, level);
 
-  request.post(device.config.address + '/api/display/brightness/' + level, function (error, response, body) {
+  request.post({
+      'url':device.config.address + '/api/display/brightness/' + level,
+      'headers': {'server-token': device.config.token}
+    }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
       log.debug('Successfully set Rad display brightness: %s', device.name);
       defer.resolve({'status': 'success'});
@@ -110,11 +120,15 @@ Rad.get_status = function (device) {
   var defer = q.defer();
   var update = {};
 
-  log.debug('Getting Rad status: %s', device.name);
+  log.info('Getting Rad status: %s', device.name);
 
   var getConfig = function () {
 
-    request({uri: device.config.address + '/api/abode/config', json: true}, function (error, response, config) {
+    request({
+      'url': device.config.address + '/api/abode/config', 
+      'json': true, 
+      'headers': {'server-token': device.config.token}
+    }, function (error, response, config) {
       if (!error && response.statusCode === 200) {
         update.config = device.config || {};
 
@@ -131,7 +145,11 @@ Rad.get_status = function (device) {
 
   var getStatus = function () {
 
-    request({uri: device.config.address + '/api/abode/status', json: true}, function (error, response, body) {
+    request({
+      'uri': device.config.address + '/api/abode/status', 
+      'json': true,
+      'headers': {'server-token': device.config.token}
+    }, function (error, response, body) {
       if (!error && response.statusCode === 200) {
 
         log.debug('Received status for Rad', device.name);
@@ -141,6 +159,7 @@ Rad.get_status = function (device) {
 
         getConfig();
       } else {
+        console.log(error, response.statusCode);
         log.error('Failed get Rad status for %s: %s', device.name, String(error));
         defer.reject({'status': 'failed', 'message': String(error)});
       }
@@ -177,14 +196,17 @@ Rad.load = function () {
 
 };
 
-Rad.save_config = function (url, data, section) {
+Rad.save_config = function (url, data, section, token) {
   var defer = q.defer();
 
   section = (section === '' || section === undefined) ? '' : '/' + section;
 
   var save_config = function () {
 
-    request.post(url + '/api/abode/save', function (error, response) {
+    request.post({
+      'url': url + '/api/abode/save', 
+      'headers': {'server-token': token}
+    }, function (error, response) {
       if (!error && response.statusCode === 200) {
 
         log.debug('Saved Rad config:', url);
@@ -202,7 +224,8 @@ Rad.save_config = function (url, data, section) {
 
     request.put({
       'url': url + '/api/abode/config' + section,
-      'json': data
+      'json': data,
+      'headers': {'server-token': token}
     }, function (error, response, body) {
       if (!error && response.statusCode === 200) {
 
@@ -229,7 +252,7 @@ Rad.pre_save = function (device) {
     data.display = device.config.display;
   }
   
-  Rad.save_config(device.config.address, data).then(function () {
+  Rad.save_config(device.config.address, data, undefined, device.config.token).then(function () {
     defer.resolve();
   }, function (err) {
     defer.reject(err);

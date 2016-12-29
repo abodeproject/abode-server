@@ -423,7 +423,8 @@ DeviceSchema.methods._save = function (log_save, options) {
       self.save(function (err) {
         if (err) {
           log.error('Device failed to save:', self.name);
-          log.debug(err.message || err);
+          log.error(err);
+
           defer.reject(err);
           return;
         }

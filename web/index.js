@@ -163,8 +163,21 @@ Web.init = function () {
     next();
   });
   Web.server.use(function (req, res, next) {
+    if (req.headers['server-token'] === undefined) {
+      next();
+      return;
+    }
 
-    if (!abode.auth) {
+    if (req.headers['server-token'] === abode.config.server_token) {
+      log.info('Server request received');
+      req.is_server = true;
+    }
+
+    next();
+  });
+  Web.server.use(function (req, res, next) {
+
+    if (!abode.auth || req.is_server) {
       next();
       return;
     }
@@ -200,7 +213,7 @@ Web.init = function () {
     var alt_method = function() {
       var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
 
-      if (Web.check_auth(ip, req.path)) {
+      if (req.is_server || Web.check_auth(ip, req.path)) {
         next();
       } else {
         res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});

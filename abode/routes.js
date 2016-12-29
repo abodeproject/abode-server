@@ -190,6 +190,9 @@ router.get('/status/', function (req, res) {
       status._lumens = data._lumens;
     }
 
+    if (status.capabilities.length === 0) {
+      delete status.capabilities;
+    }
     res.status(200).send(status);
   });
 
