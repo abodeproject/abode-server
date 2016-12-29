@@ -480,7 +480,9 @@ Abode.import_ca = function (url) {
     }
   };
 
-  request({uri: url})
+  log.info('Downloading certificate: %s', url + '/ca-chain.crt')
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  request({uri: url + '/ca-chain.crt'})
   .pipe(fs.createWriteStream('/tmp/ca.crt'))
   .on('error', function() {
     defer.reject({'message': 'Failed to retreive CA file'})

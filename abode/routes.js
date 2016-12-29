@@ -20,7 +20,7 @@ router.get('/upnp', function (req, res) {
 });
 
 router.post('/import_ca', function (req, res) {
-  abode.import_ca(req.body.ca_url).then(function (response) {
+  abode.import_ca(req.body.url).then(function (response) {
     res.status(200).send(response);
   }, function (err) {
     res.status(400).send(err)
