@@ -412,7 +412,7 @@ DeviceSchema.methods.get_rooms = function () {
 // Define a save function that returns an promise instead of using a callback
 DeviceSchema.methods._save = function (log_save, options) {
   var self = this,
-    changed = self.modifiedPaths(),
+    //changed = self.modifiedPaths(),
     defer = q.defer();
 
   options = options || {};
