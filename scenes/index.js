@@ -136,7 +136,7 @@ SceneSchema.methods._save = function () {
       log.error('Failed to save room:', err)
       defer.reject(err);
     } else {
-      log.info('Scene saved successfully');
+      log.debug('Scene saved successfully');
       abode.events.emit('UPDATED', {'type': 'scene', 'name': self.name, 'object': self});
       defer.resolve();
     }
@@ -359,7 +359,7 @@ SceneSchema.methods.start = function () {
         self._state = 'active';
 
         self._save().then(function () {
-          log.info('Scene started, updating');
+          log.info('Scene started, updating:', self.name);
           defer.resolve({'status': 'success'});
         }, function (err) {
           log.error('Failed to update scene after turning on: ', err);
@@ -522,7 +522,7 @@ SceneSchema.methods.stop = function () {
   timers = [];
 
   self._save().then(function () {
-    log.info('Scene stopped, updating');
+    log.debug('Scene stopped, updating');
     defer.resolve({'status': 'success'});
   }, function (err) {
     log.error('Failed to update scene after turning on: ', err);
