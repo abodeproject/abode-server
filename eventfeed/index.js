@@ -5,7 +5,7 @@ var routes;
 var q = require('q');
 var hat = require('hat');
 var logger = require('log4js'),
-  log = logger.getLogger('events');
+  log = logger.getLogger('eventfeed');
 var mongoose = require('mongoose');
 var webPush = require('web-push');
 
@@ -25,11 +25,34 @@ var EventFeed = function () {
   setInterval(EventFeed.event_heartbeat, 1000 * abode.config.hearbeat_interval);
   log.debug('Started Events');
 
+  setInterval(EventFeed.event_cleaner, 1000 * 60);
+  EventFeed.event_cleaner();
+
   return true;
 };
 
 EventFeed.clients = [];
 EventFeed.model = mongoose.model('Events', EventsSchema);
+
+
+EventFeed.event_cleaner = function () {
+  var old_age = new Date();
+  old_age.setHours(old_age.getHours() - 1);
+
+  log.debug('Starting cleanup of stale events');
+  EventFeed.model.remove({'created': {'$lt': old_age}}, function (err, results) {
+    if (err) {
+      log.error('Erroring cleaning stale events: %s', err);
+      return;
+    }
+
+    if (results.result.n == 0) {
+      log.debug('No events removed');
+    } else {
+      log.info('Removed %s stale events', results.result.n);
+    }
+  });
+};
 
 EventFeed.event_heartbeat = function () {
   EventFeed.clients.forEach(function (res) {

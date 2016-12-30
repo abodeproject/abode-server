@@ -51,6 +51,8 @@ var Auth = function () {
     defer.resolve(Auth);
   });
 
+  setInterval(Auth.token_cleaner, 1000 * 60);
+  Auth.token_cleaner();
   defer.resolve();
 
   return defer.promise;
@@ -90,6 +92,24 @@ var TokenSchema = mongoose.Schema({
   'device': {'type': String },
   'expires': { 'type': Date, 'required': true },
 });
+
+Auth.token_cleaner = function () {
+
+  log.debug('Starting cleanup of expire tokens');
+  Auth.tokens.remove({'expires': {'$lt': new Date()}}, function (err, results) {
+    if (err) {
+      log.error('Erroring cleaning expire tokens: %s', err);
+      return;
+    }
+
+    if (results.result.n == 0) {
+      log.debug('No tokens removed');
+    } else {
+      log.info('Removed %s expired tokens', results.result.n);
+    }
+  });
+
+};
 
 TokenSchema.methods.assign_device = function (id, address) {
   var self = this,
