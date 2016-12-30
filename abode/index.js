@@ -122,6 +122,7 @@ Abode.init = function (config) {
   var start = function() {
     //Load out modules
     Abode.providers = require('../providers');
+    Abode.network = require('../network');
     Abode.auth = require('../auth');
     Abode.sources = require('../sources');
     Abode.rooms = require('../rooms');
@@ -139,6 +140,7 @@ Abode.init = function (config) {
     //Start initializing our modules
     loadModule('providers')(Abode.config.providers)
     .then(loadModule('web'))
+    .then(loadModule('network'))
     .then(loadModule('auth'))
     .then(loadModule('sources'))
     .then(loadModule('rooms'))
