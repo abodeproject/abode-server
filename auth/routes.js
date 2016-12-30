@@ -21,49 +21,22 @@ router.get('/', function (req, res) {
 });
 
 /**
- * @api {delete} /auth Logout
- * @apiGroup Auth
- */
-router.delete('/', function (req, res) {
-
-  req.session.destroy(function(err) {
-    if (err) {
-      res.status(400).send({'status': 'failed', 'error': err});
-      return;
-    }
-
-    res.status(200).send({'authorized': false});
-  });
-
-});
-
-/**
- * @api {post} /auth Login
+ * @api {post} /auth/login Login
  * @apiGroup Auth
  *
- * @apiParam {String} user
+ * @apiParam {String} username
  * @apiParam {String} password
  * @apiParamExample {json} Login Example
  *   {
- *     "user": "john",
+ *     "username": "john",
  *     "password": "secret",
  *   }
  *
  * @apiSuccess {String} status Authentication Status
- * @apiSuccess {String} user   Name of the authenticated user
+ * @apiSuccess {String} username   Name of the authenticated user
  * @apiSuccess {String} auth_token  Auth token for the user
  * @apiSuccess {String} client_token  Client token for the user
  */
-router.post('/', web.isJson, function (req, res) {
-
-  auth.login(req.body).then(function (auth) {
-    req.session.auth = true;
-    res.status(200).send({'status': 'success', 'user': auth.user, 'client_token': auth.client_token, 'auth_token': auth.auth_token });
-  }, function () {
-    res.status(401).send({'status': 'failed', 'message': 'Login Failed'});
-  });
-
-});
 
 router.post('/login', web.isJson, function (req, res) {
   req.body.ip = req.client_ip;

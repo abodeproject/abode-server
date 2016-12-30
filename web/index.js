@@ -114,34 +114,15 @@ Web.init = function () {
   //Get abode
   abode = require('../abode');
 
-  /*
-  var store_config = {
-    mongooseConnection: abode.db,
-  };
-  */
-
   //Create an express instance
   Web.server = express();
   Web.server.use(logger.connectLogger(http_logger));
   Web.server.use(bodyParser.json());
   Web.server.use(bodyParser.text());
-  /*
-  Web.server.use(session({
-    name: 'abode-auth',
-    saveUninitialized: true,
-    resave: true,
-    secret: abode.config.secret || 'XAj2XTOQ5TA#ybgNxl#cw6pcyDn%bKeh',
-    store: new MongoStore(store_config)
-  }));
-  */
+
   Web.server.use(function (req, res, next) {
     var trusted = false;
 
-/*
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
-    res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
-*/
     if (req.headers.origin) {
       Web.config.cors_origins.forEach(function (trust) {
         trusted = (req.headers.origin.indexOf(trust) === 0) ? trust : trusted;
@@ -155,6 +136,8 @@ Web.init = function () {
     }
     next();
   });
+
+  //Always return a 204 for OPTIONS which is usually a CORS test
   Web.server.use(function (req, res, next) {
     if (req.method === 'OPTIONS') {
       res.status(204).send();
@@ -162,8 +145,10 @@ Web.init = function () {
     }
     next();
   });
+
+  //Check server token for abode device
   Web.server.use(function (req, res, next) {
-    if (req.headers['server-token'] === undefined) {
+    if (req.headers['server-token'] === undefined || abode.config.mode !== 'device') {
       next();
       return;
     }
@@ -175,6 +160,8 @@ Web.init = function () {
 
     next();
   });
+
+  // Validate client/auth tokens
   Web.server.use(function (req, res, next) {
 
     if (!abode.auth || req.is_server) {
@@ -183,9 +170,20 @@ Web.init = function () {
     }
 
     req.client_ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
-    abode.auth.check(req.headers['client_token'] || req.query.client_token, req.headers['auth_token'] || req.query.auth_token, req.client_ip, req.headers['user-agent']).then(function (response) {
+    abode.auth.check(req.headers['client-token'] || req.headers['client_token'] || req.query.client_token, req.headers['auth-token'] || req.headers['auth_token'] || req.query.auth_token, req.client_ip, req.headers['user-agent']).then(function (response) {
 
+      //Should probably standardize on one of these
       req.token = response;
+      req.auth = response;
+
+      //Get a new token expiration date
+      var token_expiration = new Date();
+      token_expiration.setDate(token_expiration.getDate() + 1);
+
+      //Set the token expiration and save it
+      req.token.expires = token_expiration
+      req.token.save();
+
       next();
 
     }, function (err) {
@@ -193,6 +191,8 @@ Web.init = function () {
     });
 
   });
+
+  //Get our token device if token found
   Web.server.use(function (req, res, next) {
 
     if (!req.token) {
@@ -208,31 +208,28 @@ Web.init = function () {
     })
 
   });
+
+  // Check uri and ip against allowed list
   Web.server.use(function (req, res, next) {
 
-    var alt_method = function() {
-      var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
+    // If we are already authorized, continue
+    if (req.auth || req.token || req.is_server) {
+      next();
+      return;
+    }
 
-      if (req.is_server || Web.check_auth(ip, req.path)) {
-        next();
-      } else {
-        res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
-      }
+    // Determine our client IP
+    var ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
 
-    };
-
-    if (abode.auth && req.headers.client_token && req.headers.auth_token) {
-      abode.auth.check_token(req.headers.client_token, req.headers.auth_token).then(function (auth) {
-        req.auth = auth;
-        next();
-      }, function () {
-        alt_method();
-      })
+    //Check the ip and uri
+    if (Web.check_auth(ip, req.path)) {
+      next();
     } else {
-      alt_method();
+      res.status(401).send({'status': 'failed', 'message': 'Unauthorized'});
     }
 
   });
+
   Web.server.use('/', express.static(__dirname + '/../public'));
   Web.server.use(function (req, res, next) {
     res.removeHeader('X-Powered-By');
