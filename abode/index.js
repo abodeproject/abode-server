@@ -176,12 +176,14 @@ Abode.init = function (config) {
 
   } else {
     Abode.providers = require('../providers');
+    Abode.network = require('../network');
     Abode.web = require('../web');
     Abode.web.init();
     Abode.web.server.use('/api/abode', require('./routes'));
 
     loadModule('providers')(['display','video'])
     .then(loadModule('web'))
+    .then(loadModule('network'))
     .then(function () {
       Abode.events.emit('ABODE_STARTED');
       if (!config.disable_upnp) {
