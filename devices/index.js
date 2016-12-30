@@ -73,6 +73,7 @@ var DeviceSchema = mongoose.Schema({
     'index': true
   },
   'description': {'type': String},
+  'icon': {'type': String},
   'tags': {'type': Array, 'default': []},
   'capabilities': {'required': true, 'type': [{
     'type': String,

@@ -39,6 +39,7 @@ var TriggersSchema = mongoose.Schema({
     'index': true
   },
   'description': {'type': String},
+  'icon': {'type': String},
   'tags': {'type': Array, 'default': []},
   'enabled': {'type': Boolean, 'default': true},
   'match': String,

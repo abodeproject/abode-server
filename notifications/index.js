@@ -21,6 +21,7 @@ var ActionsSchema = mongoose.Schema({
 
 var NotificationsSchema = mongoose.Schema({
   'name': {'type': String, 'unique': true, 'required': true},
+  'icon': {'type': String},
   'description': {'type': String},
   'tags': {'type': Array, 'default': []},
   'active': {'type': Boolean, 'default': false},
