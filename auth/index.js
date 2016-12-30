@@ -328,6 +328,7 @@ Auth.check_token = function (client_token, auth_token) {
   var search = {
     'client_token': client_token,
     'auth_token': auth_token,
+    'expires': {'$gt': new Date()}
   };
 
   Auth.tokens.find(search, function (err, tokens) {
