@@ -598,7 +598,7 @@ DeviceSchema.methods.remove_room = function (room) {
   if (self._rooms.indexOf(room._id) === -1 ) {
     msg = 'Room not found in device';
     log.error(msg);
-    defer.reject({'status': 'failed', 'message': msg});
+    defer.resolve({'status': 'success', 'message': msg});
     return defer.promise;
   }
 

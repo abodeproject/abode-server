@@ -394,8 +394,8 @@ RoomSchema.methods.remove_device = function (device) {
   //Check if the device is a member of the room
   if (self._devices.indexOf(device._id) === -1 ) {
     msg = 'Device not found in room';
-    log.error(msg);
-    defer.reject({'status': 'failed', 'message': msg});
+    log.debug(msg);
+    defer.resolve({'status': 'success', 'message': msg});
     return defer.promise;
   }
 
