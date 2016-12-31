@@ -156,8 +156,7 @@ router.get('/status/', function (req, res) {
     status.capabilities.push('browser');
     status.capabilities.push('display');
     status.capabilities.push('onoff');
-    level = Math.round((display.brightness / display.max_brightness) * 100);
-    status._level = level;
+    status._level = display.brightness;
     status.capabilities.push('dimmer');
   }
 
