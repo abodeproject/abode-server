@@ -221,7 +221,7 @@ router.post('/restart', function (req, res) {
     res.send({'status': 'success'});
   };
 
-  exec('/usr/bin/sudo /sbin/shutdown -r now', b_handler);
+  exec('/usr/bin/sudo -n /sbin/shutdown -r now', b_handler);
 });
 
 router.post('/shutdown', function (req, res) {
@@ -235,7 +235,7 @@ router.post('/shutdown', function (req, res) {
     res.send({'status': 'success'});
   };
 
-  exec('/usr/bin/sudo /sbin/shutdown -h now', b_handler);
+  exec('/usr/bin/sudo -n /sbin/shutdown -h now', b_handler);
 });
 
 

@@ -177,7 +177,7 @@ Display.set_brightness = function (brightness) {
     defer.resolve({'status': 'success'});
   };
 
-  exec('sudo ./set_brightness ' + Display.display + ' ' + brightness, b_handler);
+  exec('sudo -n ./set_brightness ' + Display.display + ' ' + brightness, b_handler);
 
   return defer.promise;
 };
