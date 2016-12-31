@@ -309,10 +309,18 @@ Network.connect = function (body) {
         return;
       }
 
+      log.info('Restarting WPA Supplicant');
       exec('sudo -n systemctl restart wpa_supplicant', wpa_handler);
-      exec('sudo -n ifdown ' + body.interface, function (err, stdout, stderr) {
-        exec('sudo -n ifup ' + body.interface);
-      });
+
+      if (body.interface) {
+        log.info('Downing Interface: %s', body.interface);
+        exec('sudo -n ifdown ' + body.interface, function (err, stdout, stderr) {
+          log.info('Upping Interface: %s', body.interface);
+          exec('sudo -n ifup ' + body.interface);
+        });
+      } else {
+        log.warning('No interface specified, might to restart');
+      }
     });
   };
 
