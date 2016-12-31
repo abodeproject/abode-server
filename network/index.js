@@ -310,11 +310,8 @@ Network.connect = function (body) {
       }
 
       exec('sudo -n systemctl restart wpa_supplicant', wpa_handler);
-      exec('sudo -n ifup ' + body.interface, function (err, stdout, stderr) {
-        if (err) {
-          log.error(stderr);
-          return;
-        }
+      exec('sudo -n ifdown ' + body.interface, function (err, stdout, stderr) {
+        exec('sudo -n ifup ' + body.interface);
       });
     });
   };
