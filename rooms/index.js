@@ -403,7 +403,7 @@ RoomSchema.methods.remove_device = function (device) {
   if (device._rooms.indexOf(self._id) > -1 ) {
     device._rooms.splice(device._rooms.indexOf(self._id), 1);
 
-    device._save().then(function () {
+    device._save(undefined, {'skip_pre': true}).then(function () {
       save();
     }, function (err) {
       log.error('Error removing room from device: ', err);
