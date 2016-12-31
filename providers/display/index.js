@@ -19,9 +19,13 @@ var Display = function () {
   abode.web.server.use('/api/display', routes);
 
   abode.config.display.interval = abode.config.display.interval || 5;
+  abode.config.display.min_brightness = abode.config.display.min_brightness || 0;
+  abode.config.display.min_brightness = parseInt(abode.config.display.min_brightness);
   abode.config.display.enabled = (abode.config.display.enabled === false) ? false : true;
 
   config = abode.config.display || {};
+  Display.config = config;
+
   if (config.enabled === true) {
     log.info('Starting Display');
 
@@ -96,7 +100,9 @@ Display.load = function () {
         return;
       }
 
-      Display.brightness = parseInt(data, 10);
+      Display.raw_brightness = parseInt(data, 10);
+      Display.brightness = parseInt((Display.raw_brightness / Display.max_brightness) * 100, 10);
+
       log.debug('Current brightness:', Display.brightness);
       bl_defer.resolve(data);
     });
@@ -109,8 +115,8 @@ Display.load = function () {
     Display.display = display;
     log.debug('Parsing display:', Display.display);
 
-    get_currentbacklight()
-    .then(get_maxbacklight, failLoad)
+    get_maxbacklight()
+    .then(get_currentbacklight, failLoad)
     .then(function (response) {
       defer.resolve(response);
     }, function (err) {
@@ -160,24 +166,31 @@ Display.load = function () {
 
 Display.set_brightness = function (brightness) {
   var defer = q.defer();
+  var cmd;
 
-  brightness = parseInt(brightness, 10);
-
-  if (isNaN(brightness) || brightness > Display.max_brightness) {
+  if (isNaN(brightness)) {
     defer.reject({'status': 'failed', 'message': 'Invalid brightness specified'});
     return defer.promise;
   }
 
+  //This should be a percent
+  brightness = parseInt(brightness, 10);
+  brightness = parseInt((brightness / 100) * Display.max_brightness, 10);
+
+  brightness = (brightness > Display.max_brightness) ? Display.max_brightness : brightness;
+  brightness = (brightness < Display.config.min_brightness) ? Display.config.min_brightness : brightness;
+
   var b_handler = function (err, stdout, stderr) {
     if (err) {
-      defer.resolve({'status': 'failed', 'message': stdout, 'error': stderr});
+      defer.resolve({'status': 'failed', 'message': stdout, 'error': stderr, 'cmd': cmd});
       return;
     }
 
     defer.resolve({'status': 'success'});
   };
 
-  exec('sudo -n ./set_brightness ' + Display.display + ' ' + brightness, b_handler);
+  cmd = 'sudo -n ./set_brightness ' + Display.display + ' ' + brightness;
+  exec(cmd, b_handler);
 
   return defer.promise;
 };

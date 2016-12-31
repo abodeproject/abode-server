@@ -10,6 +10,8 @@ router.get('/', function (req, res) {
     'name': display.display,
     'power': display.power,
     'brightness': display.brightness,
+    'raw_brightness': display.raw_brightness,
+    'min_brightness': display.config.min_brightness,
     'max_brightness': display.max_brightness,
   });
 
