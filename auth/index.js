@@ -212,11 +212,19 @@ Auth.get_pin = function (id) {
 Auth.check_pin = function (pin, device) {
   var defer = q.defer();
   var query = {
-    'pin': Auth.crypt_password(String(pin))
+    '$or': [
+      {
+        'pin': Auth.crypt_password(String(pin)),
+        'devices': []
+      }
+    ]
   }
 
   if (device) {
-    query.device = device._id || device;
+    query.$or[1] = {
+      'pin': Auth.crypt_password(String(pin)),
+      'devices': device._id || device
+    };
   }
 
   Auth.pins.findOne(query, function (err, pin) {
