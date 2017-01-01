@@ -410,6 +410,14 @@ SceneSchema.methods.start = function () {
       log.debug('Sending ON to object:', object.name);
       return (action.object_type === 'scenes') ? object.start() : object.on();
     }
+    if (action.object_type === 'device' && action.locked === true) {
+      log.debug('Sending Display Lock to object:', object.name);
+      return object.lock();
+    }
+    if (action.object_type === 'device' && action.locked === false) {
+      log.debug('Sending Display Unlock to object:', object.name);
+      return object.unlock();
+    }
     if (action._on === false && action._level === undefined) {
       log.debug('Sending OFF to object:', object.name);
       return (action.object_type === 'scenes') ? object.stop() : object.off();
