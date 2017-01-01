@@ -78,6 +78,7 @@ var AuthSchema = mongoose.Schema({
   'user': { 'type': String, 'required': true, 'unique': true },
   'email': { 'type': String, 'required': true, 'unique': true },
   'password': { 'type': String, 'required': true, 'unique': true },
+  'locked': {'type': Boolean, 'default': false},
   'created': { 'type': Date, 'default': Date.now },
 });
 
@@ -90,6 +91,7 @@ var TokenSchema = mongoose.Schema({
   'ip': {'type': String},
   'agent': {'type': String},
   'device': {'type': String },
+  'locked': {'type': Boolean, 'default': false},
   'expires': { 'type': Date, 'required': true },
 });
 

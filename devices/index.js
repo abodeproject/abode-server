@@ -105,6 +105,7 @@ var DeviceSchema = mongoose.Schema({
   '_forecast': Array,
   '_hourly': Array,
   '_alerts': Array,
+  'locked': {'type': Boolean, 'default': false},
   'config': Object,
   'last_seen': Date,
 });
@@ -196,7 +197,7 @@ DeviceSchema.methods.off = function () { return this.send_command('off', undefin
 DeviceSchema.methods.open = function () { return this.send_command('open', undefined, false); };
 DeviceSchema.methods.close = function () { return this.send_command('close', undefined, false); };
 DeviceSchema.methods.lock = function () { return this.send_command('lock', undefined, false); };
-DeviceSchema.methods.unlock = function () { return this.send_command('unlock', undefined, false); };
+DeviceSchema.methods.unlock = function (pin) { return this.send_command('unlock', pin, false); };
 DeviceSchema.methods.set_level = function (level, rate) { return this.send_command('set_level', [level, rate], false); };
 DeviceSchema.methods.set_point = function (level, cache) { return this.send_command('set_point', level, cache); };
 DeviceSchema.methods.set_mode = function (mode) { return this.send_command('set_mode', mode, false); };
