@@ -74,6 +74,13 @@ Auth.statuses = [
 ];
 
 var PinSchema = mongoose.Schema({
+  'name': {
+    'type': String,
+    'required': true,
+    'unique': true,
+  },
+  'icon': { 'type': String },
+  'tags': { 'type': Array },
   'pin': { 
     'type': String, 
     'required': [true, 'Numeric PIN of 4 or more digits required'], 
