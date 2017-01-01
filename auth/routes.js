@@ -296,4 +296,93 @@ router.post('/devices', web.isJson, function (req, res) {
 
 });
 
+
+/**
+ * @api {get} /auth/pins Get Pins
+ * @apiGroup Auth
+ */
+router.post('/check_pin', web.isJson, function (req, res) {
+
+  auth.check_pin(req.body.pin).then(function (results) {
+    res.status(200).send(results);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+/**
+ * @api {get} /auth/pins Get Pins
+ * @apiGroup Auth
+ */
+router.get('/pins', function (req, res) {
+
+  auth.query_pins().then(function (results) {
+    res.status(200).send(results);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+/**
+ * @api {get} /auth/pins Get Pins
+ * @apiGroup Auth
+ */
+router.post('/pins', web.isJson, function (req, res) {
+
+  auth.create_pin(req.body).then(function (response) {
+    res.status(200).send(response);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+/**
+ * @api {get} /auth/pins Get Pins
+ * @apiGroup Auth
+ */
+router.get('/pins/:id', function (req, res) {
+
+  auth.get_pin(req.params.id).then(function (pin) {
+    res.status(200).send(pin);
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+/**
+ * @api {get} /auth/pins Get Pins
+ * @apiGroup Auth
+ */
+router.put('/pins/:id', function (req, res) {
+
+  auth.update_pin(req.params.id, req.body).then(function (response) {
+
+    res.status(200).send(response);
+
+  }, function (err) {
+    res.status(err.code || 400).send(err);
+  });
+
+});
+
+/**
+ * @api {get} /auth/pins Get Pins
+ * @apiGroup Auth
+ */
+router.delete('/pins/:id', function (req, res) {
+
+  auth.delete_pin(req.params.id).then(function (response) {
+
+    res.status(200).send(response);
+
+  }, function (err) {
+    res.status(err.code || 400).send(err);
+  });
+
+});
+
 module.exports = router;

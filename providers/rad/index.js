@@ -171,9 +171,8 @@ Rad.get_status = function (device) {
   return defer.promise;
 };
 
-Rad.lock = function (device, pin) {
+Rad.lock = function () {
   var defer = q.defer();
-
 
   defer.resolve({'update': {'locked': true}});
 
@@ -183,10 +182,11 @@ Rad.lock = function (device, pin) {
 Rad.unlock = function (device, pin) {
   var defer = q.defer();
 
-
-  log.info(pin);
-  //defer.reject({'message': 'Failed to unlock'});
-  defer.resolve({'update': {'locked': false}});
+  abode.auth.check_pin(pin, device).then(function () {
+    defer.resolve({'update': {'locked': false}});
+  }, function (err) {
+    defer.reject(err);
+  });
 
   return defer.promise;
 };

@@ -73,6 +73,31 @@ Auth.statuses = [
   'auth1', 'auth2', 'nodevice', 'locked', 'outofarea', 'stale', 'active', 'unassigned'
 ];
 
+var PinSchema = mongoose.Schema({
+  'pin': { 
+    'type': String, 
+    'required': [true, 'Numeric PIN of 4 or more digits required'], 
+    'unique': true,
+    'set': function (v) {
+        if (isNaN(v)) {
+          return undefined
+        }
+
+        if (String(v).length < 4) {
+          return undefined;
+        }
+
+        return Auth.crypt_password(String(v));
+    }
+  },
+  'devices': { 'type': Array },
+  'triggers': { 'type': Array },
+  'actions': { 'type': Array },
+  'expires': { 'type': Date },
+  'last_used': { 'type': Date, 'default': Date.now },
+  'created': { 'type': Date, 'default': Date.now },
+});
+
 var AuthSchema = mongoose.Schema({
   'name': { 'type': String, 'required': true, 'unique': true },
   'user': { 'type': String, 'required': true, 'unique': true },
@@ -111,6 +136,157 @@ Auth.token_cleaner = function () {
     }
   });
 
+};
+
+Auth.query_pins = function (filter, options) {
+  var defer = q.defer();
+
+  filter = filter || {};
+  options = options || {'sort': {'timestamp': -1}};
+
+  Auth.pins.find(filter, null, options)
+  .select('-pin')
+  .exec(function (err, pins) {
+    if (err) {
+      defer.reject(err);
+      return;
+    }
+
+    //Add each trigger to the _Devices array
+    defer.resolve(pins.reverse());
+  });
+
+  return defer.promise;
+};
+
+Auth.create_pin = function (data) {
+
+  var defer = q.defer(),
+    pin = new Auth.pins(data);
+
+  pin.save( function (err) {
+    if (err) {
+      log.error('Failed to create pin');
+      log.debug(err.message || err);
+
+      err.fields = {};
+
+      Object.keys(err.errors).forEach(function (key) {
+        err.fields[key] = err.errors[key].message;
+      });
+
+      defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
+      return defer.promise;
+    }
+
+    log.debug('Pin created: ', pin._id);
+    defer.resolve(pin);
+  });
+
+  return defer.promise;
+};
+
+Auth.get_pin = function (id) {
+  var defer = q.defer();
+
+  Auth.pins.findOne({'_id': id})
+  //.select('-pin')
+  .exec(function (err, pin) {
+    if (err) {
+      defer.reject(err);
+      return;
+    }
+
+    if (!pin) {
+      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+      return;
+    }
+
+    //Add each trigger to the _Devices array
+    defer.resolve(pin);
+  });
+
+  return defer.promise;
+};
+
+Auth.check_pin = function (pin, device) {
+  var defer = q.defer();
+  var query = {
+    'pin': Auth.crypt_password(String(pin))
+  }
+
+  if (device) {
+    query.device = device._id || device;
+  }
+
+  Auth.pins.findOne(query, function (err, pin) {
+    if (err) {
+      defer.reject(err);
+      return;
+    }
+
+    if (!pin) {
+      defer.reject({'status': 'failed', 'message': 'Invalid PIN'});
+      return;
+    }
+
+    defer.resolve(pin);
+  });
+
+  return defer.promise;
+};
+
+Auth.update_pin = function (id, data) {
+  var defer = q.defer();
+
+  Auth.get_pin({'_id': id}).then(function (pin) {
+    Object.keys(data).forEach(function (key) {
+      pin[key] = data[key];
+    });
+
+    pin.save(function (err) {
+      if (err) {
+        log.error('Failed to create pin');
+        log.debug(err.message || err);
+
+        err.fields = {};
+
+        Object.keys(err.errors).forEach(function (key) {
+          err.fields[key] = err.errors[key].message;
+        });
+
+        defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
+        return defer.promise;
+      }
+
+      log.debug('Pin saved: ', pin._id);
+      defer.resolve(pin)
+    })
+  }, function () {
+    defer.reject({'code': 404, 'message': 'Record not found'});
+  });
+
+  return defer.promise;
+};
+
+Auth.delete_pin = function (id) {
+  var defer = q.defer();
+
+  Auth.pins.remove({'_id': id}, function (err, report) {
+    if (err) {
+      defer.reject({'status': 'failed', 'message': err.message});
+      return defer.promise;
+    }
+
+    if (report.result.n === 0) {
+      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+      return;
+    }
+
+    defer.resolve(report);
+  });
+
+  return defer.promise;
 };
 
 TokenSchema.methods.assign_device = function (id, address) {
@@ -222,7 +398,7 @@ TokenSchema.methods.create_device = function (config) {
 
 Auth.crypt_password = function (password) {
 
-  return crypto.createHmac('sha256', config.secret).update(password).digest('hex');
+  return (password === undefined) ? undefined : crypto.createHmac('sha256', config.secret).update(password).digest('hex');
 
 };
 
@@ -531,5 +707,6 @@ Auth.assign = function (token, device) {
 
 Auth.model = mongoose.model('Auth', AuthSchema);
 Auth.tokens = mongoose.model('Tokens', TokenSchema);
+Auth.pins = mongoose.model('Pins', PinSchema);
 
 module.exports = Auth;
