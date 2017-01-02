@@ -182,17 +182,7 @@ Rad.lock = function () {
 Rad.unlock = function (device, pin) {
   var defer = q.defer();
 
-  if (pin) {
-    
-    abode.auth.check_pin(pin, device).then(function () {
-      defer.resolve({'update': {'locked': false}});
-    }, function (err) {
-      defer.reject(err);
-    });
-    
-  } else {
-    defer.resolve({'update': {'locked': false}});
-  }
+  defer.resolve({'update': {'locked': false}});
 
   return defer.promise;
 };
