@@ -197,7 +197,7 @@ Auth.get_pin = function (id) {
   var defer = q.defer();
 
   Auth.pins.findOne({'_id': id})
-  //.select('-pin')
+  .select('-pin')
   .exec(function (err, pin) {
     if (err) {
       defer.reject(err);
