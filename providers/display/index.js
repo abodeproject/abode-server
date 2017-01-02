@@ -101,7 +101,7 @@ Display.load = function () {
       }
 
       Display.raw_brightness = parseInt(data, 10);
-      Display.brightness = parseInt((Display.raw_brightness / Display.max_brightness) * 100, 10);
+      Display.brightness = parseInt(((Display.raw_brightness - Display.min_brightness) / Display.max_brightness) * 100, 10);
 
       log.debug('Current brightness:', Display.brightness);
       bl_defer.resolve(data);
@@ -175,7 +175,8 @@ Display.set_brightness = function (brightness) {
 
   //This should be a percent
   brightness = parseInt(brightness, 10);
-  brightness = parseInt((brightness / 100) * Display.max_brightness, 10);
+  brightness = parseInt((brightness / 100) * (Display.max_brightness - Display.min_brightness), 10);
+  brightness += Display.min_brightness;
 
   brightness = (brightness > Display.max_brightness) ? Display.max_brightness : brightness;
   brightness = (brightness < Display.config.min_brightness) ? Display.config.min_brightness : brightness;
