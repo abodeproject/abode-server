@@ -281,6 +281,7 @@ Auth.update_pin = function (id, data) {
       }
 
       log.debug('Pin saved: ', pin._id);
+      delete pin.pin;
       defer.resolve(pin)
     })
   }, function () {
