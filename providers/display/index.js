@@ -176,7 +176,7 @@ Display.set_brightness = function (brightness) {
   //This should be a percent
   brightness = parseInt(brightness, 10);
   brightness = parseInt((brightness / 100) * (Display.max_brightness - Display.config.min_brightness), 10);
-  brightness += Display.min_brightness;
+  brightness += Display.config.min_brightness;
 
   brightness = (brightness > Display.max_brightness) ? Display.max_brightness : brightness;
   brightness = (brightness < Display.config.min_brightness) ? Display.config.min_brightness : brightness;
