@@ -2,7 +2,7 @@
 
 var insteonhub = require('../insteonhub'),
   abode = require('../../abode'),
-  web = require('../web'),
+  web = require('../../web'),
   express = require('express'),
   router = express.Router();
 
