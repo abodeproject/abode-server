@@ -52,7 +52,7 @@ router.get('/wireless_status', function (req, res) {
   });
 });
 
-router.post('/connect', function (req, res) {
+router.post('/connect', web.isUnlocked, function (req, res) {
   abode.network.connect(req.body).then(function (response) {
     res.status(200).send(response);
   }, function (err) {

@@ -19,7 +19,7 @@ router.get('/upnp', function (req, res) {
   });
 });
 
-router.post('/import_ca', function (req, res) {
+router.post('/import_ca', web.isUnlocked, function (req, res) {
   abode.import_ca(req.body.url).then(function (response) {
     res.status(200).send(response);
   }, function (err) {
@@ -35,14 +35,14 @@ router.get('/detect_devices', function (req, res) {
   });
 });
 
-router.get('/config', function (req, res) {
+router.get('/config', web.isUnlocked, function (req, res) {
   var config = extend({}, abode.config);
   config.save_needed = abode.save_needed;
 
   res.status(200).send(config);
 });
 
-router.put('/config', web.isJson, function (req, res) {
+router.put('/config', web.isUnlocked, web.isJson, function (req, res) {
 
   abode.update_config(req.body).then(function (response) {
     res.status(200).send(response);
@@ -52,13 +52,13 @@ router.put('/config', web.isJson, function (req, res) {
 
 });
 
-router.get('/config/:section', function (req, res) {
+router.get('/config/:section', web.isUnlocked, function (req, res) {
 
   res.status(200).send(abode.config[req.params.section]);
 
 });
 
-router.put('/config/:section', web.isJson, function (req, res) {
+router.put('/config/:section', web.isUnlocked, web.isJson, function (req, res) {
 
   abode.update_config(req.body, req.params.section).then(function (response) {
     res.status(200).send(response);
@@ -68,7 +68,7 @@ router.put('/config/:section', web.isJson, function (req, res) {
 
 });
 
-router.post('/save', function (req, res) {
+router.post('/save', web.isUnlocked, function (req, res) {
   abode.write_config().then(function (response) {
     res.status(200).send(response);
   }, function (err) {
@@ -99,7 +99,7 @@ router.get('/views/:view', function (req, res) {
 
 });
 
-router.put('/views/:view', function (req, res) {
+router.put('/views/:view', web.isUnlocked, function (req, res) {
 
   if (req.params.view.indexOf('.html') === -1) {
     req.params.view += '.html';
@@ -126,7 +126,7 @@ router.put('/views/:view', function (req, res) {
 
 });
 
-router.delete('/views/:view', function (req, res) {
+router.delete('/views/:view', web.isUnlocked, function (req, res) {
 
   abode.delete_view(req.params.view).then(function (response) {
     res.status(200).send(response);

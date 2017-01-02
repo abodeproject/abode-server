@@ -2,6 +2,7 @@
 
 var insteonhub = require('../insteonhub'),
   abode = require('../../abode'),
+  web = require('../web'),
   express = require('express'),
   router = express.Router();
 
@@ -67,7 +68,7 @@ router.get('/devices/:id', function (req, res) {
 
 });
 
-router.post('/devices/:id/on', function (req, res) {
+router.post('/devices/:id/on', web.isUnlocked, function (req, res) {
 
   var device = insteonhub.get_device(req.params.id);
 
@@ -87,7 +88,7 @@ router.post('/devices/:id/on', function (req, res) {
 
 });
 
-router.post('/devices/:id/beep', function (req, res) {
+router.post('/devices/:id/beep', web.isUnlocked, function (req, res) {
 
   var device = insteonhub.get_device(req.params.id);
 
@@ -107,7 +108,7 @@ router.post('/devices/:id/beep', function (req, res) {
 
 });
 
-router.post('/devices/:id/off', function (req, res) {
+router.post('/devices/:id/off', web.isUnlocked, function (req, res) {
 
   var device = insteonhub.get_device(req.params.id);
 
@@ -127,7 +128,7 @@ router.post('/devices/:id/off', function (req, res) {
 
 });
 
-router.post('/devices/:id/status', function (req, res) {
+router.post('/devices/:id/status', web.isUnlocked, function (req, res) {
 
   var device = insteonhub.get_device(req.params.id);
 
@@ -147,7 +148,7 @@ router.post('/devices/:id/status', function (req, res) {
 
 });
 
-router.post('/devices/:id/level/:level', function (req, res) {
+router.post('/devices/:id/level/:level', web.isUnlocked, function (req, res) {
 
   var device = insteonhub.get_device(req.params.id);
 
@@ -237,7 +238,7 @@ router.get('/houses/:id', function (req, res) {
 
 });
 
-router.post('/refresh', function (req, res) {
+router.post('/refresh', web.isUnlocked, function (req, res) {
 
   insteonhub.refresh().then(function () {
     res.status(200).send({'status': 'success'});

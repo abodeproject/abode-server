@@ -1,6 +1,7 @@
 'use strict';
 
 var alarmclocks = require('../alarmclock'),
+  web = require('../../web'),
   express = require('express'),
   router = express.Router();
 
@@ -14,7 +15,7 @@ router.get('/', function (req, res) {
 
 });
 
-router.post('/', function (req, res) {
+router.post('/', web.isUnlocked, function (req, res) {
 
   alarmclocks.create(req.body).then(function (response) {
     res.send(response);
@@ -34,7 +35,7 @@ router.get('/:id', function (req, res) {
 
 });
 
-router.put('/:id', function (req, res) {
+router.put('/:id', web.isUnlocked, function (req, res) {
 
   alarmclocks.update(req.body, req.params.id).then(function (response) {
     res.send(response);
@@ -44,7 +45,7 @@ router.put('/:id', function (req, res) {
 
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
 
   alarmclocks.delete(req.params.id).then(function () {
     res.status(204).send();

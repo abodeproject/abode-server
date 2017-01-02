@@ -10,7 +10,7 @@ router.get('/', function (req, res) {
   res.end();
 });
 
-router.post('/', web.isJson, function (req, res) {
+router.post('/', web.isUnlocked, web.isJson, function (req, res) {
   delete req.body.notifications;
 
   triggers.create(req.body).then(function (response) {
@@ -30,7 +30,7 @@ router.get('/:id', function (req, res) {
   res.end();
 });
 
-router.put('/:id', web.isJson, function (req, res) {
+router.put('/:id', web.isUnlocked, web.isJson, function (req, res) {
   delete req.body.notifications;
   delete req.body.__v;
 
@@ -51,7 +51,7 @@ router.put('/:id', web.isJson, function (req, res) {
   });
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
   var trigger = triggers.get(req.params.id);
   if (!trigger) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -84,7 +84,7 @@ router.get('/:id/notifications', function (req, res) {
 
 });
 
-router.post('/:id/notifications', function (req, res) {
+router.post('/:id/notifications', web.isUnlocked, function (req, res) {
 
   var record = triggers.get(req.params.id);
 
@@ -120,7 +120,7 @@ router.get('/:id/notifications/:notification_id', function (req, res) {
 
 });
 
-router.delete('/:id/notifications/:notification_id', function (req, res) {
+router.delete('/:id/notifications/:notification_id', web.isUnlocked, function (req, res) {
 
   var record = triggers.get(req.params.id);
 
@@ -138,7 +138,7 @@ router.delete('/:id/notifications/:notification_id', function (req, res) {
 
 });
 
-router.post('/:id/check', function (req, res) {
+router.post('/:id/check', web.isUnlocked, function (req, res) {
   var trigger = triggers.get(req.params.id);
   if (!trigger) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -151,7 +151,7 @@ router.post('/:id/check', function (req, res) {
   });
 });
 
-router.post('/:id/enable', function (req, res) {
+router.post('/:id/enable', web.isUnlocked, function (req, res) {
   var trigger = triggers.get(req.params.id);
   if (!trigger) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -164,7 +164,7 @@ router.post('/:id/enable', function (req, res) {
   });
 });
 
-router.post('/:id/disable', function (req, res) {
+router.post('/:id/disable', web.isUnlocked, function (req, res) {
   var trigger = triggers.get(req.params.id);
   if (!trigger) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});

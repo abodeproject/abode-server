@@ -13,7 +13,7 @@ router.get('/', function (req, res) {
 
 });
 
-router.post('/', web.isJson, function (req, res) {
+router.post('/', web.isUnlocked, web.isJson, function (req, res) {
   ifttt.create(req.body).then(function () {
     res.status(201).send({'status': 'success'});
   }, function (err) {
@@ -33,7 +33,7 @@ router.get('/:id', function (req, res) {
 
 });
 
-router.put('/:id', web.isJson, function (req, res) {
+router.put('/:id', web.isUnlocked, web.isJson, function (req, res) {
   var key = ifttt.get(req.params.id);
   if (!key) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -48,7 +48,7 @@ router.put('/:id', web.isJson, function (req, res) {
   });
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
 
   var key = ifttt.get(req.params.id);
   if (!key) {
@@ -75,7 +75,7 @@ router.get('/:id/triggers', function (req, res) {
 
 });
 
-router.post('/:id/triggers', web.isJson, function (req, res) {
+router.post('/:id/triggers', web.isUnlocked, web.isJson, function (req, res) {
 
   var key = ifttt.get(req.params.id);
   var trigger = triggers.get(req.body._id || req.body.name);
@@ -117,7 +117,7 @@ router.get('/:id/triggers/:trigger', function (req, res) {
 
 });
 
-router.delete('/:id/triggers/:trigger', function (req, res) {
+router.delete('/:id/triggers/:trigger', web.isUnlocked, function (req, res) {
 
   var key = ifttt.get(req.params.id);
   var trigger = triggers.get(req.params.trigger);

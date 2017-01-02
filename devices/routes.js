@@ -15,7 +15,7 @@ var fs = require('fs'),
  * @api {get} /devices/logs
  * @apiGroup Devices
  */
-router.get('/logs', function (req, res) {
+router.get('/logs', web.isUnlocked, function (req, res) {
   var opts = {
     skip: req.params.skip || 0,
     limit: req.params.limit || 25,
@@ -48,7 +48,7 @@ devices.capabilities.forEach(function (capability) {
 
 });
 
-router.post('/', web.isJson, function (req, res) {
+router.post('/', web.isUnlocked, web.isJson, function (req, res) {
   devices.create(req.body).then(function () {
     res.status(201).send({'status': 'success'});
   }, function (err) {
@@ -177,7 +177,7 @@ router.get('/:id/rooms', function (req, res) {
 
 });
 
-router.post('/:id/rooms', web.isJson, function (req, res) {
+router.post('/:id/rooms', web.isUnlocked, web.isJson, function (req, res) {
   var device = devices.get(req.params.id);
   if (!device) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -215,7 +215,7 @@ router.get('/:id/rooms/:roomid', function (req, res) {
   }
 });
 
-router.delete('/:id/rooms/:roomid', function (req, res) {
+router.delete('/:id/rooms/:roomid', web.isUnlocked, function (req, res) {
   var device = devices.get(req.params.id);
   if (!device) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -235,7 +235,7 @@ router.delete('/:id/rooms/:roomid', function (req, res) {
   });
 });
 
-router.put('/:id', web.isJson, function (req, res) {
+router.put('/:id', web.isUnlocked, web.isJson, function (req, res) {
   var device = devices.get(req.params.id);
   if (!device) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -252,7 +252,7 @@ router.put('/:id', web.isJson, function (req, res) {
   });
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
   var device = devices.get(req.params.id);
   if (!device) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -300,7 +300,7 @@ var statuses = [
   'alerts',
 ];
 actions.forEach(function (action) {
-  router.post('/:id/' + action, function (req, res) {
+  router.post('/:id/' + action, web.isUnlocked, function (req, res) {
     var device = devices.get(req.params.id);
     if (!device) {
       res.status(404).send({'status': 'failed', 'message': 'Record not found'});

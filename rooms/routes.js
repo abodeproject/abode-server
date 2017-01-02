@@ -12,7 +12,7 @@ router.get('/', function (req, res) {
   res.end();
 });
 
-router.post('/', web.isJson, function (req, res) {
+router.post('/', web.isUnlocked, web.isJson, function (req, res) {
   rooms.create(req.body).then(function (room) {
     res.status(200).send(room);
   }, function (err) {
@@ -41,7 +41,7 @@ router.get('/:id/scenes', function (req, res) {
 
 });
 
-router.post('/:id/scenes', web.isJson, function (req, res) {
+router.post('/:id/scenes', web.isUnlocked, web.isJson, function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Room not found'});
@@ -79,7 +79,7 @@ router.get('/:id/scenes/:sceneid', function (req, res) {
   }
 });
 
-router.delete('/:id/scenes/:sceneid', function (req, res) {
+router.delete('/:id/scenes/:sceneid', web.isUnlocked, function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Room not found'});
@@ -110,7 +110,7 @@ router.get('/:id/devices', function (req, res) {
 
 });
 
-router.post('/:id/devices', web.isJson, function (req, res) {
+router.post('/:id/devices', web.isUnlocked, web.isJson, function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Room not found'});
@@ -148,7 +148,7 @@ router.get('/:id/devices/:deviceid', function (req, res) {
   }
 });
 
-router.delete('/:id/devices/:deviceid', function (req, res) {
+router.delete('/:id/devices/:deviceid', web.isUnlocked, function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Room not found'});
@@ -168,7 +168,7 @@ router.delete('/:id/devices/:deviceid', function (req, res) {
   });
 });
 
-router.put('/:id', web.isJson, function (req, res) {
+router.put('/:id', web.isUnlocked, web.isJson, function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -188,7 +188,7 @@ router.put('/:id', web.isJson, function (req, res) {
   });
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -285,7 +285,7 @@ var ages = [
 ];
 
 actions.forEach(function (action) {
-  router.post('/:id/' + action, function (req, res) {
+  router.post('/:id/' + action, web.isUnlocked, function (req, res) {
     var room = rooms.get(req.params.id);
     if (!room) {
       res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -344,7 +344,7 @@ ages.forEach(function (age) {
 
 });
 
-router.post('/:id/status', function (req, res) {
+router.post('/:id/status', web.isUnlocked, function (req, res) {
   var room = rooms.get(req.params.id);
   if (!room) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});

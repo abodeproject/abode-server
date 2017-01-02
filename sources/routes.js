@@ -12,7 +12,7 @@ router.get('/', function (req, res) {
   res.end();
 });
 
-router.post('/', web.isJson, function (req, res) {
+router.post('/', web.isUnlocked, web.isJson, function (req, res) {
 
   sources.create(req.body).then(function (source) {
     res.status(200).send(source);
@@ -31,7 +31,7 @@ router.get('/:id', function (req, res) {
   res.end();
 });
 
-router.put('/:id', web.isJson, function (req, res) {
+router.put('/:id', web.isUnlocked, web.isJson, function (req, res) {
   var source = sources.get(req.params.id);
   if (!source) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -51,7 +51,7 @@ router.put('/:id', web.isJson, function (req, res) {
   });
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
   var source = sources.get(req.params.id);
   if (!source) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});

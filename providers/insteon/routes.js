@@ -2,6 +2,7 @@
 
 var devices = require('../../devices'),
   insteon = require('../insteon'),
+  web = require('../../web'),
   express = require('express'),
   router = express.Router();
 var logger = require('log4js'),
@@ -13,7 +14,7 @@ router.get('/', function (req, res) {
 
 });
 
-router.post('/linking/start', function (req, res) {
+router.post('/linking/start', web.isUnlocked, function (req, res) {
 
   var config = {};
   config.type = req.body.type || 'either';
@@ -33,7 +34,7 @@ router.get('/linking/status', function (req, res) {
 
 });
 
-router.post('/linking/stop', function (req, res) {
+router.post('/linking/stop', web.isUnlocked, function (req, res) {
 
   insteon.stop_linking().then(function () {
     res.status(200).send({'status': 'success'});
@@ -43,7 +44,7 @@ router.post('/linking/stop', function (req, res) {
 
 });
 
-router.post('/linking/clear', function (req, res) {
+router.post('/linking/clear', web.isUnlocked, function (req, res) {
 
   insteon.last_device = {};
   res.send({'status': 'success'});
@@ -60,7 +61,7 @@ router.get('/linking/last', function (req, res) {
 
 });
 
-router.post('/devices/:id/start_linking', function (req, res) {
+router.post('/devices/:id/start_linking', web.isUnlocked, function (req, res) {
 
   var device = devices.get(req.params.id);
 
@@ -78,7 +79,7 @@ router.post('/devices/:id/start_linking', function (req, res) {
 
 });
 
-router.post('/devices/:id/add_to_group', function (req, res) {
+router.post('/devices/:id/add_to_group', web.isUnlocked, function (req, res) {
 
   var device = devices.get(req.params.id);
 
@@ -96,7 +97,7 @@ router.post('/devices/:id/add_to_group', function (req, res) {
 
 });
 
-router.post('/devices/:id/start_unlinking', function (req, res) {
+router.post('/devices/:id/start_unlinking', web.isUnlocked, function (req, res) {
 
   var device = devices.get(req.params.id);
 
@@ -114,7 +115,7 @@ router.post('/devices/:id/start_unlinking', function (req, res) {
 
 });
 
-router.post('/devices/:id/remove_from_group', function (req, res) {
+router.post('/devices/:id/remove_from_group', web.isUnlocked, function (req, res) {
 
   var device = devices.get(req.params.id);
 
@@ -138,7 +139,7 @@ router.get('/actions', function (req, res) {
 
 });
 
-router.post('/devices/:id/send_action/:action', function (req, res) {
+router.post('/devices/:id/send_action/:action', web.isUnlocked, function (req, res) {
 
   var device = devices.get(req.params.id);
 

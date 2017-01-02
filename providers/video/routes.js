@@ -15,7 +15,7 @@ router.get('/', function (req, res) {
 
 });
 
-router.post('/', web.isJson, function (req, res) {
+router.post('/', web.isUnlocked, web.isJson, function (req, res) {
 
   video.start(req.body).then(function (response) {
     res.status(200).send(response);
@@ -25,7 +25,7 @@ router.post('/', web.isJson, function (req, res) {
 
 });
 
-router.delete('/', function (req, res) {
+router.delete('/', web.isUnlocked, function (req, res) {
 
   if (video.playing) {
 

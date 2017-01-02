@@ -89,7 +89,7 @@ router.post('/logout', function (req, res) {
  *
  */
 
-router.get('/devices', function (req, res) {
+router.get('/devices', web.isUnlocked, function (req, res) {
 
   auth.devices().then(function (results) {
     res.send(results);
@@ -118,7 +118,7 @@ router.get('/devices', function (req, res) {
  * @apiSuccess {String} status Assignment Status
  * @apiSuccess {String} message Message describing the status
  */
-router.post('/assign', function (req, res) {
+router.post('/assign', web.isUnlocked, function (req, res) {
   req.body.config = req.body.config || {};
   console.log(req.body.config.address);
   req.token.assign_device(req.body._id, req.body.config.address).then(function (response) {
@@ -148,7 +148,7 @@ router.post('/assign', function (req, res) {
  *
  * @apiSuccess {String} status Current status of the token which was used for the request
  */
-router.get('/check',function (req, res) {
+router.get('/check', web.isUnlocked,function (req, res) {
 
   if (req.token && req.token.status === 'active') {
     res.send({'status': 'active', 'token': req.token, 'identity': req.identity, 'device': req.device});
@@ -197,7 +197,7 @@ router.get('/device', function (req, res) {
 
 });
 
-router.put('/device', function (req, res) {
+router.put('/device', web.isUnlocked, function (req, res) {
 
   if (req.token.status === 'active') {
 
@@ -234,7 +234,7 @@ router.put('/device', function (req, res) {
  *   }
  *
  */
-router.post('/device/set_interface', function (req, res) {
+router.post('/device/set_interface', web.isUnlocked, function (req, res) {
 
   if (req.token.status === 'active' && req.body.interface) {
 
@@ -284,7 +284,7 @@ router.post('/device/set_interface', function (req, res) {
  *   }
  *
  */
-router.post('/devices', web.isJson, function (req, res) {
+router.post('/devices', web.isUnlocked, web.isJson, function (req, res) {
 
   req.token.create_device(req.body).then(function (result) {
     res.send(result);
@@ -315,7 +315,7 @@ router.post('/check_pin', web.isJson, function (req, res) {
  * @api {get} /auth/pins Get Pins
  * @apiGroup Auth
  */
-router.get('/pins', function (req, res) {
+router.get('/pins', web.isUnlocked, function (req, res) {
 
   auth.query_pins().then(function (results) {
     res.status(200).send(results);
@@ -329,7 +329,7 @@ router.get('/pins', function (req, res) {
  * @api {get} /auth/pins Get Pins
  * @apiGroup Auth
  */
-router.post('/pins', web.isJson, function (req, res) {
+router.post('/pins', web.isUnlocked, web.isJson, function (req, res) {
 
   auth.create_pin(req.body).then(function (response) {
     res.status(200).send(response);
@@ -343,7 +343,7 @@ router.post('/pins', web.isJson, function (req, res) {
  * @api {get} /auth/pins Get Pins
  * @apiGroup Auth
  */
-router.get('/pins/:id', function (req, res) {
+router.get('/pins/:id', web.isUnlocked, function (req, res) {
 
   auth.get_pin(req.params.id).then(function (pin) {
     res.status(200).send(pin);
@@ -357,7 +357,7 @@ router.get('/pins/:id', function (req, res) {
  * @api {get} /auth/pins Get Pins
  * @apiGroup Auth
  */
-router.put('/pins/:id', function (req, res) {
+router.put('/pins/:id', web.isUnlocked, function (req, res) {
 
   auth.update_pin(req.params.id, req.body).then(function (response) {
 
@@ -373,7 +373,7 @@ router.put('/pins/:id', function (req, res) {
  * @api {get} /auth/pins Get Pins
  * @apiGroup Auth
  */
-router.delete('/pins/:id', function (req, res) {
+router.delete('/pins/:id', web.isUnlocked, function (req, res) {
 
   auth.delete_pin(req.params.id).then(function (response) {
 

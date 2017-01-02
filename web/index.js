@@ -248,4 +248,16 @@ Web.isJson = function (req, res, next) {
   }
 };
 
+Web.isUnlocked = function (req, res, next) {
+  if ( !req.device ) {
+    next();
+    return;
+  }
+
+  if (req.device.locked === true) {
+    res.status(403).send({'status': 'locked', 'message': 'This device is locked and the request can not be performed'});
+    return;
+  }
+};
+
 module.exports = Web;

@@ -10,7 +10,7 @@ router.get('/', function (req, res) {
   res.end();
 });
 
-router.post('/', web.isJson, function (req, res) {
+router.post('/', web.isUnlocked, web.isJson, function (req, res) {
   interfaces.create(req.body).then(function (iface) {
     res.status(200).send(iface);
   }, function (err) {
@@ -38,7 +38,7 @@ router.get('/:id/template', function (req, res) {
   res.end();
 });
 
-router.put('/:id', web.isJson, function (req, res) {
+router.put('/:id', web.isUnlocked, web.isJson, function (req, res) {
   var iface = interfaces.get(req.params.id);
   if (!iface) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
@@ -56,7 +56,7 @@ router.put('/:id', web.isJson, function (req, res) {
   });
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
   var iface = interfaces.get(req.params.id);
   if (!iface) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});

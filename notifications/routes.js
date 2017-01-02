@@ -16,7 +16,7 @@ router.get('/', function (req, res) {
 
 });
 
-router.post('/', function (req, res) {
+router.post('/', web.isUnlocked, function (req, res) {
 
   delete req.body.triggers;
 
@@ -28,7 +28,7 @@ router.post('/', function (req, res) {
 
 });
 
-router.post('/test_push', function (req, res) {
+router.post('/test_push', web.isUnlocked, function (req, res) {
 
   notifications.push_notifications(req.body).then(function (results) {
     res.status(200).send(results);
@@ -96,7 +96,7 @@ router.get('/:id/actions', function (req, res) {
 
 });
 
-router.post('/:id/actions', function (req, res) {
+router.post('/:id/actions', web.isUnlocked, function (req, res) {
 
   notifications.get(req.params.id).then(function (record) {
 
@@ -128,7 +128,7 @@ router.get('/:id/actions/:action_id', function (req, res) {
 
 });
 
-router.put('/:id/actions/:action_id', function (req, res) {
+router.put('/:id/actions/:action_id', web.isUnlocked, function (req, res) {
 
   notifications.get(req.params.id).then(function (record) {
 
@@ -144,7 +144,7 @@ router.put('/:id/actions/:action_id', function (req, res) {
 
 });
 
-router.delete('/:id/actions/:action_id', function (req, res) {
+router.delete('/:id/actions/:action_id', web.isUnlocked, function (req, res) {
 
   notifications.get(req.params.id).then(function (record) {
 
@@ -176,7 +176,7 @@ router.get('/:id/triggers', function (req, res) {
 
 });
 
-router.post('/:id/triggers', function (req, res) {
+router.post('/:id/triggers', web.isUnlocked, function (req, res) {
 
   notifications.get(req.params.id).then(function (record) {
 
@@ -206,7 +206,7 @@ router.get('/:id/triggers/:trigger_id', function (req, res) {
 
 });
 
-router.delete('/:id/triggers/:trigger_id', function (req, res) {
+router.delete('/:id/triggers/:trigger_id', web.isUnlocked, function (req, res) {
 
   notifications.get(req.params.id).then(function (results) {
     results.delete_trigger(req.params.trigger_id).then(function (result) {
@@ -220,7 +220,7 @@ router.delete('/:id/triggers/:trigger_id', function (req, res) {
 
 });
 
-router.put('/:id', function (req, res) {
+router.put('/:id', web.isUnlocked, function (req, res) {
 
   delete req.body.triggers;
   delete req.body.active;
@@ -235,7 +235,7 @@ router.put('/:id', function (req, res) {
 
 });
 
-router.post('/:id/activate', function (req, res) {
+router.post('/:id/activate', web.isUnlocked, function (req, res) {
 
   notifications.activate(req.params.id, req.body).then(function (result) {
 
@@ -246,7 +246,7 @@ router.post('/:id/activate', function (req, res) {
 
 });
 
-router.post('/:id/deactivate', function (req, res) {
+router.post('/:id/deactivate', web.isUnlocked, function (req, res) {
 
   notifications.deactivate(req.params.id).then(function (record) {
     res.status(200).send(record);
@@ -266,7 +266,7 @@ router.post('/:id/render', function (req, res) {
 
 });
 
-router.post('/:id/do_action/:actionid', function (req, res) {
+router.post('/:id/do_action/:actionid', web.isUnlocked, function (req, res) {
 
   notifications.do_action(req.params.id, req.params.actionid).then(function (result) {
     res.send(result)
@@ -276,7 +276,7 @@ router.post('/:id/do_action/:actionid', function (req, res) {
 
 });
 
-router.delete('/:id', function (req, res) {
+router.delete('/:id', web.isUnlocked, function (req, res) {
 
   notifications.delete(req.params.id).then(function () {
     res.status(204).send();

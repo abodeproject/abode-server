@@ -179,7 +179,7 @@ Rad.lock = function () {
   return defer.promise;
 };
 
-Rad.unlock = function (device, pin) {
+Rad.unlock = function () {
   var defer = q.defer();
 
   defer.resolve({'update': {'locked': false}});
