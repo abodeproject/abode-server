@@ -19,11 +19,11 @@ var Insteon = function () {
   Insteon.config = abode.config.insteon || {};
   Insteon.config.enabled = (Insteon.config.enabled === false) ? false : true;
   Insteon.config.serial_device = Insteon.config.serial_device || '/dev/ttyUSB0';
-  Insteon.config.serial_baudrate = Insteon.config.serial_baudrate || 19200;
-  Insteon.config.serial_databits = Insteon.config.serial_databits || 8;
-  Insteon.config.serial_stopbits = Insteon.config.serial_stopbits || 1;
-  Insteon.config.serial_parity = Insteon.config.serial_parity || 0;
-  Insteon.config.serial_flowcontrol = Insteon.config.serial_flowcontrol || 0;
+  Insteon.config.serial_baudrate = parseInt(Insteon.config.serial_baudrate) || 19200;
+  Insteon.config.serial_databits = parseInt(Insteon.config.serial_databits) || 8;
+  Insteon.config.serial_stopbits = parseInt(Insteon.config.serial_stopbits) || 1;
+  Insteon.config.serial_parity = parseInt(Insteon.config.serial_parity )|| 0;
+  Insteon.config.serial_flowcontrol = (Insteon.config.serial_flowcontrol) || 0;
   Insteon.config.timeout = Insteon.config.timeout || 1000;
   Insteon.config.queue_timeout = Insteon.config.queue_timeout || 5000;
   Insteon.config.delay = Insteon.config.delay || 400;
