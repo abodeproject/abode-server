@@ -258,6 +258,8 @@ Web.isUnlocked = function (req, res, next) {
     res.status(403).send({'status': 'locked', 'message': 'This device is locked and the request can not be performed'});
     return;
   }
+
+  next();
 };
 
 module.exports = Web;

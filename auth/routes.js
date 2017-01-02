@@ -148,7 +148,7 @@ router.post('/assign', web.isUnlocked, function (req, res) {
  *
  * @apiSuccess {String} status Current status of the token which was used for the request
  */
-router.get('/check', web.isUnlocked,function (req, res) {
+router.get('/check', function (req, res) {
 
   if (req.token && req.token.status === 'active') {
     res.send({'status': 'active', 'token': req.token, 'identity': req.identity, 'device': req.device});
