@@ -361,7 +361,7 @@ router.put('/pins/:id', function (req, res) {
 
   auth.update_pin(req.params.id, req.body).then(function (response) {
 
-    res.status(200).send(response);
+    res.status(204).send();
 
   }, function (err) {
     res.status(err.code || 400).send(err);
