@@ -101,7 +101,7 @@ Display.load = function () {
       }
 
       Display.raw_brightness = parseInt(data, 10);
-      Display.brightness = parseInt(((Display.raw_brightness - Display.min_brightness) / (Display.max_brightness - Display.min_brightness)) * 100, 10);
+      Display.brightness = parseInt(((Display.raw_brightness - Display.min_brightness) / Display.max_brightness) * 100, 10);
 
       log.debug('Current brightness:', Display.brightness);
       bl_defer.resolve(data);
