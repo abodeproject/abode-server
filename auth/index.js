@@ -245,6 +245,12 @@ Auth.check_pin = function (pin, device) {
       return;
     }
 
+    //If we have any actions, fire them off now
+    if (pin.actions && pin.actions.length > 0) {
+      log.info('Firing Unlock Actions for Pin: %s', pin.name);
+      abode.triggers.fire_actions(pin.actions);
+    }
+
     defer.resolve(pin);
   });
 
