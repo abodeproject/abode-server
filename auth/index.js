@@ -805,7 +805,7 @@ Auth.new_login = function (data, methods) {
     }, function () {
       //If method is required, fail authenitcation and finish
       if (method.usage === 'required') {
-        authenticated = false;
+        authenticated = 0;
         done();
         return;
       }
