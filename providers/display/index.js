@@ -26,7 +26,7 @@ var Display = function () {
   config = abode.config.display || {};
   Display.config = config;
 
-  if (config.enabled === true) {
+  if (config.enabled === true  && process.env.DISPLAY) {
     log.info('Starting Display');
 
     Display.load().then(function () {
@@ -37,7 +37,7 @@ var Display = function () {
 
     defer.resolve();
   } else {
-    log.warn('Not starting Display.  Not enabled');
+    log.warn('Not starting Display.  Not enabled or no Display detected');
     defer.resolve();
   }
 

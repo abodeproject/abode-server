@@ -71,11 +71,12 @@ Abode.init = function (config) {
   //Load the config.ini
   if (fs.existsSync(config.path) && config.read_config === true) {
     var parsed_config = ini.parse(fs.readFileSync(config.path, 'utf-8'));
-    Abode.config = merge.recursive(true, config, parsed_config);
+    Abode.config = merge(config, parsed_config);
+    //Abode.config = merge.recursive(true, config, parsed_config);
   } else {
     Abode.config = config;
   }
-  
+
   logger.clearAppenders();
   logger.loadAppender('file');
   logger.addAppender(logger.appenders.console(), 'abode');
