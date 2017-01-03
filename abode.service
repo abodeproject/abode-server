@@ -3,8 +3,8 @@ Description=Abode Home Automation Service
 After=network.target mongodb.service
 
 [Service]
-ExecStart=/usr/bin/node /home/abode/abode-server/index.js
-WorkingDirectory=/home/abode/abode-server
+ExecStart=/usr/bin/node /home/abode/abode-server/src/index.js
+WorkingDirectory=/home/abode/abode-server/src
 User=abode
 Restart=always
 StandardOutput=syslog

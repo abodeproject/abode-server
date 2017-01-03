@@ -1,11 +1,8 @@
 node_modules/*
-public/vendor/*
-config.ini
-public/cameras/*
-public/webcam*
-public/images/day.jpg
-views/*.html
-ssl/*
-logs/*
+src/config.ini
+src/logs/*
 playbook.retry
 ca-chain.crt
+config.ini
+logs/*
+public/*

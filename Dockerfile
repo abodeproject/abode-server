@@ -13,7 +13,8 @@ ENV ABODE_CONFIG=/data/config.ini \
 	ABODE_ACCESS_LOGS=console \
 	ABODE_WEB_ADDRESS=0.0.0.0
 
-COPY . app/
+COPY node_modules app/node_modules
+COPY src/ app/
 
 EXPOSE 8080
 USER abode

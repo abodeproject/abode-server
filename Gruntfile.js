@@ -10,16 +10,13 @@ module.exports = function(grunt) {
       files: {
         src: [
           '*.js',
-          'providers/**/*.js',
-          'rooms/**/*.js',
-          'devices/**/*.js',
-          'triggers/**/*.js',
+          'src/**/*.js',
         ]
       },
     },
     watch: {
       apidoc: {
-        files: ['**/*.js', '*.js'],
+        files: ['src/**/*.js'],
         tasks: ['exec'],
         options: {
           interrupt: true,
@@ -28,19 +25,9 @@ module.exports = function(grunt) {
       },
       scripts: {
         files: [
-          '*.js',
-          'providers/**/*.js',
-          'rooms/**/*.js',
-          'devices/**/*.js',
-          'triggers/**/*.js',
+          'src/*.js',
+          'src/**/*.js',
         ],
-        tasks: ['jshint'],
-        options: {
-          livereload: false,
-        }
-      },
-      static: {
-        files: ['public/scripts/**/*.js'],
         tasks: ['jshint'],
         options: {
           livereload: false,
@@ -57,8 +44,9 @@ module.exports = function(grunt) {
     },
     nodemon: {
       apidoc: {
-        script: 'index.js',
+        script: 'src/index.js',
         options: {
+          cwd: 'src',
           ext: 'ini,js',
           ignore: ['**/*.js'],
           env: {
@@ -67,20 +55,20 @@ module.exports = function(grunt) {
         }
       },
       dev: {
-        script: 'index.js',
+        script: 'src/index.js',
         options: {
+          cwd: 'src',
           ext: 'ini,js',
-          ignore: ['public/**/*.js'],
           env: {
             NODE_ENV: 'dev',
           }
         }
       },
       prod: {
-        script: 'index.js',
+        script: 'src/index.js',
         options: {
+          cwd: 'src',
           ext: 'js,ini',
-          ignore: ['public/**/*.js'],
           env: {
             NODE_ENV: 'prod',
           }

@@ -1,9 +1,0 @@
-<div class="modal-body">
-
-  <ul class="list-group">
-    <li class="list-group-item" ng-repeat="device in devices | orderBy: ['-_on', '+age', '+name']" ng-class="{'list-group-item-success': '!device._on', 'list-group-item-danger': device._on}" ng-click="open(device.name)"><h5 class="list-group-item-heading">{{device.name}}</h5><p style="font-size: 1.4em;" class="list-group-item-text text-right">{{device.age | ageHumanReadable}}</p></li>
-
-</div>
-<div class="modal-footer">
-    <button class="btn btn-primary" type="button" ng-click="ok()">Done</button>
-</div>
