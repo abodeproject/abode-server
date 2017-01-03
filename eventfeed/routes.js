@@ -128,4 +128,71 @@ router.get('/:key', function (req, res) {
   });
 });
 
+router.get('/feed/:key', function (req, res) {
+
+  //Check our key for validity 
+  abode.check_key(req.params.key).then(function () {
+  
+
+    //If a last parameter was specified send all events since last timestamp
+    if (!isNaN(req.query.last)) {
+      abode.eventfeed.query({'timestamp': {'$gt': req.query.last}}).then(function (results) {
+
+        // set timeout as high as possible
+        req.socket.setTimeout(0);
+
+        // send headers for event-stream connection
+        // see spec for more information
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        });
+        res.write('\n');
+
+        //Send our previous events
+        results.forEach(function (event) {
+          res.write('id: ' + event.timestamp + '\n');
+          res.write('data:' + JSON.stringify(event.event) + '\n\n'); // Note the extra newline
+        });
+
+        abode.eventfeed.clients.push(res);
+        abode.events.emit('CLIENT_CONNECTED', {'type': 'eventfeed', 'client': res});
+
+        req.on("close", function() {
+          abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
+        });
+
+      }, function (err) {
+        res.status(400).send(err);
+      });
+
+    } else {
+
+    // set timeout as high as possible
+    req.socket.setTimeout(0);
+
+      // send headers for event-stream connection
+      // see spec for more information
+      res.writeHead(200, {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+      });
+      res.write('\n');
+
+      abode.eventfeed.clients.push(res);
+      abode.events.emit('CLIENT_CONNECTED', {'type': 'eventfeed', 'client': res});
+
+      req.on("close", function() {
+        abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
+      });
+
+    }
+
+  }, function (err) {
+    res.status(err.http_code || 400).send(err);
+  });
+});
+
 module.exports = router;
