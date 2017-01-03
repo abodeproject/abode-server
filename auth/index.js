@@ -8,6 +8,8 @@ var mongoose = require('mongoose');
 var q = require('q');
 var hat = require('hat');
 var crypto = require('crypto');
+var geoip = require('geoip-lite');
+var useragent = require('useragent');
 var addr = require('netaddr').Addr;
 var logger = require('log4js'),
   log = logger.getLogger('auth');
@@ -26,7 +28,7 @@ var Auth = function () {
   config.min_auth = config.min_auth || 1;
   config.default_user = config.default_user || 'guest';
 
-  log.debug('Checking for default user');
+  log.debug('Checking for admin user');
   Auth.list().then(function (results) {
     if (results.length === 0) {
       log.warn('No users defined, creating one');
@@ -39,7 +41,7 @@ var Auth = function () {
       }).then(function () {
           defer.resolve(Auth);
         }, function (err) {
-          log.error('Unable to create default account:', err);
+          log.error('Unable to create admin account:', err);
           defer.resolve(Auth);
       });
     } else {
@@ -49,6 +51,26 @@ var Auth = function () {
     log.error(err);
 
     defer.resolve(Auth);
+  });
+
+  log.debug('Checking for default user: %s', config.default_user);
+  Auth.list({'user': config.default_user}).then(function (results) {
+    if (results.length === 0) {
+      log.warn('No default defined, creating one');
+
+      Auth.create({
+        'name': config.default_user,
+        'user': config.default_user,
+        'email': config.default_user + '@localhost',
+        'password':  hat(512, 32)
+      }).then(function () {
+        log.error('Created default user: %s', config.default_user);
+      }, function (err) {
+         log.error('Unable to create default account:', err);
+      });
+    }
+  }, function (err) {
+    log.error(err);
   });
 
   setInterval(Auth.token_cleaner, 1000 * 60);
@@ -136,9 +158,11 @@ var TokenSchema = mongoose.Schema({
   'created': { 'type': Date, 'default': Date.now },
   'status': { 'type': String },
   'ip': {'type': String},
-  'agent': {'type': String},
+  'agent': {},
   'device': {'type': String },
   'locked': {'type': Boolean, 'default': false},
+  'last_used': { 'type': Date},
+  'locale': {},
   'expires': { 'type': Date, 'required': true },
 });
 
@@ -550,18 +574,26 @@ Auth.update = function (id, data) {
 Auth.delete = function (id) {
   var defer = q.defer();
 
-  Auth.model.remove({'_id': id}, function (err, report) {
-    if (err) {
-      defer.reject({'status': 'failed', 'message': err.message});
-      return defer.promise;
-    }
+  Auth.get(id).then(function (user) {
 
-    if (report.result.n === 0) {
-      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
-      return;
-    }
+    Auth.model.remove({'_id': id}, function (err, report) {
+      if (err) {
+        defer.reject({'status': 'failed', 'message': err.message});
+        return defer.promise;
+      }
 
-    defer.resolve(report);
+      Auth.delete_token(undefined, user.user);
+
+      if (report.result.n === 0) {
+        defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+        return;
+      }
+
+      defer.resolve(report);
+    });
+
+  }, function (err) {
+    defer.reject(err);
   });
 
   return defer.promise;
@@ -597,12 +629,20 @@ Auth.login = function (data) {
   return defer.promise;
 };
 
-Auth.gen_token = function (user, expires, status, device, ip, agent) {
+Auth.gen_token = function (user, expires, status, device, ip, agent_raw) {
 
 
   var token,
     defer = q.defer(),
     token_expiration = new Date();
+
+  var agent = useragent.parse(agent_raw);
+  agent = JSON.stringify(agent);
+  agent = JSON.parse(agent);
+  agent.source = req.headers['user-agent'];
+
+  var geo = geoip.lookup(ip);
+  geo = geo || {};
 
   expires = expires || 1;
   token_expiration.setDate(token_expiration.getDate() + expires);
@@ -615,6 +655,7 @@ Auth.gen_token = function (user, expires, status, device, ip, agent) {
     'device': device,
     'status': status,
     'ip': ip,
+    'locale': geo,
     'agent': agent,
   });
 
@@ -892,10 +933,19 @@ Auth.get_token = function (id, user) {
 
 Auth.delete_token = function (id, user) {
   var defer = q.defer();
-  var filter = {'_id': id};
+  var filter = {};
+
+  if (id) {
+    filter._id = id;
+  }
 
   if (user) {
     filter.user = user;
+  }
+
+  if (user === undefined && id === undefined) {
+    defer.reject({'code': 400, 'status': 'failed', 'message': 'No token specified'});
+    return defer.promise;
   }
 
   Auth.tokens.remove(filter, function (err, report) {

@@ -41,8 +41,13 @@ router.get('/', function (req, res) {
 router.post('/login', web.isJson, function (req, res) {
   req.body.ip = req.client_ip;
   req.body.agent = req.headers['user-agent'];
+  var methods = undefined;
 
-  auth.new_login(req.body, ['password']).then(function (response) {
+  if (req.body.password) {
+    methods = ['password'];
+  }
+
+  auth.new_login(req.body, methods).then(function (response) {
     res.status(response.http_code || 200).send(response);
   }, function (err) {
     res.status(err.http_code || 400).send(err);
@@ -417,6 +422,8 @@ router.get('/users/:id', web.isUnlocked, function (req, res) {
 
 router.put('/users/:id', web.isUnlocked, web.isJson, function (req, res) {
 
+  delete req.body.user;
+  
   auth.update(req.params.id, req.body).then(function (response) {
 
     res.status(204).send();
@@ -429,12 +436,23 @@ router.put('/users/:id', web.isUnlocked, web.isJson, function (req, res) {
 
 router.delete('/users/:id', web.isUnlocked, function (req, res) {
 
-  auth.delete(req.params.id).then(function (response) {
+  auth.get(req.params.id).then(function (user) {
 
-    res.status(204).send(response);
+    if (req.auth && req.auth.user === user.user) {
+      res.status(400).send({'status': 'failed', 'message': 'Cannot delete self'});
+      return;
+    }
+
+    auth.delete(req.params.id).then(function (response) {
+
+      res.status(204).send(response);
+
+    }, function (err) {
+      res.status(err.code || 400).send(err);
+    });
 
   }, function (err) {
-    res.status(err.code || 400).send(err);
+    res.status(404).send(err);
   });
 
 });
@@ -487,5 +505,34 @@ router.delete('/users/:id/tokens/:tokenid', web.isUnlocked, function (req, res) 
 
 });
 
+router.get('/tokens', web.isUnlocked, function (req, res) {
+
+  auth.list_tokens().then(function (results) {
+    res.status(200).send(results);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.get('/tokens/:id', web.isUnlocked, function (req, res) {
+
+  auth.get_token(req.params.id).then(function (record) {
+    res.status(200).send(record);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.delete('/tokens/:id', web.isUnlocked, function (req, res) {
+
+  auth.delete_token(req.params.id).then(function () {
+    res.status(204).send();
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
 
 module.exports = router;

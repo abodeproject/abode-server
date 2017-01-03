@@ -5,6 +5,8 @@ var abode,
   fs = require('fs'),
   logger = require('log4js'),
   log = logger.getLogger('web'),
+  geoip = require('geoip-lite'),
+  useragent = require('useragent'),
   http_logger = logger.getLogger('http_access'),
   https = require('https'),
   addr = require('netaddr').Addr,
@@ -180,8 +182,19 @@ Web.init = function () {
       var token_expiration = new Date();
       token_expiration.setDate(token_expiration.getDate() + 1);
 
+      var agent = useragent.parse(req.headers['user-agent']);
+      agent = JSON.stringify(agent);
+      agent = JSON.parse(agent);
+      agent.source = req.headers['user-agent'];
+
+      var geo = geoip.lookup(req.client_ip);
+      geo = geo || {};
+
       //Set the token expiration and save it
+      req.token.last_used = new Date();
       req.token.expires = token_expiration
+      req.token.locale = geo;
+      req.token.agent = agent;
       req.token.save();
 
       next();
