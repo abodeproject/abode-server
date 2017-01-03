@@ -725,7 +725,7 @@ Auth.new_login = function (data, methods) {
 
   var done = function () {
     //If we dont have any successful authentications, fail
-    if (authenticated === 0) {
+    if (authenticated === 0 || authenticated === false) {
       defer.reject({'status': 'failure', 'message': 'Authentication failure'});
       return;
     }
