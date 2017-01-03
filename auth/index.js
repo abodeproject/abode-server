@@ -106,12 +106,12 @@ var PinSchema = mongoose.Schema({
 });
 
 var AuthSchema = mongoose.Schema({
-  'name': { 'type': String, 'required': true, 'unique': true },
-  'user': { 'type': String, 'required': true, 'unique': true },
-  'email': { 'type': String, 'required': true, 'unique': true },
+  'name': { 'type': String, 'required': [true, 'Name is required'], 'unique': true },
+  'user': { 'type': String, 'required': [true, 'User is required'], 'unique': true },
+  'email': { 'type': String, 'required': [true, 'Email is required'], 'unique': true },
   'password': {
     'type': String, 
-    'required': true,
+    'required': [true, 'Password must be at least 8 characters'],
     'set': function (v) {
         if (v === '') {
           return undefined
