@@ -183,8 +183,7 @@ Web.init = function () {
       token_expiration.setDate(token_expiration.getDate() + 1);
 
       var agent = useragent.parse(req.headers['user-agent']);
-      agent = JSON.stringify(agent);
-      agent = JSON.parse(agent);
+      agent = agent.toJSON()
       agent.source = req.headers['user-agent'];
 
       var geo = geoip.lookup(req.client_ip);
