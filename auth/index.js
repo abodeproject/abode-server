@@ -720,8 +720,10 @@ Auth.password = function (config) {
 
   Auth.list(search, '-password -__v -created').then(function (results) {
     if (results.length > 0) {
+      log.info('Password authentication successful: %s', config.user);
       defer.resolve(results[0]);
     } else {
+      log.warning('Password authentication successful: %s', config.user);
       defer.reject();
     }
   }, function (err) {
