@@ -638,7 +638,7 @@ Auth.gen_token = function (user, expires, status, device, ip, agent_raw) {
 
   var agent = useragent.parse(agent_raw);
   agent = agent.toJSON()
-  agent.source = req.headers['user-agent'];
+  agent.source = agent_raw;
 
   var geo = geoip.lookup(ip);
   geo = geo || {};
