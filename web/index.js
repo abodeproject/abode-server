@@ -34,7 +34,12 @@ var Web = function () {
   Web.config.access_log = Web.config.access_log || 'logs/abode_access.log';
   Web.config.cors_origins = Web.config.cors_origins || ['http://localhost'];
 
-  logger.addAppender(logger.appenders.file(Web.config.access_log, logger.layouts.messagePassThroughLayout, 4194304, 4), 'http_access');
+  if (Web.config.access_log !== 'console') {
+    logger.addAppender(logger.appenders.file(Web.config.access_log, logger.layouts.messagePassThroughLayout, 4194304, 4), 'http_access');
+  } else {
+    log.info('Logging access log to console');
+    logger.addAppender(logger.appenders.console(), 'http_access');
+  }
 
   if (Web.config.key && Web.config.cert) {
     var httpsOptions = {
@@ -118,7 +123,7 @@ Web.init = function () {
 
   //Create an express instance
   Web.server = express();
-  Web.server.use(logger.connectLogger(http_logger));
+  Web.server.use(logger.connectLogger(http_logger, { level: 'auto' }));
   Web.server.use(bodyParser.json());
   Web.server.use(bodyParser.text());
 

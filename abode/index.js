@@ -50,7 +50,7 @@ Abode.init = function (config) {
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
   config.database.database = config.database.database || 'abode';
-  config.providers = config.providers || ['display','video'];
+  config.providers = config.providers || ['rad'];
   config.fail_on_provider = config.fail_on_provider || true;
   config.hearbeat_interval = config.hearbeat_interval || 10;
   config.event_cache_size = 100;
@@ -71,11 +71,11 @@ Abode.init = function (config) {
   //Load the config.ini
   if (fs.existsSync(config.path) && config.read_config === true) {
     var parsed_config = ini.parse(fs.readFileSync(config.path, 'utf-8'));
-    Abode.config = merge(config, parsed_config);
+    Abode.config = merge.recursive(true, config, parsed_config);
   } else {
     Abode.config = config;
   }
-
+  
   logger.clearAppenders();
   logger.loadAppender('file');
   logger.addAppender(logger.appenders.console(), 'abode');
@@ -163,6 +163,7 @@ Abode.init = function (config) {
   };
 
   if (config.mode === 'server') {
+    log.info('Starting Abode in Server mode');
 
     //Connect to the database
     Abode.db = mongoose.connect('mongodb://' + Abode.config.database.server + '/' + Abode.config.database.database).connection;
@@ -175,6 +176,7 @@ Abode.init = function (config) {
     Abode.db.once('open', start);
 
   } else {
+    log.info('Starting Abode in Device mode');
     Abode.providers = require('../providers');
     Abode.network = require('../network');
     Abode.web = require('../web');
