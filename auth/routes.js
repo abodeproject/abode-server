@@ -42,7 +42,7 @@ router.post('/login', web.isJson, function (req, res) {
   req.body.ip = req.client_ip;
   req.body.agent = req.headers['user-agent'];
 
-  auth.new_login(req.body).then(function (response) {
+  auth.new_login(req.body, ['password']).then(function (response) {
     res.status(response.http_code || 200).send(response);
   }, function (err) {
     res.status(err.http_code || 400).send(err);
@@ -384,5 +384,108 @@ router.delete('/pins/:id', web.isUnlocked, function (req, res) {
   });
 
 });
+
+router.get('/users', web.isUnlocked, function (req, res) {
+
+  auth.list().then(function (results) {
+    res.status(200).send(results);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/users', web.isUnlocked, web.isJson, function (req, res) {
+
+  auth.create(req.body).then(function (response) {
+    res.status(200).send(response);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.get('/users/:id', web.isUnlocked, function (req, res) {
+
+  auth.get(req.params.id).then(function (user) {
+    res.status(200).send(user);
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.put('/users/:id', web.isUnlocked, web.isJson, function (req, res) {
+
+  auth.update(req.params.id, req.body).then(function (response) {
+
+    res.status(204).send();
+
+  }, function (err) {
+    res.status(err.code || 400).send(err);
+  });
+
+});
+
+router.delete('/users/:id', web.isUnlocked, function (req, res) {
+
+  auth.delete(req.params.id).then(function (response) {
+
+    res.status(204).send(response);
+
+  }, function (err) {
+    res.status(err.code || 400).send(err);
+  });
+
+});
+
+router.get('/users/:id/tokens', web.isUnlocked, function (req, res) {
+
+  auth.get(req.params.id).then(function (user) {
+
+    auth.list_tokens({'user': user.user}).then(function (results) {
+     res.status(200).send(results);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.get('/users/:id/tokens/:tokenid', web.isUnlocked, function (req, res) {
+
+  auth.get(req.params.id).then(function (user) {
+
+    auth.get_token(req.params.tokenid, user.user).then(function (results) {
+     res.status(200).send(results);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.delete('/users/:id/tokens/:tokenid', web.isUnlocked, function (req, res) {
+
+  auth.get(req.params.id).then(function (user) {
+
+    auth.delete_token(req.params.tokenid, user.user).then(function (results) {
+     res.status(204).send(results);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
 
 module.exports = router;

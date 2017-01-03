@@ -35,7 +35,7 @@ var Auth = function () {
         'name': 'admin',
         'user': 'admin',
         'email': 'admin@localhost',
-        'password': Auth.crypt_password('changeme')
+        'password': 'changeme'
       }).then(function () {
           defer.resolve(Auth);
         }, function (err) {
@@ -109,8 +109,23 @@ var AuthSchema = mongoose.Schema({
   'name': { 'type': String, 'required': true, 'unique': true },
   'user': { 'type': String, 'required': true, 'unique': true },
   'email': { 'type': String, 'required': true, 'unique': true },
-  'password': { 'type': String, 'required': true, 'unique': true },
+  'password': {
+    'type': String, 
+    'required': true,
+    'set': function (v) {
+        if (v === '') {
+          return undefined
+        }
+
+        if (String(v).length < 8) {
+          return undefined;
+        }
+
+        return Auth.crypt_password(String(v));
+    }
+  },
   'locked': {'type': Boolean, 'default': false},
+  'last_login': { 'type': Date },
   'created': { 'type': Date, 'default': Date.now },
 });
 
@@ -178,9 +193,11 @@ Auth.create_pin = function (data) {
 
       err.fields = {};
 
-      Object.keys(err.errors).forEach(function (key) {
-        err.fields[key] = err.errors[key].message;
-      });
+      if (err.errors) {
+        Object.keys(err.errors).forEach(function (key) {
+          err.fields[key] = err.errors[key].message;
+        });
+      }
 
       defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
       return defer.promise;
@@ -272,9 +289,11 @@ Auth.update_pin = function (id, data) {
 
         err.fields = {};
 
-        Object.keys(err.errors).forEach(function (key) {
-          err.fields[key] = err.errors[key].message;
-        });
+        if (err.errors) {
+          Object.keys(err.errors).forEach(function (key) {
+            err.fields[key] = err.errors[key].message;
+          });
+        }
 
         defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
         return defer.promise;
@@ -424,12 +443,14 @@ Auth.crypt_password = function (password) {
 
 };
 
-Auth.list = function (conditions, options) {
+Auth.list = function (filter, options) {
   var defer = q.defer();
 
-  conditions = conditions || {};
+  filter = filter || {};
 
-  Auth.model.find(conditions, options, function (err, users) {
+  Auth.model.find(filter, null, options)
+  .select('-password')
+  .exec(function (err, users) {
     if (err) { defer.reject(err); return; }
 
     defer.resolve(users);
@@ -445,13 +466,102 @@ Auth.create = function (config) {
   // Save the user
   user.save( function (err) {
     if (err) {
-      log.error(err.message || err);
-      defer.reject(err);
+      log.error('Failed to create user');
+      log.debug(err.message || err);
+
+      err.fields = {};
+
+      if (err.errors) {
+        Object.keys(err.errors).forEach(function (key) {
+          err.fields[key] = err.errors[key].message;
+        });
+      }
+
+      defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
       return defer.promise;
     }
 
     log.info('User created: ', config.name);
+    delete user.password;
     defer.resolve(user);
+  });
+
+  return defer.promise;
+};
+
+Auth.get = function (id) {
+  var defer = q.defer();
+
+  Auth.model.findOne({'_id': id})
+  .select('-password')
+  .exec(function (err, user) {
+    if (err) {
+      defer.reject(err);
+      return;
+    }
+
+    if (!user) {
+      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+      return;
+    }
+
+    defer.resolve(user);
+  });
+
+  return defer.promise;
+};
+
+Auth.update = function (id, data) {
+  var defer = q.defer();
+
+  Auth.get({'_id': id}).then(function (user) {
+    Object.keys(data).forEach(function (key) {
+      user[key] = data[key];
+    });
+
+    user.save(function (err) {
+      if (err) {
+        log.error('Failed to update user');
+        log.debug(err.message || err);
+
+        err.fields = {};
+
+        if (err.errors) {
+          Object.keys(err.errors).forEach(function (key) {
+            err.fields[key] = err.errors[key].message;
+          });
+        }
+
+        defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
+        return defer.promise;
+      }
+
+      log.debug('User saved: ', user._id);
+      delete user.password;
+      defer.resolve(user)
+    })
+  }, function () {
+    defer.reject({'code': 404, 'message': 'Record not found'});
+  });
+
+  return defer.promise;
+};
+
+Auth.delete = function (id) {
+  var defer = q.defer();
+
+  Auth.model.remove({'_id': id}, function (err, report) {
+    if (err) {
+      defer.reject({'status': 'failed', 'message': err.message});
+      return defer.promise;
+    }
+
+    if (report.result.n === 0) {
+      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+      return;
+    }
+
+    defer.resolve(report);
   });
 
   return defer.promise;
@@ -607,7 +717,7 @@ Auth.ip = function (data) {
   return defer.promise;
 };
 
-Auth.new_login = function (data) {
+Auth.new_login = function (data, methods) {
   var index = 0,
     identity = {},
     authenticated = 0,
@@ -644,9 +754,15 @@ Auth.new_login = function (data) {
     });
   };
 
-  var next = function () {
+  var next = function (methods) {
     var method = Auth.methods[index];
     index += 1;
+
+    if (methods !== undefined && methods.indexOf(method.name) === -1) {
+      log.debug('Method not requested, skipping: %s', method.name);
+      next();
+      return;
+    }
 
     if (!method) {
       log.debug('Finished all authentications methods');
@@ -699,7 +815,11 @@ Auth.new_login = function (data) {
     })
   };
 
-  next();
+  if (methods !== undefined && methods instanceof Array === false) {
+    methods = [methods]
+  }
+
+  next(methods);
 
   return defer.promise;
 };
@@ -723,6 +843,74 @@ Auth.assign = function (token, device) {
   var defer = q.defer();
 
   defer.reject({});
+
+  return defer.promise;
+};
+
+Auth.list_tokens = function (filter, options) {
+  var defer = q.defer();
+
+  filter = filter || {};
+
+  Auth.tokens.find(filter, null, options)
+  .select('-auth_token')
+  .exec(function (err, tokens) {
+    if (err) { defer.reject(err); return; }
+
+    defer.resolve(tokens);
+  });
+
+  return defer.promise;
+};
+
+Auth.get_token = function (id, user) {
+  var defer = q.defer();
+  var filter = {'_id': id};
+
+  if (user) {
+    filter.user = user;
+  }
+
+  Auth.tokens.findOne(filter)
+  .select('-auth_token')
+  .exec(function (err, token) {
+    if (err) {
+      defer.reject(err);
+      return;
+    }
+
+    if (!token) {
+      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+      return;
+    }
+
+    defer.resolve(token);
+  });
+
+  return defer.promise;
+};
+
+Auth.delete_token = function (id, user) {
+  var defer = q.defer();
+  var filter = {'_id': id};
+
+  if (user) {
+    filter.user = user;
+  }
+
+  Auth.tokens.remove(filter, function (err, report) {
+    if (err) {
+      defer.reject({'status': 'failed', 'message': err.message});
+      return defer.promise;
+    }
+
+    if (report.result.n === 0) {
+      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+      return;
+    }
+
+    defer.resolve();
+  });
 
   return defer.promise;
 };
