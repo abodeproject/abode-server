@@ -109,11 +109,11 @@ var PinSchema = mongoose.Schema({
     'unique': true,
     'set': function (v) {
         if (isNaN(v)) {
-          return undefined
+          return;
         }
 
         if (String(v).length < 4) {
-          return undefined;
+          return;
         }
 
         return Auth.crypt_password(String(v));
@@ -136,11 +136,11 @@ var AuthSchema = mongoose.Schema({
     'required': [true, 'Password must be at least 8 characters'],
     'set': function (v) {
         if (v === '') {
-          return undefined
+          return;
         }
 
         if (String(v).length < 8) {
-          return undefined;
+          return;
         }
 
         return Auth.crypt_password(String(v));
@@ -175,7 +175,7 @@ Auth.token_cleaner = function () {
       return;
     }
 
-    if (results.result.n == 0) {
+    if (results.result.n === 0) {
       log.debug('No tokens removed');
     } else {
       log.info('Removed %s expired tokens', results.result.n);
@@ -266,7 +266,7 @@ Auth.check_pin = function (pin, device) {
         'devices': []
       }
     ]
-  }
+  };
 
   if (device) {
     query.$or[1] = {
@@ -325,8 +325,9 @@ Auth.update_pin = function (id, data) {
 
       log.debug('Pin saved: ', pin._id);
       delete pin.pin;
-      defer.resolve(pin)
-    })
+      defer.resolve(pin);
+    });
+
   }, function () {
     defer.reject({'code': 404, 'message': 'Record not found'});
   });
@@ -456,7 +457,7 @@ TokenSchema.methods.create_device = function (config) {
     });
   }, function (err) {
     defer.reject(err);
-  })
+  });
 
   return defer.promise;
 };
@@ -562,8 +563,9 @@ Auth.update = function (id, data) {
 
       log.debug('User saved: ', user._id);
       delete user.password;
-      defer.resolve(user)
-    })
+      defer.resolve(user);
+    });
+
   }, function () {
     defer.reject({'code': 404, 'message': 'Record not found'});
   });
@@ -637,7 +639,7 @@ Auth.gen_token = function (user, expires, status, device, ip, agent_raw) {
     token_expiration = new Date();
 
   var agent = useragent.parse(agent_raw);
-  agent = agent.toJSON()
+  agent = agent.toJSON();
   agent.source = agent_raw;
 
   var geo = geoip.lookup(ip);
@@ -695,7 +697,7 @@ Auth.check_token = function (client_token, auth_token) {
   return defer.promise;
 };
 
-Auth.check = function (client_token, auth_token, ip, agent) {
+Auth.check = function (client_token, auth_token) {
   var defer = q.defer();
 
   Auth.check_token(client_token, auth_token).then(function (token) {
@@ -854,11 +856,11 @@ Auth.new_login = function (data, methods) {
 
       //Otherwise, move to next method
       next();
-    })
+    });
   };
 
   if (methods !== undefined && methods instanceof Array === false) {
-    methods = [methods]
+    methods = [methods];
   }
 
   next(methods);
@@ -881,7 +883,7 @@ Auth.devices = function () {
   return defer.promise;
 };
 
-Auth.assign = function (token, device) {
+Auth.assign = function () {
   var defer = q.defer();
 
   defer.reject({});

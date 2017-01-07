@@ -1,23 +1,16 @@
 'use strict';
 
-var fs = require('fs'),
-  ini = require('ini'),
-  web = require('../web'),
+var web = require('../web'),
   abode = require('../abode'),
   express = require('express'),
-  logger = require('log4js'),
-  log = logger.getLogger('network'),
-  extend = require('util')._extend,
-  exec = require('child_process').exec,
   router = express.Router();
-  
 
 router.get('/', function (req, res) {
   abode.network.status().then(function (response) {
     res.status(200).send(response);
   }, function (err) {
     res.status(400).send(err);
-  })
+  });
 });
 
 router.get('/wireless', function (req, res) {

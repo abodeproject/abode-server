@@ -2,13 +2,12 @@
 
 var abode;
 var routes;
-var config;
 
 var q = require('q');
 var fs = require('fs');
 var logger = require('log4js'),
   log = logger.getLogger('network'),
-  exec = require('child_process').exec;;
+  exec = require('child_process').exec;
 
 // Build the devices object
 var Network = function () {
@@ -39,7 +38,7 @@ Network.list_interfaces = function () {
     var if_re = /\d+: ([^:]+): .+mtu (\S+).+state (\S+)/;
     var mac_re = /link\/ether (\S+)/;
     var ip_re = /inet (\S+) brd (\S+)/;
-    var if_index = -1
+    var if_index = -1;
     var ifaces = [];
 
     lines.forEach(function (line) {
@@ -55,7 +54,8 @@ Network.list_interfaces = function () {
           'name': if_match[1],
           'mtu': if_match[2],
           'link': (if_match[3].toLowerCase() === 'up') ? true : false
-        }
+        };
+
         if (connection.interface === ifaces[if_index].name) {
           ifaces[if_index].essid = connection.essid;
         }
@@ -89,7 +89,7 @@ Network.list_interfaces = function () {
   Network.wireless_status().then(function (result) {
     connection = result;
     ip_addr();
-  }, ip_addr);;
+  }, ip_addr);
 
   return defer.promise;
 };
@@ -145,8 +145,7 @@ Network.list_wireless = function () {
     var in_cell = false;
     var cell_index = -1;
     var cells = [];
-    var cells = [];
-    var essid_re = /ESSID:"([^"]+)"/
+    var essid_re = /ESSID:"([^"]+)"/;
     var if_re = /^(\S+).+Scan/;
     var iface;
 
@@ -226,7 +225,7 @@ Network.list_wireless = function () {
   Network.wireless_status().then(function (result) {
     connection = result;
     iwlist();
-  }, iwlist);;
+  }, iwlist);
 
   return defer.promise;
 };
@@ -280,7 +279,7 @@ Network.list_routes = function () {
     });
 
     defer.resolve(routes);
-  }
+  };
 
   exec('ip route', handler);
 
@@ -314,7 +313,7 @@ Network.connect = function (body) {
 
       if (body.interface) {
         log.info('Downing Interface: %s', body.interface);
-        exec('sudo -n ifdown ' + body.interface, function (err, stdout, stderr) {
+        exec('sudo -n ifdown ' + body.interface, function () {
           log.info('Upping Interface: %s', body.interface);
           exec('sudo -n ifup ' + body.interface);
         });
@@ -328,9 +327,9 @@ Network.connect = function (body) {
     log.debug('Parsing WPA Supplicant Config');
     var network_re = new RegExp('\nnetwork={[^}]+}','m');
 
-    var network_match = network_re.exec(data);
     data = data.replace(network_re, '').trim();
     data += '\nnetwork={\n  ssid="' + body.essid + '"\n';
+
     if (body.secret) {
       data += '  psk="' + body.secret + '"\n';
     }
@@ -350,7 +349,7 @@ Network.connect = function (body) {
 
       parse_wpa(data);
     });
-  }
+  };
 
   if (!body.essid) {
     defer.reject({'error': 'No ESSID Specified'});
@@ -399,7 +398,8 @@ Network.status = function () {
       defer.resolve(status);
     }, function (err) {
       defer.reject(err);
-    })
+    });
+
   }, function (err) {
     defer.reject(err);
   });

@@ -2,7 +2,6 @@
 
 var abode,
   q = require('q'),
-  fs = require('fs'),
   logger = require('log4js'),
   log = logger.getLogger('web'),
   geoip = require('geoip-lite'),
@@ -12,8 +11,6 @@ var abode,
   addr = require('netaddr').Addr,
   read = require('fs').readFileSync,
   bodyParser = require('body-parser'),
-  session = require('express-session'),
-  MongoStore = require('connect-mongo')(session),
   pathspec = require('pathspec').Mask,
   express = require('express');
 
@@ -31,7 +28,7 @@ var Web = function () {
   Web.config.address = Web.config.address || '0.0.0.0';
   Web.config.secureProtocol = Web.config.secureProtocol || 'TLSv1_2_server_method';
   Web.config.ciphers = Web.config.ciphers || 'AES128-GCM-SHA256:HIGH:!RC4:!MD5:!aNULL:!EDH';
-  Web.config.access_log = Web.config.access_log || 'logs/abode_access.log';
+  Web.config.access_log = Web.config.access_log || 'console';
   Web.config.cors_origins = Web.config.cors_origins || ['http://localhost'];
 
   if (Web.config.access_log !== 'console') {
@@ -82,7 +79,7 @@ var Web = function () {
 
 };
 
-Web.check_auth = function (ip, uri, auth, session) {
+Web.check_auth = function (ip, uri) {
   var allowed = false;
 
 
@@ -98,14 +95,6 @@ Web.check_auth = function (ip, uri, auth, session) {
     });
 
   }
-
-  /*
-  if (allowed) { session.auth = true; session.user = 'guest'; return true; }
-
-  if (auth) {
-    return true;
-  }
-  */
 
   abode.config.allow_uris.forEach(function (matcher) {
 
@@ -177,7 +166,7 @@ Web.init = function () {
     }
 
     req.client_ip = (abode.config.ip_header && req.headers[abode.config.ip_header]) ? req.headers[abode.config.ip_header] : req.ip;
-    abode.auth.check(req.headers['client-token'] || req.headers['client_token'] || req.query.client_token, req.headers['auth-token'] || req.headers['auth_token'] || req.query.auth_token, req.client_ip, req.headers['user-agent']).then(function (response) {
+    abode.auth.check(req.headers['client-token'] || req.headers.client_token || req.query.client_token, req.headers['auth-token'] || req.headers.auth_token || req.query.auth_token, req.client_ip, req.headers['user-agent']).then(function (response) {
 
       //Should probably standardize on one of these
       req.token = response;
@@ -188,7 +177,7 @@ Web.init = function () {
       token_expiration.setDate(token_expiration.getDate() + 1);
 
       var agent = useragent.parse(req.headers['user-agent']);
-      agent = agent.toJSON()
+      agent = agent.toJSON();
       agent.source = req.headers['user-agent'];
 
       var geo = geoip.lookup(req.client_ip);
@@ -196,14 +185,14 @@ Web.init = function () {
 
       //Set the token expiration and save it
       req.token.last_used = new Date();
-      req.token.expires = token_expiration
+      req.token.expires = token_expiration;
       req.token.locale = geo;
       req.token.agent = agent;
       req.token.save();
 
       next();
 
-    }, function (err) {
+    }, function () {
       next();
     });
 
@@ -222,7 +211,7 @@ Web.init = function () {
       next();
     }, function () {
       next();
-    })
+    });
 
   });
 

@@ -3,11 +3,9 @@
 var abode;
 var routes;
 var q = require('q');
-var hat = require('hat');
 var logger = require('log4js'),
   log = logger.getLogger('eventfeed');
 var mongoose = require('mongoose');
-var webPush = require('web-push');
 
 var EventsSchema = mongoose.Schema({
   'timestamp': {'type': Number, 'required': true},
@@ -46,7 +44,7 @@ EventFeed.event_cleaner = function () {
       return;
     }
 
-    if (results.result.n == 0) {
+    if (results.result.n === 0) {
       log.debug('No events removed');
     } else {
       log.info('Removed %s stale events', results.result.n);
@@ -91,17 +89,18 @@ EventFeed.query = function (filter, options) {
 };
 
 EventFeed.send = function (data) {
-  var timestamp = new Date(),
-    timestamp = timestamp.getTime(),
-    event = new EventFeed.model({'timestamp': timestamp, 'event': data});
+  var event,
+    timestamp = new Date();
+
+  timestamp = timestamp.getTime();
+  event = new EventFeed.model({'timestamp': timestamp, 'event': data});
 
   event.save( function (err) {
     if (err) {
       log.error('Failed to create event');
       log.debug(err.message || err);
 
-      defer.reject({'status': 'failed', 'message': 'Failed to create event', 'error': err});
-      return defer.promise;
+      return;
     }
 
     log.debug('Event created: ', event._id);
@@ -135,7 +134,7 @@ EventFeed.addClient = function (req, res) {
   // push this res object to our global variable
   abode.eventfeed.clients.push(res);
 
-  req.on("close", function() {
+  req.on('close', function() {
     abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
   });
 

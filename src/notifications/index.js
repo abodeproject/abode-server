@@ -265,7 +265,8 @@ NotificationsSchema.methods.do_action = function (id) {
 
 NotificationsSchema.methods.add_trigger = function (config) {
 
-  var self = this,
+  var msg,
+    self = this,
     defer = q.defer();
   var trigger = abode.triggers.get(config._id);
 
@@ -501,8 +502,8 @@ Notifications.delete = function (id) {
     });
 
   }, function (err) {
-    defer.reject(err)
-  })
+    defer.reject(err);
+  });
 
   return defer.promise;
 };
@@ -585,7 +586,7 @@ Notifications.activate = function (id, body) {
         });
         return;
       }
-    };
+    }
 
     //If we are not active, increment our check out and check against the threshold
     if (!record.active) {
@@ -641,13 +642,13 @@ Notifications.activate = function (id, body) {
     });
 
   }, function (err) {
-    defer.reject(err)
+    defer.reject(err);
   });
 
   return defer.promise;
 };
 
-Notifications.deactivate = function (id, body) {
+Notifications.deactivate = function (id) {
   var data = {},
     defer = q.defer();
 
@@ -675,30 +676,28 @@ Notifications.deactivate = function (id, body) {
     });
 
   }, function (err) {
-    defer.reject(err)
+    defer.reject(err);
   });
 
   return defer.promise;
 };
 
 Notifications.render = function (id) {
-  var data = {},
-    defer = q.defer();
+  var defer = q.defer();
 
   Notifications.get(id).then(function (record) {
 
     defer.resolve(record.render());
 
   }, function (err) {
-    defer.reject(err)
+    defer.reject(err);
   });
 
   return defer.promise;
 };
 
 Notifications.do_action = function (id, actionid) {
-  var data = {},
-    defer = q.defer();
+  var defer = q.defer();
 
   Notifications.get(id).then(function (record) {
 
@@ -709,7 +708,7 @@ Notifications.do_action = function (id, actionid) {
     });
 
   }, function (err) {
-    defer.reject(err)
+    defer.reject(err);
   });
 
   return defer.promise;
@@ -725,7 +724,7 @@ Notifications.secure_action = function (token) {
       return;
     }
 
-    var action = result.actions.filter(function (action) { return (String(action.token) === String(token))});
+    var action = result.actions.filter(function (action) { return (String(action.token) === String(token)); });
 
     //If no action found, deactivate
     if (action.length === 0) {
@@ -733,7 +732,7 @@ Notifications.secure_action = function (token) {
       action_defer = Notifications.deactivate(result._id);
     } else {
       log.info('Received de-activation action from notification: %s', result.name);
-      action_defer = Notifications.do_action(result._id, action[0]._id)
+      action_defer = Notifications.do_action(result._id, action[0]._id);
     }
 
     action_defer.then(function (result) {

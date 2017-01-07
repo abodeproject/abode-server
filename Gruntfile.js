@@ -44,7 +44,7 @@ module.exports = function(grunt) {
     },
     nodemon: {
       apidoc: {
-        script: 'src/index.js',
+        script: 'index.js',
         options: {
           cwd: 'src',
           ext: 'ini,js',
@@ -55,7 +55,7 @@ module.exports = function(grunt) {
         }
       },
       dev: {
-        script: 'src/index.js',
+        script: 'index.js',
         options: {
           cwd: 'src',
           ext: 'ini,js',
@@ -65,7 +65,7 @@ module.exports = function(grunt) {
         }
       },
       prod: {
-        script: 'src/index.js',
+        script: 'index.js',
         options: {
           cwd: 'src',
           ext: 'js,ini',
@@ -77,7 +77,7 @@ module.exports = function(grunt) {
     },
     concurrent: {
       dev: {
-        tasks: ['watch:scripts', 'watch:static', 'nodemon:dev'],
+        tasks: ['watch:scripts', 'nodemon:dev'],
         options: {
           logConcurrentOutput: true
         }

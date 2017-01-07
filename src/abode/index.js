@@ -60,6 +60,7 @@ Abode.init = function (config) {
   config.name = config.name || 'Local';
   config.url = config.url || 'http://' + Abode.get_ip() + ':8080';
 
+  Abode.config = config;
   Abode.save_needed = false;
   Abode.views = {};
 
@@ -70,11 +71,12 @@ Abode.init = function (config) {
 
   //Load the config.ini
   if (fs.existsSync(config.path) && config.read_config === true) {
-    log.info('Loading configuration file: %s', config.path)
+    log.info('Loading configuration file: %s', config.path);
     var parsed_config = ini.parse(fs.readFileSync(config.path, 'utf-8'));
     Abode.config = merge(config, parsed_config);
     //Abode.config = merge.recursive(true, config, parsed_config);
   } else {
+    log.info('No configuration file found: %s', config.path);
     Abode.config = config;
   }
 
@@ -222,9 +224,9 @@ Abode.detect_upnp = function (type) {
   type = type || 'abode:server';
   
   //Set our response handler
-  client.on('response', function (headers, statusCode, rinfo) {
+  client.on('response', function (headers) {
     var name = headers.USN.split('::')[0];
-    var matches = results.filter(function (item) { return (item.url === headers.LOCATION); })
+    var matches = results.filter(function (item) { return (item.url === headers.LOCATION); });
 
     //If we have an existing entry, skip it
     if (matches.length > 0) {
@@ -263,7 +265,7 @@ Abode.detect_upnp = function (type) {
 Abode.write_config = function () {
   var defer = q.defer();
 
-  fs.writeFile('config.ini', ini.encode(Abode.config, {whitespace: true}), function (err) {
+  fs.writeFile(Abode.config.path, ini.encode(Abode.config, {whitespace: true}), function (err) {
     if (err) {
       defer.reject({'status': 'failed', 'message': err});
       return;
@@ -378,7 +380,7 @@ Abode.default_views = function () {
 Abode.get_view = function (view) {
   var defer = q.defer();
 
-  Abode.default_views().then(function (views) {
+  Abode.default_views().then(function () {
 
     //if (views.indexOf(view) === -1) {
     //  defer.reject({'status': 'failed', 'message': 'View not found'});
@@ -416,7 +418,7 @@ Abode.write_view = function (view, data) {
   return defer.promise;
 };
 
-Abode.delete_view = function (view, data) {
+Abode.delete_view = function (view) {
   var defer = q.defer();
 
 
@@ -490,12 +492,12 @@ Abode.import_ca = function (url) {
     }
   };
 
-  log.info('Downloading certificate: %s', url + '/ca-chain.crt')
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  log.info('Downloading certificate: %s', url + '/ca-chain.crt');
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   request({uri: url + '/ca-chain.crt'})
   .pipe(fs.createWriteStream('/tmp/ca.crt'))
   .on('error', function() {
-    defer.reject({'message': 'Failed to retreive CA file'})
+    defer.reject({'message': 'Failed to retreive CA file'});
   })
   .on('close', function() {
     do_import();

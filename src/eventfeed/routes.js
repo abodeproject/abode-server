@@ -1,14 +1,7 @@
 'use strict';
 
-var fs = require('fs'),
-  ini = require('ini'),
-  web = require('../web'),
-  abode = require('../abode'),
+var abode = require('../abode'),
   express = require('express'),
-  logger = require('log4js'),
-  log = logger.getLogger('abode'),
-  extend = require('util')._extend,
-  exec = require('child_process').exec,
   router = express.Router();
 
 router.get('/', function (req, res) {
@@ -44,7 +37,7 @@ router.get('/', function (req, res) {
 
   abode.eventfeed.query(filter, options).then(function (results) {
     res.set('record-total', results.length);
-    res.send(results)
+    res.send(results);
   }, function (err) {
     res.status(400).send(err);
   });
@@ -92,7 +85,7 @@ router.get('/feed/:key', function (req, res) {
         abode.eventfeed.clients.push(res);
         abode.events.emit('CLIENT_CONNECTED', {'type': 'eventfeed', 'client': res});
 
-        req.on("close", function() {
+        req.on('close', function () {
           abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
         });
 
@@ -117,7 +110,7 @@ router.get('/feed/:key', function (req, res) {
       abode.eventfeed.clients.push(res);
       abode.events.emit('CLIENT_CONNECTED', {'type': 'eventfeed', 'client': res});
 
-      req.on("close", function() {
+      req.on('close', function () {
         abode.eventfeed.clients.splice(abode.eventfeed.clients.indexOf(res), 1);
       });
 

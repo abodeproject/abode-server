@@ -1,7 +1,6 @@
 'use strict';
 
 var abode;
-var sources;
 var routes;
 var http = require('http');
 var q = require('q');
@@ -56,7 +55,7 @@ SourceSchema.methods._save = function () {
 
   this.save(function (err) {
     if (err) {
-      log.error('Failed to save source:', err)
+      log.error('Failed to save source:', err);
       defer.reject(err);
     } else {
       log.info('Source saved successfully');
@@ -93,8 +92,7 @@ SourceSchema.methods.delete = function () {
 };
 
 SourceSchema.methods.proxy = function (method, headers, uri, body) {
-  var self = this,
-    defer = q.defer();
+  var self = this;
 
   delete headers['x-forwarded-for'];
 
@@ -107,7 +105,7 @@ SourceSchema.methods.proxy = function (method, headers, uri, body) {
   };
 
   if (body) {
-    options.body = body
+    options.body = body;
     options.json = true;
   }
   try {

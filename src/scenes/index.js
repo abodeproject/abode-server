@@ -116,7 +116,7 @@ SceneSchema.methods.is_on = function () {
 
   defer.resolve((self._on === true));
 
-  return defer.promise;;
+  return defer.promise;
 };
 
 SceneSchema.methods.is_off = function () {
@@ -135,7 +135,7 @@ SceneSchema.methods._save = function () {
 
   this.save(function (err) {
     if (err) {
-      log.error('Failed to save room:', err)
+      log.error('Failed to save room:', err);
       defer.reject(err);
     } else {
       log.debug('Scene saved successfully');
@@ -496,10 +496,9 @@ SceneSchema.methods.start = function () {
   };
 
   // Start processing the steps
-
   self._save().then(function () {
     next();
-  })
+  });
 
   defer.resolve({'status': 'pending'});
 

@@ -2,7 +2,6 @@
 
 var abode,
   routes,
-  config,
   q = require('q'),
   fs = require('fs'),
   path = require('path'),
@@ -18,19 +17,19 @@ var Display = function () {
 
   abode.web.server.use('/api/display', routes);
 
+  abode.config.display  = abode.config.display || {};
   abode.config.display.interval = abode.config.display.interval || 5;
   abode.config.display.min_brightness = abode.config.display.min_brightness || 0;
   abode.config.display.min_brightness = parseInt(abode.config.display.min_brightness);
   abode.config.display.enabled = (abode.config.display.enabled === false) ? false : true;
 
-  config = abode.config.display || {};
-  Display.config = config;
+  Display.config = abode.config.display;
 
-  if (config.enabled === true  && process.env.DISPLAY) {
+  if (Display.config.enabled === true  && process.env.DISPLAY) {
     log.info('Starting Display');
 
     Display.load().then(function () {
-      Display.poller = setInterval(Display.load, 1000 * config.interval);
+      Display.poller = setInterval(Display.load, 1000 * Display.config.interval);
     }, function (err) {
       log.error('Display loader failed, not starting: ', err);
     });
@@ -129,18 +128,18 @@ Display.load = function () {
     if (displays.length === 0) {
       failLoad('Failed to find a display');
     } else if (displays.length === 1) {
-      config.name = displays[0];
+      Display.config.name = displays[0];
       parseDisplay(displays[0]);
     } else {
-      if (config.display) {
-        if (displays.indexOf(config.display) !== -1) {
-          parseDisplay(displays.indexOf(config.display));
+      if (Display.config.display) {
+        if (displays.indexOf(Display.config.display) !== -1) {
+          parseDisplay(displays.indexOf(Display.config.display));
         } else {
-          failLoad('Failed to find configured display: ', config.display);
+          failLoad('Failed to find configured display: ', Display.config.display);
         }
       } else {
         log.warn('Multiple displays found, using first: ', displays[0]);
-        config.name = displays[0];
+        Display.config.name = displays[0];
         parseDisplay(displays[0]);
       }
     }

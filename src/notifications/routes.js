@@ -1,7 +1,6 @@
 'use strict';
 
-var q = require('q'),
-  notifications = require('../notifications'),
+var notifications = require('../notifications'),
   web = require('../web'),
   express = require('express'),
   router = express.Router();
@@ -117,7 +116,7 @@ router.get('/:id/actions/:action_id', function (req, res) {
   notifications.get(req.params.id).then(function (record) {
 
     record.get_action(req.params.action_id).then(function (result) {
-      res.status(204).send(req.body);
+      res.status(204).send(result);
     }, function (err) {
       res.status(400).send(err);
     });
@@ -133,7 +132,7 @@ router.put('/:id/actions/:action_id', web.isUnlocked, function (req, res) {
   notifications.get(req.params.id).then(function (record) {
 
     record.update_action(req.params.action_id).then(function (result) {
-      res.status(204).send(req.body);
+      res.status(204).send(result);
     }, function (err) {
       res.status(400).send(err);
     });
@@ -149,7 +148,7 @@ router.delete('/:id/actions/:action_id', web.isUnlocked, function (req, res) {
   notifications.get(req.params.id).then(function (record) {
 
     record.delete_action(req.params.action_id).then(function (result) {
-      res.status(204).send(req.body);
+      res.status(204).send(result);
     }, function (err) {
       res.status(400).send(err);
     });
@@ -211,7 +210,7 @@ router.delete('/:id/triggers/:trigger_id', web.isUnlocked, function (req, res) {
   notifications.get(req.params.id).then(function (results) {
     results.delete_trigger(req.params.trigger_id).then(function (result) {
       res.status(204).send(result);
-    }, function () {
+    }, function (err) {
       res.status(404).send(err);
     });
   }, function (err) {
@@ -269,7 +268,7 @@ router.post('/:id/render', function (req, res) {
 router.post('/:id/do_action/:actionid', web.isUnlocked, function (req, res) {
 
   notifications.do_action(req.params.id, req.params.actionid).then(function (result) {
-    res.send(result)
+    res.send(result);
   }, function (err) {
     res.status(err.http_code || 400).send(err);
   });

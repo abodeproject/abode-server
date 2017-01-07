@@ -2,7 +2,6 @@
 
 var scenes = require('../scenes'),
   rooms = require('../rooms'),
-  devices = require('../devices'),
   web = require('../web'),
   express = require('express'),
   router = express.Router();

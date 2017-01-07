@@ -1,7 +1,6 @@
 'use strict';
 
 var fs = require('fs'),
-  ini = require('ini'),
   web = require('../web'),
   abode = require('../abode'),
   express = require('express'),
@@ -23,8 +22,8 @@ router.post('/import_ca', web.isUnlocked, function (req, res) {
   abode.import_ca(req.body.url).then(function (response) {
     res.status(200).send(response);
   }, function (err) {
-    res.status(400).send(err)
-  })
+    res.status(400).send(err);
+  });
 });
 
 router.get('/detect_devices', function (req, res) {
@@ -111,7 +110,7 @@ router.put('/views/:view', web.isUnlocked, function (req, res) {
     }, function (err) {
       res.status(400).send(err);
     });
-  }
+  };
 
   if (!req.body) {
 
@@ -138,8 +137,7 @@ router.delete('/views/:view', web.isUnlocked, function (req, res) {
 
 router.get('/status/', function (req, res) {
 
-  var level,
-    display,
+  var display,
     status = {};
 
   status.name = abode.config.name;

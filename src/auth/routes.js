@@ -4,8 +4,6 @@ var web = require('../web'),
   auth = require('../auth'),
   abode = require('../abode'),
   express = require('express'),
-  logger = require('log4js'),
-  log = logger.getLogger('auth'),
   router = express.Router();
 
 /**
@@ -39,9 +37,10 @@ router.get('/', function (req, res) {
  */
 
 router.post('/login', web.isJson, function (req, res) {
+  var methods;
+
   req.body.ip = req.client_ip;
   req.body.agent = req.headers['user-agent'];
-  var methods = undefined;
 
   if (req.body.password) {
     methods = ['password'];
@@ -69,7 +68,7 @@ router.post('/logout', function (req, res) {
 
     }, function (err) {
       res.status(400).send(err);
-    })
+    });
   } else {
     res.status(401).send({'status': 'unauthenticated'});
   }
@@ -125,14 +124,14 @@ router.get('/devices', web.isUnlocked, function (req, res) {
  */
 router.post('/assign', web.isUnlocked, function (req, res) {
   req.body.config = req.body.config || {};
-  console.log(req.body.config.address);
+
   req.token.assign_device(req.body._id, req.body.config.address).then(function (response) {
     res.send(response);
   }, function (err) {
     res.status(err.http_code || 400);
     delete err.http_code;
     res.send(err);
-  })
+  });
 
 });
 
@@ -193,9 +192,9 @@ router.get('/device', function (req, res) {
     });
 
   } else if (req.token.status === 'nodevice' || req.token.status === 'unassigned') {
-    res.status(404).send({'status': token.status});
+    res.status(404).send({'status': req.token.status});
   } else if (req.token) {
-    res.status(403).send({'status': token.status});
+    res.status(403).send({'status': req.token.status});
   } else {
     res.status(401).send({'status': 'unauthenticated'});
   }
@@ -206,18 +205,17 @@ router.put('/device', web.isUnlocked, function (req, res) {
 
   if (req.token.status === 'active') {
 
-
     req.device.set_state(req.body).then(function () {
       res.status(200).send(req.device);
-      abode.devices.load()
+      abode.devices.load();
     }, function (err) {
       res.status(422).send(err);
     });
 
   } else if (req.token.status === 'nodevice' || req.token.status === 'unassigned') {
-    res.status(404).send({'status': token.status});
+    res.status(404).send({'status': req.token.status});
   } else if (req.token) {
-    res.status(403).send({'status': token.status});
+    res.status(403).send({'status': req.token.status});
   } else {
     res.status(401).send({'status': 'unauthenticated'});
   }
@@ -262,9 +260,9 @@ router.post('/device/set_interface', web.isUnlocked, function (req, res) {
     });
 
   } else if (req.token.status === 'nodevice' || req.token.status === 'unassigned') {
-    res.status(404).send({'status': token.status});
+    res.status(404).send({'status': req.token.status});
   } else if (req.token) {
-    res.status(403).send({'status': token.status});
+    res.status(403).send({'status': req.token.status});
   } else if (req.token && !req.body.interface) {
     res.status(400).send({'status': 'failed', 'message': 'No interface specified'});
   } else {
@@ -366,7 +364,7 @@ router.put('/pins/:id', web.isUnlocked, function (req, res) {
 
   auth.update_pin(req.params.id, req.body).then(function (response) {
 
-    res.status(204).send();
+    res.status(204).send(response);
 
   }, function (err) {
     res.status(err.code || 400).send(err);
@@ -426,7 +424,7 @@ router.put('/users/:id', web.isUnlocked, web.isJson, function (req, res) {
   
   auth.update(req.params.id, req.body).then(function (response) {
 
-    res.status(204).send();
+    res.status(204).send(response);
 
   }, function (err) {
     res.status(err.code || 400).send(err);
