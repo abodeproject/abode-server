@@ -511,7 +511,7 @@ Abode.import_ca = function (url) {
 
     if (result.body.ca_cert) {
       log.info('CA cert specified, starting import');
-      fs.writeFileSync('/tmp/ca.crt', result.body.ca_cert, 'utf8', do_import);
+      fs.writeFile('/tmp/ca.crt', result.body.ca_cert, 'utf8', do_import);
     } else {
       log.info('No CA cert specified');
       defer.resolve({'message': 'No CA Cert to Import'});
