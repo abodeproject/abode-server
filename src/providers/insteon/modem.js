@@ -251,6 +251,7 @@ Modem.message_handler = function (message, handler) {
           log.debug('MOTION ON detected by device: ', device.name);
           log_msg.command = 'MOTION_ON';
           state._on = true;
+          state._motion = true;
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
 
         } else if (message.cmd === 'LIGHT_OFF') {
@@ -259,6 +260,7 @@ Modem.message_handler = function (message, handler) {
           log_msg.command = 'MOTION_OFF';
           log.debug('MOTION OFF detected by device: ', device.name);
           state._on = false;
+          state._motion = false;
           device.set_state(state, log_msg).then(defer.resolve, defer.reject);
 
         } else {

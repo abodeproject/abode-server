@@ -94,6 +94,7 @@ var DeviceSchema = mongoose.Schema({
   'low_battery': {'type': Boolean, 'default': false},
   '_rooms': Array,
   '_on': {'type': Boolean, 'default': false},
+  '_motion': {'type': Boolean, 'default': false},
   '_level': {'type': Number, 'default': 0},
   '_temperature': {'type': Number, 'default': 0},
   '_humidity': {'type': Number, 'default': 0},
