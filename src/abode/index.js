@@ -475,33 +475,57 @@ Abode.make_key = function () {
 Abode.import_ca = function (url) {
   var defer = q.defer();
 
-  var process_cb = function (error, stdout, stderr) {
-    if (error) {
+  var process_cb = function (err, stdout, stderr) {
+    if (err) {
+      log.error('Error importing certificate: %s', err);
       defer.reject({'message': stderr});
       return;
     }
 
+    log.info('Successfully import CA cert');
     defer.resolve({'message': 'Successfully Import CA Certificate'});
   };
 
-  var do_import = function () {
+  var do_import = function (err) {
+    if (err) {
+      log.error('Error writing temporary file: %s', err);
+      defer.reject({'message': err});
+      return;
+    }
+
     if (process.env.HOME) {
+      log.info('Importing CA cert into chromium key store');
       exec('/usr/bin/certutil -d sql:' + process.env.HOME + '/.pki/nssdb -A -t "CT,C,C" -n abode -i ' + '/tmp/ca.crt', process_cb);
     } else {
       defer.reject({'message': 'Could not determine nssdb path.  Missing HOME'});
     }
   };
 
-  log.info('Downloading certificate: %s', url + '/ca-chain.crt');
+  var get_ca_cb = function (err, result) {
+    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+
+    if (err) {
+      defer.reject({'message': err});
+      return;
+    }
+
+    if (result.body.ca_cert) {
+      log.info('CA cert specified, starting import');
+      fs.writeFileSync('/tmp/ca.crt', result.body.ca_cert, 'utf8', do_import);
+    } else {
+      log.info('No CA cert specified');
+      defer.resolve({'message': 'No CA Cert to Import'});
+    }
+  };
+
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  request({uri: url + '/ca-chain.crt'})
-  .pipe(fs.createWriteStream('/tmp/ca.crt'))
-  .on('error', function() {
-    defer.reject({'message': 'Failed to retreive CA file'});
-  })
-  .on('close', function() {
-    do_import();
-  });
+
+  log.info('Looking for CA certificate: %s', url);
+  request({
+    uri: url + '/api/abode/status',
+    rejectUnauthorized: false,
+    json:true,
+  }, get_ca_cb);
 
   return defer.promise;
 };

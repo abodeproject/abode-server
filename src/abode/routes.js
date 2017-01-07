@@ -146,6 +146,7 @@ router.get('/status/', function (req, res) {
   status.mode = abode.config.mode;
   status.capabilities = [];
   status.ca_url = abode.config.ca_url;
+  status.ca_cert = abode.config.ca_cert;
 
   if (abode.providers && abode.providers.display) {
     display = abode.providers.display;
