@@ -188,6 +188,11 @@ router.get('/status/', function (req, res) {
       status._lumens = data._lumens;
     }
 
+    if (data._motion !== undefined) {
+      status.capabilities.push('motion_sensor');
+      status._motion = data._motion;
+    }
+
     if (status.capabilities.length === 0) {
       delete status.capabilities;
     }
