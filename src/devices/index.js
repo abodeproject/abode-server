@@ -270,7 +270,7 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
           self[key] = config[key];
 
           self.last_on = new Date();
-          if (self.capabilities.indexOf('motion_sensor') !== -1) {
+          if (self.capabilities.indexOf('motion_sensor') !== -1 && config._motion === undefined) {
             abode.events.emit('MOTION_ON', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting MOTION_ON for', {'type': 'device', 'name': self.name});
           } else if (self.capabilities.indexOf('openclose') !== -1) {
@@ -286,7 +286,7 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
           self[key] = config[key];
 
           self.last_off = new Date();
-          if (self.capabilities.indexOf('motion_sensor') !== -1) {
+          if (self.capabilities.indexOf('motion_sensor') !== -1 && config._motion === undefined) {
             abode.events.emit('MOTION_OFF', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting MOTION_OFF for', {'type': 'device', 'name': self.name});
           } else if (self.capabilities.indexOf('openclose') !== -1) {
@@ -296,6 +296,25 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
             abode.events.emit('OFF', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting OFF for', {'type': 'device', 'name': self.name});
           }
+        }
+        made_event = true;
+        break;
+      case '_motion':
+        if (config[key] === true && self[key] !== true) {
+          changes = true;
+          self[key] = config[key];
+
+          self.last_on = new Date();
+          abode.events.emit('MOTION_ON', {'type': 'device', 'name': self.name, 'object': self});
+          log.debug('Emitting MOTION_ON for', {'type': 'device', 'name': self.name});
+        }
+        if (config[key] === false && self[key] !== false) {
+          changes = true;
+          self[key] = config[key];
+
+          self.last_off = new Date();
+          abode.events.emit('MOTION_OFF', {'type': 'device', 'name': self.name, 'object': self});
+          log.debug('Emitting MOTION_OFF for', {'type': 'device', 'name': self.name});
         }
         made_event = true;
         break;
