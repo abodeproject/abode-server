@@ -268,6 +268,8 @@ router.delete('/:id', web.isUnlocked, function (req, res) {
 var actions = [
   'on',
   'off',
+  'motion_on',
+  'motion_off',
   'open',
   'close',
   'lock',

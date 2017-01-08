@@ -195,6 +195,8 @@ DeviceSchema.methods.get_age = function (key, status, date_field) {
 // Define the standard methods for a device
 DeviceSchema.methods.on = function () { return this.send_command('on', undefined, false); };
 DeviceSchema.methods.off = function () { return this.send_command('off', undefined, false); };
+DeviceSchema.methods.motion_on = function () { return this.send_command('motion_on', undefined, false); };
+DeviceSchema.methods.motion_off = function () { return this.send_command('motion_off', undefined, false); };
 DeviceSchema.methods.open = function () { return this.send_command('open', undefined, false); };
 DeviceSchema.methods.close = function () { return this.send_command('close', undefined, false); };
 DeviceSchema.methods.lock = function () { return this.send_command('lock', undefined, false); };
