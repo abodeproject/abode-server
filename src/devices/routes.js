@@ -287,6 +287,7 @@ var statuses = [
   'is_off',
   'is_open',
   'is_closed',
+  'has_motion',
   'level',
   'temperature',
   'mode',

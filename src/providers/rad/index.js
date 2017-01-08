@@ -52,6 +52,16 @@ Rad.motion_off = function (device) {
   return defer.promise;
 };
 
+Rad.has_motion = function (device) {
+  var defer = q.defer();
+
+  log.debug('Checking Rad motion status: %s', device.name);
+
+    defer.resolve({'update': {'_motion': device._motion}, 'response': device._motion});
+
+  return defer.promise;
+};
+
 Rad.on = function (device) {
   var defer = q.defer();
 

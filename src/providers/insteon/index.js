@@ -547,6 +547,16 @@ Insteon.is_closed = Insteon.is_off = function (device) {
   return defer.promise;
 };
 
+Insteon.has_motion = function (device) {
+  var defer = q.defer();
+
+  log.debug('Checking Insteon motion status: %s', device.name);
+
+    defer.resolve({'update': {'_motion': device._motion}, 'response': device._motion});
+
+  return defer.promise;
+};
+
 Insteon.device_status = function (device, sensor) {
   var defer = q.defer();
 
