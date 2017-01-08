@@ -72,6 +72,7 @@ router.get('/:id/video', function (req, res) {
   .pipe(res);
 
   req.connection.on('close',function(){    
+    log.info('Closing proxy connection to camera');
     proxy.req.socket.destroy();
   });
 
