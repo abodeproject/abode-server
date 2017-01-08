@@ -753,7 +753,7 @@ RoomSchema.methods.status = function (cache) {
   });
 
   update._motion_sensor_off_count = motions.filter( function (child) { return (child._motion === false); }).length;
-  update._motion_sensor_on_count = motions.filter( function (child) { return (child._motion === false); }).length;
+  update._motion_sensor_on_count = motions.filter( function (child) { return (child._motion === true); }).length;
   console.log(update);
 
   update._mode_off_count = conditioners.filter( function (child) { return (child._mode === 'OFF'); }).length;
