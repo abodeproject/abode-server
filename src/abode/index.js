@@ -3,7 +3,6 @@
 var q = require('q');
 var fs = require('fs');
 var os = require('os');
-var ini = require('ini');
 var path = require('path');
 var yaml = require('node-yaml');
 var hat = require('hat');
@@ -44,7 +43,7 @@ Abode.init = function (config) {
 
   //Set our default config options
   config = config || {};
-  config.path = config.path || './config.ini';
+  config.path = config.path || '../config.yaml';
   config.read_config = config.read_config || true;
   config.allow_networks = config.allow_networks || ['127.0.0.1'];
   config.ip_header = config.ip_header;
@@ -72,13 +71,15 @@ Abode.init = function (config) {
   Abode.keys = [];
 
   //Load the config.ini
+  var yaml_path = path.resolve(config.path);
+  
   if (fs.existsSync(config.path) && config.read_config === true) {
-    log.info('Loading configuration file: %s', config.path);
-    var parsed_config = ini.parse(fs.readFileSync(config.path, 'utf-8'));
+    log.info('Loading configuration file: %s', yaml_path);
+    var parsed_config = yaml.readSync(yaml_path);
     Abode.config = merge(config, parsed_config);
     //Abode.config = merge.recursive(true, config, parsed_config);
   } else {
-    log.info('No configuration file found: %s', config.path);
+    log.info('No configuration file found: %s', yaml_path);
     Abode.config = config;
   }
 
@@ -266,22 +267,12 @@ Abode.detect_upnp = function (type) {
 
 Abode.write_config = function () {
   var defer = q.defer(),
-    yaml_path = path.resolve(Abode.config.path).split('.')[0] + '.yaml';
-
-  fs.writeFile(Abode.config.path, ini.encode(Abode.config, {whitespace: true}), function (err) {
-    if (err) {
-      defer.reject({'status': 'failed', 'message': err});
-      return;
-    }
-
-    Abode.save_needed = false;
-    defer.resolve({'status': 'success'});
-  });
+    yaml_path = path.resolve(Abode.config.path);
 
   yaml.write(yaml_path, Abode.config).then(function () {
     defer.resolve({'status': 'success'});
   }, function (err) {
-      defer.reject({'status': 'failed', 'message': err});
+    defer.reject({'status': 'failed', 'message': err});
   });
 
   return defer.promise;
