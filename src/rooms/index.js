@@ -705,7 +705,6 @@ var counts = [
   {'filter': 'appliance', 'key': '_on'},
   {'filter': 'fan', 'key': '_on'},
   {'filter': 'conditioner', 'key': '_on'},
-  {'filter': 'motion_sensor', 'key': '_motion'},
   {'filter': 'window', 'key': '_on'},
   {'filter': 'door', 'key': '_on'},
   {'filter': 'shade', 'key': '_on'},
@@ -716,6 +715,7 @@ RoomSchema.methods.status = function (cache) {
     self = this,
     defer = q.defer(),
     status_defers = [],
+    motions = self.get_motion_sensors(),
     conditioners = self.get_conditioners();
 
   cache = (cache === undefined) ? false : cache;
@@ -751,6 +751,10 @@ RoomSchema.methods.status = function (cache) {
     update['_' + type.key + '_on_count'] = on_count.length;
     update['_' + type.key + '_off_count'] = off_count.length;
   });
+
+  update._motion_sensor_off_count = motions.filter( function (child) { return (child._motion === false); }).length;
+  update._motion_sensor_on_count = motions.filter( function (child) { return (child._motion === false); }).length;
+  console.log(update);
 
   update._mode_off_count = conditioners.filter( function (child) { return (child._mode === 'OFF'); }).length;
   update._mode_heat_count = conditioners.filter( function (child) { return (child._mode === 'HEAT'); }).length;
