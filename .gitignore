@@ -4,5 +4,6 @@ src/logs/*
 playbook.retry
 ca-chain.crt
 config.ini
+config.yaml
 logs/*
 public/*

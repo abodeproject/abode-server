@@ -4,6 +4,8 @@ var q = require('q');
 var fs = require('fs');
 var os = require('os');
 var ini = require('ini');
+var path = require('path');
+var yaml = require('node-yaml');
 var hat = require('hat');
 var merge = require('merge');
 var mongoose = require('mongoose');
@@ -263,7 +265,8 @@ Abode.detect_upnp = function (type) {
 };
 
 Abode.write_config = function () {
-  var defer = q.defer();
+  var defer = q.defer(),
+    yaml_path = path.resolve(Abode.config.path).split('.')[0] + '.yaml';
 
   fs.writeFile(Abode.config.path, ini.encode(Abode.config, {whitespace: true}), function (err) {
     if (err) {
@@ -273,6 +276,12 @@ Abode.write_config = function () {
 
     Abode.save_needed = false;
     defer.resolve({'status': 'success'});
+  });
+
+  yaml.write(yaml_path, Abode.config).then(function () {
+    defer.resolve({'status': 'success'});
+  }, function (err) {
+      defer.reject({'status': 'failed', 'message': err});
   });
 
   return defer.promise;
