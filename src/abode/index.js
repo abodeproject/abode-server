@@ -46,7 +46,7 @@ Abode.init = function (config) {
   config.path = config.path || '../config.yaml';
   config.read_config = config.read_config || true;
   config.allow_networks = config.allow_networks || ['127.0.0.1'];
-  config.ip_header = config.ip_header;
+  config.ip_header = config.ip_header || '';
   config.allow_uris = config.allow_uris || ['/','/api/notifications/action/*', '/api/auth/login', '/scripts/*', '/css/*', '/images/*', '/views/*', '/fonts/*', '/webcam/*', 'favicon.ico', '/font/*', '/api/events/feed/*'];
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
@@ -56,6 +56,7 @@ Abode.init = function (config) {
   config.hearbeat_interval = config.hearbeat_interval || 10;
   config.event_cache_size = 100;
   config.disable_upnp = (config.disable_upnp === undefined) ? false : config.disable_upnp;
+  config.debug = (config.debug === undefined) ? false : config.debug;
   config.upnp_client_timeout = config.upnp_client_timeout || 2;
   config.mode = config.mode || 'device';
   config.name = config.name || 'Local';
@@ -72,7 +73,7 @@ Abode.init = function (config) {
 
   //Load the config.ini
   var yaml_path = path.resolve(config.path);
-  
+
   if (fs.existsSync(config.path) && config.read_config === true) {
     log.info('Loading configuration file: %s', yaml_path);
     var parsed_config = yaml.readSync(yaml_path);
