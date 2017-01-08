@@ -211,6 +211,8 @@ DeviceSchema.methods.play = function (url, duration) { return this.send_command(
 DeviceSchema.methods.is_on = DeviceSchema.methods.is_open = function (cache) { return this.send_command('is_on', undefined, cache, '_on', true); };
 DeviceSchema.methods.is_off = DeviceSchema.methods.is_closed = function (cache) { return this.send_command('is_off', undefined, cache, '_on', false); };
 
+DeviceSchema.methods.has_motion = function (cache) { return this.send_command('has_motion', undefined, cache, '_motion', true); };
+
 DeviceSchema.methods.on_time = DeviceSchema.methods.open_time = function () { return this.get_age('_on', true, 'last_on'); };
 DeviceSchema.methods.off_time = DeviceSchema.methods.closed_time = function () { return this.get_age('_on', false, 'last_off'); };
 
