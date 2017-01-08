@@ -34,7 +34,7 @@ var Scenes = function () {
     Scenes._scenes.forEach(function (scene) {
       if (scene._on) {
         log.info('Scene was previously on, restarting:', scene.name);
-        scene.start();
+        //scene.start();
       }
     });
     defer.resolve();
