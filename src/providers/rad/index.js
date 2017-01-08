@@ -32,6 +32,26 @@ var Rad = function () {
   return defer.promise;
 };
 
+Rad.motion_on = function (device) {
+  var defer = q.defer();
+
+  log.debug('Turning on Rad motion: %s', device.name);
+
+  defer.resolve({'status': 'success', 'update': {'_motion': true}});
+
+  return defer.promise;
+};
+
+Rad.motion_off = function (device) {
+  var defer = q.defer();
+
+  log.debug('Turning off Rad motion: %s', device.name);
+
+  defer.resolve({'status': 'success', 'update': {'_motion': false}});
+
+  return defer.promise;
+};
+
 Rad.on = function (device) {
   var defer = q.defer();
 
