@@ -748,8 +748,8 @@ RoomSchema.methods.status = function (cache) {
       on_count = children.filter( function (child) { return (child[type.key] === true); } ),
       off_count = children.filter( function (child) { return (child[type.key] === false); } );
 
-    update['_' + type + '_on_count'] = on_count.length;
-    update['_' + type + '_off_count'] = off_count.length;
+    update['_' + type.key + '_on_count'] = on_count.length;
+    update['_' + type.key + '_off_count'] = off_count.length;
   });
 
   update._mode_off_count = conditioners.filter( function (child) { return (child._mode === 'OFF'); }).length;
