@@ -701,13 +701,13 @@ RoomSchema.methods.get_shades = filterDevices('shade');
 RoomSchema.methods.get_scenes = filterDevices('scene');
 
 var counts = [
-  {'filter': 'light', 'key': '_on'},
-  {'filter': 'appliance', 'key': '_on'},
-  {'filter': 'fan', 'key': '_on'},
-  {'filter': 'conditioner', 'key': '_on'},
-  {'filter': 'window', 'key': '_on'},
-  {'filter': 'door', 'key': '_on'},
-  {'filter': 'shade', 'key': '_on'},
+  'light',
+  'appliance',
+  'fan',
+  'conditioner',
+  'window',
+  'door',
+  'shade'
 ];
 
 RoomSchema.methods.status = function (cache) {
@@ -744,9 +744,9 @@ RoomSchema.methods.status = function (cache) {
   });
 
   counts.forEach(function (type) {
-    var children = self['get_' + type.filter + 's'](),
-      on_count = children.filter( function (child) { return (child[type.key] === true); } ),
-      off_count = children.filter( function (child) { return (child[type.key] === false); } );
+    var children = self['get_' + type + 's'](),
+      on_count = children.filter( function (child) { return (child._on === true); } ),
+      off_count = children.filter( function (child) { return (child._on === false); } );
 
     update['_' + type.key + '_on_count'] = on_count.length;
     update['_' + type.key + '_off_count'] = off_count.length;
