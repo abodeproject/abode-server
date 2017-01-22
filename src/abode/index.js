@@ -51,7 +51,7 @@ Abode.init = function (config) {
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
   config.database.database = config.database.database || 'abode';
-  config.providers = config.providers || ['rad'];
+  config.providers = config.providers || ['rad','browser', 'time'];
   config.fail_on_provider = config.fail_on_provider || true;
   config.hearbeat_interval = config.hearbeat_interval || 10;
   config.event_cache_size = 100;
@@ -128,6 +128,8 @@ Abode.init = function (config) {
 
   //Define the function to start everything after the db is connected
   var start = function() {
+    log.info('Loading providers');
+
     //Load out modules
     Abode.providers = require('../providers');
     Abode.network = require('../network');
@@ -174,6 +176,7 @@ Abode.init = function (config) {
     log.info('Starting Abode in Server mode');
 
     //Connect to the database
+    log.debug('Connecting to DB: mongodb://%s/%s', Abode.config.database.server, Abode.config.database.database);
     Abode.db = mongoose.connect('mongodb://' + Abode.config.database.server + '/' + Abode.config.database.database).connection;
 
     //Register our event handlers for the database

@@ -29,9 +29,9 @@ var Auth = function () {
   config.default_user = config.default_user || 'guest';
 
   log.debug('Checking for admin user');
-  Auth.list().then(function (results) {
+  Auth.list({'user': 'admin'}).then(function (results) {
     if (results.length === 0) {
-      log.warn('No users defined, creating one');
+      log.warn('No admin user defined, creating one');
 
       Auth.create({
         'name': 'admin',
@@ -39,6 +39,7 @@ var Auth = function () {
         'email': 'admin@localhost',
         'password': 'changeme'
       }).then(function () {
+          log.info('Created admin user: admin');
           defer.resolve(Auth);
         }, function (err) {
           log.error('Unable to create admin account:', err);
@@ -56,7 +57,7 @@ var Auth = function () {
   log.debug('Checking for default user: %s', config.default_user);
   Auth.list({'user': config.default_user}).then(function (results) {
     if (results.length === 0) {
-      log.warn('No default defined, creating one');
+      log.warn('No default user defined, creating one');
 
       Auth.create({
         'name': config.default_user,
@@ -64,7 +65,7 @@ var Auth = function () {
         'email': config.default_user + '@localhost',
         'password':  hat(512, 32)
       }).then(function () {
-        log.error('Created default user: %s', config.default_user);
+        log.info('Created default user: %s', config.default_user);
       }, function (err) {
          log.error('Unable to create default account:', err);
       });

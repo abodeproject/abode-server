@@ -1,7 +1,7 @@
 FROM fedora:latest
 
 RUN dnf update -y
-RUN dnf install -y nodejs
+RUN dnf install -y nodejs mongodb
 
 RUN mkdir -p /app /data /data/logs; \
     useradd abode; \

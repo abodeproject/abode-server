@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: abode-server
+  labels:
+    run: abode-server
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    run: abode-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: abode
+  labels:
+    run: abode
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    run: abode-ui-test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    run: mongo
+spec:
+  type: NodePort
+  ports:
+  - port: 27017
+    targetPort: 27017
+    protocol: TCP
+    name: mongo
+  selector:
+    run: mongo
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: abode-server
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: abode-server
+    spec:
+      containers:
+      - name: abode-server
+        image: sneel/abode-server:v0.0.1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ABODE_DB_SERVER
+          value: "mongo.default.svc"
+        - name: ABODE_DEBUG
+          value: "1"
+        - name: ABODE_URL
+          value: abode.default.svc
+        volumeMounts:
+        - mountPath: /data
+          name: abode-data
+      volumes:
+      - name: abode-data
+        hostPath:
+          path: /data/abode-server
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:3.2.11
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - mountPath: /data/db
+          name: mongo-data
+      volumes:
+      - name: mongo-data
+        hostPath:
+          path: /data/mongodb
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: abode-ui-test
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: abode-ui-test
+    spec:
+      containers:
+      - name: abode-ui
+        image: sneel/abode-ui-test:proxy
+        ports:
+        - containerPort: 80
+        env:
+        - name: ABODE_SERVER
+          value: "abode-server.default.svc"

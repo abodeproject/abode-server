@@ -66,6 +66,8 @@ var Notifications = function () {
 
   abode.web.server.use('/api/notifications', routes);
 
+  abode.config.notifications = abode.config.notifications || {};
+
   if (abode.config.notifications.gcmapikey) {
     Notifications.gcmAPIKey = abode.config.notifications.gcmapikey;
   }
