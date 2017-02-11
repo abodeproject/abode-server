@@ -433,7 +433,7 @@ LutronCaseta.on_error = function () {
 };
 
 LutronCaseta.on_timeout = function () {
-  log.warn('Connection Timed Out.  Reconnecting in %s seconds', LutronCaseta.config.reconnect_timeout);
+  log.warn('Connection Timed Out', LutronCaseta.config.reconnect_timeout);
 };
 
 LutronCaseta.on_close = function () {
