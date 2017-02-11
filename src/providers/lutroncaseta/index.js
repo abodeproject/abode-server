@@ -71,7 +71,8 @@ LutronCaseta.poll = function () {
   LutronCaseta.polling = new Date();
 
   // Get all lutron devices
-  abode.devices.get_by_providerAsync('lutroncaseta').then(function (devices) {
+  var devices = abode.devices.get_by_provider('lutroncaseta');
+  //abode.devices.get_by_providerAsync('lutroncaseta').then(function (devices) {
     var device_defers = [];
 
     // If no devices found, return
@@ -111,7 +112,7 @@ LutronCaseta.poll = function () {
       LutronCaseta.polling = false;
     });
 
-  });
+  //});
 
 };
 
