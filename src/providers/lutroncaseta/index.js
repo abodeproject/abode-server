@@ -29,6 +29,7 @@ var LutronCaseta = function () {
   LutronCaseta.config.reconnect_timeout = LutronCaseta.config.reconnect_timeout || 5;
   LutronCaseta.config.message_time = LutronCaseta.config.message_time || 2;
   LutronCaseta.config.queue_interval = LutronCaseta.config.queue_interval || 100;
+  LutronCaseta.config.poll_interval = LutronCaseta.config.poll_interval || 60;
 
   // Build our telnet client
   LutronCaseta.connection = new telnet();
@@ -58,6 +59,62 @@ var LutronCaseta = function () {
   return defer.promise;
 };
 
+LutronCaseta.poll = function () {
+
+  // If we are already polling, throw an error
+  if (LutronCaseta.polling) {
+    log.warn('Poll in progress since %s', LutronCaseta.polling);
+    return;
+  }
+
+  // Set our polling start time
+  LutronCaseta.polling = new Date();
+
+  // Get all lutron devices
+  abode.devices.get_by_providerAsync('lutroncaseta').then(function (devices) {
+    var device_defers = [];
+
+    // If no devices found, return
+    if (devices.length === 0) {
+      log.info('No Lutron Devices to Poll');
+      LutronCaseta.polling = false;
+      return;
+    }
+
+    log.debug('Starting to poll devices');
+    devices.forEach(function (device) {
+      // Set our device defer and add it to our list
+      var device_defer = q.defer();
+      device_defers.push(device_defer.promise);
+
+      // If device is not active, do not poll
+      if (device.active !== true) {
+        device_defer.resolve();
+        return;
+      }
+
+      // Get status of device
+      LutronCaseta.status(device).then(function (data) {
+        device_defer.resolve();
+
+        // If we have an update key, set the device staet
+        if (data.update) {
+
+          device.set_state(data.update, undefined, {'skip_pre': true, 'skip_post': true});
+
+        }
+      });
+    });
+
+    // Once all devices polled, set polling flag to false
+    q.allSettled(device_defers).then(function () {
+      LutronCaseta.polling = false;
+    });
+
+  });
+
+};
+
 LutronCaseta.start = function () {
   var msg,
     defer = q.defer();
@@ -73,6 +130,9 @@ LutronCaseta.start = function () {
 
     // Start our queue processor
     LutronCaseta.timer = setInterval(LutronCaseta.queue_processor, LutronCaseta.config.queue_interval);
+
+    // Start our poller
+    LutronCaseta.poller = setInterval(LutronCaseta.poll, LutronCaseta.config.poll_interval * 1000);
 
     log.info(msg);
     defer.resolve({'status': 'success', 'message': msg});
@@ -97,6 +157,9 @@ LutronCaseta.stop = function () {
 
     // Stop the queue handler
     clearInterval(LutronCaseta.timer);
+
+    // Stop the queue handler
+    clearInterval(LutronCaseta.poller);
 
     // Disconnect the telnet connection
     LutronCaseta.connection.end();
@@ -406,7 +469,7 @@ LutronCaseta.on_data = function (data) {
   log.info('Message received:', message.response);
 
   // Lookup the integration id
-  abode.devices.model.findOne({'config.integration_id': message.integration_id, 'provider': 'lutroncaseta'}).then(function (device) {
+  abode.devices.query({'config.integration_id': message.integration_id, 'provider': 'lutroncaseta'}).then(function (device) {
 
     if (!device) {
       log.warn('Device not found:', message.integration_id);
