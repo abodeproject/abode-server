@@ -95,7 +95,7 @@ LutronCaseta.poll = function () {
       }
 
       // Get status of device
-      LutronCaseta.status(device).then(function (data) {
+      LutronCaseta.get_status(device).then(function (data) {
         device_defer.resolve();
 
         // If we have an update key, set the device staet
