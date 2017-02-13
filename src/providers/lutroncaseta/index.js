@@ -470,12 +470,7 @@ LutronCaseta.on_data = function (data) {
   log.info('Message received:', message.response);
 
   // Lookup the integration id
-  abode.devices.model.findOne({'config.integration_id': message.integration_id, 'provider': 'lutroncaseta'}, function (err, device) {
-
-    if (err) {
-      log.error('Error looking up device: %s', err);
-      return;
-    }
+  abode.devices.model.findOne({'config.integration_id': message.integration_id, 'provider': 'lutroncaseta'}).then(function (device) {
 
     if (!device) {
       log.warn('Device not found:', message.integration_id);
@@ -491,6 +486,8 @@ LutronCaseta.on_data = function (data) {
     data.last_seen = new Date();
     device.set_state(data);
 
+  }, function (err) {
+    log.error('Error looking up device: %s', err);
   });
 
 };
