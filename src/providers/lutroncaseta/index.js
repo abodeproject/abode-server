@@ -274,7 +274,7 @@ LutronCaseta.command_handlers = {
 };
 
 // Set our regex for parsing a message
-LutronCaseta.message_re = /([~#?])([^,]+),([^,]+),?([^]+)?,?([^]+)?,?([^]+)?/;
+LutronCaseta.message_re = /([~#?])([^,]+),([^,]+),?([^,]+)?,?([^,]+)?,?([^,]+)?\r?/;
 
 LutronCaseta.Message = function (config) {
   var self = this,
@@ -313,11 +313,11 @@ LutronCaseta.Message = function (config) {
   LutronCaseta.queue.push(self);
 };
 
-LutronCaseta.Message.prototype.success = function (response) {
+LutronCaseta.Message.prototype.success = function () {
   var self = this;
 
-  self.response = response;
-  self.defer.resolve({'status': 'success', 'message': self.response, 'command': self.message});
+  //self.response = response;
+  self.defer.resolve({'status': 'success', 'message': self.response, 'command': self.message, 'self': self});
   log.debug('Message success:', self.response);
 };
 
@@ -379,11 +379,11 @@ LutronCaseta.Message.prototype.send = function () {
 
     // If we got an ERROR command, error out
     if (self.command === 'ERROR') {
-      return self.error(self.response);
+      return self.error();
     }
 
     // Otherwise run message success handler
-    return self.success(self.response);
+    return self.success();
   });
 
 };
@@ -470,7 +470,7 @@ LutronCaseta.on_data = function (data) {
   log.info('Message received:', message.response);
 
   // Lookup the integration id
-  abode.devices.query({'config.integration_id': message.integration_id, 'provider': 'lutroncaseta'}).then(function (device) {
+  abode.devices.model.find({'config.integration_id': message.integration_id, 'provider': 'lutroncaseta'}).then(function (device) {
 
     if (!device) {
       log.warn('Device not found:', message.integration_id);
@@ -515,7 +515,7 @@ LutronCaseta.on_failedlogin = function () {
 };
 
 // 
-LutronCaseta.status = function (device) {
+LutronCaseta.get_status = function (device) {
   var defer = q.defer();
 
   var cmd = [
@@ -524,8 +524,9 @@ LutronCaseta.status = function (device) {
     '1'
   ];
 
-  LutronCaseta.send(cmd.join(',')).then(function () {
-    defer.resolve({'response': true, 'update': {}});
+  LutronCaseta.send(cmd.join(',')).then(function (msg) {
+    var level = parseInt(msg.self.parameters, 10);
+    defer.resolve({'response': true, 'update': {'_level': level, '_on': (level > 0)}}); 
   }, function (err) {
     defer.reject(err);
   });
