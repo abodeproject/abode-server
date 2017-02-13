@@ -479,7 +479,7 @@ LutronCaseta.on_data = function (data) {
 
     var data = {};
     if (message.parameters !== undefined) {
-      data._level = message.parameters;
+      data._level = parseInt(message.parameters, 10);
       data._on = (message.parameters > 0);
     }
 
