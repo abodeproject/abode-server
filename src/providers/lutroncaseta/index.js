@@ -478,9 +478,9 @@ LutronCaseta.on_data = function (data) {
     }
 
     var data = {};
-    if (message.level !== undefined) {
-      data._level = message.level;
-      data._on = (message.level > 0);
+    if (message.parameters !== undefined) {
+      data._level = message.parameters;
+      data._on = (message.parameters > 0);
     }
 
     data.last_seen = new Date();
@@ -525,7 +525,7 @@ LutronCaseta.get_status = function (device) {
   ];
 
   LutronCaseta.send(cmd.join(',')).then(function (msg) {
-    var level = parseInt(msg.self.parameters, 10);
+    var level = parseInt(msg.self.parameters, 10) ;
     defer.resolve({'response': true, 'update': {'_level': level, '_on': (level > 0)}}); 
   }, function (err) {
     defer.reject(err);
