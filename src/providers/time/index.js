@@ -59,7 +59,7 @@ var updateDetails = function (date) {
 
   Time.moon_azimuth = convertDeg(moonpos.azimuth, 180);
   Time.moon_altitude = convertDeg(moonpos.altitude);
-  Time.moon_phase = convertDeg(moon_illumination.phase);
+  Time.moon_phase = parseInt(moon_illumination.phase * 100, 10);
 
   Time.sunrise = Time.getTime(suncalc.sunrise);
   Time.sunset = Time.getTime(suncalc.sunset);
