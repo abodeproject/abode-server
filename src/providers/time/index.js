@@ -6,6 +6,9 @@ var routes,
   day_int,
   current,
   suncalc,
+  sunpos,
+  moonpos,
+  moon_illumination,
   time_interval,
   q = require('q'),
   events,
@@ -15,6 +18,13 @@ var routes,
 var Time;
 var logger = require('log4js'),
   log = logger.getLogger('time');
+
+var convertDeg = function (rad, offset) {
+  var result = (rad * 180 / Math.PI) + (offset || 0);
+  result = (result > 360) ? result - 360 : result;
+
+  return Math.round(result);
+};
 
 //Update the various details which other functions rely on
 var updateDetails = function (date) {
@@ -40,6 +50,16 @@ var updateDetails = function (date) {
 
   //Update sun/moon times
   suncalc = SunCalc.getTimes(current, Time.config.location.lat, Time.config.location.long);
+  sunpos = SunCalc.getPosition(current, Time.config.location.lat, Time.config.location.long);
+  moonpos = SunCalc.getMoonPosition(current, Time.config.location.lat, Time.config.location.long);
+  moon_illumination = SunCalc.getMoonIllumination(current);
+
+  Time.sun_azimuth = convertDeg(sunpos.azimuth, 180);
+  Time.sun_altitude = convertDeg(sunpos.altitude);
+
+  Time.moon_azimuth = convertDeg(moonpos.azimuth, 180);
+  Time.moon_altitude = convertDeg(moonpos.altitude);
+  Time.moon_phase = convertDeg(moon_illumination.phase);
 
   Time.sunrise = Time.getTime(suncalc.sunrise);
   Time.sunset = Time.getTime(suncalc.sunset);
@@ -200,7 +220,12 @@ Time.toJSON = function () {
     'dusk': Time.dusk,
     'night': Time.night,
     'day': Time.day,
-    'is': Time.is
+    'sun_azimuth': Time.sun_azimuth,
+    'sun_altitude': Time.sun_altitude,
+    'moon_azimuth': Time.moon_azimuth,
+    'moon_altitude': Time.moon_altitude,
+    'moon_phase': Time.moon_phase,
+    'is': Time.is,
   };
 };
 
