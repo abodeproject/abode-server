@@ -7,3 +7,4 @@ config.ini
 config.yaml
 logs/*
 public/*
+npm-debug.log
