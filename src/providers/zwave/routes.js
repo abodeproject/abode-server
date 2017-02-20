@@ -10,6 +10,7 @@ router.get('/', function (req, res) {
     'enabled': zwave.config.enabled,
     'connected': zwave.connected,
     'queue': zwave.queue.length,
+    'new_devices': zwave.new_devices
   });
 
 });

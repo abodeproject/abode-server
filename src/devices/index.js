@@ -44,6 +44,7 @@ Devices.capabilities = [
   'humidity_sensor',
   'moisture_sensor',
   'light_sensor',
+  'uv_sensor',
   'window',
   'door',
   'shade',
@@ -59,7 +60,8 @@ Devices.capabilities = [
   'browser',
   'sensor',
   'siren',
-  'lock'
+  'lock',
+  'battery_sensor',
 ];
 Devices._devices = [];
 Devices.logs = mongoose.model('DeviceLogs', DeviceLogSchema);
@@ -101,6 +103,8 @@ var DeviceSchema = mongoose.Schema({
   '_lumens': {'type': Number, 'default': 0},
   '_mode': {'type': String},
   '_set_point': {'type': Number},
+  '_battery': {'type': Number},
+  '_uv': {'type': Number},
   '_moon': Object,
   '_weather': Object,
   '_forecast': Array,
@@ -678,16 +682,13 @@ Devices.create = function (config) {
   }
 
   // Save the device
-  device.save( function (err) {
-    if (err) {
-      log.error(err.message || err);
-      defer.reject(err);
-      return defer.promise;
-    }
-
+  device._save().then(function () {
     log.info('Device created: ', config.name);
     self._devices.push(device);
-    defer.resolve(device);
+    return defer.resolve(device);
+  }, function (err) {
+    log.error(err.message || err);
+    return defer.reject(err);
   });
 
   return defer.promise;
