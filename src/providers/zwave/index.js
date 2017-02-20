@@ -435,6 +435,10 @@ ZWave.save_pending = function (device) {
     device._motion = (device.config.commandclasses.ALARM['1'].Burglar.value !== 0);
     device.capabilities.push('motion_sensor');
   }
+  
+  if (device.set_state) {
+    device.set_state(device);
+  }
 
   ZWave.pending_devices.splice(ZWave.pending_devices.indexOf(device), 1);
 
