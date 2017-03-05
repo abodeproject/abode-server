@@ -112,7 +112,7 @@ Autoshades.processor = function () {
 
     // If no devices found, return
     if (devices.length === 0) {
-      log.info('No Autoshade Devices to Process');
+      log.debug('No Autoshade Devices to Process');
       Autoshades.working = false;
       return;
     }    
@@ -169,7 +169,7 @@ Autoshades.processor = function () {
 Autoshades.get_status = function (device) {
   var defer = q.defer();
 
-  log.info('Autoshades.get_status(%s)', device);
+  log.debug('Autoshades.get_status(%s)', device);
   defer.resolve({'response': true}); 
 
   return defer.promise;
@@ -178,7 +178,7 @@ Autoshades.get_status = function (device) {
 Autoshades.on = Autoshades.open = function (device) {
   var defer = q.defer();
 
-  log.info('Autoshades.on(%s)', device.name);
+  log.debug('Autoshades.on(%s)', device.name);
   defer.resolve({'response': true, 'update': {_on: true, _level: 100}});
 
   return defer.promise;
@@ -187,7 +187,7 @@ Autoshades.on = Autoshades.open = function (device) {
 Autoshades.off = Autoshades.close = function (device) {
   var defer = q.defer();
 
-  log.info('Autoshades.off(%s)', device.name);
+  log.debug('Autoshades.off(%s)', device.name);
   defer.resolve({'response': true, 'update': {_on: false, _level: 0}});
 
   return defer.promise;
@@ -197,7 +197,7 @@ Autoshades.set_level = function (device, level) {
   var defer = q.defer();
   var device_defers = [];
 
-  log.info('Autoshades.set_level(%s, %s)', device.name, level);
+  log.debug('Autoshades.set_level(%s, %s)', device.name, level);
 
   // If we have no devices, stop processing
   if (!device.config.devices) {
@@ -242,7 +242,7 @@ Autoshades.set_level = function (device, level) {
     }
 
     // Set the device and return add the defer to our list
-    log.info('Setting shade level to %s%%: %s', level, shade_device.name);
+    log.debug('Setting shade level to %s%%: %s', level, shade_device.name);
     device_defers.push(shade_device.set_level(level));
   });
 

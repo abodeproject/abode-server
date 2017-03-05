@@ -320,7 +320,7 @@ actions.forEach(function (action) {
         res.status(400).send(err || {'status': 'failed', 'message': 'Failed to send action'});
       });
     } else {
-      res.send({'status': 'success', 'response': response});
+      res.send({'status': 'success', 'response': response, 'device': device});
     }
   });
 

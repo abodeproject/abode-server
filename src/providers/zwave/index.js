@@ -25,37 +25,19 @@ var ZWave = function () {
   ZWave.config.message_time = ZWave.config.message_time || 2;
   ZWave.config.queue_interval = ZWave.config.queue_interval || 100;
   ZWave.config.poll_interval = ZWave.config.poll_interval || 60;
-  ZWave.config.save_wait = ZWave.config.save_wait || 500;
+  ZWave.config.save_wait = ZWave.config.save_wait || 1000;
   ZWave.config.temperature_units = ZWave.config.temperature_units || 'F';
+  ZWave.config.ready_timeout = ZWave.config.ready_timeout || 60;
+  ZWave.config.command_timeout = ZWave.config.command_timeout || 30;
 
   // Set some defaults
   ZWave.connected = false;
   ZWave.queue = [];
   ZWave.new_devices = [];
+  ZWave.waiting = [];
   ZWave.pending_devices = [];
   ZWave.pending_timers = {};
-
-  ZWave.connection = new OZW({
-      Logging: false,
-      ConsoleOutput: true
-  });
-
-  ZWave.connection.on('driver ready', ZWave.on_driver_ready);
-  ZWave.connection.on('driver failed', ZWave.on_driver_failed);
-  ZWave.connection.on('scan complete', ZWave.on_scan_complete);
-  ZWave.connection.on('node added', ZWave.on_node_added);
-  ZWave.connection.on('node removed', ZWave.on_node_removed);
-  ZWave.connection.on('node naming', ZWave.on_node_naming);
-  ZWave.connection.on('node available', ZWave.on_node_available);
-  ZWave.connection.on('node ready', ZWave.on_node_ready);
-  ZWave.connection.on('polling enabled', ZWave.on_polling_enabled);
-  ZWave.connection.on('polling disabled', ZWave.on_polling_disabled);
-  ZWave.connection.on('scene event', ZWave.on_scene_event);
-  ZWave.connection.on('value added', ZWave.on_value_added);
-  ZWave.connection.on('value changed', ZWave.on_value_changed);
-  ZWave.connection.on('value refreshed', ZWave.on_value_refreshed);
-  ZWave.connection.on('value removed', ZWave.on_value_removed);
-  ZWave.connection.on('controller command', ZWave.on_controller_command);
+  ZWave.ready = [];
 
   // If we are enabled, start it up
   if (ZWave.config.enabled) {
@@ -89,7 +71,7 @@ ZWave.enable = function () {
     ZWave.timer = setInterval(ZWave.queue_processor, ZWave.config.queue_interval);
 
     // Start our poller
-    ZWave.poller = setInterval(ZWave.poll, ZWave.config.poll_interval * 1000);
+    //ZWave.poller = setInterval(ZWave.poll, ZWave.config.poll_interval * 1000);
 
     log.info(msg);
     defer.resolve({'status': 'success', 'message': msg});
@@ -134,12 +116,12 @@ ZWave.disable = function () {
 
 ZWave.queue_processor = function () {
 
-  // If we are already processing a message, skip this interval
+  // If we are already processing a command, skip this interval
   if (!ZWave.connected) {
     return;
   }
 
-  // If we are already processing a message, skip this interval
+  // If we are already processing a command, skip this interval
   if (ZWave.processing) {
     return;
   }
@@ -149,14 +131,14 @@ ZWave.queue_processor = function () {
     return;
   }
 
-  // Get a message to process
-  var msg = ZWave.queue.shift();
+  // Get a command to process
+  var cmd = ZWave.queue.shift();
 
-  // Set our processing flag to the message
-  ZWave.processing = msg;
+  // Set our processing flag to the command
+  ZWave.processing = cmd;
 
-  // Send the message
-  msg.send();
+  // Send the command
+  cmd.send();
 };
 
 ZWave.poll = function () {
@@ -216,19 +198,95 @@ ZWave.poll = function () {
 
 };
 
+ZWave.convert_to_hex = function (key) {
+  var i,
+    keyBuf,
+    keyHex = [];
+
+  if (!key) {
+    return;
+  }
+
+  keyBuf = Buffer.from(key, 'utf8');
+
+  for (i=0; i<keyBuf.length; i += 1) {
+    keyHex.push('0x' + keyBuf.toString('hex', i, i+1));
+  }
+
+  return keyHex;
+};
+
 ZWave.connect = function () {
   var defer = q.defer();
+
+  ZWave.connection = new OZW({
+      Logging: false,
+      ConsoleOutput: true,
+      NetworkKey: ZWave.convert_to_hex(ZWave.config.security_key)
+  });
+
+  ZWave.connection.on('driver ready', ZWave.on_driver_ready);
+  ZWave.connection.on('driver failed', ZWave.on_driver_failed);
+  ZWave.connection.on('scan complete', ZWave.on_scan_complete);
+  ZWave.connection.on('node added', ZWave.on_node_added);
+  ZWave.connection.on('node removed', ZWave.on_node_removed);
+  ZWave.connection.on('node naming', ZWave.on_node_naming);
+  ZWave.connection.on('node available', ZWave.on_node_available);
+  ZWave.connection.on('node ready', ZWave.on_node_ready);
+  ZWave.connection.on('polling enabled', ZWave.on_polling_enabled);
+  ZWave.connection.on('polling disabled', ZWave.on_polling_disabled);
+  ZWave.connection.on('scene event', ZWave.on_scene_event);
+  ZWave.connection.on('value added', ZWave.on_value_added);
+  ZWave.connection.on('value changed', ZWave.on_value_changed);
+  ZWave.connection.on('value refreshed', ZWave.on_value_refreshed);
+  ZWave.connection.on('value removed', ZWave.on_value_removed);
+  ZWave.connection.on('controller command', ZWave.on_controller_command);
 
   ZWave.connection.connect(ZWave.config.device);
 
   return defer.promise;
 };
 
+ZWave.wait_for_ready = function (device) {
+  var msg,
+    timer,
+    wait_obj,
+    defer = q.defer(),
+    nodeid = device.config.node_id;
+
+  timer = setTimeout(function () {
+    msg = 'Timeout waiting for node to be ready: ' + device.name;
+    defer.reject({'status': 'failed', 'message': msg});
+    log.warn(msg);
+    ZWave.waiting.splice(ZWave.waiting.indexOf(wait_obj), 1);
+  }, ZWave.config.ready_timeout * 1000);
+
+  wait_obj = {'node_id': nodeid, 'defer': defer, 'timer': timer};
+
+  ZWave.waiting.push(wait_obj);
+
+  return defer.promise;
+};
+
+ZWave.send = function (config) {
+
+  // Create a new message
+  var cmd = new ZWave.Command(config);
+
+  return cmd.promise;
+};
+
 ZWave.get_status = function (device) {
   var defer = q.defer();
 
-  log.info('ZWave.get_status(%s)', device);
-  defer.resolve();
+  log.info('ZWave.get_status(%s)', device.name);
+
+  ZWave.connection.refreshNodeInfo(device.config.node_id);
+  ZWave.wait_for_ready(device).then(function (device) {
+    defer.resolve({'status': true, 'update': ZWave.parse_device(device)});
+  }, function (err) {
+    defer.reject(err);
+  });
 
   return defer.promise;
 };
@@ -237,7 +295,19 @@ ZWave.on = function (device) {
   var defer = q.defer();
 
   log.info('ZWave.on(%s)', device);
-  defer.resolve();
+  if (device.config.node_id || device.config.scene_id) {
+
+    if (device.config.type === 'scene') {
+      ZWave.connection.activateScene(device.config.scene_id);
+    } else {
+      ZWave.connection.setNodeOn(device.config.node_id);
+    }
+
+    defer.resolve();
+
+  } else {
+    defer.reject({'status': 'failed', 'message': 'Missing node id'});
+  }
   
   return defer.promise;
 };
@@ -246,7 +316,12 @@ ZWave.off = function (device) {
   var defer = q.defer();
 
   log.info('ZWave.off(%s)', device);
-  defer.resolve();
+  if (device.config.node_id) {
+    ZWave.connection.setNodeOff(device.config.node_id);
+    defer.resolve(); 
+  } else {
+    defer.reject({'status': 'failed', 'message': 'Missing device nodeid or level'});
+  }
   
   return defer.promise;
 };
@@ -255,7 +330,13 @@ ZWave.set_level = function (device, level) {
   var defer = q.defer();
 
   log.info('ZWave.off(%s, %s)', device, level);
-  defer.resolve();
+
+  if (device.config.node_id && level !== undefined) {
+    ZWave.setLevel(device.config.node_id, level);
+    defer.resolve();
+  } else {
+    defer.reject({'status': 'failed', 'message': 'Missing device nodeid or level'});
+  }
   
   return defer.promise;
 };
@@ -263,6 +344,7 @@ ZWave.set_level = function (device, level) {
 ZWave.on_driver_ready = function (homeid) {
   log.info('Driver Ready', homeid);
   ZWave.connected = true;
+  ZWave.scenes = ZWave.connection.getScenes();
 };
 
 ZWave.on_driver_failed = function () {
@@ -310,22 +392,46 @@ ZWave.on_node_available = function (nodeid, nodeinfo) {
   ZWave.get_device(nodeid).then(function (device) {
     log.debug('Node available', device.name || nodeid);
 
-    ZWave.delay_save(device);
-
     device.config.nodeinfo = nodeinfo;
+
+    ZWave.delay_save(device);
   }, function (err) {
     log.error('Error looking up device: %s', err);
   });
 };
 
+ZWave.is_waiting = function (nodeid) {
+  var waiting = ZWave.waiting.filter(function (waiting) {
+    return (waiting.node_id === nodeid);
+  });
+
+  return (waiting.length > 0) ? waiting[0] : false;
+};
+
+ZWave.is_ready = function (nodeid) {
+  return (ZWave.ready.indexOf(nodeid) >= 0);
+};
+
 ZWave.on_node_ready = function (nodeid, nodeinfo) {
+  var waiting = ZWave.is_waiting(nodeid);
+
+  if (!ZWave.is_ready(nodeid)) {
+    ZWave.ready.push(nodeid);
+  }
 
   ZWave.get_device(nodeid).then(function (device) {
     log.debug('Node ready', device.name || nodeid);
 
+    device.config.nodeinfo = nodeinfo;
+
+    if (waiting) {
+      log.info('Found node waiting: %s', nodeid);
+      waiting.defer.resolve(device);
+      clearTimeout(waiting.timer);
+    }
+
     ZWave.delay_save(device);
 
-    device.config.nodeinfo = nodeinfo;
   }, function (err) {
     log.error('Error looking up device: %s', err);
   });
@@ -350,14 +456,14 @@ ZWave.on_value_added = ZWave.on_value_changed = ZWave.on_value_refreshed = funct
   ZWave.get_device(nodeid).then(function (device) {
     log.debug('value added/changed/refreshed %s.%s.%s.%s.%s', device.name || nodeid, class_key, valueId.value_id, valueId.label, valueId.value);
 
-    ZWave.delay_save(device);
-
     //Set the values
     device.config.commandclasses = device.config.commandclasses || {};
     device.config.commandclasses[class_key] = device.config.commandclasses[class_key] || {};
     device.config.commandclasses[class_key][valueId.instance] = device.config.commandclasses[class_key][valueId.instance] || {};
     device.config.commandclasses[class_key][valueId.instance][valueId.label || valueId.index] = valueId;
 
+    device.last_seen = new Date();
+    ZWave.delay_save(device);
   }, function (err) {
     log.error('Error looking up device: %s', err);
   });
@@ -392,10 +498,8 @@ ZWave.delay_save = function (device) {
 
 };
 
-ZWave.save_pending = function (device) {
-  log.info('Saving device:', device.name || device.config.node_id);
+ZWave.parse_device = function (device) {
   device.capabilities = [];
-
 
   if (device.config.commandclasses.BATTERY && device.config.commandclasses.BATTERY['1']) {
     if (device.config.commandclasses.BATTERY['1']['Battery Level']) {
@@ -435,7 +539,15 @@ ZWave.save_pending = function (device) {
     device._motion = (device.config.commandclasses.ALARM['1'].Burglar.value !== 0);
     device.capabilities.push('motion_sensor');
   }
-  
+
+  return device;
+};
+
+ZWave.save_pending = function (device) {
+  log.info('Saving device:', device.name || device.config.node_id);
+
+  device = ZWave.parse_device(device);
+
   if (device.set_state) {
     device.set_state(device);
   }
@@ -615,6 +727,208 @@ ZWave.post_save = function (device) {
   }
 
   defer.resolve();
+
+  return defer.promise;
+};
+
+ZWave.add_node = function (security) {
+  ZWave.connection.addNode(security);
+};
+
+ZWave.remove_node = function () {
+  ZWave.connection.removeNode();
+};
+
+ZWave.set_name = function (nodeid, name) {
+  ZWave.connection.setNodeName(nodeid, name);
+};
+
+ZWave.set_location = function (nodeid, location) {
+  ZWave.connection.setNodeLocation(nodeid, location);
+};
+
+ZWave.set_value = function (nodeid, commandClass, instance, index, value) {
+  var defer = q.defer();
+
+  if (!ZWave.is_ready(nodeid)) {
+    defer.resolve();
+    return defer.promise;
+  }
+
+  if (!nodeid || !commandClass || !instance || !index || !value) {
+    defer.reject({'status': 'failed', 'message': 'Missing required key/values'});
+  } else {
+    log.debug('Setting value: nodeid=%s, commandclass=%s, instance=%s, index=%s, value=%s', nodeid, commandClass, instance, index, value);
+    ZWave.connection.setValue({ 'node_id': nodeid, 'class_id': commandClass, 'instance': instance, 'index': index}, value);
+    defer.resolve();
+  }
+
+  return defer.promise;
+};
+
+ZWave.get_scenes = function () {
+  var defer = q.defer();
+
+  var scenes = ZWave.connection.getScenes();
+  scenes.forEach(function (scene) {
+    scene.values = ZWave.connection.sceneGetValues(scene.sceneid);
+  });
+
+  ZWave.scenes = scenes;
+
+  defer.resolve(scenes);
+
+  return defer.promise;
+};
+
+ZWave.create_scene = function (name) {
+  var defer = q.defer();
+
+  log.debug('Creating scene: %s', name);
+  defer.resolve({'sceneid': ZWave.connection.createScene(name, undefined)});
+
+  ZWave.get_scenes();
+
+  return defer.promise;
+};
+
+ZWave.remove_scene = function (sceneid) {
+  var defer = q.defer();
+
+
+  log.debug('Removing scene: %s', sceneid);
+  defer.resolve(ZWave.connection.removeScene(sceneid));
+
+  ZWave.get_scenes();
+  
+  return defer.promise;
+};
+
+ZWave.get_scene = function (sceneid) {
+  var defer = q.defer();
+
+  log.debug('Looking up scene: %s', sceneid);
+
+  var scenes = ZWave.scenes.filter(function (scene) {
+    return (scene.sceneid === parseInt(sceneid));
+  });
+
+  if (scenes.length === 1) {
+    defer.resolve(scenes[0]);
+  } else {
+    defer.reject({'status': 'failed', 'message': 'Scene not found', 'http_code': 404});
+  }
+  
+  return defer.promise;
+};
+
+ZWave.add_scene_value = function (sceneid, nodeid, commandclass, instance, index, value) {
+  var defer = q.defer();
+
+  ZWave.get_scene(sceneid).then(function () {
+    ZWave.connection.addSceneValue(sceneid, nodeid, commandclass, instance, index, value);
+    defer.resolve();
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
+ZWave.remove_scene_value = function (sceneid, nodeid, commandclass, instance, index, value) {
+  var defer = q.defer();
+
+  ZWave.get_scene(sceneid).then(function () {
+    ZWave.connection.removeSceneValue(sceneid, nodeid, commandclass, instance, index, value);
+    defer.resolve();
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
+ZWave.pre_save = function (device) {
+  var defer = q.defer(),
+    value_defers = [];
+
+  // Look for an existing device
+  abode.devices.model.findOne({'provider': 'zwave', 'config.node_id': device.config.node_id}, function (err, orig) {
+    if (err) {
+      return defer.reject(err);
+    }
+
+    // If we didn't find an existing device, resolve our defer
+    if (orig === undefined) {
+      return defer.resolve();
+    }
+
+
+    //If we have a CONFIGURATION command class, start comparing
+    if (device.config && device.config.commandclasses && device.config.commandclasses.CONFIGURATION) {
+
+      //If the orig device does not have the the config command class, resolve our defer
+      if (!orig.config || !orig.config.commandclasses || !orig.config.commandclasses.CONFIGURATION) {
+        return defer.resolve();
+      }
+
+      // Iterate through each instance
+      Object.keys(device.config.commandclasses.CONFIGURATION).forEach(function (instance) {
+
+        //Check if instance exists in orig
+        if (!orig.config.commandclasses.CONFIGURATION[instance]) {
+          return;
+        }
+
+        Object.keys(device.config.commandclasses.CONFIGURATION[instance]).forEach(function (config) {
+          var new_index = device.config.commandclasses.CONFIGURATION[instance][config];
+          var org_index = orig.config.commandclasses.CONFIGURATION[instance][config];
+
+          // If orig does not have the instance index, return
+          if (org_index === undefined) {
+            return;
+          }
+
+          // If device does not have the instance index value, return
+          if (new_index.value === undefined) {
+            return;
+          }
+
+          // If orig does not have the instance index value, return
+          if (org_index.value === undefined) {
+            return;
+          }
+
+          // If our instance index values match, return
+          if (new_index.value === org_index.value) {
+            return;
+          }
+          
+          //var value_defer = ZWave.set_value(new_index.node_id, new_index.class_id, new_index.instance, new_index.index, new_index.value);
+
+          //value_defers.push(value_defer);
+
+          // Set the value
+          console.log('Set value: %s = %s (was %s)', config, new_index.value, orig.config.commandclasses.CONFIGURATION[instance][config].value);
+        });
+
+      });
+
+      // If we have any value sets, wait for them to finish
+      if (value_defers.length > 0) {
+
+        log.debug('Waiting for set_values');
+        q.allSettled(value_defers).then(function () {
+          defer.resolve();
+        });
+
+      // Otherwise, just resolve our defer
+      } else {
+        return defer.resolve();
+      }
+
+    }
+  });
 
   return defer.promise;
 };
