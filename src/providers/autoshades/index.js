@@ -204,7 +204,6 @@ Autoshades.set_level = function (device, level) {
   var defer = q.defer();
   var device_defers = [];
 
-  log.debug('Autoshades.set_level(%s, %s)', device.name, level);
 
   // If we have no devices, stop processing
   if (!device.config.devices) {
@@ -225,6 +224,8 @@ Autoshades.set_level = function (device, level) {
     defer.reject({'response': false, 'message': 'Outside of azimuth range'});
     return defer.promise;
   }
+
+  log.info('Autoshades.set_level(%s, %s)', device.name, level);
 
   // Iterate through each device
   device.config.devices.forEach(function (shade) {
