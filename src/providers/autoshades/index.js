@@ -219,7 +219,7 @@ Autoshades.set_level = function (device, level) {
   }
 
   // Make sure we're within our azimuth range
-  if (abode.providers.time.sun_azimuth < device.config.min_azimuth  && abode.providers.time.sun_azimuth > device.config.max_azimuth ) {
+  if (abode.providers.time.sun_azimuth < device.config.min_azimuth || abode.providers.time.sun_azimuth > device.config.max_azimuth ) {
     log.debug('Not within azimuth range %s - %s (%s)', device.config.min_azimuth, device.config.max_azimuth, abode.providers.time.sun_azimuth);
     defer.reject({'response': false, 'message': 'Outside of azimuth range'});
     return defer.promise;
