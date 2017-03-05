@@ -104,8 +104,15 @@ Autoshades.processor = function () {
     }
 
     // If the altitude is less then zero, the sun isn't up so do nothing
-    if (abode.providers.time.sun_altitude < 0) {
+    if (abode.providers.time.sun_altitude <= 0) {
       log.warn('Sun is set, doing nothing');
+      Autoshades.working = false;
+      return;
+    }
+
+    // If the altitude is less then zero, the sun isn't up so do nothing
+    if (abode.providers.time.is_night) {
+      log.warn('It is night, doing nothing');
       Autoshades.working = false;
       return;
     }
