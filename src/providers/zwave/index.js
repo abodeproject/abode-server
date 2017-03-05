@@ -499,45 +499,60 @@ ZWave.delay_save = function (device) {
 };
 
 ZWave.parse_device = function (device) {
-  device.capabilities = [];
+  device.capabilities = device.capabilities || [];
 
-  if (device.config.commandclasses.BATTERY && device.config.commandclasses.BATTERY['1']) {
-    if (device.config.commandclasses.BATTERY['1']['Battery Level']) {
-      device._battery = parseFloat(device.config.commandclasses.BATTERY['1']['Battery Level'].value);
-      device.capabilities.push('battery_sensor');
-    }
-  }
+  if (device.config && device.config.commandclasses) {
 
-  if (device.config.commandclasses.SENSOR_MULTILEVEL && device.config.commandclasses.SENSOR_MULTILEVEL['1']) {
-    if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Temperature) {
-      var temp = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1'].Temperature.value);
-      if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Temperature.units !== ZWave.config.temperature_units) {
-        if (ZWave.config.temperature_units === 'F') {
-          temp = temp * (9/5) + 32;
-        } else {
-          temp = (temp - 32) * (5/9);
+    if (device.config.commandclasses.BATTERY && device.config.commandclasses.BATTERY['1']) {
+      if (device.config.commandclasses.BATTERY['1']['Battery Level']) {
+        device._battery = parseFloat(device.config.commandclasses.BATTERY['1']['Battery Level'].value);
+        if (device.capabilities.indexOf('battery_sensor') === -1) {
+          device.capabilities.push('battery_sensor');
         }
       }
-      device._temperature = parseFloat(temp.toFixed(2));
-      device.capabilities.push('temperature_sensor');
     }
-    if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Luminance) {
-      device._lumens = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1'].Luminance.value);
-      device.capabilities.push('light_sensor');
-    }
-    if (device.config.commandclasses.SENSOR_MULTILEVEL['1']['Relative Humidity']) {
-      device._humidity = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1']['Relative Humidity'].value);
-      device.capabilities.push('humidity_sensor');
-    }
-    if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Ultraviolet) {
-      device._uv = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1'].Ultraviolet.value);
-      device.capabilities.push('uv_sensor');
-    }
-  }
 
-  if (device.config.commandclasses.ALARM && device.config.commandclasses.ALARM['1']) {
-    device._motion = (device.config.commandclasses.ALARM['1'].Burglar.value !== 0);
-    device.capabilities.push('motion_sensor');
+    if (device.config.commandclasses.SENSOR_MULTILEVEL && device.config.commandclasses.SENSOR_MULTILEVEL['1']) {
+      if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Temperature) {
+        var temp = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1'].Temperature.value);
+        if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Temperature.units !== ZWave.config.temperature_units) {
+          if (ZWave.config.temperature_units === 'F') {
+            temp = temp * (9/5) + 32;
+          } else {
+            temp = (temp - 32) * (5/9);
+          }
+        }
+        device._temperature = parseFloat(temp.toFixed(2));
+        if (device.capabilities.indexOf('temperature_sensor') === -1) {
+          device.capabilities.push('temperature_sensor');
+        }
+      }
+      if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Luminance) {
+        device._lumens = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1'].Luminance.value);
+        if (device.capabilities.indexOf('light_sensor') === -1) {
+          device.capabilities.push('light_sensor');
+        }
+      }
+      if (device.config.commandclasses.SENSOR_MULTILEVEL['1']['Relative Humidity']) {
+        device._humidity = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1']['Relative Humidity'].value);
+        if (device.capabilities.indexOf('humidity_sensor') === -1) {
+          device.capabilities.push('humidity_sensor');
+        }
+      }
+      if (device.config.commandclasses.SENSOR_MULTILEVEL['1'].Ultraviolet) {
+        device._uv = parseFloat(device.config.commandclasses.SENSOR_MULTILEVEL['1'].Ultraviolet.value);
+        if (device.capabilities.indexOf('uv_sensor') === -1) {
+          device.capabilities.push('uv_sensor');
+        }
+      }
+    }
+
+    if (device.config.commandclasses.ALARM && device.config.commandclasses.ALARM['1']) {
+      device._motion = (device.config.commandclasses.ALARM['1'].Burglar.value !== 0);
+      if (device.capabilities.indexOf('motion_sensor') === -1) {
+        device.capabilities.push('motion_sensor');
+      }
+    }
   }
 
   return device;
