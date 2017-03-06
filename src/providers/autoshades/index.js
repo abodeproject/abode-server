@@ -107,7 +107,7 @@ Autoshades.processor = function () {
 
     // If the altitude is less then zero, the sun isn't up so do nothing
     if (abode.providers.time.sun_altitude <= 0) {
-      log.warn('Sun is set, doing nothing');
+      log.warn('Sun is below horizon, doing nothing');
       Autoshades.working = false;
       return;
     }
@@ -149,20 +149,8 @@ Autoshades.processor = function () {
         return;
       }
 
-      var sunset_diff = abode.providers.time.time - abode.providers.time.sunset;
-      var sunrise_diff = abode.providers.time.time - abode.providers.time.sunrise;
-
-      //If within 2 times the interval of sunrise, set our sunrise level
-      if (device.config.sunrise && device.config.sunrise_level !== undefined && sunrise_diff > 0 && sunrise_diff <= (Autoshades.config.interval * 60 * 2)) {
-        log.debug('Using sunrise level');
-        level = device.config.sunrise_level;
-      }
-
-      //If within 2 times the interval of sunset, set our sunset level
-      if (device.config.sunset && device.config.sunset_level !== undefined && sunset_diff > 0 && sunset_diff <= (Autoshades.config.interval * 60 * 2)) {
-        log.debug('Using sunset level');
-        level = device.config.sunset_level;
-      }
+      var sunset_diff = abode.providers.time.sunset - abode.providers.time.time;
+      var sunrise_diff = abode.providers.time.sunrise - abode.providers.time.time;
 
       // If we are between sunset and sunrise try to determine our level
       if (abode.providers.time.time > abode.providers.time.sunrise && abode.providers.time.time < abode.providers.time.sunset) {
@@ -187,6 +175,18 @@ Autoshades.processor = function () {
           log.debug('Using sun tracking level');
           level = ease_function(abode.providers.time.sun_altitude);
         }
+      }
+
+      //If within 2 times of the interval of sunrise, set our sunrise level
+      if (device.config.sunrise && device.config.sunrise_level !== undefined && sunrise_diff > 0 && sunrise_diff <= (Autoshades.config.interval * 60 * 2)) {
+        log.debug('Using sunrise level');
+        level = device.config.sunrise_level;
+      }
+
+      //If within 2 times of the interval of sunset, set our sunset level
+      if (device.config.sunset && device.config.sunset_level !== undefined && sunset_diff > 0 && sunset_diff <= (Autoshades.config.interval * 60 * 2)) {
+        log.debug('Using sunset level');
+        level = device.config.sunset_level;
       }
 
       // If we do not have a level to set, move on
