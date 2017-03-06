@@ -149,8 +149,9 @@ Autoshades.processor = function () {
         return;
       }
 
+      // Determine our diff. A positive value is after sunrise and before sunset
+      var sunrise_diff = abode.providers.time.time - abode.providers.time.sunrise;
       var sunset_diff = abode.providers.time.sunset - abode.providers.time.time;
-      var sunrise_diff = abode.providers.time.sunrise - abode.providers.time.time;
 
       // If we are between sunset and sunrise try to determine our level
       if (abode.providers.time.time > abode.providers.time.sunrise && abode.providers.time.time < abode.providers.time.sunset) {
@@ -178,13 +179,13 @@ Autoshades.processor = function () {
       }
 
       //If within 2 times of the interval of sunrise, set our sunrise level
-      if (device.config.sunrise && device.config.sunrise_level !== undefined && sunrise_diff > 0 && sunrise_diff <= (Autoshades.config.interval * 60 * 2)) {
+      if (device.config.sunrise && device.config.sunrise_level !== undefined && sunrise_diff >= 0 && sunrise_diff <= (Autoshades.config.interval * 60 * 2)) {
         log.debug('Using sunrise level');
         level = device.config.sunrise_level;
       }
 
       //If within 2 times of the interval of sunset, set our sunset level
-      if (device.config.sunset && device.config.sunset_level !== undefined && sunset_diff > 0 && sunset_diff <= (Autoshades.config.interval * 60 * 2)) {
+      if (device.config.sunset && device.config.sunset_level !== undefined && sunset_diff >= 0 && sunset_diff <= (Autoshades.config.interval * 60 * 2)) {
         log.debug('Using sunset level');
         level = device.config.sunset_level;
       }
