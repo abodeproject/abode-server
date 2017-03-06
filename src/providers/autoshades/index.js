@@ -206,6 +206,8 @@ Autoshades.processor = function () {
           device.set_state(data.update, undefined, {'skip_pre': true, 'skip_post': true});
 
         }
+      }, function () {
+          device_defer.reject();
       });
     });
 
