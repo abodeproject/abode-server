@@ -37,6 +37,8 @@ var Autoshades = function () {
   return defer.promise;
 };
 
+Autoshades.cloudy_conditions = ['cloudy', 'hazy', 'rain', 'tstorms', 'snow', 'sleet', 'fog', 'flurries'];
+
 Autoshades.enable = function () {
   var defer = q.defer();
 
@@ -147,8 +149,51 @@ Autoshades.processor = function () {
         return;
       }
 
-      // Determine the shade level based on the sun altitude
-      level = ease_function(abode.providers.time.sun_altitude);
+      var sunset_diff = abode.providers.time.time - abode.providers.time.sunset;
+      var sunrise_diff = abode.providers.time.time - abode.providers.time.sunrise;
+
+      //If within 2 times the interval of sunrise, set our sunrise level
+      if (device.config.sunrise && device.config.sunrise_level !== undefined && sunrise_diff > 0 && sunrise_diff <= (Autoshades.config.interval * 60 * 2)) {
+        log.debug('Using sunrise level');
+        level = device.config.sunrise_level;
+      }
+
+      //If within 2 times the interval of sunset, set our sunset level
+      if (device.config.sunset && device.config.sunset_level !== undefined && sunset_diff > 0 && sunset_diff <= (Autoshades.config.interval * 60 * 2)) {
+        log.debug('Using sunset level');
+        level = device.config.sunset_level;
+      }
+
+      // If we are between sunset and sunrise try to determine our level
+      if (abode.providers.time.time > abode.providers.time.sunrise && abode.providers.time.time < abode.providers.time.sunset) {
+        log.debug('Time is between sunrise and sunset');
+        // If we're tracking weather, determine our weather
+        if (device.config.weather) {
+          // Lookup the weather device
+          var weather_device = abode.devices.get(device.config.weather._id);
+
+          // Check the device was foudn and it was weather
+          if (weather_device && weather_device._weather) {
+            // If the device has a conditions icon and it's in our list, set the level
+            if (weather_device._weather.icon && Autoshades.cloudy_conditions.indexOf(weather_device._weather.icon) >= 0) {
+              log.debug('Using cloudy level');
+              level = device.config.cloudy_level;
+            }
+          }
+        }
+
+        // If we are tracking the sun and no level has been determined, get the level
+        if (device.config.track && level === undefined) {
+          log.debug('Using sun tracking level');
+          level = ease_function(abode.providers.time.sun_altitude);
+        }
+      }
+
+      // If we do not have a level to set, move on
+      if (level === undefined) {
+        log.debug('Nothing to do for device: %s', device.name);
+        return device_defer.resolve();
+      }
 
       // Set the auto shade device level
       Autoshades.set_level(device, level).then(function (data) {
