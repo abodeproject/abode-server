@@ -105,20 +105,6 @@ Autoshades.processor = function () {
       return;
     }
 
-    // If the altitude is less then zero, the sun isn't up so do nothing
-    if (abode.providers.time.sun_altitude <= 0) {
-      log.warn('Sun is below horizon, doing nothing');
-      Autoshades.working = false;
-      return;
-    }
-
-    // If the altitude is less then zero, the sun isn't up so do nothing
-    if (abode.providers.time.is_night) {
-      log.warn('It is night, doing nothing');
-      Autoshades.working = false;
-      return;
-    }
-
     // If no devices found, return
     if (devices.length === 0) {
       log.debug('No Autoshade Devices to Process');
@@ -162,17 +148,22 @@ Autoshades.processor = function () {
       }
 
       // If we are tracking the sun and no level has been determined, get the level
-      if (device.config.track && level === undefined) {
+      if (device.config.track && level === undefined && abode.providers.time.sun_azimuth ) {
         log.debug('Using sun tracking level');
-        ease_function = Autoshades.ease_functions[device.config.mode];
-        // If no ease function defined, skip
-        if (ease_function === undefined) {
-          log.warn('Invalid ease function for device: %s %s', device.name, device.config.mode);
-          device_defer.resolve();
-          return;
+
+        // Make sure we're within our azimuth range
+        if (abode.providers.time.sun_azimuth >= device.config.min_azimuth && abode.providers.time.sun_azimuth <= device.config.max_azimuth ) {
+          ease_function = Autoshades.ease_functions[device.config.mode];
+          // If no ease function defined, skip
+          if (ease_function === undefined) {
+            log.warn('Invalid ease function for device: %s %s', device.name, device.config.mode);
+            return device_defer.resolve();
+          }
+          
+          level = ease_function(abode.providers.time.sun_altitude);
+        } else {
+          log.debug('Not within azimuth range %s - %s (%s)', device.config.min_azimuth, device.config.max_azimuth, abode.providers.time.sun_azimuth);
         }
-        
-        level = ease_function(abode.providers.time.sun_altitude);
       }
 
       //If within 2 times of the interval of sunrise, set our sunrise level
@@ -197,7 +188,7 @@ Autoshades.processor = function () {
       device_defer.timer = setTimeout(function () {
         device_defer.resolve();
         log.error('Timeout waiting for device level to set: %s', device.name);
-      }, 1000 * 60 * 5);
+      }, 1000 * 60 * Autoshades.config.interval);
 
       // Set the auto shade device level
       Autoshades.set_level(device, level).then(function (data) {
@@ -262,20 +253,6 @@ Autoshades.set_level = function (device, level) {
   // If we have no devices, stop processing
   if (!device.config.devices) {
     defer.reject({'response': false, 'message': 'No devices to set'});
-    return defer.promise;
-  }
-
-  // If no azimuth information is available, stop processing
-  if (abode.providers.time === undefined || abode.providers.time.sun_azimuth === undefined) {
-    log.warn('No sun azimuth information, is the time provider running?');
-    defer.reject({'response': false, 'message': 'No sun azimuth information, is the time provider running?'});
-    return defer.promise;
-  }
-
-  // Make sure we're within our azimuth range
-  if (abode.providers.time.sun_azimuth < device.config.min_azimuth || abode.providers.time.sun_azimuth > device.config.max_azimuth ) {
-    log.debug('Not within azimuth range %s - %s (%s)', device.config.min_azimuth, device.config.max_azimuth, abode.providers.time.sun_azimuth);
-    defer.reject({'response': false, 'message': 'Outside of azimuth range'});
     return defer.promise;
   }
 
