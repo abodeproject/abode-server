@@ -146,34 +146,34 @@ Autoshades.processor = function () {
       var sunrise_diff = abode.providers.time.time - abode.providers.time.sunrise;
       var sunset_diff = abode.providers.time.sunset - abode.providers.time.time;
 
-        // If we're tracking weather, determine our weather
-        if (device.config.weather) {
-          // Lookup the weather device
-          var weather_device = abode.devices.get(device.config.weather._id);
+      // If we're tracking weather, determine our weather
+      if (device.config.weather) {
+        // Lookup the weather device
+        var weather_device = abode.devices.get(device.config.weather._id);
 
-          // Check the device was foudn and it was weather
-          if (weather_device && weather_device._weather && weather_device._weather.icon) {
-            // If the device has a conditions icon and it's in our list, set the level
-            if (Autoshades.cloudy_conditions.indexOf(weather_device._weather.icon) >= 0) {
-              log.debug('Using cloudy level');
-              level = device.config.cloudy_level;
-            }
+        // Check the device was foudn and it was weather
+        if (weather_device && weather_device._weather && weather_device._weather.icon) {
+          // If the device has a conditions icon and it's in our list, set the level
+          if (Autoshades.cloudy_conditions.indexOf(weather_device._weather.icon) >= 0) {
+            log.debug('Using cloudy level');
+            level = device.config.cloudy_level;
           }
         }
+      }
 
-        // If we are tracking the sun and no level has been determined, get the level
-        if (device.config.track && level === undefined) {
-          log.debug('Using sun tracking level');
-          ease_function = Autoshades.ease_functions[device.config.mode]
-          // If no ease function defined, skip
-          if (ease_function === undefined) {
-            log.warn('Invalid ease function for device: %s %s', device.name, device.config.mode);
-            device_defer.resolve();
-            return;
-          }
-          
-          level = ease_function(abode.providers.time.sun_altitude);
+      // If we are tracking the sun and no level has been determined, get the level
+      if (device.config.track && level === undefined) {
+        log.debug('Using sun tracking level');
+        ease_function = Autoshades.ease_functions[device.config.mode];
+        // If no ease function defined, skip
+        if (ease_function === undefined) {
+          log.warn('Invalid ease function for device: %s %s', device.name, device.config.mode);
+          device_defer.resolve();
+          return;
         }
+        
+        level = ease_function(abode.providers.time.sun_altitude);
+      }
 
       //If within 2 times of the interval of sunrise, set our sunrise level
       if (device.config.sunrise && device.config.sunrise_level !== undefined && sunrise_diff >= 0 && sunrise_diff <= (Autoshades.config.interval * 60 * 2)) {
@@ -193,9 +193,16 @@ Autoshades.processor = function () {
         return device_defer.resolve();
       }
 
+      // Set a timer
+      device_defer.timer = setTimeout(function () {
+        device_defer.resolve();
+        log.error('Timeout waiting for device level to set: %s', device.name);
+      }, 1000 * 60 * 5);
+
       // Set the auto shade device level
       Autoshades.set_level(device, level).then(function (data) {
         device_defer.resolve();
+        clearTimeout(device_defer.timer);
 
         // If we have an update key, set the device staet
         if (data.update) {
@@ -204,7 +211,9 @@ Autoshades.processor = function () {
 
         }
       }, function () {
+        log.error('There was error setting the level for: %s', device.name);
           device_defer.reject();
+          clearTimeout(device_defer.timer);
       });
     });
 
