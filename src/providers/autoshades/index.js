@@ -124,13 +124,9 @@ Autoshades.processor = function () {
       // If autoshade device is not on, skip
       if (device._on === false) {
         log.debug('Skipping autoshades device because it is off: %s', device.name);
-        device_defer.resolve();
-        return;
+        return device_defer.resolve();
       }
 
-      // Determine our diff. A positive value is after sunrise and before sunset
-      var sunrise_diff = abode.providers.time.time - abode.providers.time.sunrise;
-      var sunset_diff = abode.providers.time.sunset - abode.providers.time.time;
 
       // If we're tracking weather, determine our weather
       if (device.config.weather) {
@@ -149,7 +145,6 @@ Autoshades.processor = function () {
 
       // If we are tracking the sun and no level has been determined, get the level
       if (device.config.track && level === undefined && abode.providers.time.sun_azimuth ) {
-        log.debug('Using sun tracking level');
 
         // Make sure we're within our azimuth range
         if (abode.providers.time.sun_azimuth >= device.config.min_azimuth && abode.providers.time.sun_azimuth <= device.config.max_azimuth ) {
@@ -160,27 +155,42 @@ Autoshades.processor = function () {
             return device_defer.resolve();
           }
           
+          log.debug('Using sun tracking level');
           level = ease_function(abode.providers.time.sun_altitude);
+          if (level < 0) {
+            level = undefined;
+            log.debug('Sun is too low, skipping sun tracking');
+          }
         } else {
           log.debug('Not within azimuth range %s - %s (%s)', device.config.min_azimuth, device.config.max_azimuth, abode.providers.time.sun_azimuth);
         }
       }
 
-      //If within 2 times of the interval of sunrise, set our sunrise level
+      // If within 2 times of the interval of sunrise, set our sunrise level
+      // Determine our diff. A positive value is after sunrise
+      var sunrise_diff = abode.providers.time.time - abode.providers.time.sunrise;
+
       if (device.config.sunrise && device.config.sunrise_level !== undefined && sunrise_diff >= 0 && sunrise_diff <= (Autoshades.config.interval * 60 * 2)) {
         log.debug('Using sunrise level');
         level = device.config.sunrise_level;
+      } else {
+        log.debug('Not within sunrise range: %s seconds', sunrise_diff);
       }
 
-      //If within 2 times of the interval of sunset, set our sunset level
+      // If within 2 times of the interval of sunset, set our sunset level
+      // Determine our diff. A positive value is before sunset
+      var sunset_diff = abode.providers.time.sunset - abode.providers.time.time;
+
       if (device.config.sunset && device.config.sunset_level !== undefined && sunset_diff >= 0 && sunset_diff <= (Autoshades.config.interval * 60 * 2)) {
         log.debug('Using sunset level');
         level = device.config.sunset_level;
+      } else {
+        log.debug('Not within sunset range: %s seconds', sunset_diff);
       }
 
       // If we do not have a level to set, move on
       if (level === undefined) {
-        log.debug('Nothing to do for device: %s', device.name);
+        log.debug('No level could be determined for device: %s', device.name);
         return device_defer.resolve();
       }
 
@@ -197,14 +207,12 @@ Autoshades.processor = function () {
 
         // If we have an update key, set the device staet
         if (data.update) {
-
           device.set_state(data.update, undefined, {'skip_pre': true, 'skip_post': true});
-
         }
       }, function () {
         log.error('There was error setting the level for: %s', device.name);
-          device_defer.reject();
-          clearTimeout(device_defer.timer);
+        device_defer.reject();
+        clearTimeout(device_defer.timer);
       });
     });
 
@@ -260,7 +268,8 @@ Autoshades.set_level = function (device, level) {
 
   // Iterate through each device
   device.config.devices.forEach(function (shade) {
-    var shade_device = abode.devices.get(shade.name);
+    var device_level,
+      shade_device = abode.devices.get(shade.name);
 
     // If the device could not be found, skip
     if (!shade_device) {
@@ -268,21 +277,25 @@ Autoshades.set_level = function (device, level) {
       return;
     }
 
-    // If the device is already at the requested value, skip
-    if (shade_device._level === level) {
-      log.debug('Shade level already set: %s (%s)', shade_device.name, level);
-      return;
+    // If requested level is above min level, set to min_level
+    if (device.min_level !== undefined && level >= device.min_level) {
+      // Set the device and return add the defer to our list
+      log.debug('Shade level higher then then min level: %s (%s)', shade_device.name, device.min_level);
+      device_level = device.min_level;
+    } else {
+      device_level = level;
     }
 
-    // If requested level is abode max level, do nothing
-    if (device.min_level !== undefined && level >= device.min_level) {
-      log.debug('Shade level higher then then max level: %s (%s)', shade_device.name, device.min_level);
+    // If the device is already at the requested value, skip
+    if (shade_device._level === device_level) {
+      log.debug('Shade level already set: %s (%s)', shade_device.name, level);
       return;
     }
 
     // Set the device and return add the defer to our list
     log.debug('Setting shade level to %s%%: %s', level, shade_device.name);
-    device_defers.push(shade_device.set_level(level));
+    device_defers.push(shade_device.set_level(device_level));
+
   });
 
   // Once all device defers are resolved, resolve our main defer
