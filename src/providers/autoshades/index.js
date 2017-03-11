@@ -37,7 +37,7 @@ var Autoshades = function () {
   return defer.promise;
 };
 
-Autoshades.cloudy_conditions = ['cloudy', 'hazy', 'rain', 'tstorms', 'snow', 'sleet', 'fog', 'flurries'];
+Autoshades.cloudy_conditions = ['cloudy', 'mostlycloudy', 'rain', 'tstorms', 'snow', 'sleet', 'fog', 'flurries'];
 
 Autoshades.enable = function () {
   var defer = q.defer();
