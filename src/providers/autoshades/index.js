@@ -129,7 +129,7 @@ Autoshades.processor = function () {
 
 
       // If we're tracking weather, determine our weather
-      if (device.config.weather) {
+      if (device.config.weather && abode.providers.time.is.day) {
         // Lookup the weather device
         var weather_device = abode.devices.get(device.config.weather._id);
 
