@@ -431,7 +431,7 @@ SceneSchema.methods.start = function () {
       log.debug('Setting mode for object: ', action.name, action._mode);
       object.set_mode(action._mode).then(function () {
         setTimeout(function () {
-          log.debug('Setting set_point for object: ', action.nameaction._set_point);
+          log.debug('Setting set_point for object: ', action.name, action._set_point);
           object.set_point(action._set_point).then(defer.resolve, defer.reject);
         });
       }, function (err) {
