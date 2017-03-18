@@ -130,6 +130,8 @@ Autoshades.processor = function () {
 
       // If we're tracking weather, determine our weather
       if (device.config.weather && abode.providers.time.is.day) {
+
+
         // Lookup the weather device
         var weather_device = abode.devices.get(device.config.weather._id);
 
@@ -137,8 +139,15 @@ Autoshades.processor = function () {
         if (weather_device && weather_device._weather && weather_device._weather.icon) {
           // If the device has a conditions icon and it's in our list, set the level
           if (Autoshades.cloudy_conditions.indexOf(weather_device._weather.icon) >= 0) {
-            log.debug('Using cloudy level');
-            level = device.config.cloudy_level;
+            if (device.config.track && level === undefined && abode.providers.time.sun_azimuth ) {
+              if (abode.providers.time.sun_azimuth >= device.config.min_azimuth && abode.providers.time.sun_azimuth <= device.config.max_azimuth ) {
+                log.debug('Using cloudy level');
+                level = device.config.cloudy_level;
+              }
+            } else {
+              log.debug('Using cloudy level');
+              level = device.config.cloudy_level;
+            }
           }
         }
       }
