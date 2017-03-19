@@ -136,6 +136,11 @@ var getStatuses = function (config) {
         return;
       }
 
+      if (!devices[index]) {
+        next_device();
+        return;
+      }
+
       var endpoint = devices[index][config.key];
 
       if (endpoint instanceof Function) {
