@@ -156,7 +156,7 @@ Autoshades.processor = function () {
       if (device.config.track && level === undefined && abode.providers.time.sun_azimuth ) {
 
         // Make sure we're within our azimuth range
-        if (abode.providers.time.sun_azimuth >= device.config.min_azimuth && abode.providers.time.sun_azimuth <= device.config.max_azimuth ) {
+        if (abode.providers.time.sun_azimuth >= device.config.min_azimuth && abode.providers.time.sun_azimuth <= device.config.max_azimuth && abode.providers.time.sun_altitude > 0) {
           ease_function = Autoshades.ease_functions[device.config.mode];
           // If no ease function defined, skip
           if (ease_function === undefined) {
