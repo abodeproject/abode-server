@@ -286,11 +286,11 @@ Autoshades.set_level = function (device, level) {
       return;
     }
 
-    // If requested level is above min level, set to min_level
-    if (device.min_level !== undefined && level >= device.min_level) {
+    // If requested level is above min level, set to wait_level
+    if (device.wait_level !== undefined && level >= device.wait_level) {
       // Set the device and return add the defer to our list
-      log.debug('Shade level higher then then min level: %s (%s)', shade_device.name, device.min_level);
-      device_level = device.min_level;
+      log.debug('Shade level higher then then min level: %s (%s)', shade_device.name, device.wait_level);
+      device_level = device.wait_level;
     } else {
       device_level = level;
     }
@@ -299,6 +299,11 @@ Autoshades.set_level = function (device, level) {
     if (shade_device._level === device_level) {
       log.debug('Shade level already set: %s (%s)', shade_device.name, level);
       return;
+    }
+
+    // If the device is below min_level, skip
+    if (device_level < device.min_level) {
+      log.debug('Shade level requested is below min level: %s (req: %s min: %s )', shade_device.name, level, device.min_level);
     }
 
     // Set the device and return add the defer to our list
