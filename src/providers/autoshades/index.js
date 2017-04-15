@@ -287,28 +287,30 @@ Autoshades.set_level = function (device, level) {
     }
 
     // If requested level is above min level, set to wait_level
-    if (device.wait_level !== undefined && level >= device.wait_level) {
+    if (shade.wait_level !== undefined && level > shade.wait_level) {
       // Set the device and return add the defer to our list
-      log.debug('Shade level higher then then min level: %s (%s)', shade_device.name, device.wait_level);
-      device_level = device.wait_level;
+      log.debug('Shade level requested is abode wait level:: %s (req: %s wait: %s )', shade.name, level, shade.wait_level);
+      return;
+    } else {
+      device_level = level;
+    }
+
+    // If the device is below min_level, skip
+    if (shade.min_level !== undefined && device_level < shade.min_level) {
+      log.debug('Shade level requested is below min level: %s (req: %s min: %s )', shade.name, level, shade.min_level);
+      return;
     } else {
       device_level = level;
     }
 
     // If the device is already at the requested value, skip
     if (shade_device._level === device_level) {
-      log.debug('Shade level already set: %s (%s)', shade_device.name, level);
-      return;
-    }
-
-    // If the device is below min_level, skip
-    if (device_level < device.min_level) {
-      log.debug('Shade level requested is below min level: %s (req: %s min: %s )', shade_device.name, level, device.min_level);
+      log.debug('Shade level already set: %s (%s)', shade.name, level);
       return;
     }
 
     // Set the device and return add the defer to our list
-    log.debug('Setting shade level to %s%%: %s', level, shade_device.name);
+    log.debug('Setting shade level to %s%%: %s', device_level, shade_device.name);
     device_defers.push(shade_device.set_level(device_level));
 
   });
