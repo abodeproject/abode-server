@@ -304,6 +304,7 @@ Autoshades.set_level = function (device, level) {
     // If the device is below min_level, skip
     if (device_level < device.min_level) {
       log.debug('Shade level requested is below min level: %s (req: %s min: %s )', shade_device.name, level, device.min_level);
+      return;
     }
 
     // Set the device and return add the defer to our list
