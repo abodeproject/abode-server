@@ -380,7 +380,12 @@ Triggers.type_handler = function (trigger) {
   */
     //  return;
     //}
-    log.info('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
+    if (trigger === 'UPDATED') {
+      log.debug('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
+
+    } else {
+      log.info('Received "%s" event: ', trigger, matcher.name || matcher || '', (matcher.type) ? '(type: ' + matcher.type  + ')' : '');
+    }
 
     //Loop through each trigger for the given type
     Triggers.get_by_type(trigger).forEach(function (t) {
