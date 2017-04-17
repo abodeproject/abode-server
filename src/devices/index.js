@@ -152,7 +152,7 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
   }
 
   //Call the function and expect a promise back
-  providers[self.provider][cmd].apply(self, args).then(function (status) {
+  providers[self.provider][cmd].apply(providers[self.provider], args).then(function (status) {
     var changes = false;
     status.update = status.update || {};
 
@@ -341,6 +341,7 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
     if (JSON.stringify(self[key]) !== JSON.stringify(config[key])) {
       changes = true;
       self[key] = config[key];
+      self.markModified(key);
     }
   });
 
@@ -353,7 +354,7 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
       room.status(true);
     });
   }
-
+  
   return self._save(log_msg, options);
 
   /*
