@@ -1,6 +1,6 @@
 'use strict';
 
-var q = require('q'),
+var Q = require('q'),
   logger = require('log4js'),
   log = logger.getLogger('insteon.modem'),
   inherits = require('util').inherits,
@@ -12,11 +12,12 @@ var q = require('q'),
 var Modem = function (config) {
   var self = this;
 
-	log.info('Initializing insteon modem');
-	self.config = config || {};
+  log.info('Initializing insteon modem');
+  self.config = config || {};
   self.config.send_interval = self.config.send_interval || 100;
   self.config.read_interval = self.config.read_interval || 100;
   self.config.message_timeout = self.config.message_timeout || 5000;
+  self.config.modem_debug = (self.config.modem_debug!==false);
 
   self.connected = false;
   self.message = new Message(0);
@@ -44,7 +45,7 @@ var Modem = function (config) {
 
 Modem.prototype.connect = function () {
   var self = this,
-    defer = q.defer();
+    defer = Q.defer();
 
   var processSerial = function (err) {
     if (err) {
@@ -82,30 +83,30 @@ Modem.prototype.connect = function () {
 
 Modem.prototype.disconnect = function () {
   var self = this,
-    defer = q.defer();
+    defer = Q.defer();
 
-    clearInterval(self.send_interval);
-    clearInterval(self.read_interval);
+  clearInterval(self.send_interval);
+  clearInterval(self.read_interval);
 
-    self.device.close(function (err) {
-      if (err) {
-        return defer.reject(err);
-      }
+  self.device.close(function (err) {
+    if (err) {
+      return defer.reject(err);
+    }
 
-      defer.resolve();
-    });
+    defer.resolve();
+  });
 
-    return defer.promise;
+  return defer.promise;
 };
 
 inherits(Modem, EventEmitter);
 
 Modem.prototype.on_error = function () {
-  console.log('error', arguments);
+  log.error('error', arguments);
 };
 
 Modem.prototype.on_open = function () {
-  console.log('open', arguments);
+  log.info('open', arguments);
 };
 
 Modem.prototype.on_disconnect = function (err) {
@@ -235,20 +236,20 @@ Modem.prototype.send = function () {
 
     // Iterate through each of our expectations
     message.expect.forEach(function (expected) {
-      //Build the expecation object
+      //Build the expectation object
       var expectation = new Expectation(self);
       expectation.command = expected.command;
       expectation.expect_from = (expected.expect_from === true);
 
       message.expect.splice(message.expect.indexOf(expected), 1, expectation);
-      // Add the 
+      // Add the
       expect_defers.push(expectation.defer.promise);
       self.expectations.push(expectation);
     });
 
-    q.allSettled(expect_defers).then(function (results) {
+    Q.allSettled(expect_defers).then(function (results) {
       message.failures = [];
-      message.responses = []
+      message.responses = [];
 
       results.forEach(function (result) {
         if (result.value.result.status !== 'success') {
@@ -262,7 +263,7 @@ Modem.prototype.send = function () {
       if (message.failures.length > 0) {
         message.failed('Expectation failed');
       } else {
-        message.success()
+        message.success();
 
         if (message.emit) {
           self.emit('MESSAGE', message.result);
