@@ -24,11 +24,9 @@ Serializers.start_all_linking = function () {
   return buf;
 };
 
-Serializers.send_insteon_standard = function (config) {
+Serializers.send_insteon_standard = function () {
   var flags,
-  	buf = new Buffer(6);
-
-  config = config || {};
+    buf = new Buffer(6);
 
   this.to = this.to || '00.00.01';
 
@@ -126,7 +124,6 @@ Serializers.all_link_database_record = function () {
     this.flags.raw = this.d6.toString(2);
     this.flags.used = (128 & this.result.d6) >> 7;
     this.flags.type = (64 & this.result.d6) >> 6;
-    console.log(this.flags);
 
     // Generate a crc for d14...
     // Inverse sum of cmd_1, cmd_2 and D1-D13 then bitwise & with 0xff
@@ -145,7 +142,7 @@ Serializers.all_link_database_record = function () {
       this.d10,
       this.d11,
       this.d12,
-      this.d13,
+      this.d13
     ].reduce(function(a, b) { return a + b; }, 0);
     crc = (crc * -1) & 0xff;
     this.d14 = crc;
