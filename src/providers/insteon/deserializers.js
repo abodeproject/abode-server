@@ -6,7 +6,7 @@ var Deserializers = {};
 
 Deserializers.im_info = function () {
   var msg = this.buffer,
-  	status = msg.readUInt8(6);
+    status = msg.readUInt8(6);
 
   status = (status === 0x06) ? 'success': 'error';
 
@@ -19,7 +19,7 @@ Deserializers.im_info = function () {
 
 Deserializers.im_configuration = function () {
   var msg = this.buffer,
- 	flags = msg.readUInt8(0,1),
+    flags = msg.readUInt8(0,1),
     status = msg.readUInt8(3,4);
 
   this.result.monitor = flags & parseInt('100000', 2);
@@ -42,7 +42,7 @@ Deserializers.start_all_linking = function () {
 
 Deserializers.record = function () {
   var msg = this.buffer,
-  	flags_dec = msg.readUInt8(0);
+    flags_dec = msg.readUInt8(0);
 
   this.result.group =  msg.readUInt8(1);
   this.result.addr = utils.bufferToAddr(msg.slice(2,5));
@@ -82,7 +82,7 @@ Deserializers.all_link_complete = function () {
 
 Deserializers.ack = function() {
   var msg = this.buffer,
-  	status = msg.readUInt8(0);
+    status = msg.readUInt8(0);
 
   status = (status === 0x06) ? 'success': 'error';
 
@@ -112,7 +112,7 @@ Deserializers.get_all_link_database_delta = function() {
 
 Deserializers.received_insteon_standard = function () {
   var msg = this.buffer,
-  	flags = msg.readUInt8(6);
+    flags = msg.readUInt8(6);
 
   this.result.flags = flags.toString(2);
   this.result.type = (flags >> 5);
@@ -262,6 +262,13 @@ Deserializers.extended_data = function () {
   this.result.data = {};
   this.result.data.ramp_rate = this.result.d7;
   this.result.data.on_level = this.result.d8;
+
+};
+
+Deserializers.id_request = function () {
+
+  this.result.devcat = this.result.cmd_1;
+  this.result.subcat = this.result.cmd_2;
 
 };
 
