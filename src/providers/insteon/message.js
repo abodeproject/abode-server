@@ -71,7 +71,7 @@ Message.prototype.get_command_by_code = function (code, extended) {
 
         self.result = self.result || {};
         self.result.command = self.result.command || [];
-        self.result.command.push(cmds[i])
+        self.result.command.push(cmds[i]);
         self.deserializers = self.deserializers || [];
 
         // Merge the command into the message
@@ -79,16 +79,14 @@ Message.prototype.get_command_by_code = function (code, extended) {
         break;
       }
     }
-    
+
   }
 
 };
 
 Message.prototype.parse_cmd_1 = function () {
-  var i,
-    self = this,
-    cmds = Object.keys(commands),
-    total = cmds.length;
+  var self = this,
+    cmds = Object.keys(commands);
 
   if (self.result.cmd_1 === undefined || self.command === undefined) {
     return;
@@ -120,7 +118,7 @@ Message.prototype.parse_cmd_1 = function () {
       if (commands[ cmd ].deserialize) {
         log.debug('Deserializing %s message', cmd);
         commands[ cmd ].deserialize.apply(self);
-        self.deserializers.push(commands[ cmd ].deserialize)
+        self.deserializers.push(commands[ cmd ].deserialize);
       } else {
         log.warn('No deserializer for command: %s', cmd);
       }
@@ -157,8 +155,8 @@ Message.prototype.parse_cmd_1 = function () {
 Message.prototype.parse = function () {
 
   if (this.buffer.length >= 2 && this.code === undefined) {
-      this.code = this.buffer.readUInt8(1);
-      this.get_command_by_code(this.code);
+    this.code = this.buffer.readUInt8(1);
+    this.get_command_by_code(this.code);
   }
 
 
@@ -192,7 +190,7 @@ Message.prototype.prep = function () {
     this.error = new Error('Unknown message command:' + this.command);
     return;
   }
-  
+
   // If our command inherits from another, check it exists
   if (commands[this.command].command && !commands[commands[this.command].command]) {
     this.error = new Error('Unknown parent message command:' + commands[this.command].command);
