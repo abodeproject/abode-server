@@ -150,13 +150,13 @@ Rad.get_status = function (device) {
   var defer = q.defer();
   var update = {};
 
-  log.info('Getting Rad status: %s', device.name);
+  log.debug('Getting Rad status: %s', device.name);
 
   var getConfig = function () {
 
     request({
-      'url': device.config.address + '/api/abode/config', 
-      'json': true, 
+      'url': device.config.address + '/api/abode/config',
+      'json': true,
       'headers': {'server-token': device.config.token}
     }, function (error, response, config) {
       if (!error && response.statusCode === 200) {
@@ -176,7 +176,7 @@ Rad.get_status = function (device) {
   var getStatus = function () {
 
     request({
-      'uri': device.config.address + '/api/abode/status', 
+      'uri': device.config.address + '/api/abode/status',
       'json': true,
       'headers': {'server-token': device.config.token}
     }, function (error, response, body) {
@@ -249,7 +249,7 @@ Rad.save_config = function (url, data, section, token) {
   var save_config = function () {
 
     request.post({
-      'url': url + '/api/abode/save', 
+      'url': url + '/api/abode/save',
       'headers': {'server-token': token}
     }, function (error, response) {
       if (!error && response.statusCode === 200) {
@@ -296,7 +296,7 @@ Rad.pre_save = function (device) {
   if (device.config && device.config.display) {
     data.display = device.config.display;
   }
-  
+
   Rad.save_config(device.config.address, data, undefined, device.config.token).then(function () {
     defer.resolve();
   }, function (err) {
