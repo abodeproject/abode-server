@@ -296,6 +296,50 @@ Insteon.start_brighten = function (device) {
   return defer.promise;
 };
 
+Insteon.unlock = function (device) {
+  var defer = Q.defer();
+
+  log.info('Insteon.off(%s)', device.name);
+
+  var cmd = new Message();
+
+  cmd.to = device.config.address;
+  cmd.command = 'LIGHT_LEVEL';
+  cmd.cmd_2 = 0x00;
+
+  cmd.send(this.modem).then(function (result) {
+    result.response = true;
+    result.update = {_on: false, _level: 0};
+    defer.resolve(result);
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
+Insteon.lock = function (device) {
+  var defer = Q.defer();
+
+  log.info('Insteon.off(%s)', device.name);
+
+  var cmd = new Message();
+
+  cmd.to = device.config.address;
+  cmd.command = 'LIGHT_LEVEL';
+  cmd.cmd_2 = 0xff;
+
+  cmd.send(this.modem).then(function (result) {
+    result.response = true;
+    result.update = {_on: false, _level: 0};
+    defer.resolve(result);
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
 Insteon.off = Insteon.close = function (device) {
   var defer = Q.defer();
 
