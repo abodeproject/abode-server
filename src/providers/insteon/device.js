@@ -117,11 +117,13 @@ Device.prototype.load_database = function () {
     self.config.database = Object.keys(db).map(function (key) { return db[key]; });
 
     defer.resolve(self.config.database);
+    self.status = 'idle';
 
     self.update();
   };
 
   var fail = function () {
+    self.status = 'idle';
     defer.reject({'message': 'Gave up trying to get records'});
   };
 
@@ -172,6 +174,14 @@ Device.prototype.load_database = function () {
       defer.reject(err);
     });
   };
+
+  if (self.status === 'loading_database') {
+    log.error('Attmpted to load database when process already in progress');
+    defer.reject({'status': 'failed', 'message': 'Device database load in process'});
+    return defer.promise;
+  }
+
+  self.status = 'loading_database';
 
   get_delta();
 
