@@ -215,6 +215,11 @@ Insteon.get_device = function (address) {
 Insteon.get_status = function (device) {
   var defer = Q.defer();
 
+  if (device.capabilities && device.capabilities.indexOf('lock') !== -1) {
+    log.debug('Insteon lock controller has no useful status');
+    defer.resolve();
+    return defer.promise;
+  }
   log.info('Insteon.get_status(%s)', device.name);
 
   var cmd = new Message();
