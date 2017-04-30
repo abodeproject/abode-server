@@ -233,24 +233,44 @@ Device.prototype.create_record = function (config) {
     self = this,
     defer = Q.defer();
 
-  self.next_free_id().then(function (response) {
-    var record = {
-      'controller': config.controller,
-      'address': config.address,
-      'group': config.group,
-      'on_level': config.on_level,
-      'ramp_rate': config.ramp_rate,
-      'button': config.button
-    };
 
-    errors = Device.validate_record(record, true);
-
-    if (errors.length > 0) {
-      return defer.reject({'message': 'Record validation error', 'errors': errors});
+  self.get_delta().then(function (result) {
+    if (result.database_delta !== self.config.database_delta) {
+      defer.reject({'message': 'Database out of sync. Perform a load first'});
+      return;
     }
 
-    self.insteon.write_all_link_database(self, response.id, record).then(function (response) {
-      defer.resolve(response);
+    var db_match = self.config.database.filter(function (record) {
+      return (config.group === record.group && config.address === record.address && config.controller === record.controller);
+    });
+
+    if (db_match.length > 0) {
+      defer.reject({'message': 'Record of this type, device and scene already exists'});
+      return;
+    }
+
+    self.next_free_id().then(function (response) {
+      var record = {
+        'controller': config.controller,
+        'address': config.address,
+        'group': config.group,
+        'on_level': config.on_level,
+        'ramp_rate': config.ramp_rate,
+        'button': config.button
+      };
+
+      errors = Device.validate_record(record, true);
+
+      if (errors.length > 0) {
+        return defer.reject({'message': 'Record validation error', 'errors': errors});
+      }
+
+      self.insteon.write_all_link_database(self, response.id, record).then(function (response) {
+        defer.resolve(response);
+      }, function (err) {
+        defer.reject(err);
+      });
+
     }, function (err) {
       defer.reject(err);
     });
@@ -300,8 +320,18 @@ Device.prototype.update_record = function (id, config) {
     return defer.promise;
   }
 
-  self.insteon.write_all_link_database(self, id, record).then(function (response) {
-    defer.resolve(response);
+  self.get_delta().then(function (result) {
+    if (result.database_delta !== self.config.database_delta) {
+      defer.reject({'message': 'Database out of sync. Perform a load first'});
+      return;
+    }
+
+    self.insteon.write_all_link_database(self, id, record).then(function (response) {
+      defer.resolve(response);
+    }, function (err) {
+      defer.reject(err);
+    });
+
   }, function (err) {
     defer.reject(err);
   });
