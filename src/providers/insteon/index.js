@@ -35,6 +35,7 @@ var Insteon = function () {
     log.info('Device Linked: %s', message.result.addr);
 
   });
+  Insteon.modem.on('CLOSED', Insteon.disable);
   Insteon.enabled = false;
   Insteon.linking = false;
 
@@ -76,9 +77,9 @@ Insteon.enable = function () {
     log.info('Provider Enabled');
     Insteon.enabled = true;
     defer.resolve({'status': 'success', 'message': 'Insteon enabled'});
-  }, function () {
+  }, function (err) {
     Insteon.enabled = false;
-    defer.reject();
+    defer.reject(err);
   });
 
   return defer.promise;
@@ -151,6 +152,12 @@ Insteon.disable = function () {
     defer.reject({'status': 'failed', 'message': 'Insteon is not enabled'});
     return defer.promise;
   }
+
+  if (!Insteon.modem.connected) {
+    defer.reject({'status': 'failed', 'message': 'Insteon is not connected'});
+    Insteon.enabled = false;
+    return defer.promise;
+  };
 
   Insteon.modem.disconnect().then(function () {
     log.info('Provider Disabled');

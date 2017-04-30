@@ -17,7 +17,7 @@ var Modem = function (config) {
   self.config.send_interval = self.config.send_interval || 100;
   self.config.read_interval = self.config.read_interval || 100;
   self.config.message_timeout = self.config.message_timeout || 5000;
-  self.config.modem_debug = (self.config.modem_debug!==false);
+  self.config.modem_debug = (self.config.modem_debug !== false);
 
   self.connected = false;
   self.message = new Message(0);
@@ -50,7 +50,7 @@ Modem.prototype.connect = function () {
   var processSerial = function (err) {
     if (err) {
       log.error('Could not connect to modem:', err.message);
-      return defer.reject(err);
+      return defer.reject({'status': 'failed', 'message': err.message});
     }
 
     log.debug('Insteon Modem Connected');
@@ -61,7 +61,7 @@ Modem.prototype.connect = function () {
     self.device.on('open', self.on_open.bind(self));
     self.device.on('data', self.on_data.bind(self));
     self.device.on('disconnect', self.on_disconnect.bind(self));
-    self.device.on('close', self.on_close);
+    self.device.on('close', self.on_close.bind(self));
 
 
     self.send_interval = setInterval(self.send.bind(self), self.config.send_interval);
@@ -90,7 +90,7 @@ Modem.prototype.disconnect = function () {
 
   self.device.close(function (err) {
     if (err) {
-      return defer.reject(err);
+      return defer.reject({'status': 'failed', 'message': err.message});
     }
 
     defer.resolve();
@@ -102,19 +102,23 @@ Modem.prototype.disconnect = function () {
 inherits(Modem, EventEmitter);
 
 Modem.prototype.on_error = function () {
+  this.emit('ERROR')
   log.error('error', arguments);
 };
 
 Modem.prototype.on_open = function () {
+  this.emit('OPEN');
   log.info('open', arguments);
 };
 
 Modem.prototype.on_disconnect = function (err) {
   log.error('Modem disconnected: %s', err.message);
+  this.emit('DISCONNECTED');
   this.connected = false;
 };
 
 Modem.prototype.on_close = function () {
+  this.emit('CLOSED');
   log.info('Modem connection has closed');
   this.connected = false;
 };

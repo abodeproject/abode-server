@@ -7,7 +7,7 @@ var insteon = require('../insteon'),
 router.get('/', function (req, res) {
 
   res.send({
-    'enabled': insteon.config.enabled,
+    'enabled': insteon.enabled,
     'connected': insteon.modem.connected,
     'linking': insteon.linking,
     'last_linked': insteon.last_linked,
