@@ -333,6 +333,40 @@ Insteon.get_status = function (device) {
   return defer.promise;
 };
 
+Insteon.is_open = Insteon.is_on = function (device) {
+  var defer = Q.defer();
+
+  Insteon.get_status(device).then(function (state) {
+    defer.resolve({'update': state.update, 'response': state.on});
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
+Insteon.is_closed = Insteon.is_off = function (device) {
+  var defer = Q.defer();
+
+  Insteon.get_status(device).then(function (state) {
+    defer.resolve({'update': state.update, 'response': (!state.on)});
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
+Insteon.has_motion = function (device) {
+  var defer = Q.defer();
+
+  log.debug('Checking Insteon motion status: %s', device.name);
+
+  defer.resolve({'update': {'_motion': device._motion}, 'response': device._motion});
+
+  return defer.promise;
+};
+
 Insteon.on = Insteon.open = function (device) {
   var defer = Q.defer();
 
