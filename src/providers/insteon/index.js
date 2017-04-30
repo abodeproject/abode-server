@@ -3,6 +3,7 @@
 var abode,
   routes,
   Q = require('q'),
+  utils = require('./utils'),
   logger = require('log4js'),
   Modem = require('./modem'),
   Device = require('./device'),
@@ -25,6 +26,9 @@ var Insteon = function () {
   Insteon.config = abode.config.insteon;
   Insteon.config.enabled = (Insteon.config.enabled!== false);
   Insteon.config.serial_device = Insteon.config.serial_device || '/dev/ttyUSB0';
+  Insteon.config.polling_enabled = (Insteon.config.polling_enabled!==false);
+  Insteon.config.poll_interval = Insteon.config.poll_interval || 5;
+  Insteon.config.poll_wait = Insteon.config.poll_wait || 1;
 
   Insteon.modem = new Modem(Insteon.config);
   Insteon.modem.on('MESSAGE', Insteon.message_handler);
@@ -38,9 +42,11 @@ var Insteon = function () {
   Insteon.modem.on('CLOSED', Insteon.disable);
   Insteon.enabled = false;
   Insteon.linking = false;
+  Insteon.polling = false;
 
   abode.events.on('ABODE_STARTED', function () {
     Insteon.load_devices();
+    setTimeout(Insteon.poll, 100);
   });
 
   if (Insteon.config.enabled) {
@@ -58,10 +64,87 @@ var Insteon = function () {
     defer.resolve();
   }
 
+
   return defer.promise;
 };
 
 Insteon.devices = [];
+Insteon.statusable = [
+  0x01
+];
+
+Insteon.poll = function () {
+  var i = 0;
+
+  if (Insteon.config.polling_enabled === false) {
+    return;
+  }
+
+  if (Insteon.devices.length === 0) {
+    return;
+  }
+
+  if (Insteon.enabled === false || Insteon.connected === false) {
+    return;
+  }
+
+  if (Insteon.polling !== false) {
+    return;
+  }
+
+  var done = function () {
+    var now = new Date();
+    var diff = now - Insteon.polling;
+
+    log.info('Finish polling devices: %d minutes', (diff / 1000 / 60).toFixed(2));
+
+    Insteon.polling = false;
+    setTimeout(Insteon.poll, 1000 * 60 * Insteon.config.poll_interval);
+  };
+
+  var next = function (attempt) {
+    attempt = attempt || 1;
+
+    if (i === Insteon.devices.length) {
+      return done();
+    }
+    var device = Insteon.devices[i]
+
+    if (attempt > 3) {
+      i += 1;
+      setTimeout(next, Insteon.config.poll_wait * 1000);
+      return;
+    }
+
+    if (Insteon.statusable.indexOf(device.config.device_cat) === -1) {
+      log.debug('Cannot status device type: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat))
+      i += 1;
+      setTimeout(next, 100);
+      return;
+    }
+
+    log.info('Polling device: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat));
+
+    Insteon.get_status(device).then(function (result) {
+      if (result.on !== device.on || result.level !== device.level) {
+
+        Insteon.message_handler(result);
+      }
+
+      i += 1;
+      setTimeout(next, Insteon.config.poll_wait * 1000);
+    }, function () {
+      log.error('Failed to get device status, trying again...');
+      setTimeout(function () {
+        next(attempt + 1);
+      }, Insteon.config.poll_wait * 1000);
+    });
+  };
+
+  log.info('Starting to poll devices');
+  Insteon.polling = new Date();
+  next();
+};
 
 Insteon.enable = function () {
   var defer = Q.defer();
@@ -83,6 +166,7 @@ Insteon.enable = function () {
     }, function (err) {
       log.error('Unable to get modem info: %s', err);
     });
+
     defer.resolve({'status': 'success', 'message': 'Insteon enabled'});
   }, function (err) {
     Insteon.enabled = false;
@@ -130,6 +214,10 @@ Insteon.message_handler = function (msg) {
 
 
   Insteon.get_device(msg.from).then(function (device) {
+    if (msg.on !== undefined) device.on = msg.on;
+    if (msg.level !== undefined) device.level = msg.level;
+    device.last_seen = new Date();
+
     if (device.skip_command(msg.command[msg.command.length - 1])) {
       log.debug('Skipping cleanup command from %s (%s) to %s: %s', device.name, msg.from, msg.to, msg.command);
       return;
