@@ -412,7 +412,7 @@ LutronCaseta.queue_processor = function () {
   LutronCaseta.processing = msg;
 
   // Send the message
-  msg.send();
+  if (msg) msg.send();
 
 };
 
@@ -516,7 +516,7 @@ LutronCaseta.on_failedlogin = function () {
   log.info('failedlogin');
 };
 
-// 
+//
 LutronCaseta.get_status = function (device) {
   var defer = q.defer();
 
@@ -528,7 +528,7 @@ LutronCaseta.get_status = function (device) {
 
   LutronCaseta.send(cmd.join(',')).then(function (msg) {
     var level = parseInt(msg.self.parameters, 10) ;
-    defer.resolve({'response': true, 'update': {'_level': level, '_on': (level > 0)}}); 
+    defer.resolve({'response': true, 'update': {'_level': level, '_on': (level > 0)}});
   }, function (err) {
     defer.reject(err);
   });
