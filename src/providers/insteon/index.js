@@ -28,7 +28,7 @@ var Insteon = function () {
   Insteon.config.serial_device = Insteon.config.serial_device || '/dev/ttyUSB0';
   Insteon.config.polling_enabled = (Insteon.config.polling_enabled!==false);
   Insteon.config.poll_interval = Insteon.config.poll_interval || 5;
-  Insteon.config.poll_wait = Insteon.config.poll_wait || 1;
+  Insteon.config.poll_wait = Insteon.config.poll_wait || 5;
 
   Insteon.modem = new Modem(Insteon.config);
   Insteon.modem.on('MESSAGE', Insteon.message_handler);
@@ -70,7 +70,9 @@ var Insteon = function () {
 
 Insteon.devices = [];
 Insteon.statusable = [
-  0x01
+  0x01,
+  0x02,
+  0x07
 ];
 
 Insteon.poll = function () {
@@ -116,14 +118,19 @@ Insteon.poll = function () {
       return;
     }
 
-    if (Insteon.statusable.indexOf(device.config.device_cat) === -1) {
+    if (device.config.device_cat === undefined || parseInt(device.config.device_cat) === 0) {
+      log.warn('Device has no devcat: %s', device.name || device.address);
+    }
+
+    if (Insteon.statusable.indexOf(parseInt(device.config.device_cat, 10)) === -1) {
+      device.config.device_cat = device.config.device_cat || 0;
       log.debug('Cannot status device type: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat))
       i += 1;
       setTimeout(next, 100);
       return;
     }
 
-    log.info('Polling device: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat));
+    log.debug('Polling device: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat));
 
     Insteon.get_status(device).then(function (result) {
       if (result.on !== device.on || result.level !== device.level) {

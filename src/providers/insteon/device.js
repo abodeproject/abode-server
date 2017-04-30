@@ -124,6 +124,7 @@ Device.prototype.load_database = function () {
 
   var fail = function () {
     self.status = 'idle';
+    log.error('Could not load device database: %s', self.name)
     defer.reject({'message': 'Gave up trying to get records'});
   };
 
@@ -136,6 +137,7 @@ Device.prototype.load_database = function () {
     attempt = attempt || 1;
     if (attempt > 3) {
       fail();
+      return;
     }
 
     // Get record at offset
