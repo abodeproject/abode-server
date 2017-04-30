@@ -431,4 +431,30 @@ Device.prototype.update = function () {
   return this.insteon.update(this);
 };
 
+Device.prototype.skip_command = function (command) {
+  var self = this;
+
+  // If our last command is the same, ignore it
+  if (self.last_command === command) {
+
+    // If we have a timer, clear it
+    if (self.cleanup_timer) {
+      clearTimeout(self.cleanup_timer);
+    }
+
+    // Setup our timer
+    self.cleanup_timer = setTimeout(function () {
+      self.last_command = undefined;
+      self.cleanup_timer = undefined;
+    }, 5000);
+
+    return true;
+  }
+
+  // Set our last command
+  self.last_command = command;
+
+  return false;
+};
+
 module.exports = Device;

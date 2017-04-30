@@ -76,6 +76,13 @@ Insteon.enable = function () {
   Insteon.modem.connect().then(function () {
     log.info('Provider Enabled');
     Insteon.enabled = true;
+
+    Insteon.get_im_info().then(function (info) {
+      Insteon.modem_info = info;
+      new Device(Insteon, info, abode.config.name);
+    }, function (err) {
+      log.error('Unable to get modem info: %s', err);
+    });
     defer.resolve({'status': 'success', 'message': 'Insteon enabled'});
   }, function (err) {
     Insteon.enabled = false;
@@ -98,7 +105,6 @@ Insteon.load_devices = function () {
 
 Insteon.message_handler = function (msg) {
   var devices, state = {};
-  log.info('Message received: %s from %s for %s', msg.command, msg.from, msg.to);
 
   if (msg.command.indexOf('STOP_CHANGE') >= 0) {
     log.info('Sending status request due to local level change: %s', msg.from);
@@ -122,26 +128,36 @@ Insteon.message_handler = function (msg) {
     return;
   }
 
-  // Lookup the device
-  log.debug('Looking for Abode device');
-  devices = abode.devices.get_by_provider('insteon');
-  devices = devices.filter(function (device) {
-    return (device.config && device.config.address === msg.from);
-  });
 
-  if (devices.length === 0) {
-    log.warn('No device found with address: %s', msg.from);
-    return;
-  }
-
-  state.last_seen = new Date();
-
-  devices.forEach(function (device) {
-    if (device.capabilities.indexOf('motion_sensor') >= 0) {
-      device.set_state({'_motion': state._on, 'last_seen': state.last_seen});
-    } else {
-      device.set_state(state);
+  Insteon.get_device(msg.from).then(function (device) {
+    if (device.skip_command(msg.command[msg.command.length - 1])) {
+      log.debug('Skipping cleanup command from %s (%s) to %s: %s', device.name, msg.from, msg.to, msg.command);
+      return;
     }
+
+    // Lookup the device
+    log.debug('Looking for Abode device: %s', msg.from);
+    devices = abode.devices.get_by_provider('insteon');
+    devices = devices.filter(function (device) {
+      return (device.config && device.config.address === msg.from);
+    });
+
+    if (devices.length === 0) {
+      log.warn('No device found with address: %s', msg.from);
+      return;
+    }
+
+    log.info('Message received: %s from %s (%s) for %s', msg.command, device.name, msg.from, msg.to);
+
+    state.last_seen = new Date();
+
+    devices.forEach(function (device) {
+      if (device.capabilities.indexOf('motion_sensor') >= 0) {
+        device.set_state({'_motion': state._on, 'last_seen': state.last_seen});
+      } else {
+        device.set_state(state);
+      }
+    });
   });
 };
 

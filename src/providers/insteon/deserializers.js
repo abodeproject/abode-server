@@ -10,9 +10,9 @@ Deserializers.im_info = function () {
 
   status = (status === 0x06) ? 'success': 'error';
 
-  this.result.addr = utils.bufferToAddr(msg.slice(0,3));
-  this.result.device_category = msg.readUInt8(3);
-  this.result.device_subcategory = msg.readUInt8(4);
+  this.result.address = utils.bufferToAddr(msg.slice(0,3));
+  this.result.device_cat = msg.readUInt8(3);
+  this.result.device_subcat = msg.readUInt8(4);
   this.result.firmware = msg.readUInt8(5);
   this.result.status = status;
 };

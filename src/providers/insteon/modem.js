@@ -287,7 +287,8 @@ Modem.prototype.send = function () {
 };
 
 Modem.prototype.read = function () {
-  var expected,
+  var device,
+    expected,
     self = this;
 
   if (self.read_queue.length === 0) {
