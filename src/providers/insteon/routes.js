@@ -10,6 +10,7 @@ router.get('/', function (req, res) {
     'enabled': insteon.enabled,
     'connected': insteon.modem.connected,
     'linking': insteon.linking,
+    'polling': insteon.polling,
     'last_linked': insteon.last_linked,
     'sending': insteon.modem.sending,
     'send_queue': insteon.modem.send_queue.length,
@@ -141,7 +142,15 @@ router.get('/devices', insteon.is_enabled, function (req, res) {
 router.get('/devices/:device', insteon.is_enabled, function (req, res) {
 
   insteon.get_device(req.params.device).then(function (device) {
-    res.status(200).send(device);
+
+    res.status(200).send({
+      'name': device.name,
+      'on': device.on,
+      'level': device.level,
+      'last_command': device.last_command,
+      'last_seen': device.last_seen,
+      'config': device.config,
+    });
   }, function (err) {
     res.status(404).send(err);
   });
