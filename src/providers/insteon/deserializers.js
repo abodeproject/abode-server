@@ -101,7 +101,7 @@ Deserializers.light_off = function() {
 
 Deserializers.light_status_request = function() {
   if (this.responses) {
-    this.result.on = (this.cmd_2 > 0);
+    this.result.on = (this.result.cmd_2 > 0);
     this.result.level = Math.round((this.result.cmd_2 / 255) * 100);
   }
 };
