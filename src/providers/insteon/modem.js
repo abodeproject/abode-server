@@ -14,7 +14,7 @@ var Modem = function (config) {
 
   log.info('Initializing insteon modem');
   self.config = config || {};
-  self.config.send_interval = self.config.send_interval || 100;
+  self.config.send_interval = self.config.send_interval || 400;
   self.config.read_interval = self.config.read_interval || 100;
   self.config.message_timeout = self.config.message_timeout || 5000;
   self.config.modem_debug = (self.config.modem_debug !== false);
