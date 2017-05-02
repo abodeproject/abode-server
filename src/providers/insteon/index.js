@@ -322,7 +322,7 @@ Insteon.get_status = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'LIGHT_STATUS_REQUEST';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: result.on, _level: result.level};
     defer.resolve(result);
@@ -377,11 +377,13 @@ Insteon.on = Insteon.open = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'LIGHT_ON';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
+    log.info('Successuflly sent ON command to %s', device.name);
     result.response = true;
     result.update = {_on: true, _level: device.config.on_level || 100};
     defer.resolve(result);
   }, function (err) {
+    log.info('Failed to sent ON command to %s: %s', device.name, e);
     defer.reject(err);
   });
 
@@ -398,7 +400,7 @@ Insteon.on_fast = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'LIGHT_ON_FAST';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: true, _level: device.config.on_level || 100};
     defer.resolve(result);
@@ -419,7 +421,7 @@ Insteon.start_brighten = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'START_BRIGHTEN';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: true, _level: device.config.on_level || 100};
     defer.resolve(result);
@@ -441,7 +443,7 @@ Insteon.unlock = function (device) {
   cmd.command = 'LIGHT_LEVEL';
   cmd.cmd_2 = 0x00;
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: false, _level: 0};
     defer.resolve(result);
@@ -463,7 +465,7 @@ Insteon.lock = function (device) {
   cmd.command = 'LIGHT_LEVEL';
   cmd.cmd_2 = 0xff;
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: false, _level: 0};
     defer.resolve(result);
@@ -484,7 +486,7 @@ Insteon.off = Insteon.close = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'LIGHT_OFF';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: false, _level: 0};
     defer.resolve(result);
@@ -505,7 +507,7 @@ Insteon.off_fast = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'LIGHT_OFF_FAST';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: false, _level: 0};
     defer.resolve(result);
@@ -526,7 +528,7 @@ Insteon.start_dim = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'START_DIM';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: true, _level: device.config.on_level || 100};
     defer.resolve(result);
@@ -547,7 +549,7 @@ Insteon.stop_change = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'STOP_CHANGE';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: true, _level: device.config.on_level || 100};
     defer.resolve(result);
@@ -584,7 +586,7 @@ Insteon.set_level = function (device, level, time) {
 
   cmd.cmd_2 = parseInt(cmd_2, 10);
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     result.update = {_on: (level > 0), _level: level};
     defer.resolve(result);
@@ -603,7 +605,7 @@ Insteon.get_im_info = function () {
   var cmd = new Message();
   cmd.command = 'GET_IM_INFO';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -620,7 +622,7 @@ Insteon.get_im_info = function () {
   var cmd = new Message();
   cmd.command = 'GET_IM_INFO';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -637,7 +639,7 @@ Insteon.get_im_configuration = function () {
   var cmd = new Message();
   cmd.command = 'GET_IM_CONFIGURATION';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -659,7 +661,7 @@ Insteon.start_all_linking = function (options) {
   cmd.controller = options.controller;
   cmd.group = options.group;
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -676,7 +678,7 @@ Insteon.cancel_all_linking = function () {
   var cmd = new Message();
   cmd.command = 'CANCEL_ALL_LINKING';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     Insteon.linking = false;
     defer.resolve(result);
   }, function (err) {
@@ -694,7 +696,7 @@ Insteon.led_on = function () {
   var cmd = new Message();
   cmd.command = 'LED_ON';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -711,7 +713,7 @@ Insteon.led_off = function () {
   var cmd = new Message();
   cmd.command = 'LED_OFF';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -728,7 +730,7 @@ Insteon.get_first_all_link_record = function () {
   var cmd = new Message();
   cmd.command = 'GET_FIRST_ALL_LINK_RECORD';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -745,7 +747,7 @@ Insteon.get_next_all_link_record = function () {
   var cmd = new Message();
   cmd.command = 'GET_NEXT_ALL_LINK_RECORD';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);
@@ -764,7 +766,7 @@ Insteon.enter_linking_mode = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'ENTER_LINKING_MODE';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     defer.resolve(result);
   }, function (err) {
@@ -784,7 +786,7 @@ Insteon.enter_unlinking_mode = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'ENTER_UNLINKING_MODE';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     defer.resolve(result);
   }, function (err) {
@@ -805,7 +807,7 @@ Insteon.set_button_tap = function (device, taps) {
   cmd.command = 'SET_BUTTON_TAP';
   cmd.cmd_2 = taps || 1;
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     defer.resolve(result);
   }, function (err) {
@@ -845,7 +847,7 @@ Insteon.device_text_string_request = function (device) {
   cmd.to = device.config.address;
   cmd.command = 'DEVICE_TEXT_STRING_REQUEST';
 
-  cmd.send(this.modem).then(function (result) {
+  cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
     defer.resolve(result);
   }, function (err) {
@@ -987,7 +989,7 @@ Insteon.read_all_link_database = function (device, id) {
     cmd.record = id;
   }
 
-  cmd.send(this.modem).then(function () {
+  cmd.send(Insteon.modem).then(function () {
     wait_for_records();
   }, function (err) {
     defer.reject(err);
@@ -1078,7 +1080,7 @@ Insteon.get_extended_data = function (device) {
   cmd.command = 'GET_SET_EXTENDED_DATA';
   cmd.d1 = 0x01;
 
-  cmd.send(this.modem).then(function (response) {
+  cmd.send(Insteon.modem).then(function (response) {
     defer.resolve(response.data);
   }, function (err) {
     defer.reject(err);
