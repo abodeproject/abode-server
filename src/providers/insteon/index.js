@@ -951,7 +951,7 @@ Insteon.read_all_link_database = function (device, id) {
 
 
   var record_handler = function (msg) {
-    if (msg.from.toLowerCase() === device.config.address.toLowerCase()
+    if (msg.from && msg.command && msg.from.toLowerCase() === device.config.address.toLowerCase()
       && msg.command.indexOf('ALL_LINK_DATABASE_RECORD') >= 0) {
       var existing = records.filter(function (record) {
         return (record.id === msg.record.id);
