@@ -325,7 +325,7 @@ Insteon.get_status = function (device) {
   cmd.command = 'LIGHT_STATUS_REQUEST';
 
   cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
+    result.response = {_on: result.on, _level: result.level};
     result.update = {_on: result.on, _level: result.level};
     defer.resolve(result);
   }, function (err) {
