@@ -14,9 +14,10 @@ var Modem = function (config) {
 
   log.info('Initializing insteon modem');
   self.config = config || {};
-  self.config.send_interval = self.config.send_interval || 400;
+  self.config.send_interval = self.config.send_interval || 100;
   self.config.read_interval = self.config.read_interval || 100;
-  self.config.message_timeout = self.config.message_timeout || 5000;
+  self.config.message_timeout = self.config.message_timeout || 20000;
+  self.config.attempt_timeout = self.config.attempt_timeout || 5000;
   self.config.modem_debug = (self.config.modem_debug !== false);
 
   self.connected = false;
@@ -209,33 +210,69 @@ Modem.prototype.resetMsg = function () {
 };
 
 Modem.prototype.send = function () {
-  var self = this;
+  var self = this,
+    attempt_timer;
 
+  // If nothing in the queue, return
   if (self.send_queue.length === 0) {
     return;
   }
 
+  // If we're already sending, return
   if (self.sending) {
     return;
   }
 
+  // Set the sending flag and get our message
   self.sending = true;
   var message = self.send_queue.shift();
 
+  self.last_sent = new Date();
+
+  // If we are not connected, fail the message and clear the sending flag
   if (!self.connected) {
     message.defer.reject({'status': 'failed', 'message': 'Modem is disconnected and message cannot be sent'});
     self.sending = false;
   }
 
-  message.prep();
+  // Define the attempt function
+  var attempt = function () {
 
-  if (message.error) {
-    log.error(message.error.message);
-    self.sending = false;
-    return message.defer.reject({'status': 'failed', 'message': message.error.message});
-  }
+    // If out message is no longer pending, return
+    if (!message.defer.promise.isPending()) {
+      return;
+    }
+    // If we reached retries, fail the message
+    if (message.attempt >= message.retries) {
+      message.failed('Max retries of ' + message.retries + ' reached');
+      return;
+    }
 
-  if (Array.isArray(message.expect)) {
+    // Increment our attempts
+    message.attempt += 1;
+
+    // Prep the message
+    message.prep();
+
+    // If we have a prep error, fail the message
+    if (message.error) {
+      log.error(message.error.message);
+      return message.defer.reject({'status': 'failed', 'message': message.error.message});
+    }
+
+    // If we have NO message expectations, send the message and be done
+    if (!Array.isArray(message.expect)) {
+      //Send the command
+      log.debug('Sending command attempt %s: ', message.attempt, message.buffer);
+      self.device.write(message.buffer);
+
+      self.sending = false;
+      message.success();
+
+      return;
+    }
+
+    // Process our message expectations
     var expect_defers = [];
 
     // Iterate through each of our expectations
@@ -243,10 +280,11 @@ Modem.prototype.send = function () {
       //Build the expectation object
       var expectation = new Expectation(self);
       expectation.command = expected.command;
-      expectation.expect_from = (expected.expect_from === true);
+      expectation.from = message.to;
+      //expectation.expect_from = (expected.expect_from === true);
 
       message.expect.splice(message.expect.indexOf(expected), 1, expectation);
-      // Add the
+      // Add the expectations
       expect_defers.push(expectation.defer.promise);
       self.expectations.push(expectation);
     });
@@ -256,34 +294,58 @@ Modem.prototype.send = function () {
       message.responses = [];
 
       results.forEach(function (result) {
-        if (result.value.result.status !== 'success') {
+        if (result.value && result.value.result.status !== 'success') {
           result.value.result.command = result.value.command;
           message.failures.push(result.value.result);
+        } else if(result.state === 'rejected') {
+          message.failures.push(result.reason);
+          result.value = {'result': result.reason};
         }
         Object.assign(message.result, result.value.result);
         message.responses.push(result.value.result);
       });
 
       if (message.failures.length > 0) {
-        message.failed('Expectation failed');
+        clearTimeout(attempt_timer);
+        attempt();
+        //message.failed('Expectation failed');
       } else {
+        clearTimeout(attempt_timer);
         message.success();
 
         if (message.emit) {
           self.emit('MESSAGE', message.result);
           self.emit(message.result.command, message.result);
         }
+
+        // On success, clear sending flag
+        self.sending = false;
       }
     });
-  } else {
-    message.defer.resolve({'status': 'success', 'message': 'Message sent'});
-  }
 
-  //Send the command
-  log.debug('Sending command', message.buffer);
-  self.device.write(message.buffer);
+    // Set attempt timer
+    attempt_timer = setTimeout(function () {
+      log.warn('Attempt %s for %s to %s timed out, trying again', message.attempt, message.command, message.to);
+      // Timeout the expectations which will fail the attempt
+      message.expect.forEach(function (expectation) {
+        expectation.timeout();
+      });
 
-  self.sending = false;
+    }, self.config.attempt_timeout);
+
+    //Send the command
+    log.info('Sending command attempt %s: ', message.attempt, message.buffer);
+    self.device.write(message.buffer);
+  };
+
+  // Call the attempt
+  attempt();
+
+  // If the message fails, stop sending
+  message.defer.promise.fail(function () {
+    // Clear the sending flag
+    self.sending = false;
+  });
 };
 
 Modem.prototype.read = function () {
@@ -303,7 +365,7 @@ Modem.prototype.read = function () {
   var message = self.read_queue.shift();
 
   expected = self.expectations.filter(function (expected) {
-    return (expected.command === message.command);
+    return (expected.command === message.command && expected.from === message.result.to);
   });
 
   if (expected.length > 0) {

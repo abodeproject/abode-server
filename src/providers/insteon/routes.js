@@ -16,6 +16,7 @@ router.get('/', function (req, res) {
     'send_queue': insteon.modem.send_queue.length,
     'reading': insteon.modem.reading,
     'read_queue': insteon.modem.read_queue.length,
+    'last_sent': insteon.modem.last_sent,
     'expectation_queue': insteon.modem.expectations.length,
     'modem': insteon.modem_info,
     'config': insteon.config
@@ -36,6 +37,16 @@ router.post('/enable', function (req, res) {
 router.post('/disable', insteon.is_enabled, function (req, res) {
 
   insteon.disable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.get('/database', insteon.is_enabled, function (req, res) {
+
+  insteon.load_modem_database().then(function (result) {
     res.status(200).send(result);
   }, function (err) {
     res.status(400).send(err);
@@ -163,6 +174,22 @@ router.post('/devices/:device/ping', insteon.is_enabled, function (req, res) {
   insteon.get_device(req.params.device).then(function (device) {
 
     device.ping().then(function (result) {
+      res.send(result);
+    }, function (err) {
+      res.status(400).send(err);
+    });
+
+  }, function (err) {
+    res.status(404).send(err);
+  });
+
+});
+
+router.post('/devices/:device/ping/:count', insteon.is_enabled, function (req, res) {
+
+  insteon.get_device(req.params.device).then(function (device) {
+
+    device.ping(req.params.count).then(function (result) {
       res.send(result);
     }, function (err) {
       res.status(400).send(err);

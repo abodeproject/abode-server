@@ -78,6 +78,8 @@ Insteon.statusable = [
 Insteon.poll = function () {
   var i = 0;
 
+  return;
+
   if (Insteon.config.polling_enabled === false) {
     return;
   }
@@ -729,6 +731,7 @@ Insteon.get_first_all_link_record = function () {
 
   var cmd = new Message();
   cmd.command = 'GET_FIRST_ALL_LINK_RECORD';
+  cmd.retries = 1;
 
   cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
@@ -746,6 +749,7 @@ Insteon.get_next_all_link_record = function () {
 
   var cmd = new Message();
   cmd.command = 'GET_NEXT_ALL_LINK_RECORD';
+  cmd.retries = 1;
 
   cmd.send(Insteon.modem).then(function (result) {
     defer.resolve(result);
@@ -906,6 +910,7 @@ Insteon.ping = function (device) {
 
   cmd.to = device.config.address;
   cmd.command = 'PING';
+  cmd.retries = 1;
 
   cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
@@ -1106,5 +1111,53 @@ Insteon.post_save = function (record) {
 
   return defer.promise;
 };
+
+Insteon.load_modem_database = function () {
+  var devices = [],
+    defer = Q.defer();
+
+  var done = function () {
+    devices = devices.map(function (result) {
+      var device = {
+        'controller': result.controller,
+        'address': result.addr,
+        'group': result.group,
+        'on_level': result.on_level,
+        'ramp_rate': result.ramp_rate,
+        'button': result.button
+      };
+
+      var matches = Insteon.devices.filter(function (device) {
+        return (device.config.address === result.addr);
+      });
+
+      if (matches.length > 0) {
+        device.name = matches[0].name;
+      }
+
+      return device;
+    });
+    defer.resolve(devices);
+  };
+
+  var next = function () {
+    Insteon.get_next_all_link_record().then(function (result) {
+      devices.push(result);
+      next();
+    }, function () {
+      done();
+    });
+  };
+
+  Insteon.get_first_all_link_record().then(function (result) {
+    devices.push(result);
+    next();
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+}
+;
 
 module.exports = Insteon;

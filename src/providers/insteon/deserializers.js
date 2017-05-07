@@ -48,7 +48,7 @@ Deserializers.record = function () {
   this.result.addr = utils.bufferToAddr(msg.slice(2,5));
   this.result.on_level = msg.readUInt8(5);
   this.result.ramp_rate = msg.readUInt8(6);
-  this.result.data_3 = msg.readUInt8(7);
+  this.result.button = msg.readUInt8(7);
 
 
   this.result.flags = flags_dec.toString(2);
@@ -116,6 +116,16 @@ Deserializers.received_insteon_standard = function () {
 
   this.result.flags = flags.toString(2);
   this.result.type = (flags >> 5);
+
+  this.result.broadcast = (this.result.type === parseInt('100', 2));
+  this.result.direct = (this.result.type === parseInt('0', 2));
+  this.result.direct_ack = (this.result.type === parseInt('1', 2));
+  this.result.direct_nak = (this.result.type === parseInt('101', 2));
+  this.result.all_link_broadcast = (this.result.type === parseInt('110', 2));
+  this.result.all_link_cleanup = (this.result.type === parseInt('10', 2));
+  this.result.all_link_cleanup_ack = (this.result.type === parseInt('11', 2));
+  this.result.all_link_cleanup_nak = (this.result.type === parseInt('111', 2));
+
   this.result.extended = (flags >> 4 & 1);
   this.result.hops_left = (flags >> 2 & 3);
   this.result.max_hops = (flags & 3);
@@ -136,6 +146,16 @@ Deserializers.received_insteon_extended = function () {
 
   this.result.flags = flags.toString(2);
   this.result.type = (flags >> 5);
+
+  this.result.broadcast = (this.result.type === parseInt('100', 2));
+  this.result.direct = (this.result.type === parseInt('0', 2));
+  this.result.direct_ack = (this.result.type === parseInt('1', 2));
+  this.result.direct_nak = (this.result.type === parseInt('101', 2));
+  this.result.all_link_broadcast = (this.result.type === parseInt('110', 2));
+  this.result.all_link_cleanup = (this.result.type === parseInt('10', 2));
+  this.result.all_link_cleanup_ack = (this.result.type === parseInt('11', 2));
+  this.result.all_link_cleanup_nak = (this.result.type === parseInt('111', 2));
+
   this.result.extended = (flags >> 4 & 1);
   this.result.hops_left = (flags >> 2 & 3);
   this.result.max_hops = (flags & 3);
@@ -175,6 +195,16 @@ Deserializers.send_insteon_standard = function () {
   this.result.cmd_2 = msg.readUInt8(5);
   this.result.flags = flags_dec.toString(2);
   this.result.type = (flags_dec >> 5);
+
+  this.result.broadcast = (this.result.type === parseInt('100', 2));
+  this.result.direct = (this.result.type === parseInt('0', 2));
+  this.result.direct_ack = (this.result.type === parseInt('1', 2));
+  this.result.direct_nak = (this.result.type === parseInt('101', 2));
+  this.result.all_link_broadcast = (this.result.type === parseInt('110', 2));
+  this.result.all_link_cleanup = (this.result.type === parseInt('10', 2));
+  this.result.all_link_cleanup_ack = (this.result.type === parseInt('11', 2));
+  this.result.all_link_cleanup_nak = (this.result.type === parseInt('111', 2));
+
   this.result.extended = (flags_dec >> 4 & 1);
   this.result.hops_left = (flags_dec >> 2 & 3);
   this.result.max_hops = (flags_dec & 3);

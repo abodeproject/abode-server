@@ -62,9 +62,10 @@ Device.prototype.ping = function (max) {
       'start': new Date()
     };
 
-    self.insteon.ping(self).then(function () {
+    self.insteon.ping(self).then(function (result) {
       report.end = new Date();
       report.status = 'success';
+      report.attempts = result.attempt;
       report.time = (report.end - report.start) / 1000;
 
       results.push(report);

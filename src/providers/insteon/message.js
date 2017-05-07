@@ -13,6 +13,8 @@ var Message = function (size) {
     this.buffer = new Buffer(size);
   }
   this.result = {};
+  this.retries = 3;
+  this.attempt = 0;
 
 };
 
@@ -26,7 +28,7 @@ Message.prototype.send = function (modem) {
 
   self.modem.send_queue.push(self);
 
-  self.timer = setTimeout(self.timeout.bind(self), self.modem.config.message_timeout);
+  self.timer = setTimeout(self.timeout.bind(self), self.modem.config.message_timeout * self.modem.send_queue.length);
 
   return this.defer.promise;
 };
@@ -39,19 +41,25 @@ Message.prototype.timeout = function () {
     expectation.timeout();
   });
 
-  this.defer.reject({'status': 'failed', 'message': MESSAGE_TIMEOUT});
+  this.failed(MESSAGE_TIMEOUT);
 };
 
 Message.prototype.success = function () {
   if (this.post) {
     this.post();
   }
+
+  clearTimeout(this.timer);
+  this.result.attempt = this.attempt;
+
   this.defer.resolve(this.result);
 };
 
 Message.prototype.failed = function (msg) {
   clearTimeout(this.timer);
-  this.defer.reject({'status': 'failed', 'message': msg, 'failures': this.failures});
+
+  log.error('Message failure for %s to %s: %s', this.command, this.to, msg);
+  this.defer.reject({'status': 'failed', 'message': msg, 'attempts': this.attempt, 'failures': this.failures});
 
 };
 
@@ -208,9 +216,7 @@ Message.prototype.prep = function () {
       commands[this.command].serialize.apply(this);
     }
 
-    if (commands[this.command].expect && this.expect) {
-      this.expect = this.expect.concat(commands[this.command].expect);
-    } else if (commands[this.command].expect && !this.expect) {
+    if (commands[this.command].expect) {
       this.expect = [].concat(commands[this.command].expect);
     }
   // Otherwise just assign the command
