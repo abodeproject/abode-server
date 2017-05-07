@@ -78,8 +78,6 @@ Insteon.statusable = [
 Insteon.poll = function () {
   var i = 0;
 
-  return;
-
   if (Insteon.config.polling_enabled === false) {
     return;
   }
@@ -780,7 +778,7 @@ Insteon.exit_linking_mode = function (device) {
   return defer.promise;
 };
 
-Insteon.enter_linking_mode = function (device) {
+Insteon.enter_linking_mode = function (device, group) {
   var defer = Q.defer();
 
   log.info('Insteon.enter_linking_mode(%s)', device.name);
@@ -789,6 +787,7 @@ Insteon.enter_linking_mode = function (device) {
 
   cmd.to = device.config.address;
   cmd.command = 'ENTER_LINKING_MODE';
+  cmd.group = group;
 
   cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
@@ -800,7 +799,7 @@ Insteon.enter_linking_mode = function (device) {
   return defer.promise;
 };
 
-Insteon.enter_unlinking_mode = function (device) {
+Insteon.enter_unlinking_mode = function (device, group) {
   var defer = Q.defer();
 
   log.info('Insteon.enter_unlinking_mode(%s)', device.name);
@@ -809,6 +808,7 @@ Insteon.enter_unlinking_mode = function (device) {
 
   cmd.to = device.config.address;
   cmd.command = 'ENTER_UNLINKING_MODE';
+  cmd.group = group;
 
   cmd.send(Insteon.modem).then(function (result) {
     result.response = true;

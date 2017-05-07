@@ -154,9 +154,26 @@ Serializers.enter_linking_mode = function () {
 
   // Generate a crc for d14...
   // Inverse sum of cmd_1, cmd_2 and D1-D13 then bitwise & with 0xff
+  this.cmd_2 = parseInt(this.group || 0x01, 10);
+
   var crc = [
     this.cmd_1,
-    this.cmd_2,
+    this.cmd_2
+  ].reduce(function(a, b) { return a + b; }, 0);
+  crc = (crc * -1) & 0xff;
+  this.d14 = crc;
+
+};
+
+Serializers.enter_unlinking_mode = function () {
+
+  // Generate a crc for d14...
+  // Inverse sum of cmd_1, cmd_2 and D1-D13 then bitwise & with 0xff
+  this.cmd_2 = this.group || 0x01;
+
+  var crc = [
+    this.cmd_1,
+    this.cmd_2
   ].reduce(function(a, b) { return a + b; }, 0);
   crc = (crc * -1) & 0xff;
   this.d14 = crc;

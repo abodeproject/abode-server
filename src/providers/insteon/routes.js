@@ -371,9 +371,29 @@ router.post('/devices/:device/enter_linking_mode', insteon.is_enabled, function 
 
 });
 
+router.post('/devices/:device/enter_linking_mode/:group', insteon.is_enabled, function (req, res) {
+
+  insteon.enter_linking_mode({'config': {'address': req.params.device}}, req.params.group).then(function (response) {
+    res.status(200).send(response);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.post('/devices/:device/enter_unlinking_mode', insteon.is_enabled, function (req, res) {
 
   insteon.enter_unlinking_mode({'config': {'address': req.params.device}}).then(function () {
+    res.status(204).send();
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/devices/:device/enter_unlinking_mode/:group', insteon.is_enabled, function (req, res) {
+
+  insteon.enter_unlinking_mode({'config': {'address': req.params.device}}, req.params.group).then(function () {
     res.status(204).send();
   }, function (err) {
     res.status(400).send(err);
