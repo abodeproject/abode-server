@@ -242,6 +242,7 @@ Commands.LIGHT_STATUS_REQUEST = {
   'receive': {
     'cmd_1': 0x19
   },
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}],
   'deserialize': function () {},
   'post': deserialize.light_status_request
 };

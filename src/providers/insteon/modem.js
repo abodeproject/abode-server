@@ -365,7 +365,7 @@ Modem.prototype.read = function () {
   var message = self.read_queue.shift();
 
   expected = self.expectations.filter(function (expected) {
-    return (expected.command === message.command && expected.from === message.result.to);
+    return (expected.command === message.command && (expected.from === message.result.from || expected.from === message.result.to));
   });
 
   if (expected.length > 0) {
