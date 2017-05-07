@@ -29,6 +29,9 @@ var Modem = function (config) {
   self.read_queue = [];
   self.expectations = [];
 
+  self.polling = false;
+  self.last_sent = new Date();
+
   self.sending = false;
   self.reading = false;
 
@@ -227,12 +230,15 @@ Modem.prototype.send = function () {
   self.sending = true;
   var message = self.send_queue.shift();
 
-  self.last_sent = new Date();
+  if (!self.polling) {
+    self.last_sent = new Date();
+  }
 
   // If we are not connected, fail the message and clear the sending flag
   if (!self.connected) {
     message.defer.reject({'status': 'failed', 'message': 'Modem is disconnected and message cannot be sent'});
     self.sending = false;
+    self.polling = false;
   }
 
   // Define the attempt function
@@ -267,6 +273,7 @@ Modem.prototype.send = function () {
       self.device.write(message.buffer);
 
       self.sending = false;
+      self.polling = false;
       message.success();
 
       return;
@@ -320,6 +327,7 @@ Modem.prototype.send = function () {
 
         // On success, clear sending flag
         self.sending = false;
+        self.polling = false;
       }
     });
 
@@ -345,6 +353,7 @@ Modem.prototype.send = function () {
   message.defer.promise.fail(function () {
     // Clear the sending flag
     self.sending = false;
+    self.polling = false;
   });
 };
 

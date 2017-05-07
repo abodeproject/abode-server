@@ -28,7 +28,7 @@ var Insteon = function () {
   Insteon.config.serial_device = Insteon.config.serial_device || '/dev/ttyUSB0';
   Insteon.config.polling_enabled = (Insteon.config.polling_enabled!==false);
   Insteon.config.poll_interval = Insteon.config.poll_interval || 5;
-  Insteon.config.poll_wait = Insteon.config.poll_wait || 5;
+  Insteon.config.poll_wait = Insteon.config.poll_wait || 60;
 
   Insteon.modem = new Modem(Insteon.config);
   Insteon.modem.on('MESSAGE', Insteon.message_handler);
@@ -105,6 +105,18 @@ Insteon.poll = function () {
   };
 
   var next = function (attempt) {
+
+    var now = new Date(),
+      modem_idle_time = (now - Insteon.modem.last_sent);
+
+    // Wait for modem to be idle
+    if (modem_idle_time < (Insteon.config.poll_wait * 1000)) {
+      // Sleep until we might be idle again (wait time minus current idle time).
+      var idle_wait = (Insteon.config.poll_wait * 1000) - modem_idle_time;
+      log.debug('Modem not idle, sleeping %s sec', (idle_wait / 1000).toFixed(2));
+      setTimeout(next, idle_wait);
+      return;
+    }
     attempt = attempt || 1;
 
     if (i === Insteon.devices.length) {
@@ -132,6 +144,8 @@ Insteon.poll = function () {
 
     log.debug('Polling device: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat));
 
+    Insteon.modem.polling = true;
+
     Insteon.get_status(device).then(function (result) {
       if (result.on !== device.on || result.level !== device.level) {
 
@@ -139,12 +153,12 @@ Insteon.poll = function () {
       }
 
       i += 1;
-      setTimeout(next, Insteon.config.poll_wait * 1000);
+      setTimeout(next, 1000);
     }, function () {
       log.error('Failed to get device status, trying again...');
       setTimeout(function () {
         next(attempt + 1);
-      }, Insteon.config.poll_wait * 1000);
+      }, 1000);
     });
   };
 
