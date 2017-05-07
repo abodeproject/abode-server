@@ -760,6 +760,26 @@ Insteon.get_next_all_link_record = function () {
   return defer.promise;
 };
 
+Insteon.exit_linking_mode = function (device) {
+  var defer = Q.defer();
+
+  log.info('Insteon.exit_linking_mode(%s)', device.name);
+
+  var cmd = new Message();
+
+  cmd.to = device.config.address;
+  cmd.command = 'EXIT_LINKING_MODE';
+
+  cmd.send(Insteon.modem).then(function (result) {
+    result.response = true;
+    defer.resolve(result);
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
 Insteon.enter_linking_mode = function (device) {
   var defer = Q.defer();
 
@@ -821,10 +841,10 @@ Insteon.set_button_tap = function (device, taps) {
   return defer.promise;
 };
 
-Insteon.product_data_request = function (device) {
+Insteon.id_request = function (device) {
   var defer = Q.defer();
 
-  log.info('Insteon.product_data_request(%s)', device.name);
+  log.info('Insteon.id_request(%s)', device.name);
 
   var cmd = new Message();
 

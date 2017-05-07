@@ -267,11 +267,18 @@ Commands.GET_ALL_LINK_DATABASE_DELTA = {
   'post': deserialize.get_all_link_database_delta
 };
 
-Commands.ENTER_LINKING_MODE = {
+Commands.EXIT_LINKING_MODE = {
   'command': 'SEND_INSTEON_STANDARD',
-  'cmd_1': 0x09,
+  'cmd_1': 0x08,
   'cmd_2': 0x00,
   'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
+};
+
+Commands.ENTER_LINKING_MODE = {
+  'command': 'SEND_INSTEON_EXTENDED',
+  'cmd_1': 0x09,
+  'cmd_2': 0x01,
+  'serialize': serialize.enter_linking_mode,
 };
 
 Commands.ENTER_UNLINKING_MODE = {

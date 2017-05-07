@@ -135,7 +135,22 @@ Deserializers.received_insteon_standard = function () {
   this.result.cmd_1 = msg.readUInt8(7);
   this.result.cmd_2 = msg.readUInt8(8);
 
-  this.result.status = 'success';
+  if (this.result.direct_nak || this.result.all_link_cleanup_nak) {
+    this.result.status = 'failed';
+    if (this.result.direct_nak && this.result.cmd_2 === 0xfb) {
+      this.result.message = 'Illegal value in command';
+    } else if (this.result.direct_nak && this.result.cmd_2 === 0xfc) {
+      this.result.message = 'Pre NAK in case database search takes too long';
+    } else if (this.result.direct_nak && this.result.cmd_2 === 0xfd) {
+      this.result.message = 'Checksum is incorrect';
+    } else if (this.result.direct_nak && this.result.cmd_2 === 0xfe) {
+      this.result.message = 'oad sense detects no load (confirm this one)';
+    } else if (this.result.direct_nak && this.result.cmd_2 === 0xff) {
+      this.result.message = 'Sender\'s device ID not in responder\'s database';
+    }
+  } else {
+    this.result.status = 'success';
+  }
   //this.result.cmd_1 = msg.slice(7,8)[0];
   //this.result.cmd_2 = msg.slice(8,9)[0];
 };
@@ -297,8 +312,10 @@ Deserializers.extended_data = function () {
 
 Deserializers.id_request = function () {
 
-  this.result.devcat = this.result.cmd_1;
-  this.result.subcat = this.result.cmd_2;
+  var parts = this.result.to.split('.');
+  this.result.devcat = parseInt(parts[0], 10);
+  this.result.subcat = parseInt(parts[1], 10);
+  this.result.firmware = parseInt(parts[2], 10);
 
 };
 

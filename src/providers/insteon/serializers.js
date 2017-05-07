@@ -150,4 +150,17 @@ Serializers.all_link_database_record = function () {
   }
 };
 
+Serializers.enter_linking_mode = function () {
+
+  // Generate a crc for d14...
+  // Inverse sum of cmd_1, cmd_2 and D1-D13 then bitwise & with 0xff
+  var crc = [
+    this.cmd_1,
+    this.cmd_2,
+  ].reduce(function(a, b) { return a + b; }, 0);
+  crc = (crc * -1) & 0xff;
+  this.d14 = crc;
+
+};
+
 module.exports = Serializers;

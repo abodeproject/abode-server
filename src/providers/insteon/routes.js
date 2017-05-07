@@ -233,11 +233,11 @@ router.post('/devices/:device/get_all_link_database_delta', insteon.is_enabled, 
 
 });
 
-router.post('/devices/:device/product_data_request', insteon.is_enabled, function (req, res) {
+router.post('/devices/:device/id_request', insteon.is_enabled, function (req, res) {
 
   insteon.get_device(req.params.device).then(function (device) {
 
-    device.product_data_request().then(function (result) {
+    device.id_request().then(function (result) {
       res.send(result);
     }, function (err) {
       res.status(400).send(err);
@@ -351,10 +351,20 @@ router.post('/devices/:device/get_status', insteon.is_enabled, function (req, re
 
 });
 
+router.post('/devices/:device/exit_linking_mode', insteon.is_enabled, function (req, res) {
+
+  insteon.exit_linking_mode({'config': {'address': req.params.device}}).then(function (response) {
+    res.status(200).send(response);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.post('/devices/:device/enter_linking_mode', insteon.is_enabled, function (req, res) {
 
   insteon.enter_linking_mode({'config': {'address': req.params.device}}).then(function (response) {
-    res.status(204).send(response);
+    res.status(200).send(response);
   }, function (err) {
     res.status(400).send(err);
   });

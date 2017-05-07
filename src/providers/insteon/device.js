@@ -94,8 +94,8 @@ Device.prototype.beep = function () {
   return this.insteon.beep(this);
 };
 
-Device.prototype.product_data_request = function () {
-  return this.insteon.product_data_request(this);
+Device.prototype.id_request = function () {
+  return this.insteon.id_request(this);
 };
 
 Device.prototype.load_database = function () {
