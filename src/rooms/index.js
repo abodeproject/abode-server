@@ -147,9 +147,11 @@ var getStatuses = function (config) {
         var dev_timeout;
 
         dev_timeout = setTimeout(function () {
-          log.info(devices[index].name, config.key);
-          //log.warn('Timeout reached statusing device %s for %s', devices[index], config.key);
-          log.warn('Timeout reached statusing device');
+          try {
+            log.warn('Timeout reached statusing device %s for %s', devices[index].name, config.key);
+          } catch (e) {
+            log.error('Error with warning: %s', e);
+          }
           next_device();
         }, 5000);
 
