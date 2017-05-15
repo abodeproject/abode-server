@@ -150,7 +150,7 @@ var getStatuses = function (config) {
           try {
             log.warn('Timeout reached statusing device %s for %s', devices[index].name, config.key);
           } catch (e) {
-            log.error('Error with warning: %s', e);
+            log.error('Error with warning: %s', e.message);
           }
           next_device();
         }, 5000);
