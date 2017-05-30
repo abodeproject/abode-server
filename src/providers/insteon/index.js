@@ -888,8 +888,8 @@ Insteon.id_request = function (device) {
 
     var devices = abode.devices.get_by_provider('insteon');
 
-    device.config.devcat = result.devcat;
-    device.config.subcat = result.subcat;
+    device.config.device_cat = result.devcat;
+    device.config.device_subcat = result.subcat;
     device.config.firmware = result.firmware;
 
     devices = devices.filter(function (item) {
