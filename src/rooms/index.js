@@ -148,6 +148,7 @@ var getStatuses = function (config) {
 
         dev_timeout = setTimeout(function () {
           try {
+            //TODO: Figure out how devices[index] is undefined in some cases
             log.warn('Timeout reached statusing device %s for %s', devices[index].name, config.key);
           } catch (e) {
             log.error('Error with warning: %s', e.message);
