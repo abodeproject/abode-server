@@ -901,8 +901,8 @@ Insteon.id_request = function (device) {
       return;
     }
 
-    devices.forEach(function (device) {
-      device.set_state(device.config);
+    devices.forEach(function (item) {
+      item.set_state(device.config);
     });
 
     defer.resolve(result);
