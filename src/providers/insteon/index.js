@@ -262,8 +262,26 @@ Insteon.message_handler = function (msg) {
 
     devices.forEach(function (device) {
       if (device.capabilities.indexOf('motion_sensor') >= 0) {
-        device.set_state({'_motion': state._on, 'last_seen': state.last_seen});
+        state = {
+          '_motion': state._on,
+          'last_seen': state.last_seen
+        };
+
+        if (!device._motion && state._motion) {
+          state.last_on = state.last_seen;
+        } else if (device._motion && !state._motion) {
+          state.last_off = state.last_seen;
+        }
+
+        device.set_state(state);
       } else {
+
+        if (!device._on && state._on) {
+          state.last_on = state.last_seen;
+        } else if (device._on && !state._on) {
+          state.last_off = state.last_seen;
+        }
+
         device.set_state(state);
       }
     });
