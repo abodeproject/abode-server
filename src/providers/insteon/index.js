@@ -885,6 +885,26 @@ Insteon.id_request = function (device) {
 
   cmd.send(Insteon.modem).then(function (result) {
     result.response = true;
+
+    var devices = abode.devices.get_by_provider('insteon');
+
+    device.config.devcat = result.devcat;
+    device.config.subcat = result.subcat;
+    device.config.firmware = result.firmware;
+
+    devices = devices.filter(function (item) {
+      return (item.config && item.config.address === device.config.address);
+    });
+
+    if (devices.length === 0) {
+      log.warn('No device found with address: %s', device.config.address);
+      return;
+    }
+
+    devices.forEach(function (device) {
+      device.set_state(device.config);
+    });
+
     defer.resolve(result);
   }, function (err) {
     defer.reject(err);

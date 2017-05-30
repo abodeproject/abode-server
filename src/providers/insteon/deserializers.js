@@ -74,9 +74,12 @@ Deserializers.all_link_complete = function () {
   this.result.type = msg.readUInt8(0);
   this.result.group = msg.readUInt8(1);
   this.result.address = utils.bufferToAddr(msg.slice(2,5));
+  /*
+  // not reliable
   this.result.device_cat = msg.readUInt8(5);
   this.result.device_subcat = msg.readUInt8(6);
   this.result.firmware = msg.readUInt8(7);
+  */
 
 };
 

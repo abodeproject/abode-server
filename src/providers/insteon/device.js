@@ -18,18 +18,6 @@ var Device = function (insteon, config, name) {
   if (matches.length === 0) {
     self.insteon.devices.push(self);
   } else {
-    if (name !== undefined) {
-      matches[0].name = name;
-    }
-    if (config.device_cat !== undefined) {
-      matches[0].config.device_cat = config.device_cat;
-    }
-    if (config.device_subcat !== undefined) {
-      matches[0].config.device_subcat = config.device_subcat;
-    }
-    if (config.firmware !== undefined) {
-      matches[0].config.firmware = config.firmware;
-    }
     matches[0].update();
   }
 
