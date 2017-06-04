@@ -43,6 +43,7 @@ var Insteon = function () {
   Insteon.enabled = false;
   Insteon.linking = false;
   Insteon.polling = false;
+  Insteon.database = [];
 
   abode.events.on('ABODE_STARTED', function () {
     Insteon.load_devices();
@@ -1209,6 +1210,9 @@ Insteon.load_modem_database = function () {
 
       return device;
     });
+
+    Insteon.database = devices;
+
     defer.resolve(devices);
   };
 

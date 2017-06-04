@@ -46,6 +46,12 @@ router.post('/disable', insteon.is_enabled, function (req, res) {
 
 router.get('/database', insteon.is_enabled, function (req, res) {
 
+  res.status(200).send(insteon.database);
+
+});
+
+router.post('/load_database', insteon.is_enabled, function (req, res) {
+
   insteon.load_modem_database().then(function (result) {
     res.status(200).send(result);
   }, function (err) {
