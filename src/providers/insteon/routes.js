@@ -1,6 +1,7 @@
 'use strict';
 
 var insteon = require('../insteon'),
+  utils = require('./utils'),
   express = require('express'),
   router = express.Router();
 
@@ -42,6 +43,22 @@ router.post('/disable', insteon.is_enabled, function (req, res) {
     res.status(400).send(err);
   });
 
+});
+
+router.get('/scenes', insteon.is_enabled, function (req, res) {
+
+  var i,
+    scenes = [];
+
+  for (i=1; i<=255; i++) {
+    scenes.push({
+      'id': i,
+      'address': '00.00.' + utils.toHex(i),
+      'name': ''
+    });
+  }
+
+  res.status(200).send(scenes);
 });
 
 router.get('/database', insteon.is_enabled, function (req, res) {

@@ -36,7 +36,10 @@ var Insteon = function () {
     Device(Insteon, message.result);
     Insteon.linking = false;
     Insteon.last_linked = message.result;
-    log.info('Device Linked: %s', message.result.addr);
+    log.info('Device Linked: %s', message.result.address);
+    Insteon.get_device(message.result.address).then(function (device) {
+      abode.events.emit('INSTEON_LINKED', {'object': device});
+    });
 
   });
   Insteon.modem.on('CLOSED', Insteon.disable);
@@ -45,6 +48,7 @@ var Insteon = function () {
   Insteon.polling = false;
   Insteon.database = [];
 
+  abode.triggers.types.push({'name': 'INSTEON_LINKED'});
   abode.events.on('ABODE_STARTED', function () {
     Insteon.load_devices();
     setTimeout(Insteon.poll, 100);
