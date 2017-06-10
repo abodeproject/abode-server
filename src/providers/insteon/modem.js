@@ -18,7 +18,12 @@ var Modem = function (config) {
   self.config.read_interval = self.config.read_interval || 100;
   self.config.message_timeout = self.config.message_timeout || 20000;
   self.config.attempt_timeout = self.config.attempt_timeout || 5000;
-  self.config.modem_debug = (self.config.modem_debug !== false);
+  self.config.modem_debug = (self.config.modem_debug === true);
+  self.config.serial_baudrate = self.config.serial_baudrate || 19200;
+  self.config.serial_databits = self.config.serial_databits || 8;
+  self.config.serial_stopbits = self.config.serial_stopbits || 1;
+  self.config.serial_parity = self.config.serial_parity || 0;
+  self.config.serial_flowcontrol = self.config.serial_flowcontrol || 0;
 
   self.connected = false;
   self.message = new Message(0);

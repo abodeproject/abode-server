@@ -25,7 +25,7 @@ var Insteon = function () {
   abode.config.insteon = abode.config.insteon || {};
   Insteon.config = abode.config.insteon;
   Insteon.config.enabled = (Insteon.config.enabled!== false);
-  Insteon.config.serial_device = Insteon.config.serial_device || '/dev/ttyUSB0';
+  Insteon.config.serial_device = Insteon.config.serial_device;
   Insteon.config.polling_enabled = (Insteon.config.polling_enabled!==false);
   Insteon.config.poll_interval = Insteon.config.poll_interval || 5;
   Insteon.config.poll_wait = Insteon.config.poll_wait || 60;
@@ -177,6 +177,11 @@ Insteon.enable = function () {
 
   if (Insteon.enabled) {
     defer.reject({'status': 'failed', 'message': 'Insteon is already enabled'});
+    return defer.promise;
+  }
+
+  if (!Insteon.config.serial_device) {
+    defer.reject({'status': 'failed', 'message': 'No Insteon device specified'});
     return defer.promise;
   }
 
