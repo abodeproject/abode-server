@@ -1,4 +1,7 @@
+var cluster = require('cluster');
 var abode = require('./abode');
+var logger = require('log4js'),
+  log = logger.getLogger('abode');
 
 var config = {
   'path': process.env.ABODE_CONFIG,
@@ -17,4 +20,31 @@ var config = {
   }
 };
 
-abode.init(config);
+var fork = function () {
+  log.info('Starting Abode process');
+  cluster.fork();
+};
+
+if (cluster.isMaster && process.env.ABODE_DISABLE_SUPERVISOR !== '1') {
+  log.info('Abode supervisor started');
+
+  cluster.on('exit', function (worker, code, signal) {
+
+    if (code !== 0) {
+      log.error('Abode exitted, restarting in 2 seconds: %s', code);
+      setTimeout(function () {
+        fork();
+      }, 2000);
+    } else {
+      process.exit(0);
+    }
+
+  });
+
+  fork();
+
+} else {
+
+  abode.init(config);
+
+}
