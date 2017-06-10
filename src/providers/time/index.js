@@ -159,8 +159,11 @@ Time = function () {
   abode.web.server.use('/api/time', routes);
 
   Time.config = abode.config.time || {};
+  Time.config.enabled = (Time.config.enabled !== false);
   Time.config.location = Time.config.location || abode.config.location || {'lat': 0, 'long': 0};
   Time.config.debug = (Time.config.debug !== undefined) ? Time.config.debug : abode.config.debug;
+
+  Time.enabled = Time.config.enabled;
 
   //Set our log level
   if (Time.config.debug) {
