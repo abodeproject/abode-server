@@ -2,6 +2,7 @@
 
 var abode;
 var q = require('q');
+var fs = require('fs');
 var logger = require('log4js'),
   log = logger.getLogger('providers');
 
@@ -82,6 +83,35 @@ var Providers = function (providers) {
     });
 
   }
+
+  return defer.promise;
+};
+
+Providers.get_installed = function () {
+  var defer = q.defer();
+
+
+  fs.readdir('./providers', function (err, results) {
+    var folders = results.filter(function (item) {
+      var stats = fs.lstatSync('./providers/' + item);
+
+      return stats.isDirectory();
+    });
+
+    folders = folders.map(function (folder) {
+      return {
+        'id': folder,
+        'name': (Providers[folder]) ? Providers[folder].name || folder : folder,
+        'description': (Providers[folder]) ? Providers[folder].description || '' : '',
+        'author': (Providers[folder]) ? Providers[folder].author || '' : '',
+        'version': (Providers[folder]) ? Providers[folder].version || '' : '',
+        'installed': (Providers._providers.indexOf(folder) >= 0),
+        'enabled': (Providers._providers.indexOf(folder) >= 0 && Providers[folder] && Providers[folder].enabled)
+      };
+    });
+
+    defer.resolve(folders);
+  });
 
   return defer.promise;
 };
