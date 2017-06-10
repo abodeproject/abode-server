@@ -229,7 +229,7 @@ Abode.detect_upnp = function (type) {
     client = new ssdp_client();
 
   type = type || 'abode:server';
-  
+
   //Set our response handler
   client.on('response', function (headers) {
     var name = headers.USN.split('::')[0];
@@ -261,7 +261,7 @@ Abode.detect_upnp = function (type) {
   //Search for abode servers
   client.search(type);
 
-  //Timeout 
+  //Timeout
   setTimeout(function () {
     defer.resolve(results);
   }, Abode.config.upnp_client_timeout * 1000);
@@ -453,7 +453,7 @@ Abode.check_key = function (key) {
   var defer = q.defer();
 
   if (Abode.keys.indexOf(key) > -1) {
-    defer.resolve();  
+    defer.resolve();
   } else {
     defer.reject({'status': 'failed', 'message': 'Invalid Token', 'http_code': 401});
   }
@@ -530,6 +530,39 @@ Abode.import_ca = function (url) {
     rejectUnauthorized: false,
     json:true,
   }, get_ca_cb);
+
+  return defer.promise;
+};
+
+Abode.check_db = function (config) {
+  var db,
+      defer = q.defer();
+
+  log.debug('Checking DB: mongodb://%s/%s', config.server, config.database);
+  db = mongoose.connect('mongodb://' + config.server + '/' + config.database).connection;
+
+  db.on('error', function (err) {
+    log.error('Connection error: %s', err.message || err);
+    defer.reject({'status': 'failed', 'message': err.message || err});
+  });
+
+  db.once('open', function () {
+    defer.resolve({'status': 'success'});
+    db.close();
+  });
+
+  return defer.promise;
+};
+
+Abode.reload = function (config) {
+  var db,
+      defer = q.defer();
+
+  defer.resolve();
+
+  setTimeout(function () {
+    process.exit(255);
+  }, 1000);
 
   return defer.promise;
 };

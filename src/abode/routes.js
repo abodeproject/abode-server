@@ -202,7 +202,11 @@ router.get('/status/', function (req, res) {
 });
 
 router.get('/providers', function (req, res) {
-  res.send(abode.providers._providers);
+  abode.providers.get_installed().then(function (providers) {
+    res.send(providers);
+  }, function (err) {
+    res.status(400).send(err);
+  });
 });
 
 router.get('/capabilities', function (req, res) {
@@ -253,6 +257,26 @@ router.all('/sources/:source/:uri', function (req, res) {
 
 router.post('/reboot', function (req, res) {
   res.send(req.params);
+});
+
+router.post('/check_db', function (req, res) {
+
+  abode.check_db(req.body).then(function () {
+    res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/reload', function (req, res) {
+
+  abode.reload().then(function () {
+    res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
 });
 
 module.exports = router;
