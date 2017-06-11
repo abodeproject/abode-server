@@ -18,9 +18,32 @@ var AlarmClock = function () {
   abode.config.alarmclock = abode.config.alarmclock || {};
   abode.config.alarmclock.enabled = (abode.config.alarmclock.enabled === false) ? false : true;
 
+  if (abode.config.alarmclock.enabled) {
+    AlarmClock.enable();
+  } else {
+    AlarmClock.enabled = false;
+  }
   config = abode.config.alarmclock || {};
   log.info('Alarm Clock Loaded');
   defer.resolve();
+
+  return defer.promise;
+};
+
+AlarmClock.enable = function () {
+  var defer = q.defer();
+
+  AlarmClock.enabled = true;
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+
+AlarmClock.disable = function () {
+  var defer = q.defer();
+
+  AlarmClock.enabled = false;
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };

@@ -6,6 +6,32 @@ var insteonhub = require('../insteonhub'),
   express = require('express'),
   router = express.Router();
 
+router.get('/', function (req, res) {
+  res.send({
+    'enabled': insteonhub.enabled,
+  });
+});
+
+router.post('/enable', function (req, res) {
+
+  insteonhub.enable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/disable', function (req, res) {
+
+  insteonhub.disable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.get('/auth_url', function (req, res) {
 
   var url = insteonhub.config.base_url + '/oauth2/auth';

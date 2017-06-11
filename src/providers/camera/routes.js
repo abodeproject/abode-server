@@ -11,7 +11,29 @@ var logger = require('log4js'),
 
 router.get('/', function (req, res) {
 
-  res.send(cameras.list());
+  res.send({
+    'enabled': cameras.enabled,
+  });
+
+});
+
+router.post('/enable', function (req, res) {
+
+  cameras.enable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/disable', function (req, res) {
+
+  cameras.disable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
 
 });
 
@@ -71,7 +93,7 @@ router.get('/:id/video', function (req, res) {
   })
   .pipe(res);
 
-  req.connection.on('close',function(){    
+  req.connection.on('close',function(){
     log.info('Closing proxy connection to camera');
     proxy.req.socket.destroy();
   });

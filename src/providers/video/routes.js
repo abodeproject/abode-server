@@ -8,10 +8,30 @@ var video = require('../video'),
 router.get('/', function (req, res) {
 
   if (video.display) {
-    res.send({'status': 'ready', 'display': video.display, 'playing': video.playing, 'last_status': video.last_status});
+    res.send({'enabled': video.enabled, 'status': 'ready', 'display': video.display, 'playing': video.playing, 'last_status': video.last_status});
   } else {
     res.send({'status': 'failed', 'message': 'No display found'});
   }
+
+});
+
+router.post('/enable', function (req, res) {
+
+  video.enable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/disable', function (req, res) {
+
+  video.disable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
 
 });
 

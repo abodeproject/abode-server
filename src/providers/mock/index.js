@@ -25,19 +25,43 @@ var Mock = function () {
   log.info(msg);
   defer.resolve({'status': 'success', 'message': msg});
 
-  defer.resolve();
+  if (Mock.config.enabled) {
+    Mock.enable();
+  } else {
+    Mock.enabled = false;
+  }
+
+  return defer.promise;
+};
+
+Mock.enable = function () {
+  var defer = q.defer();
+
+  log.info('Enabling Mock provider');
+  Mock.enabled = true;
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+
+Mock.disable = function () {
+  var defer = q.defer();
+
+  log.info('Disabling Mock provider');
+  Mock.enabled = false;
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };
 
 
 
-// 
+//
 Mock.get_status = function (device) {
   var defer = q.defer();
 
   log.info('Mock.get_status(%s)', device);
-  defer.resolve({'response': true}); 
+  defer.resolve({'response': true});
 
   return defer.promise;
 };

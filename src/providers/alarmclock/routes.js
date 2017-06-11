@@ -5,6 +5,34 @@ var alarmclocks = require('../alarmclock'),
   express = require('express'),
   router = express.Router();
 
+router.get('/status', function (req, res) {
+
+  res.send({
+    'enabled': alarmclocks.enabled,
+  });
+
+});
+
+router.post('/enable', function (req, res) {
+
+  alarmclocks.enable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/disable', function (req, res) {
+
+  alarmclocks.disable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.get('/', function (req, res) {
 
   alarmclocks.list().then(function (results) {

@@ -32,11 +32,37 @@ var IFTTT = function () {
     abode.config.allow_uris.push('/api/ifttt/trigger/*/*');
   }
 
-  abode.config.ifttt.enabled = (abode.config.ifttt.enabled === false) ? false : true;
+  abode.config.ifttt.enabled = (abode.config.ifttt.enabled !== false);
 
+  if (abode.config.ifttt.enabled) {
+    IFTTT.enable();
+  } else {
+    log.warn('Computer provider not enabled: %s', abode.config.ifttt.enabled);
+    IFTTT.enabled = false;
+  }
   config = abode.config.ifttt || {};
 
   return IFTTT.load();
+};
+
+IFTTT.enable = function () {
+  var defer = q.defer();
+
+  log.info('Enabling IFTTT provider');
+  IFTTT.enabled = true;
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+
+IFTTT.disable = function () {
+  var defer = q.defer();
+
+  log.info('Disabling IFTTT provider');
+  IFTTT.enabled = false;
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
 };
 
 // Define a save function that returns an promise instead of using a callback

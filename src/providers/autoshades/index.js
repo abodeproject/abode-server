@@ -30,6 +30,8 @@ var Autoshades = function () {
 
   if (Autoshades.config.enabled) {
     Autoshades.enable();
+  } else {
+    Autoshades.enabled = false;
   }
 
   defer.resolve();
@@ -43,6 +45,7 @@ Autoshades.enable = function () {
   var defer = q.defer();
 
   if (!Autoshades.enabled) {
+    log.info('Enabling and starting Autoshades poller interval');
     Autoshades.timer = setInterval(Autoshades.processor, Autoshades.config.interval * 60 * 1000);
     Autoshades.enabled = true;
     defer.resolve({'status': 'success', 'message': 'Autoshades Enabled'});
@@ -57,6 +60,7 @@ Autoshades.disable = function () {
   var defer = q.defer();
 
   if (Autoshades.enabled) {
+    log.info('Disabling and stopping Autoshades poller interval');
     if (Autoshades.timer) {
       clearInterval(Autoshades.timer);
     }
@@ -110,7 +114,7 @@ Autoshades.processor = function () {
       log.debug('No Autoshade Devices to Process');
       Autoshades.working = false;
       return;
-    }    
+    }
 
     log.debug('Starting to process autoshade devices');
     devices.forEach(function (device) {
@@ -163,7 +167,7 @@ Autoshades.processor = function () {
             log.warn('Invalid ease function for device: %s %s', device.name, device.config.mode);
             return device_defer.resolve();
           }
-          
+
           log.debug('Using sun tracking level');
           level = ease_function(abode.providers.time.sun_altitude);
           if (level < 0) {
@@ -234,12 +238,12 @@ Autoshades.processor = function () {
   //});
 };
 
-// 
+//
 Autoshades.get_status = function (device) {
   var defer = q.defer();
 
   log.debug('Autoshades.get_status(%s)', device);
-  defer.resolve({'response': true}); 
+  defer.resolve({'response': true});
 
   return defer.promise;
 };

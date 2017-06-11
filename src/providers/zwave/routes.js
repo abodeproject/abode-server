@@ -7,7 +7,7 @@ var zwave = require('../zwave'),
 router.get('/', function (req, res) {
 
   res.send({
-    'enabled': zwave.config.enabled,
+    'enabled': zwave.enabled,
     'connected': zwave.connected,
     'queue': zwave.queue.length,
     'new_devices': zwave.new_devices,
@@ -95,7 +95,7 @@ router.get('/scenes/:id', function (req, res) {
 router.delete('/scenes/:id', function (req, res) {
 
   zwave.remove_scene(req.params.id);
-  
+
   res.status(204).send();
 
 });

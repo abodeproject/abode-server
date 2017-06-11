@@ -21,7 +21,7 @@ var LutronCaseta = function () {
   abode.config.lutroncaseta = abode.config.lutroncaseta || {};
   LutronCaseta.config = abode.config.lutroncaseta;
   LutronCaseta.config.enabled = (LutronCaseta.config.enabled === true) ? true : false;
-  LutronCaseta.config.bridge_host = LutronCaseta.config.bridge_host;
+  LutronCaseta.config.bridge_host = LutronCaseta.config.bridge_host || '';
   LutronCaseta.config.bridge_port = LutronCaseta.config.bridge_port || 23;
   LutronCaseta.config.username = LutronCaseta.config.username || 'lutron';
   LutronCaseta.config.password = LutronCaseta.config.password || 'integration';
@@ -52,6 +52,7 @@ var LutronCaseta = function () {
 
   } else {
     log.info('Lutron Caseta provider not enabled');
+    LutronCaseta.enabled = false;
   }
 
   defer.resolve();
@@ -124,7 +125,7 @@ LutronCaseta.start = function () {
     msg = 'Provider started';
 
     // Enable the provider
-    LutronCaseta.config.enabled = true;
+    LutronCaseta.enabled = true;
 
     // Attempt a connection
     LutronCaseta.connect();
@@ -154,7 +155,7 @@ LutronCaseta.stop = function () {
     msg = 'Provider stopped';
 
     // Disable the provider
-    LutronCaseta.config.enabled = false;
+    LutronCaseta.enabled = false;
 
     // Stop the queue handler
     clearInterval(LutronCaseta.timer);
@@ -169,8 +170,9 @@ LutronCaseta.stop = function () {
     defer.resolve({'status': 'success', 'message': msg});
   } else {
     msg = 'Already stopped';
+    LutronCaseta.enabled = false;
     log.error(msg);
-    defer.reject({'status': 'failed', 'message': msg});
+    defer.resolve({'status': 'failed', 'message': msg});
   }
 
   return defer.promise;

@@ -47,13 +47,36 @@ var InsteonHub = function () {
 
 
     log.warn('InsteonHub started.  Not enabled');
-    InsteeonHub.enabled = true;
+    InsteonHub.enable();
+
     defer.resolve();
 
   } else {
     log.warn('Not starting InsteonHub.  Not enabled');
     defer.resolve();
+    InsteonHub.enabled = false;
   }
+
+  return defer.promise;
+};
+
+InsteonHub.enable = function () {
+  var defer = q.defer();
+
+  if (InsteonHub.config.api_secret && InsteonHub.config.api_key && InsteonHub.config.user && InsteonHub.config.password) {
+    InsteonHub.enabled = true;
+    defer.resolve({'status': 'success'});
+  } else {
+    defer.reject({'status': 'failed', 'message': 'Missing configuration settings'});
+  }
+  return defer.promise;
+};
+
+InsteonHub.disable = function () {
+  var defer = q.defer();
+
+  InsteonHub.enabled = false;
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };

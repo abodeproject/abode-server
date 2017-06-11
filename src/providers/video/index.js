@@ -19,6 +19,8 @@ var Video = function () {
 
   abode.web.server.use('/api/video', routes);
 
+  abode.config.video = abode.config.video || {};
+  abode.config.video.enabled = (abode.config.video.enabled !== false);
   abode.config.video.player = abode.config.video.player || 'omxplayer';
   abode.config.video.options = abode.config.video.options || [];
 
@@ -29,7 +31,33 @@ var Video = function () {
   } else {
     log.warn('No valid display found');
   }
+
+  if (abode.config.video.enabled) {
+    Video.enable();
+  } else {
+    Video.enabled = false;
+  }
   defer.resolve();
+
+  return defer.promise;
+};
+
+Video.enable = function () {
+  var defer = q.defer();
+
+  log.info('Enabling Video provider');
+  Video.enabled = true;
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+
+Video.disable = function () {
+  var defer = q.defer();
+
+  log.info('Disabling Video provider');
+  Video.enabled = false;
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };

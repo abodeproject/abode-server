@@ -47,6 +47,7 @@ var ZWave = function () {
 
   } else {
     log.info('Z-Wave provider not enabled');
+    ZWave.enabled = false;
   }
 
   defer.resolve();
@@ -62,7 +63,7 @@ ZWave.enable = function () {
     msg = 'Provider started';
 
     // Enable the provider
-    ZWave.config.enabled = true;
+    ZWave.enabled = true;
 
     // Attempt a connection
     ZWave.connect();
@@ -92,7 +93,7 @@ ZWave.disable = function () {
     msg = 'Provider stopped';
 
     // Disable the provider
-    ZWave.config.enabled = false;
+    ZWave.enabled = false;
 
     // Stop the queue handler
     clearInterval(ZWave.timer);
@@ -107,8 +108,9 @@ ZWave.disable = function () {
     defer.resolve({'status': 'success', 'message': msg});
   } else {
     msg = 'Already stopped';
+    ZWave.enabled = false;
     log.error(msg);
-    defer.reject({'status': 'failed', 'message': msg});
+    defer.resolve({'status': 'failed', 'message': msg});
   }
 
   return defer.promise;
@@ -308,7 +310,7 @@ ZWave.on = function (device) {
   } else {
     defer.reject({'status': 'failed', 'message': 'Missing node id'});
   }
-  
+
   return defer.promise;
 };
 
@@ -318,11 +320,11 @@ ZWave.off = function (device) {
   log.info('ZWave.off(%s)', device);
   if (device.config.node_id) {
     ZWave.connection.setNodeOff(device.config.node_id);
-    defer.resolve(); 
+    defer.resolve();
   } else {
     defer.reject({'status': 'failed', 'message': 'Missing device nodeid or level'});
   }
-  
+
   return defer.promise;
 };
 
@@ -337,7 +339,7 @@ ZWave.set_level = function (device, level) {
   } else {
     defer.reject({'status': 'failed', 'message': 'Missing device nodeid or level'});
   }
-  
+
   return defer.promise;
 };
 
@@ -600,7 +602,7 @@ ZWave.get_device = function (nodeid) {
           ZWave.new_devices.push(new_device);
           return defer.resolve(new_device);
         }
-        
+
         return defer.resolve(new_devices[0]);
       }
 
@@ -721,7 +723,7 @@ ZWave.command_classes = {
 };
 
 ZWave.get_command_class_by_id = function (classid) {
-  
+
   var classes = Object.keys(ZWave.command_classes).filter(function (c) {
     return (ZWave.command_classes[c] === classid);
   });
@@ -815,7 +817,7 @@ ZWave.remove_scene = function (sceneid) {
   defer.resolve(ZWave.connection.removeScene(sceneid));
 
   ZWave.get_scenes();
-  
+
   return defer.promise;
 };
 
@@ -833,7 +835,7 @@ ZWave.get_scene = function (sceneid) {
   } else {
     defer.reject({'status': 'failed', 'message': 'Scene not found', 'http_code': 404});
   }
-  
+
   return defer.promise;
 };
 
@@ -918,7 +920,7 @@ ZWave.pre_save = function (device) {
           if (new_index.value === org_index.value) {
             return;
           }
-          
+
           //var value_defer = ZWave.set_value(new_index.node_id, new_index.class_id, new_index.instance, new_index.index, new_index.value);
 
           //value_defers.push(value_defer);

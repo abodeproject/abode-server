@@ -1,22 +1,19 @@
 'use strict';
 
-var radiothermostat = require('../radiothermostat'),
+var rad = require('../rad'),
   express = require('express'),
   router = express.Router();
 
 router.get('/', function (req, res) {
 
   res.send({
-    'enabled': radiothermostat.enabled,
-    'current': radiothermostat.current,
-    'forecast': radiothermostat.forecast,
+    'enabled': rad.enabled,
   });
-
 });
 
 router.post('/enable', function (req, res) {
 
-  radiothermostat.enable().then(function (result) {
+  rad.enable().then(function (result) {
     res.status(200).send(result);
   }, function (err) {
     res.status(400).send(err);
@@ -26,7 +23,7 @@ router.post('/enable', function (req, res) {
 
 router.post('/disable', function (req, res) {
 
-  radiothermostat.disable().then(function (result) {
+  rad.disable().then(function (result) {
     res.status(200).send(result);
   }, function (err) {
     res.status(400).send(err);

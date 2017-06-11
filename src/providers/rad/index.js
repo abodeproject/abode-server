@@ -2,6 +2,7 @@
 
 var abode,
   config,
+  routes,
   q = require('q'),
   request = require('request');
 
@@ -11,6 +12,10 @@ var logger = require('log4js'),
 var Rad = function () {
   var defer = q.defer();
   abode = require('../../abode');
+
+  routes = require('./routes');
+
+  abode.web.server.use('/api/rad', routes);
 
   config = abode.config.rad || {};
   config.enabled = (config.enabled === false) ? false : true;
@@ -25,11 +30,38 @@ var Rad = function () {
     }
 
     log.info('Starting Rad provider');
-    setInterval(Rad.load, (1000 * config.interval));
+
+    Rad.enable();
     Rad.load();
   });
 
   defer.resolve();
+
+  return defer.promise;
+};
+
+Rad.enable = function () {
+  var defer = q.defer();
+
+  Rad.enabled = true;
+  log.info('Enabling and starting Rad poller interval');
+  Rad.poller = setInterval(Rad.load, (1000 * config.interval));
+
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+
+Rad.disable = function () {
+  var defer = q.defer();
+
+  log.info('Disabling and stopping Rad poller interval');
+  if (Rad.poller) {
+    clearInterval(Rad.poller);
+  }
+  Rad.enabled = false;
+
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };

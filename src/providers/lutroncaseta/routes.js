@@ -7,14 +7,14 @@ var lutroncaseta = require('../lutroncaseta'),
 router.get('/', function (req, res) {
 
   res.send({
-    'enabled': lutroncaseta.config.enabled,
+    'enabled': lutroncaseta.enabled,
     'connected': lutroncaseta.connected,
     'queue': lutroncaseta.queue.length,
   });
 
 });
 
-router.post('/start', function (req, res) {
+router.post('/enable', function (req, res) {
 
   lutroncaseta.start().then(function (response) {
   	res.send(response);
@@ -24,7 +24,7 @@ router.post('/start', function (req, res) {
 
 });
 
-router.post('/stop', function (req, res) {
+router.post('/disable', function (req, res) {
 
   lutroncaseta.stop().then(function (response) {
   	res.send(response);

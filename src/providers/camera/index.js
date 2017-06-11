@@ -45,16 +45,43 @@ var Camera = function () {
 
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {
+      Camera.enabled = false;
       log.warn('Not starting Camera.  Not enabled');
       return;
     }
 
     log.info('Starting Camera provider');
-    setInterval(Camera.load, (1000 * config.interval));
+    Camera.enable();
     Camera.load();
   });
 
   defer.resolve();
+
+  return defer.promise;
+};
+
+Camera.enable = function () {
+  var defer = q.defer();
+
+  log.info('Enabling and starting Camera poller interval');
+  Camera.poller = setInterval(Camera.load, (1000 * config.interval));
+  Camera.enabled = true;
+
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+
+Camera.disable = function () {
+  var defer = q.defer();
+
+  log.info('Disabling and stopping Camera poller interval');
+  if (Camera.poller) {
+    clearInterval(Camera.poller);
+  }
+  Camera.enabled = false;
+
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };

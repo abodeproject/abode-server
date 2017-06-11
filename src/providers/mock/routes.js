@@ -7,7 +7,7 @@ var mock = require('../mock'),
 router.get('/', function (req, res) {
 
   res.send({
-    'enabled': mock.config.enabled
+    'enabled': mock.enabled
   });
 
 });

@@ -17,7 +17,7 @@ Wunderground = function () {
   routes = require('./routes');
 
   config = abode.config.wunderground || {};
-  config.enabled = (config.enabled === false) ? false : true;
+  config.enabled = (config.enabled === true);
   config.server = config.server || 'api.wunderground.com';
   config.interval = config.interval || 5;
   config.temp_units = config.temp_units || 'f';
@@ -26,21 +26,17 @@ Wunderground = function () {
   config.dist_units = config.dist_units || 'mi';
   config.rain_units = config.rain_units || 'in';
 
-  if (config.key === undefined) {
-    log.error('Wunderground provider has no key configured');
-    defer.reject('Wunderground provider has no key configured');
-    return defer.promise;
-  }
-
   abode.web.server.use('/api/wunderground', routes);
 
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {
+      Wunderground.enabled = false;
       log.warn('Not starting Wunderground.  Not enabled');
       return;
     }
 
     log.info('Starting Wunderground provider');
+    Wunderground.enable();
     setInterval(Wunderground.load, (1000 * 60 * config.interval));
     Wunderground.load();
   });
@@ -48,6 +44,34 @@ Wunderground = function () {
 
   log.debug('Wunderground provider initialized');
   defer.resolve(Wunderground);
+
+  return defer.promise;
+};
+
+Wunderground.enable = function () {
+  var defer = q.defer();
+
+  if (config.key) {
+    log.info('Enabling and starting Wunderground poller interval');
+    Wunderground.poller = setInterval(Wunderground.load, (1000 * 60 * config.interval));
+    Wunderground.enabled = true;
+    defer.resolve({'status': 'success'});
+  } else {
+    defer.reject({'status': 'failed', 'message': 'No API key configured'});
+  }
+
+  return defer.promise;
+};
+
+Wunderground.disable = function () {
+  var defer = q.defer();
+
+  log.info('Disabling and stopping Wunderground poller interval');
+  if (Wunderground.poller) {
+    clearInterval(Wunderground.poller);
+  }
+  Wunderground.enabled = false;
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };

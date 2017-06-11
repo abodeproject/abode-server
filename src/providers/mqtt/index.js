@@ -1,6 +1,7 @@
 'use strict';
 
 var abode,
+  routes,
   q = require('q'),
   mqtt = require('mqtt'),
   logger = require('log4js'),
@@ -11,6 +12,9 @@ var Mqtt = function () {
 
   abode = require('../../abode');
 
+  // Set our routes
+  routes = require('./routes');
+  abode.web.server.use('/api/mqtt', routes);
 
   abode.config.mqtt = abode.config.mqtt || {};
   Mqtt.config = abode.config.mqtt;
@@ -28,12 +32,41 @@ var Mqtt = function () {
     });
   } else {
     log.info('Mqtt provider not enabled');
+    Mqtt.enabled = false;
     defer.resolve();
   }
 
 
   return defer.promise;
 };
+
+Mqtt.enable = function () {
+  var defer = q.defer();
+
+  Mqtt.connect().then(function () {
+    log.info('Mqtt provider initialized');
+    Mqtt.enabled = true;
+    defer.resolve();
+  }, function (err) {
+    Mqtt.client.end();
+    Mqtt.enabled = false;
+    defer.reject({'status': 'failed', 'message': 'Failed to connect to MQTT'});
+  });
+
+  return defer.promise;
+};
+
+Mqtt.disable = function () {
+  var defer = q.defer();
+
+  if (Mqtt.client && !Mqtt.client.disconnected) {
+    Mqtt.client.end();
+  }
+  Mqtt.enabled = false;
+  defer.resolve();
+
+  return defer.promise;
+}
 
 Mqtt.cache = {};
 

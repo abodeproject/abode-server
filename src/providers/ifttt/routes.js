@@ -13,6 +13,34 @@ router.get('/', function (req, res) {
 
 });
 
+router.get('/status', function (req, res) {
+
+  res.send({
+    'enabled': ifttt.enabled
+  });
+
+});
+
+router.post('/enable', function (req, res) {
+
+  ifttt.enable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
+router.post('/disable', function (req, res) {
+
+  ifttt.disable().then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.post('/', web.isUnlocked, web.isJson, function (req, res) {
   ifttt.create(req.body).then(function () {
     res.status(201).send({'status': 'success'});

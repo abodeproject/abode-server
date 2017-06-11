@@ -32,18 +32,43 @@ Radiothermostat = function () {
 
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {
+      Radiothermostat.enabled = false;
       log.warn('Not starting Radiothermostat.  Not enabled');
       return;
     }
 
     log.info('Starting Radiothermostat provider');
-    setInterval(Radiothermostat.load, (1000 * 60 * config.interval));
+    Radiothermostat.enable()
     Radiothermostat.load();
   });
 
 
   log.debug('Radiothermostat provider initialized');
   defer.resolve(Radiothermostat);
+
+  return defer.promise;
+};
+
+Radiothermostat.enable = function () {
+  var defer = q.defer();
+
+  Radiothermostat.poller = setInterval(Radiothermostat.load, (1000 * 60 * config.interval));
+  Radiothermostat.enabled = true;
+
+  defer.resolve({'status': 'success'});
+
+  return defer.promise;
+};
+
+Radiothermostat.disable = function () {
+  var defer = q.defer();
+
+  if (Radiothermostat.poller) {
+    clearInterval(Radiothermostat.poller);
+  }
+  Radiothermostat.enabled = false;
+
+  defer.resolve({'status': 'success'});
 
   return defer.promise;
 };
