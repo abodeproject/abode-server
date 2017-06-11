@@ -17,6 +17,7 @@ var InsteonHub = function () {
 
   //Set our configuration options
   InsteonHub.config = abode.config.insteonhub || {};
+  InsteonHub.config.enabled = (InsteonHub.config === true);
   InsteonHub.config.base_url = abode.config.insteonhub.base_url || 'https://connect.insteon.com/api/v2';
   InsteonHub.config.auth_url = abode.config.insteonhub.auth_url || 'http://localhost:8080/api/insteonhub/authorize';
 
@@ -46,6 +47,7 @@ var InsteonHub = function () {
 
 
     log.warn('InsteonHub started.  Not enabled');
+    InsteeonHub.enabled = true;
     defer.resolve();
 
   } else {

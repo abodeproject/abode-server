@@ -24,6 +24,7 @@ var Display = function () {
   abode.config.display.enabled = (abode.config.display.enabled === false) ? false : true;
 
   Display.config = abode.config.display;
+  Display.enabled = abode.config.display.enabled;
 
   if (Display.config.enabled === true  && process.env.DISPLAY) {
     log.info('Starting Display');

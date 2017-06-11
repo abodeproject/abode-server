@@ -17,6 +17,8 @@ var Browser = function () {
   abode.config.browser = abode.config.browser || {};
   abode.config.browser.enabled = (abode.config.browser.enabled === false) ? false : true;
 
+  Browser.enabled = abode.config.browser.enabled;
+
   config = abode.config.browser || {};
   log.info('Browser Loaded');
   defer.resolve();

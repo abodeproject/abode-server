@@ -16,6 +16,8 @@ var Rad = function () {
   config.enabled = (config.enabled === false) ? false : true;
   config.interval = config.interval || 30;
 
+  Rad.enabled = config.enabled;
+
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {
       log.warn('Not starting Rad.  Not enabled');
