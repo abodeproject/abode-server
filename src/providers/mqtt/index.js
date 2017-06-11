@@ -24,12 +24,8 @@ var Mqtt = function () {
   Mqtt.config.min_save_age = Mqtt.config.min_save_age || 1000 * 10;
 
   if (Mqtt.config.enabled) {
-    Mqtt.connect().then(function () {
-      log.info('Mqtt provider initialized');
-      defer.resolve();
-    }, function (err) {
-      defer.reject(err);
-    });
+    Mqtt.enable();
+    defer.resolve();
   } else {
     log.info('Mqtt provider not enabled');
     Mqtt.enabled = false;
