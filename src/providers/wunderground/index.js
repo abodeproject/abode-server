@@ -37,7 +37,6 @@ Wunderground = function () {
 
     log.info('Starting Wunderground provider');
     Wunderground.enable();
-    setInterval(Wunderground.load, (1000 * 60 * config.interval));
     Wunderground.load();
   });
 
