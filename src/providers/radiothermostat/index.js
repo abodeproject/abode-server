@@ -168,7 +168,7 @@ Radiothermostat.set_point = function (device, temp) {
   } else if (device._mode === 'COOL') {
     data.t_cool = temp;
   } else {
-    defer.rejecet({'status': 'failed', 'message': 'Conditioner is off'});
+    defer.reject({'status': 'failed', 'message': 'Conditioner is off'});
     return defer.promise;
   }
 
@@ -177,7 +177,7 @@ Radiothermostat.set_point = function (device, temp) {
     json: data
   }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
-      log.debug('Successfully set thermostat set point: %s', temp);
+      log.info('Successfully set thermostat set point: %s', temp);
       defer.resolve({'status': 'success', 'update': {'_set_point': temp}});
     } else {
       log.error('Failed to set thermostat set point %s: %s', device.name, body);
