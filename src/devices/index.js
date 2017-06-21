@@ -34,6 +34,7 @@ var Devices = function () {
 //Build an array of capabilities we'll support
 Devices.capabilities = [
   'light',
+  'beep',
   'dimmer',
   'appliance',
   'conditioner',
