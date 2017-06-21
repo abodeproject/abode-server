@@ -943,22 +943,49 @@ Insteon.device_text_string_request = function (device) {
   return defer.promise;
 };
 
-Insteon.beep = function (device) {
-  var defer = Q.defer();
+Insteon.beep = function (device, count) {
+  var i = 0,
+    response = {},
+    success = [],
+    errors = [],
+    defer = Q.defer();
+
+  count = count || 1;
+
+  var do_beep = function () {
 
   log.info('Insteon.beep(%s)', device.name);
+    i += 1;
 
-  var cmd = new Message();
+    if (i > count) {
+      response.errors = errors;
+      response.successes = success;
+      if (response.errors.length === count) {
+        response.response = false;
+        return defer.reject(response);
+      } else {
+        response.response = true;
+        return defer.resolve(response);
+      }
+    }
 
-  cmd.to = device.config.address;
-  cmd.command = 'BEEP';
+    var cmd = new Message();
 
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
+    cmd.to = device.config.address;
+    cmd.command = 'BEEP';
+
+    cmd.send(Insteon.modem).then(function (result) {
+      success.count = i;
+      success.push(result);
+      setTimeout(do_beep, 500);
+    }, function (err) {
+      err.count = i;
+      errors.push(err);
+      setTimeout(do_beep, 500);
+    });
+  };
+
+  do_beep();
 
   return defer.promise;
 };

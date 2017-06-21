@@ -274,6 +274,7 @@ var actions = [
   'close',
   'lock',
   'unlock',
+  'beep',
   'set_level',
   'set_mode',
   'set_humidity',

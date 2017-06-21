@@ -205,6 +205,7 @@ DeviceSchema.methods.open = function () { return this.send_command('open', undef
 DeviceSchema.methods.close = function () { return this.send_command('close', undefined, false); };
 DeviceSchema.methods.lock = function () { return this.send_command('lock', undefined, false); };
 DeviceSchema.methods.unlock = function (pin) { return this.send_command('unlock', pin, false); };
+DeviceSchema.methods.beep = function (count) { return this.send_command('beep', count, false); };
 DeviceSchema.methods.set_level = function (level, rate) { return this.send_command('set_level', [level, rate], false); };
 DeviceSchema.methods.set_point = function (level, cache) { return this.send_command('set_point', level, cache); };
 DeviceSchema.methods.set_mode = function (mode) { return this.send_command('set_mode', mode, false); };
@@ -354,7 +355,7 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
       room.status(true);
     });
   }
-  
+
   return self._save(log_msg, options);
 
   /*
