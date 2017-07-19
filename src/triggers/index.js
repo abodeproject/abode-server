@@ -30,8 +30,22 @@ var Triggers = function () {
 };
 
 //Define the device schema
+var TriggerMatchersSchema = mongoose.Schema({
+  'trigger': {
+    'type': String,
+    'required': true,
+  },
+  'match': {
+    'type': String
+  },
+  'match_type': {
+    'type': String,
+    'default': ''
+  }
+});
+
 var TriggersSchema = mongoose.Schema({
-  'trigger': {'type': String, 'required': true},
+  'trigger': {'type': String, 'required': false},
   'name': {
     'type': String,
     'required': true,
@@ -42,6 +56,9 @@ var TriggersSchema = mongoose.Schema({
   'icon': {'type': String},
   'tags': {'type': Array, 'default': []},
   'enabled': {'type': Boolean, 'default': true},
+  'triggers': {
+    'type': [TriggerMatchersSchema]
+  },
   'match': String,
   'match_type': {'type': String, 'default': ''},
   'actions': [
@@ -397,27 +414,20 @@ Triggers.type_handler = function (trigger) {
           if (t.match === String(matcher.name) || t.match.name === String(matcher.name)) {
             log.debug('Type based match found');
           } else {
-            log.debug('Trigger not typed matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
+            log.debug('Trigger not typed matched: %s (%s != %s)', t.trigger.name, t.match, matcher.name || matcher || '');
             return false;
           }
         } else if (t.match === String(matcher)) {
           log.debug('Simple matche found');
         } else {
-          log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
+          log.debug('Trigger not matched: %s (%s != %s)', t.trigger.name, t.match, matcher.name || matcher || '');
           return false;
         }
-        /*
-        if (t.match !== matcher.name && (t.match !== String(matcher)) ) {
-          log.debug('Trigger not matched: %s (%s != %s)', t.name, t.match, matcher.name || matcher || '');
-          return false;
-        } else {
-          log.debug('Trigger matched: %s (%s == %s)', t.name, t.match, matcher.name || matcher || '');
-        }
-        */
       }
 
       //Fire the trigger
-      Triggers.fire_trigger(t);
+      log.debug('%s trigger matched, checking conditions: %s', trigger, matcher.name);
+      Triggers.fire_trigger(t.trigger);
     });
   };
 };
@@ -613,9 +623,29 @@ Triggers.get_by_id = function (id) {
 //Given an id, return the room
 Triggers.get_by_type = function (type) {
   var triggers = this.list();
-  var trigger = triggers.filter(function (item) { return (String(item.trigger) === String(type)); });
+  var matched = triggers.filter(function (item) { return (String(item.trigger) === String(type)); });
+  matched = matched.map(function (trigger) {
+    return {
+      'trigger': trigger,
+      'match_type': trigger.match_type,
+      'match': trigger.match
+    }
+  });
 
-  return trigger;
+  // Iterate through each trigger and check trigger.matchers array for type matches.
+  triggers.forEach(function (trigger) {
+    var matches = trigger.triggers.filter(function (item) { return (String(item.trigger) === String(type)); });
+
+    matches.forEach(function (matcher) {
+      matched.push({
+        'trigger': trigger,
+        'match_type': matcher.match_type,
+        'match': matcher.match
+      })
+    });
+  });
+
+  return matched;
 };
 
 Triggers.get = function (id) {
