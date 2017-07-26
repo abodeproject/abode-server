@@ -1,3 +1,5 @@
+'use strict';
+
 var cluster = require('cluster');
 var abode = require('./abode');
 var logger = require('log4js'),
@@ -29,6 +31,7 @@ if (cluster.isMaster && process.env.ABODE_DISABLE_SUPERVISOR !== '1') {
   log.info('Abode supervisor started');
 
   cluster.on('exit', function (worker, code, signal) {
+    log.debug('Received signal %s', signal);
 
     if (code !== 0) {
       log.error('Abode exitted, restarting in 2 seconds: %s', code);
