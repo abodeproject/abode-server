@@ -123,7 +123,7 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
     defer = q.defer();
 
   if (cache === undefined) {
-    cache = false;
+    cache = true;
   }
 
   args = (args instanceof Array) ? args : [args];
