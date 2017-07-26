@@ -1,6 +1,6 @@
 'use strict';
 
-var q = require('q');
+var Q = require('q');
 var fs = require('fs');
 var os = require('os');
 var path = require('path');
@@ -12,8 +12,8 @@ var events = require('events');
 var logger = require('log4js'),
   log = logger.getLogger('abode');
 var request = require('request');
-var ssdp = require('node-ssdp').Server;
-var ssdp_client = require('node-ssdp').Client;
+var SSDP = require('node-ssdp').Server;
+var SSDP_Client = require('node-ssdp').Client;
 var exec = require('child_process').exec;
 
 var Abode = function() { };
@@ -21,14 +21,15 @@ var Abode = function() { };
 Abode.get_ip = function () {
   var interfaces = os.networkInterfaces();
   var addresses = [];
-  for (var k in interfaces) {
-      for (var k2 in interfaces[k]) {
-          var address = interfaces[k][k2];
-          if (address.family === 'IPv4' && !address.internal) {
-              addresses.push(address.address);
-          }
+
+  Object.keys(interfaces).forEach(function (iface) {
+    interfaces[iface].forEach(function (address) {
+
+      if (address.family === 'IPv4' && address.internal === false) {
+          addresses.push(address.address);
       }
-  }
+    });
+  });
 
   if (addresses.length > 0) {
     return addresses[0];
@@ -39,7 +40,7 @@ Abode.get_ip = function () {
 };
 
 Abode.init = function (config) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   //Set our default config options
   config = config || {};
@@ -116,7 +117,7 @@ Abode.init = function (config) {
       func.config = Abode.config[mod] || {};
       return func;
     } else {
-      var defer = q.defer();
+      var defer = Q.defer();
 
       log.error('Error loading getting module: ' + mod);
       defer.reject({'status': 'failed', 'message': 'Failed to get module: ' + mod});
@@ -213,7 +214,7 @@ Abode.init = function (config) {
 };
 
 Abode.start_upnp = function () {
-  Abode.upnp = new ssdp({'udn': Abode.config.name, 'location': Abode.config.url});
+  Abode.upnp = new SSDP({'udn': Abode.config.name, 'location': Abode.config.url});
   if (Abode.config.mode === 'server') {
     Abode.upnp.addUSN('abode:server');
   } else {
@@ -225,8 +226,8 @@ Abode.start_upnp = function () {
 
 Abode.detect_upnp = function (type) {
   var results = [],
-    defer = q.defer(),
-    client = new ssdp_client();
+    defer = Q.defer(),
+    client = new SSDP_Client();
 
   type = type || 'abode:server';
 
@@ -270,7 +271,7 @@ Abode.detect_upnp = function (type) {
 };
 
 Abode.write_config = function () {
-  var defer = q.defer(),
+  var defer = Q.defer(),
     yaml_path = path.resolve(Abode.config.path);
 
   yaml.write(yaml_path, Abode.config).then(function () {
@@ -283,7 +284,7 @@ Abode.write_config = function () {
 };
 
 Abode.update_config = function (data, section) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   Abode.save_needed = true;
   if (section !== undefined) {
@@ -306,7 +307,7 @@ Abode.update_config = function (data, section) {
   return defer.promise;
 };
 Abode.list_views = function () {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   fs.readdir('views/', function (err, files) {
     if (err) {
@@ -325,7 +326,7 @@ Abode.list_views = function () {
   return defer.promise;
 };
 Abode.read_view = function (file) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   var read_default = function () {
 
@@ -365,7 +366,7 @@ Abode.read_view = function (file) {
 };
 
 Abode.default_views = function () {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   fs.readdir('views/defaults', function (err, files) {
     if (err) {
@@ -382,7 +383,7 @@ Abode.default_views = function () {
 };
 
 Abode.get_view = function (view) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   Abode.default_views().then(function () {
 
@@ -406,7 +407,7 @@ Abode.get_view = function (view) {
 };
 
 Abode.write_view = function (view, data) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
 
   fs.writeFile('views/' + view, data, function (err) {
@@ -423,7 +424,7 @@ Abode.write_view = function (view, data) {
 };
 
 Abode.delete_view = function (view) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
 
   Abode.default_views().then(function (views) {
@@ -450,7 +451,7 @@ Abode.delete_view = function (view) {
 };
 
 Abode.check_key = function (key) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   if (Abode.keys.indexOf(key) > -1) {
     defer.resolve();
@@ -462,7 +463,7 @@ Abode.check_key = function (key) {
 };
 
 Abode.make_key = function () {
-  var defer = q.defer();
+  var defer = Q.defer();
   var key = hat(256, 16);
 
   Abode.keys.push(key);
@@ -477,7 +478,7 @@ Abode.make_key = function () {
 };
 
 Abode.import_ca = function (url) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   var process_cb = function (err, stdout, stderr) {
     if (err) {
@@ -528,7 +529,7 @@ Abode.import_ca = function (url) {
   request({
     uri: url + '/api/abode/status',
     rejectUnauthorized: false,
-    json:true,
+    json: true
   }, get_ca_cb);
 
   return defer.promise;
@@ -536,7 +537,7 @@ Abode.import_ca = function (url) {
 
 Abode.check_db = function (config) {
   var db,
-      defer = q.defer();
+      defer = Q.defer();
 
   log.debug('Checking DB: mongodb://%s/%s', config.server, config.database);
   db = mongoose.connect('mongodb://' + config.server + '/' + config.database).connection;
@@ -554,9 +555,8 @@ Abode.check_db = function (config) {
   return defer.promise;
 };
 
-Abode.reload = function (config) {
-  var db,
-      defer = q.defer();
+Abode.reload = function () {
+  var defer = Q.defer();
 
   defer.resolve();
 
