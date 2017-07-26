@@ -5,7 +5,7 @@ var abode,
   routes,
   config,
   Radiothermostat,
-  q = require('q'),
+  Q = require('q'),
   http = require('http'),
   logger = require('log4js'),
   request = require('request'),
@@ -19,12 +19,12 @@ var modes = [
 ];
 
 Radiothermostat = function () {
-  var defer = q.defer();
+  var defer = Q.defer();
   abode = require('../../abode');
   events = abode.events;
   routes = require('./routes');
 
-  config = abode.config.radiothermostat || {};
+  config = abode.config.radiothermostat = abode.config.radiothermostat || {};
   config.enabled = config.enabled || true;
   config.interval = config.interval || 1;
 
@@ -38,7 +38,7 @@ Radiothermostat = function () {
     }
 
     log.info('Starting Radiothermostat provider');
-    Radiothermostat.enable()
+    Radiothermostat.enable();
     Radiothermostat.load();
   });
 
@@ -50,7 +50,7 @@ Radiothermostat = function () {
 };
 
 Radiothermostat.enable = function () {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   Radiothermostat.poller = setInterval(Radiothermostat.load, (1000 * 60 * config.interval));
   Radiothermostat.enabled = true;
@@ -61,7 +61,7 @@ Radiothermostat.enable = function () {
 };
 
 Radiothermostat.disable = function () {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   if (Radiothermostat.poller) {
     clearInterval(Radiothermostat.poller);
@@ -92,7 +92,7 @@ Radiothermostat.off = function (device) {
 };
 
 Radiothermostat.is_on = function (device) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   defer.resolve({'response': (device._on === true)});
 
@@ -100,7 +100,7 @@ Radiothermostat.is_on = function (device) {
 };
 
 Radiothermostat.is_off = function (device) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   defer.resolve({'response': (device._on === false)});
 
@@ -108,7 +108,7 @@ Radiothermostat.is_off = function (device) {
 };
 
 Radiothermostat.temperature = function (device) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   defer.resolve({'response': device._temperature});
 
@@ -116,7 +116,7 @@ Radiothermostat.temperature = function (device) {
 };
 
 Radiothermostat.humidity = function (device) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   defer.resolve({'response': device._humidity});
 
@@ -124,7 +124,7 @@ Radiothermostat.humidity = function (device) {
 };
 
 Radiothermostat.set_mode = function (device, mode) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   if (modes.indexOf(mode) === -1) {
     defer.reject({'status': 'failed', 'message': 'Invalid mode specified'});
@@ -134,7 +134,7 @@ Radiothermostat.set_mode = function (device, mode) {
   request.post({
     uri: 'http://' + device.config.address + '/tstat',
     json: {
-      'tmode': modes.indexOf(mode),
+      'tmode': modes.indexOf(mode)
     }
   }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
@@ -154,19 +154,20 @@ Radiothermostat.set_mode = function (device, mode) {
 };
 
 Radiothermostat.set_point = function (device, temp) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   var data = {};
+  var set_point = parseInt(temp, 10);
 
-  if (typeof(temp) !== 'number') {
+  if (isNaN(set_point)) {
     defer.resolve({'response': device._set_point});
     return defer.promise;
   }
 
   if (device._mode === 'HEAT') {
-    data.t_heat = temp;
+    data.t_heat = set_point;
   } else if (device._mode === 'COOL') {
-    data.t_cool = temp;
+    data.t_cool = set_point;
   } else {
     defer.reject({'status': 'failed', 'message': 'Conditioner is off'});
     return defer.promise;
@@ -177,8 +178,8 @@ Radiothermostat.set_point = function (device, temp) {
     json: data
   }, function (error, response, body) {
     if (!error && response.statusCode === 200) {
-      log.info('Successfully set thermostat set point: %s', temp);
-      defer.resolve({'status': 'success', 'update': {'_set_point': temp}});
+      log.info('Successfully set thermostat set point: %s', set_point);
+      defer.resolve({'status': 'success', 'update': {'_set_point': set_point}});
     } else {
       log.error('Failed to set thermostat set point %s: %s', device.name, body);
       defer.reject({'status': 'failed', 'message': body});
@@ -189,13 +190,14 @@ Radiothermostat.set_point = function (device, temp) {
 };
 
 Radiothermostat.get_status = function (device) {
-  var defer = q.defer();
+  var defer = Q.defer();
 
   Radiothermostat.get(device.config.address).then(function (data) {
+    data.tstate = data.tstate || 0;
     device.config.raw = data;
 
     defer.resolve({'update': {
-        _on: (data.tstat > 0),
+        _on: (data.tstate > 0),
         _temperature: data.temp,
         _mode: modes[data.tmode],
         _set_point: data.t_heat || data.t_cool || 0
@@ -210,12 +212,12 @@ Radiothermostat.get_status = function (device) {
 
 Radiothermostat.get = function (address) {
   var data = '',
-    defer = q.defer();
+    defer = Q.defer();
 
   var uri = '/tstat';
   var options = {
     host: address,
-    path: uri,
+    path: uri
   };
 
   var handleError = function (err) {
