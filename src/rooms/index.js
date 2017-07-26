@@ -15,7 +15,7 @@ var RoomLogSchema = mongoose.Schema({
   'extra': Object,
   'command': String,
   'to':  Object,
-  'from':  Object,
+  'from':  Object
 });
 
 // Define our main Rooms object
@@ -88,14 +88,14 @@ var RoomSchema = mongoose.Schema({
   '_scene_off_count': Number,
   '_mode_off_count': Number,
   '_mode_heat_count': Number,
-  '_mode_cool_count': Number,
+  '_mode_cool_count': Number
 });
 
 Rooms._rooms = [];
 Rooms.logs = mongoose.model('RoomLogs', RoomLogSchema);
 
 // Function that returns another function based on the config passed
-// that will then query specific statuses for for the romm defined
+// that will then query specific statuses for for the room defined
 // in the initial config
 var getStatuses = function (config) {
   return function (cache) {
@@ -105,10 +105,10 @@ var getStatuses = function (config) {
       self = this,
       defer = q.defer();
 
-    cache = (cache === undefined) ? false : cache;
+    cache = (cache === undefined) ? true : cache;
     config.filter = (config.filter === undefined) ? true : config.filter;
 
-    //should check to ensure get functino exists
+    //should check to ensure get function exists
     var devices = self['get_' + config.type]();
 
     //Once we're done return the data
@@ -220,7 +220,7 @@ var getAge = function (config) {
     var last = {},
       self = this,
       ages = {},
-      children = [],
+      children,
       now = new Date(),
       defer = q.defer(),
       filter = 'get_' + config.type + 's';
@@ -603,20 +603,20 @@ RoomSchema.methods.set_state = function (config, log_msg) {
     '_mode_heat': 'HEAT',
     '_mode_cool': 'COOL',
     '_conditioning_on': 'CONDITIONING',
-    '_appliances_on': 'APPLIANCES',
+    '_appliances_on': 'APPLIANCES'
   };
 
   var openclose_events = {
     '_doors_open': 'DOORS',
     '_windows_open': 'WINDOWS',
-    '_shades_open': 'SHADES',
+    '_shades_open': 'SHADES'
   };
 
   var int_events = {
     '_temperature': 'TEMPERATURE',
     '_humidity': 'HUMIDITY',
     '_lumacity': 'LUMACITY',
-    '_set_point': 'SET_POINT',
+    '_set_point': 'SET_POINT'
   };
 
   Object.keys(config).forEach(function (key) {
@@ -693,7 +693,7 @@ var statuses = {
   'scenes_on': '_scenes_on',
   'scenes_off': '_scenes_off',
   'mode_heat': '_mode_heat',
-  'mode_cool': '_mode_cool',
+  'mode_cool': '_mode_cool'
 };
 
 RoomSchema.methods.get_lights = filterDevices('light');
