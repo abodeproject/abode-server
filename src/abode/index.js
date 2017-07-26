@@ -87,6 +87,7 @@ Abode.init = function (config) {
 
   logger.clearAppenders();
   logger.loadAppender('file');
+  logger.loadAppender('dateFile');
   logger.addAppender(logger.appenders.console(), 'abode');
 
   //Set our log level

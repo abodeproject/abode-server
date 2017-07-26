@@ -100,13 +100,13 @@ var PinSchema = mongoose.Schema({
   'name': {
     'type': String,
     'required': true,
-    'unique': true,
+    'unique': true
   },
   'icon': { 'type': String },
   'tags': { 'type': Array },
-  'pin': { 
-    'type': String, 
-    'required': [true, 'Numeric PIN of 4 or more digits required'], 
+  'pin': {
+    'type': String,
+    'required': [true, 'Numeric PIN of 4 or more digits required'],
     'unique': true,
     'set': function (v) {
         if (isNaN(v)) {
@@ -125,7 +125,7 @@ var PinSchema = mongoose.Schema({
   'actions': { 'type': Array },
   'expires': { 'type': Date },
   'last_used': { 'type': Date, 'default': Date.now },
-  'created': { 'type': Date, 'default': Date.now },
+  'created': { 'type': Date, 'default': Date.now }
 });
 
 var AuthSchema = mongoose.Schema({
@@ -133,7 +133,7 @@ var AuthSchema = mongoose.Schema({
   'user': { 'type': String, 'required': [true, 'User is required'], 'unique': true },
   'email': { 'type': String, 'required': [true, 'Email is required'], 'unique': true },
   'password': {
-    'type': String, 
+    'type': String,
     'required': [true, 'Password must be at least 8 characters'],
     'set': function (v) {
         if (v === '') {
@@ -149,7 +149,7 @@ var AuthSchema = mongoose.Schema({
   },
   'locked': {'type': Boolean, 'default': false},
   'last_login': { 'type': Date },
-  'created': { 'type': Date, 'default': Date.now },
+  'created': { 'type': Date, 'default': Date.now }
 });
 
 var TokenSchema = mongoose.Schema({
@@ -164,7 +164,7 @@ var TokenSchema = mongoose.Schema({
   'locked': {'type': Boolean, 'default': false},
   'last_used': { 'type': Date},
   'locale': {},
-  'expires': { 'type': Date, 'required': true },
+  'expires': { 'type': Date, 'required': true }
 });
 
 Auth.token_cleaner = function () {
@@ -658,7 +658,7 @@ Auth.gen_token = function (user, expires, status, device, ip, agent_raw) {
     'status': status,
     'ip': ip,
     'locale': geo,
-    'agent': agent,
+    'agent': agent
   });
 
   token.save( function (err) {
