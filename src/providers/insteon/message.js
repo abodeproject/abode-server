@@ -1,6 +1,7 @@
 'use strict';
 
 var q = require('q'),
+  utils = require('./utils'),
   commands = require('./commands'),
   logger = require('log4js'),
   log = logger.getLogger('insteon.message');
@@ -15,6 +16,8 @@ var Message = function (size) {
   this.result = {};
   this.retries = 3;
   this.attempt = 0;
+
+  this.insteon = require('../insteon');
 
 };
 
@@ -261,6 +264,94 @@ Message.prototype.prep = function () {
   }
 
   this.post = commands[this.command].post;
+};
+
+Message.prototype.rx_message = function () {
+  var str = ['[RX]'],
+    self = this;
+
+  str.push(['0x', utils.toHex(self.code || 0), ' (', self.command, ')'].join(''));
+
+  if (self.result.status) {
+    str.push(self.result.status);
+  }
+
+  if (self.result.extended) {
+    str.push('extended');
+  }
+
+  if (self.result.all_link_broadcast) {
+    str.push('all_link_broadcast');
+  }
+
+  if (self.result.all_link_cleanup) {
+    str.push('all_link_cleanup');
+  }
+
+  if (self.result.all_link_cleanup_ack) {
+    str.push('all_link_cleanup_ack');
+  }
+
+  if (self.result.all_link_cleanup_nak) {
+    str.push('all_link_cleanup_nak');
+  }
+
+  if (self.result.direct) {
+    str.push('direct');
+  }
+
+  if (self.result.direct_ack) {
+    str.push('direct_ack');
+  }
+
+  if (self.result.direct_nak) {
+    str.push('direct_nak');
+  }
+
+  if (self.result.from) {
+    str.push(['from: ', self.result.from, ' (', self.insteon.get_device_sync(self.result.from).name, ')'].join(''));
+  }
+
+  if (self.result.to) {
+    str.push(['to: ', self.result.to, ' (', self.insteon.get_device_sync(self.result.to).name, ')'].join(''));
+  }
+
+  if (self.result.cmd_1) {
+    str.push(['cmd_1: 0x', utils.toHex(self.result.cmd_1 || 0), ' (', self.result.command[self.result.command.length - 1], ')'].join(''));
+  }
+
+  if (self.result.cmd_2 !== undefined) {
+    str.push(['cmd_2: 0x', utils.toHex(self.result.cmd_2 || 0)].join(''));
+  }
+
+  str.push(['raw: ', utils.bufferToString(self.buffer)].join(''));
+
+  return str.join(' ');
+
+};
+
+
+
+Message.prototype.tx_message = function () {
+  var str = ['[TX]'],
+    self = this;
+
+  str.push(['0x', utils.toHex(self.code || 0), ' (', self.command, ')'].join(''));
+
+  if (self.to) {
+    str.push(['to: ', self.to, ' (', self.insteon.get_device_sync(self.to).name, ')'].join(''));
+  }
+
+  if (self.cmd_1) {
+    str.push(['cmd_1: 0x', utils.toHex(self.cmd_1 || 0)].join(''));
+  }
+
+  if (self.cmd_2 !== undefined) {
+    str.push(['cmd_2: 0x', utils.toHex(self.cmd_2 || 0)].join(''));
+  }
+
+  return str.join(' ');
+
 };
 
 module.exports = Message;

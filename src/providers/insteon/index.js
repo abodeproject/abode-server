@@ -25,6 +25,9 @@ var Insteon = function () {
   abode.config.insteon = abode.config.insteon || {};
   Insteon.config = abode.config.insteon;
   Insteon.config.enabled = (Insteon.config.enabled!== false);
+  Insteon.config.message_log = Insteon.config.message_log || 'console';
+  Insteon.config.message_log_size = Insteon.config.message_log_size || 4194304;
+  Insteon.config.message_log_count = Insteon.config.message_log_count || 4;
   Insteon.config.serial_device = Insteon.config.serial_device;
   Insteon.config.polling_enabled = (Insteon.config.polling_enabled!==false);
   Insteon.config.poll_interval = Insteon.config.poll_interval || 5;
@@ -67,6 +70,15 @@ var Insteon = function () {
     var msg = 'Provider initialized but not enabled';
     log.info(msg);
     defer.resolve();
+  }
+
+
+
+  if (Insteon.config.message_log !== 'console') {
+    logger.addAppender(logger.appenders.file(Insteon.config.message_log, logger.layouts.patternLayout('[%d]%m'), Insteon.config.message_log_size, Insteon.config.message_log_count), 'insteon_message');
+  } else {
+    log.info('Logging access log to console');
+    logger.addAppender(logger.appenders.console(), 'insteon_message');
   }
 
 
@@ -347,6 +359,19 @@ Insteon.get_device = function (address) {
   }
 
   return defer.promise;
+};
+
+Insteon.get_device_sync = function (address) {
+
+  var matches = Insteon.devices.filter(function (device) {
+    return (device.config.address === address);
+  });
+
+  if (matches.length > 0) {
+    return matches[0];
+  } else {
+    return {'name': 'UNKNOWN'};
+  }
 };
 
 Insteon.get_status = function (device) {

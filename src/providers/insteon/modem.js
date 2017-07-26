@@ -1,8 +1,10 @@
 'use strict';
 
 var Q = require('q'),
+  utils = require('./utils'),
   logger = require('log4js'),
   log = logger.getLogger('insteon.modem'),
+  log_message = logger.getLogger('insteon_message'),
   inherits = require('util').inherits,
   Message = require('./message'),
   Expectation = require('./expectation'),
@@ -265,6 +267,8 @@ Modem.prototype.send = function () {
     // Prep the message
     message.prep();
 
+    log_message.info(message.tx_message());
+
     // If we have a prep error, fail the message
     if (message.error) {
       log.error(message.error.message);
@@ -378,6 +382,8 @@ Modem.prototype.read = function () {
   self.reading = true;
   var message = self.read_queue.shift();
 
+  log_message.info(message.rx_message());
+  //log.info('[rx:0x%s (%s)] from: %s, to: %s, cmd_1: 0x%s, cmd_2: 0x%s', utils.toHex(message.code || 0), message.command, message.result.from, message.result.to, utils.toHex(message.result.cmd_1 || 0), utils.toHex(message.result.cmd_2 || 0));
   expected = self.expectations.filter(function (expected) {
     return (expected.command === message.command && (expected.from === message.result.from || expected.from === message.result.to));
   });

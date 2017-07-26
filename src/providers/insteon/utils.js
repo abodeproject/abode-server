@@ -38,4 +38,14 @@ Utils.recordIdToArray = function (id) {
 
 };
 
+Utils.bufferToString = function (buf) {
+  var str = [];
+
+  buf.forEach(function (value) {
+    str.push('0x' + Utils.toHex(value));
+  });
+
+  return str.join(' ');
+};
+
 module.exports = Utils;
