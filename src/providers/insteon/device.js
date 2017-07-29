@@ -2,7 +2,7 @@
 var Q = require('q'),
   Message = require('./message'),
   logger = require('log4js'),
-  log = logger.getLogger('insteon');
+  log = logger.getLogger('insteon.device');
 
 var Device = function (insteon, config, name) {
   'use strict';
@@ -23,6 +23,8 @@ var Device = function (insteon, config, name) {
   } else {
     matches[0].update();
   }
+
+  self.is_scene = (self.config.address.split('.')[0] === '00');
 
   return self;
 };
@@ -988,7 +990,7 @@ Device.prototype.light_off = function () {
     .then(function (result) {
       log.info('Successuflly sent OFF command to %s', self.name || self.config.address);
       result.response = true;
-      result.update = {_on: true, _level: self.config.on_level || 100};
+      result.update = {_on: false, _level: 0};
       defer.resolve(result);
     })
     .fail(function (err) {

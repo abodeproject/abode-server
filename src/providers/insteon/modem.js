@@ -140,6 +140,7 @@ Modem.prototype.on_close = function () {
 
 Modem.prototype.on_data = function (data) {
   this.read_buffer.push(data);
+  log_message.info(data);
 };
 
 Modem.prototype.process_buffer = function () {

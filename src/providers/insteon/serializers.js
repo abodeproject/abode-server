@@ -12,6 +12,8 @@ Serializers.start_all_linking = function () {
     code = 0x01;
   } else if (this.controller === false) {
     code = 0x00;
+  } else if (this.controller === 'delete') {
+    code = 0xff;
   } else {
     code = 0x03;
   }

@@ -7,6 +7,7 @@ var abode,
   logger = require('log4js'),
   Modem = require('./modem'),
   Device = require('./device'),
+  Scene = require('./scene'),
   Message = require('./message'),
   log = logger.getLogger('insteon');
 
@@ -53,6 +54,7 @@ var Insteon = function () {
   abode.triggers.types.push({'name': 'INSTEON_LINKED'});
   abode.events.on('ABODE_STARTED', function () {
     Insteon.load_devices();
+    Insteon.load_scenes();
     setTimeout(Insteon.poll, 100);
   });
 
@@ -85,6 +87,7 @@ var Insteon = function () {
 };
 
 Insteon.devices = [];
+Insteon.scenes = [];
 Insteon.statusable = [
   0x01,
   0x02,
@@ -226,10 +229,30 @@ Insteon.load_devices = function () {
   var devices = abode.devices.get_by_provider('insteon');
 
   devices.forEach(function (device) {
-    new Device(Insteon, device.config, device.name);
+    var d = new Device(Insteon, device.config, device.name);
+    d.on = device._on;
+    d.last_seen = device.last_seen;
+    d.low_battery = device.low_battery;
   });
+};
 
-  log.info('here');
+Insteon.load_scenes = function () {
+  log.info('Loading Insteon scenes');
+  var i,
+    devices = abode.devices.get_by_provider('insteon');
+
+  for (i=1; i<=255; i++) {
+    var name,
+      matches = Insteon.devices.filter(function (dev) {
+        return (dev.config.address.toLowerCase() === '00.00.' + utils.toHex(i));
+      });
+
+    if (matches.length > 0) {
+      new Scene(Insteon, matches[0].config, matches[0].name);
+    } else {
+      new Scene(Insteon, {'address': '00.00.' + utils.toHex(i), 'used': false}, 'UNUSED');
+    }
+  }
 };
 
 Insteon.message_handler = function (msg) {
@@ -392,6 +415,22 @@ Insteon.get_device_sync = function (address) {
   } else {
     return {'name': 'UNKNOWN'};
   }
+};
+
+Insteon.get_scene = function (address) {
+  var defer = Q.defer();
+
+  var matches = Insteon.scenes.filter(function (scene) {
+    return (scene.config.address === address);
+  });
+
+  if (matches.length > 0) {
+    defer.resolve(matches[0]);
+  } else {
+    defer.reject({'message': 'Could not find scene'});
+  }
+
+  return defer.promise;
 };
 
 Insteon.get_status = function (device) {
@@ -986,6 +1025,17 @@ Insteon.request_device = function (req, res, next) {
   Insteon.get_device(req.params.device)
     .then(function (device) {
       req.device = device;
+      next();
+    })
+    .fail(function (err) {
+      res.status(404).send(err);
+    });
+};
+
+Insteon.request_scene = function (req, res, next) {
+  Insteon.get_scene(req.params.scene)
+    .then(function (scene) {
+      req.scene = scene;
       next();
     })
     .fail(function (err) {

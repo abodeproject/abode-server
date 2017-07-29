@@ -47,22 +47,6 @@ router.post('/disable', insteon.is_enabled, function (req, res) {
 
 });
 
-router.get('/scenes', insteon.is_enabled, function (req, res) {
-
-  var i,
-    scenes = [];
-
-  for (i=1; i<=255; i++) {
-    scenes.push({
-      'id': i,
-      'address': '00.00.' + utils.toHex(i),
-      'name': ''
-    });
-  }
-
-  res.status(200).send(scenes);
-});
-
 router.get('/database', insteon.is_enabled, function (req, res) {
 
   res.status(200).send(insteon.database);
@@ -612,5 +596,68 @@ router.post('/devices/:device/set_low_battery_level/:level', insteon.is_enabled,
 
 });
 
+
+router.get('/scenes', insteon.is_enabled, function (req, res) {
+
+  res.send(insteon.scenes);
+
+  /*
+  var i,
+    scenes = [];
+
+  for (i=1; i<=255; i++) {
+    var name,
+      matches = insteon.devices.filter(function (dev) {
+        return (dev.config.address.toLowerCase() === '00.00.' + utils.toHex(i));
+      });
+
+    name = (matches.length > 0) ? matches[0].name : 'UNUSED (' + i + ')';
+    scenes.push({
+      'id': i,
+      'address': '00.00.' + utils.toHex(i),
+      'name': name,
+      'used': matches.length > 0
+    });
+  }
+
+  res.status(200).send(scenes);
+  */
+});
+
+router.post('/scenes/:scene/members', insteon.is_enabled, insteon.request_scene, function (req, res) {
+
+  req.scene.add_member(req.params.member, req.body)
+    .then(function (result) {
+      res.send(result);
+    })
+    .fail(function (err) {
+      res.status(400).send(err);
+    });
+
+});
+
+router.put('/scenes/:scene/members/:member', insteon.is_enabled, insteon.request_scene, function (req, res) {
+
+  req.scene.update_member(req.params.member, req.body)
+    .then(function (result) {
+      res.send(result);
+    })
+    .fail(function (err) {
+      res.status(400).send(err);
+    });
+
+});
+
+router.delete('/scenes/:scene/members/:member', insteon.is_enabled, insteon.request_scene, function (req, res) {
+
+  req.scene.delete_member(req.params.member, req.body)
+    .then(function (result) {
+      res.send(result);
+    })
+    .fail(function (err) {
+      res.status(400).send(err);
+    });
+
+});
 
 module.exports = router;
