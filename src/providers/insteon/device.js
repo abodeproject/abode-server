@@ -202,7 +202,7 @@ Device.prototype.get_delta = Device.prototype.get_all_link_database_delta = func
       defer.resolve({'database_delta': result.database_delta});
     })
     .fail(function (err) {
-      log.info('Failed to sent GET_ALL_LINK_DATABASE_DELTA command to %s: %s', self.name, err);
+      log.info('Failed to send GET_ALL_LINK_DATABASE_DELTA command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -494,7 +494,7 @@ Device.prototype.set_button_tap = function (taps) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent SET_BUTTON_TAP command to %s: %s', self.name, err);
+      log.info('Failed to send SET_BUTTON_TAP command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -527,7 +527,7 @@ Device.prototype.id_request = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent ID_REQUEST command to %s: %s', self.name, err);
+      log.info('Failed to send ID_REQUEST command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -553,7 +553,7 @@ Device.prototype.product_data_request = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent ID_REQUEST command to %s: %s', self.name, err);
+      log.info('Failed to send ID_REQUEST command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -580,7 +580,7 @@ Device.prototype.device_text_string_request = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent DEVICE_TEXT_STRING_REQUEST command to %s: %s', self.name, err);
+      log.info('Failed to send DEVICE_TEXT_STRING_REQUEST command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -608,7 +608,7 @@ Device.prototype.read_operating_flags = function (flag) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent READ_OPERATING_FLAGS command to %s: %s', self.name, err);
+      log.info('Failed to send READ_OPERATING_FLAGS command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -636,7 +636,7 @@ Device.prototype.get_extended_data = function (group) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
+      log.info('Failed to send GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -668,7 +668,7 @@ Device.prototype.set_heartbeat_interval = function (interval) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
+      log.info('Failed to send GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -700,7 +700,7 @@ Device.prototype.set_low_battery_level = function (level) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
+      log.info('Failed to send GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -777,7 +777,7 @@ Device.prototype.enter_linking_mode = function (group) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent ENTER_LINKING_MODE command to %s: %s', self.name, err);
+      log.info('Failed to send ENTER_LINKING_MODE command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -804,7 +804,7 @@ Device.prototype.enter_unlinking_mode = function (group) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent ENTER_UNLINKING_MODE command to %s: %s', self.name, err);
+      log.info('Failed to send ENTER_UNLINKING_MODE command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -830,7 +830,7 @@ Device.prototype.exit_linking_mode = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent EXIT_LINKING_MODE command to %s: %s', self.name, err);
+      log.info('Failed to send EXIT_LINKING_MODE command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -857,7 +857,7 @@ Device.prototype.set_button_tap = function (taps) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent SET_BUTTON_TAP command to %s: %s', self.name, err);
+      log.info('Failed to send SET_BUTTON_TAP command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -884,14 +884,14 @@ Device.prototype.get_status = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent LIGHT_STATUS_REQUEST command to %s: %s', self.name, err);
+      log.info('Failed to send LIGHT_STATUS_REQUEST command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
   return defer.promise;
 };
 
-Device.prototype.on = function () {
+Device.prototype.light_on = function () {
   'use strict';
 
   var self = this,
@@ -911,7 +911,7 @@ Device.prototype.on = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent ON command to %s: %s', self.name, err);
+      log.info('Failed to send ON command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -938,7 +938,7 @@ Device.prototype.on_fast = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent ON_FAST command to %s: %s', self.name, err);
+      log.info('Failed to send ON_FAST command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -965,14 +965,14 @@ Device.prototype.start_brighten = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent START_BRIGHTEN command to %s: %s', self.name, err);
+      log.info('Failed to send START_BRIGHTEN command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
   return defer.promise;
 };
 
-Device.prototype.off = function () {
+Device.prototype.light_off = function () {
   'use strict';
 
   var self = this,
@@ -992,7 +992,7 @@ Device.prototype.off = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent OFF command to %s: %s', self.name, err);
+      log.info('Failed to send OFF command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -1019,7 +1019,7 @@ Device.prototype.off_fast = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent OFF_FAST command to %s: %s', self.name, err);
+      log.info('Failed to send OFF_FAST command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -1046,7 +1046,7 @@ Device.prototype.start_dim = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent START_DIM command to %s: %s', self.name, err);
+      log.info('Failed to send START_DIM command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -1073,7 +1073,7 @@ Device.prototype.stop_change = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent STOP_CHANGE command to %s: %s', self.name, err);
+      log.info('Failed to send STOP_CHANGE command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -1116,7 +1116,7 @@ Device.prototype.set_level = function (level, time) {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent %s command to %s: %s', cmd.command, self.name, err);
+      log.info('Failed to send %s command to %s: %s', cmd.command, self.name, err);
       defer.reject(err);
     });
 
@@ -1143,7 +1143,7 @@ Device.prototype.unlock = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent UNLOCK command to %s: %s', self.name, err);
+      log.info('Failed to send UNLOCK command to %s: %s', self.name, err);
       defer.reject(err);
     });
 
@@ -1171,7 +1171,7 @@ Device.prototype.lock = function () {
       defer.resolve(result);
     })
     .fail(function (err) {
-      log.info('Failed to sent LOCK command to %s: %s', self.name, err);
+      log.info('Failed to send LOCK command to %s: %s', self.name, err);
       defer.reject(err);
     });
 

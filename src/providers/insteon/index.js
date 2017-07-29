@@ -458,7 +458,7 @@ Insteon.device_command = function (device, cmd) {
 
 Insteon.on = Insteon.open = function (device) {
 
-  return Insteon.device_command(device, 'on');
+  return Insteon.device_command(device, 'light_on');
 
 };
 
@@ -488,7 +488,7 @@ Insteon.lock = function (device) {
 
 Insteon.off = Insteon.close = function (device) {
 
-  return Insteon.device_command(device, 'off');
+  return Insteon.device_command(device, 'light_off');
 
 };
 

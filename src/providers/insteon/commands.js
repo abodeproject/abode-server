@@ -255,14 +255,14 @@ Commands.PING = {
 
 Commands.BEEP = {
   'command': 'SEND_INSTEON_STANDARD',
-  'cmd_1': 0x1F,
+  'cmd_1': 0x30,
   'cmd_2': 0x00,
   'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
 };
 
 Commands.READ_OPERATING_FLAGS = {
   'command': 'SEND_INSTEON_STANDARD',
-  'cmd_1': 0x30,
+  'cmd_1': 0x1f,
   'cmd_2': 0x00
 };
 

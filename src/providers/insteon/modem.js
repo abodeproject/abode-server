@@ -79,7 +79,7 @@ Modem.prototype.connect = function () {
 
     self.send_interval = setInterval(self.send.bind(self), self.config.send_interval);
     self.read_interval = setInterval(self.read.bind(self), self.config.read_interval);
-    self.buffer_processor = setInterval(self.process_buffer.bind(self), 10);
+    self.buffer_processor = setInterval(self.process_buffer.bind(self), 1);
     return defer.resolve();
   };
 
