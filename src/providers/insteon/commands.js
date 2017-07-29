@@ -255,6 +255,13 @@ Commands.PING = {
 
 Commands.BEEP = {
   'command': 'SEND_INSTEON_STANDARD',
+  'cmd_1': 0x1F,
+  'cmd_2': 0x00,
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
+};
+
+Commands.READ_OPERATING_FLAGS = {
+  'command': 'SEND_INSTEON_STANDARD',
   'cmd_1': 0x30,
   'cmd_2': 0x00
 };
@@ -263,7 +270,6 @@ Commands.GET_ALL_LINK_DATABASE_DELTA = {
   'command': 'SEND_INSTEON_STANDARD',
   'cmd_1': 0x1F,
   'cmd_2': 0x01,
-  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}],
   'post': deserialize.get_all_link_database_delta
 };
 
@@ -278,6 +284,7 @@ Commands.ENTER_LINKING_MODE = {
   'command': 'SEND_INSTEON_EXTENDED',
   'cmd_1': 0x09,
   'serialize': serialize.enter_linking_mode,
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
 };
 
 Commands.ENTER_UNLINKING_MODE = {
@@ -352,7 +359,7 @@ Commands.GET_SET_EXTENDED_DATA = {
   'command': 'SEND_INSTEON_EXTENDED',
   'cmd_1': 0x2E,
   'cmd_2': 0x00,
-  'serialize': serialize.extended_data,
+  'serialize': serialize.send_insteon_extended,
   'deserialize': deserialize.extended_data,
   'expect': [{'command': 'INSTEON_EXTENDED_MESSAGE_RECEIVED'}]
 };
@@ -361,7 +368,8 @@ Commands.EXTENDED_DATA = {
   'command': 'INSTEON_EXTENDED_MESSAGE_RECEIVED',
   'cmd_1': 0x2E,
   'cmd_2': 0x00,
-  'deserialize': deserialize.extended_data
+  'deserialize': deserialize.extended_data,
+  'expect': [{'command': 'INSTEON_EXTENDED_MESSAGE_RECEIVED'}]
 };
 
 module.exports = Commands;

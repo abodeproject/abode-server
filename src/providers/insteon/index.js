@@ -28,7 +28,6 @@ var Insteon = function () {
   Insteon.config.message_log = Insteon.config.message_log || 'console';
   Insteon.config.message_log_size = Insteon.config.message_log_size || 4194304;
   Insteon.config.message_log_count = Insteon.config.message_log_count || 4;
-  Insteon.config.serial_device = Insteon.config.serial_device;
   Insteon.config.polling_enabled = (Insteon.config.polling_enabled!==false);
   Insteon.config.poll_interval = Insteon.config.poll_interval || 5;
   Insteon.config.poll_wait = Insteon.config.poll_wait || 60;
@@ -36,7 +35,7 @@ var Insteon = function () {
   Insteon.modem = new Modem(Insteon.config);
   Insteon.modem.on('MESSAGE', Insteon.message_handler);
   Insteon.modem.on('linked', function (message) {
-    Device(Insteon, message.result);
+    new Device(Insteon, message.result);
     Insteon.linking = false;
     Insteon.last_linked = message.result;
     log.info('Device Linked: %s', message.result.address);
@@ -91,6 +90,9 @@ Insteon.statusable = [
   0x02,
   0x07
 ];
+Insteon.heartbeats = [
+  0x0a
+];
 
 Insteon.poll = function () {
   var i = 0;
@@ -139,7 +141,7 @@ Insteon.poll = function () {
     if (i === Insteon.devices.length) {
       return done();
     }
-    var device = Insteon.devices[i]
+    var device = Insteon.devices[i];
 
     if (attempt > 3) {
       i += 1;
@@ -153,7 +155,7 @@ Insteon.poll = function () {
 
     if (Insteon.statusable.indexOf(parseInt(device.config.device_cat, 10)) === -1) {
       device.config.device_cat = device.config.device_cat || 0;
-      log.debug('Cannot status device type: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat))
+      log.debug('Cannot status device type: %s (devcat: 0x%s)', device.name || device.address, utils.toHex(device.config.device_cat));
       i += 1;
       setTimeout(next, 100);
       return;
@@ -257,8 +259,8 @@ Insteon.message_handler = function (msg) {
 
 
   Insteon.get_device(msg.from).then(function (device) {
-    if (msg.on !== undefined) device.on = msg.on;
-    if (msg.level !== undefined) device.level = msg.level;
+    if (msg.on !== undefined) { device.on = msg.on; }
+    if (msg.level !== undefined) { device.level = msg.level; }
     device.last_seen = new Date();
 
     if (device.skip_command(msg.command[msg.command.length - 1])) {
@@ -283,6 +285,21 @@ Insteon.message_handler = function (msg) {
     state.last_seen = new Date();
 
     devices.forEach(function (device) {
+
+      if (device.active === false && msg.to === '00.00.04') {
+        log.info('Heartbeat received: %s', device.name);
+        state.config = device.config;
+        state.config.last_heartbeat = new Date();
+      }
+
+      if (device.active === false && msg.to === '00.00.03') {
+        log.info('Low battery received: %s', device.name);
+        state._low_battery = true;
+        device.set_state(state);
+
+        return;
+      }
+
       if (device.capabilities.indexOf('motion_sensor') >= 0) {
         state = {
           '_motion': state._on,
@@ -322,7 +339,7 @@ Insteon.disable = function () {
     defer.reject({'status': 'failed', 'message': 'Insteon is not connected'});
     Insteon.enabled = false;
     return defer.promise;
-  };
+  }
 
   Insteon.modem.disconnect().then(function () {
     log.info('Provider Disabled');
@@ -375,29 +392,9 @@ Insteon.get_device_sync = function (address) {
 };
 
 Insteon.get_status = function (device) {
-  var defer = Q.defer();
 
-  if (device.capabilities && device.capabilities.indexOf('lock') !== -1) {
-    log.debug('Insteon lock controller has no useful status');
-    defer.resolve();
-    return defer.promise;
-  }
-  log.info('Insteon.get_status(%s)', device.name);
+  return Insteon.device_command(device, 'get_status');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'LIGHT_STATUS_REQUEST';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = {_on: result.on, _level: result.level};
-    result.update = {_on: result.on, _level: result.level};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.is_open = Insteon.is_on = function (device) {
@@ -434,234 +431,101 @@ Insteon.has_motion = function (device) {
   return defer.promise;
 };
 
-Insteon.on = Insteon.open = function (device) {
-  var defer = Q.defer();
+Insteon.device_command = function (device, cmd) {
+  var defer = Q.defer(),
+    cmd_args = [];
 
-  log.info('Insteon.on(%s)', device.name);
+  if (arguments.length > 2) {
+    cmd_args = [].splice.call(arguments, 2, arguments.length - 2);
+  }
 
-  var cmd = new Message();
+  Insteon.get_device(device.config.address)
+    .then(function (device) {
 
-  cmd.to = device.config.address;
-  cmd.command = 'LIGHT_ON';
+      if (typeof(device[cmd]) !== 'function') {
+        log.error('Invalid device command: %s', cmd);
+        return defer.reject({'status': 'failed', 'message': 'Invalid device command'});
+      }
 
-  cmd.send(Insteon.modem).then(function (result) {
-    log.info('Successuflly sent ON command to %s', device.name);
-    result.response = true;
-    result.update = {_on: true, _level: device.config.on_level || 100};
-    defer.resolve(result);
-  }, function (err) {
-    log.info('Failed to sent ON command to %s: %s', device.name, e);
-    defer.reject(err);
-  });
+      device[cmd].apply(device, cmd_args)
+        .then(defer.resolve)
+        .fail(defer.reject);
+    })
+    .fail(defer.reject);
 
   return defer.promise;
+};
+
+Insteon.on = Insteon.open = function (device) {
+
+  return Insteon.device_command(device, 'on');
+
 };
 
 Insteon.on_fast = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.on_fast(%s)', device.name);
+  return Insteon.device_command(device, 'on_fast');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'LIGHT_ON_FAST';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: true, _level: device.config.on_level || 100};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.start_brighten = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.start_brighten(%s)', device.name);
+  return Insteon.device_command(device, 'start_brighten');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'START_BRIGHTEN';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: true, _level: device.config.on_level || 100};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.unlock = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.off(%s)', device.name);
+  return Insteon.device_command(device, 'unlock');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'LIGHT_LEVEL';
-  cmd.cmd_2 = 0x00;
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: false, _level: 0};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.lock = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.off(%s)', device.name);
+  return Insteon.device_command(device, 'lock');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'LIGHT_LEVEL';
-  cmd.cmd_2 = 0xff;
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: false, _level: 0};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.off = Insteon.close = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.off(%s)', device.name);
+  return Insteon.device_command(device, 'off');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'LIGHT_OFF';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: false, _level: 0};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.off_fast = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.off_fast(%s)', device.name);
+  return Insteon.device_command(device, 'off_fast');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'LIGHT_OFF_FAST';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: false, _level: 0};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.start_dim = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.start_dim(%s)', device.name);
+  return Insteon.device_command(device, 'start_dim');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'START_DIM';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: true, _level: device.config.on_level || 100};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.stop_change = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.stop_change(%s)', device.name);
+  return Insteon.device_command(device, 'stop_change');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'STOP_CHANGE';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: true, _level: device.config.on_level || 100};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.set_level = function (device, level, time) {
-  var cmd_2,
-    rate,
-    brightness,
-    defer = Q.defer();
 
-  log.info('Insteon.on(%s)', device.name);
+  return Insteon.device_command(device, 'set_level', level, time);
 
-  var cmd = new Message();
-  cmd.command = 'LIGHT_LEVEL';
-  cmd.to = device.config.address;
+};
 
-  if (time === undefined) {
-    cmd.command = 'LIGHT_LEVEL';
-    cmd_2 = (level / 100) * 255;
-    cmd_2 = (cmd_2 > 255) ? 255 : cmd_2;
-    cmd_2 = (cmd_2 < 0) ? 0 : cmd_2;
-  } else {
-    cmd.command = 'LIGHT_LEVEL_RATE';
-    brightness = Math.round((15 * (parseInt(level, 10) / 100)));
-    rate = Math.round(15 * (parseInt(time, 10) / 100));
-    cmd_2 = (brightness << 4 | rate);
-  }
+Insteon.enter_linking_mode = function (device, group) {
 
-  cmd.cmd_2 = parseInt(cmd_2, 10);
+  return Insteon.device_command(device, 'enter_linking_mode', group);
 
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    result.update = {_on: (level > 0), _level: level};
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
+};
 
-  return defer.promise;
+Insteon.enter_unlinking_mode = function (device, group) {
+
+  return Insteon.device_command(device, 'enter_unlinking_mode', group);
+
 };
 
 Insteon.get_im_info = function () {
@@ -826,247 +690,59 @@ Insteon.get_next_all_link_record = function () {
 };
 
 Insteon.exit_linking_mode = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.exit_linking_mode(%s)', device.name);
+  return Insteon.device_command(device, 'exit_linking_mode');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'EXIT_LINKING_MODE';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
-};
-
-Insteon.enter_linking_mode = function (device, group) {
-  var defer = Q.defer();
-
-  log.info('Insteon.enter_linking_mode(%s)', device.name);
-
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'ENTER_LINKING_MODE';
-  cmd.group = group;
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
-};
-
-Insteon.enter_unlinking_mode = function (device, group) {
-  var defer = Q.defer();
-
-  log.info('Insteon.enter_unlinking_mode(%s)', device.name);
-
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'ENTER_UNLINKING_MODE';
-  cmd.group = group;
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.set_button_tap = function (device, taps) {
-  var defer = Q.defer();
 
-  log.info('Insteon.set_button_tap(%s)', device.name);
+  return Insteon.device_command(device, 'set_button_tap', taps);
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'SET_BUTTON_TAP';
-  cmd.cmd_2 = taps || 1;
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.id_request = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.id_request(%s)', device.name);
+  return Insteon.device_command(device, 'id_request');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'ID_REQUEST';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-
-    var devices = abode.devices.get_by_provider('insteon');
-
-    device.config.device_cat = result.devcat;
-    device.config.device_subcat = result.subcat;
-    device.config.firmware = result.firmware;
-
-    devices = devices.filter(function (item) {
-      return (item.config && item.config.address === device.config.address);
-    });
-
-    if (devices.length === 0) {
-      log.warn('No device found with address: %s', device.config.address);
-      return;
-    }
-
-    devices.forEach(function (item) {
-      item.set_state(device.config);
-    });
-
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.device_text_string_request = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.device_text_string_request(%s)', device.name);
+  return Insteon.device_command(device, 'device_text_string_request');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'DEVICE_TEXT_STRING_REQUEST';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.beep = function (device, count) {
-  var i = 0,
-    response = {},
-    success = [],
-    errors = [],
-    defer = Q.defer();
 
-  count = count || 1;
+  return Insteon.device_command(device, 'beep', count);
 
-  var do_beep = function () {
-
-  log.info('Insteon.beep(%s)', device.name);
-    i += 1;
-
-    if (i > count) {
-      response.errors = errors;
-      response.successes = success;
-      if (response.errors.length === count) {
-        response.response = false;
-        return defer.reject(response);
-      } else {
-        response.response = true;
-        return defer.resolve(response);
-      }
-    }
-
-    var cmd = new Message();
-
-    cmd.to = device.config.address;
-    cmd.command = 'BEEP';
-
-    cmd.send(Insteon.modem).then(function (result) {
-      success.count = i;
-      success.push(result);
-      setTimeout(do_beep, 500);
-    }, function (err) {
-      err.count = i;
-      errors.push(err);
-      setTimeout(do_beep, 500);
-    });
-  };
-
-  do_beep();
-
-  return defer.promise;
 };
 
 Insteon.get_all_link_database_delta = function (device) {
-  var defer = Q.defer();
 
-  log.info('Insteon.get_all_link_database_delta(%s)', device.name);
+  return Insteon.device_command(device, 'get_all_link_database_delta');
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'GET_ALL_LINK_DATABASE_DELTA';
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
-Insteon.ping = function (device) {
-  var defer = Q.defer();
+Insteon.ping = function (device, count) {
 
-  log.info('Insteon.ping(%s)', device.name);
+  return Insteon.device_command(device, 'ping', count);
 
-  var cmd = new Message();
-
-  cmd.to = device.config.address;
-  cmd.command = 'PING';
-  cmd.retries = 1;
-
-  cmd.send(Insteon.modem).then(function (result) {
-    result.response = true;
-    defer.resolve(result);
-  }, function (err) {
-    defer.reject(err);
-  });
-
-  return defer.promise;
 };
 
 Insteon.read_all_link_database = function (device, id) {
-  var records = [],
+  var finish,
+    set_timer,
+    record_handler,
+    records = [],
     record_timer,
     defer = Q.defer();
 
   log.info('Insteon.read_all_link_database(%s, %s)', device.config.address, id);
 
-
-  var record_handler = function (msg) {
-    if (msg.from && msg.command && msg.from.toLowerCase() === device.config.address.toLowerCase()
-      && msg.command.indexOf('ALL_LINK_DATABASE_RECORD') >= 0) {
+  record_handler = function (msg) {
+    if (msg.from && msg.command && msg.from.toLowerCase() === device.config.address.toLowerCase() && msg.command.indexOf('ALL_LINK_DATABASE_RECORD') >= 0) {
       var existing = records.filter(function (record) {
         return (record.id === msg.record.id);
       });
@@ -1088,7 +764,7 @@ Insteon.read_all_link_database = function (device, id) {
     }
   };
 
-  var finish = function () {
+  finish = function () {
     Insteon.modem.removeListener('MESSAGE', record_handler);
     if (id) {
       if (records[0]) {
@@ -1101,7 +777,7 @@ Insteon.read_all_link_database = function (device, id) {
     }
   };
 
-  var set_timer = function () {
+  set_timer = function () {
     if (record_timer) {
       clearTimeout(record_timer);
     }
@@ -1211,21 +887,28 @@ Insteon.delete_all_link_database = function (device, id) {
   return defer.promise;
 };
 
-Insteon.get_extended_data = function (device) {
-  var defer = Q.defer();
-  var cmd = new Message();
+Insteon.read_operating_flags = function (device, flag) {
 
-  cmd.to = device.config.address;
-  cmd.command = 'GET_SET_EXTENDED_DATA';
-  cmd.d1 = 0x01;
+  return Insteon.device_command(device, 'read_operating_flags', flag);
 
-  cmd.send(Insteon.modem).then(function (response) {
-    defer.resolve(response.data);
-  }, function (err) {
-    defer.reject(err);
-  });
+};
 
-  return defer.promise;
+Insteon.get_extended_data = function (device, group) {
+
+  return Insteon.device_command(device, 'get_extended_data', group);
+
+};
+
+Insteon.set_heartbeat_interval = function (device, interval) {
+
+  return Insteon.device_command(device, 'set_heartbeat_interval', interval);
+
+};
+
+Insteon.set_low_battery_level = function (device, level) {
+
+  return Insteon.device_command(device, 'set_low_battery_level', level);
+
 };
 
 Insteon.update = function (device) {
@@ -1294,7 +977,17 @@ Insteon.load_modem_database = function () {
   });
 
   return defer.promise;
-}
-;
+};
+
+Insteon.request_device = function (req, res, next) {
+  Insteon.get_device(req.params.device)
+    .then(function (device) {
+      req.device = device;
+      next();
+    })
+    .fail(function (err) {
+      res.status(404).send(err);
+    });
+};
 
 module.exports = Insteon;

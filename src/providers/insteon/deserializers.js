@@ -138,6 +138,11 @@ Deserializers.received_insteon_standard = function () {
   this.result.cmd_1 = msg.readUInt8(7);
   this.result.cmd_2 = msg.readUInt8(8);
 
+  if (this.result.cmd_1 === 0x06 && this.result.all_link_broadcast) {
+    this.result.all_link_broadcast = false;
+    this.result.all_link_cleanup_report = true;
+  }
+
   if (this.result.direct_nak || this.result.all_link_cleanup_nak) {
     this.result.status = 'failed';
     if (this.result.direct_nak && this.result.cmd_2 === 0xfb) {
@@ -308,8 +313,13 @@ Deserializers.extended_data = function () {
 
 
   this.result.data = {};
+  this.result.data.led_brightness = this.result.d3;
+  this.result.data.motion_timeout = this.result.d4;
+  this.result.data.light_intensity = this.result.d5;
   this.result.data.ramp_rate = this.result.d7;
   this.result.data.on_level = this.result.d8;
+  this.result.data.light_level = this.result.d11;
+  this.result.data.battery_voltage = this.result.d12;
 
 };
 

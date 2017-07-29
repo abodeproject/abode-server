@@ -426,7 +426,7 @@ Triggers.type_handler = function (trigger) {
       }
 
       //Fire the trigger
-      log.info('%s trigger matched from %s event, checking conditions: %s', t.trigger.name, trigger, matcher.name);
+      log.debug('%s trigger matched from %s event, checking conditions: %s', t.trigger.name, trigger, matcher.name);
       Triggers.fire_trigger(t.trigger);
     });
   };

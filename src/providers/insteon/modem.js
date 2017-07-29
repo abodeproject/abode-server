@@ -34,6 +34,7 @@ var Modem = function (config) {
 
   self.send_queue = [];
   self.read_queue = [];
+  self.read_buffer = [];
   self.expectations = [];
 
   self.polling = false;
@@ -41,6 +42,7 @@ var Modem = function (config) {
 
   self.sending = false;
   self.reading = false;
+  self.processing_buffer = false;
 
   //Set our log level
   if (self.config.modem_debug) {
@@ -77,6 +79,7 @@ Modem.prototype.connect = function () {
 
     self.send_interval = setInterval(self.send.bind(self), self.config.send_interval);
     self.read_interval = setInterval(self.read.bind(self), self.config.read_interval);
+    self.buffer_processor = setInterval(self.process_buffer.bind(self), 10);
     return defer.resolve();
   };
 
@@ -98,6 +101,7 @@ Modem.prototype.disconnect = function () {
 
   clearInterval(self.send_interval);
   clearInterval(self.read_interval);
+  clearInterval(self.buffer_processor);
 
   self.device.close(function (err) {
     if (err) {
@@ -135,9 +139,29 @@ Modem.prototype.on_close = function () {
 };
 
 Modem.prototype.on_data = function (data) {
+  this.read_buffer.push(data);
+};
+
+Modem.prototype.process_buffer = function () {
+
+  if (this.processing_buffer !== false) {
+    return;
+  }
+
+  if (this.read_buffer.length === 0) {
+    return;
+  }
+
   var i,
     tmp,
-    self = this;
+    self = this,
+    data = this.read_buffer.shift();
+
+  if (data === undefined) {
+    return;
+  }
+
+  self.processing_buffer = new Date();
 
   for (i = 0; i < data.length; i += 1) {
     //Process message start
@@ -205,10 +229,14 @@ Modem.prototype.on_data = function (data) {
         log.warn('No deserializer for message:', self.message.command);
       }
 
+      log_message.info(self.message.rx_message());
+
       self.resetMsg();
 
     }
   }
+
+  self.processing_buffer = false;
 };
 
 Modem.prototype.resetMsg = function () {
@@ -382,7 +410,6 @@ Modem.prototype.read = function () {
   self.reading = true;
   var message = self.read_queue.shift();
 
-  log_message.info(message.rx_message());
   //log.info('[rx:0x%s (%s)] from: %s, to: %s, cmd_1: 0x%s, cmd_2: 0x%s', utils.toHex(message.code || 0), message.command, message.result.from, message.result.to, utils.toHex(message.result.cmd_1 || 0), utils.toHex(message.result.cmd_2 || 0));
   expected = self.expectations.filter(function (expected) {
     return (expected.command === message.command && (expected.from === message.result.from || expected.from === message.result.to));

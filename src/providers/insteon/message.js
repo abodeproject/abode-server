@@ -296,6 +296,10 @@ Message.prototype.rx_message = function () {
     str.push('all_link_cleanup_nak');
   }
 
+  if (self.result.all_link_cleanup_report) {
+    str.push('all_link_cleanup_report');
+  }
+
   if (self.result.direct) {
     str.push('direct');
   }
@@ -351,6 +355,32 @@ Message.prototype.tx_message = function () {
   }
 
   return str.join(' ');
+
+};
+
+Message.prototype.make_crc = function () {
+
+    // Generate a crc for d14...
+    // Inverse sum of cmd_1, cmd_2 and D1-D13 then bitwise & with 0xff
+    var crc = [
+      this.cmd_1 || 0,
+      this.cmd_2 || 0,
+      this.d1 || 0,
+      this.d2 || 0,
+      this.d3 || 0,
+      this.d4 || 0,
+      this.d5 || 0,
+      this.d6 || 0,
+      this.d7 || 0,
+      this.d8 || 0,
+      this.d9 || 0,
+      this.d10 || 0,
+      this.d11 || 0,
+      this.d12 || 0,
+      this.d13 || 0
+    ].reduce(function(a, b) { return a + b; }, 0);
+    crc = (crc * -1) & 0xff;
+    this.d14 = crc;
 
 };
 

@@ -1,9 +1,12 @@
 
 var Q = require('q'),
+  Message = require('./message'),
   logger = require('log4js'),
   log = logger.getLogger('insteon');
 
 var Device = function (insteon, config, name) {
+  'use strict';
+
   var self = this;
 
   self.name = name;
@@ -25,6 +28,8 @@ var Device = function (insteon, config, name) {
 };
 
 Device.prototype.ping = function (max) {
+  'use strict';
+
   var self = this,
     results = [],
     defer = Q.defer();
@@ -50,7 +55,13 @@ Device.prototype.ping = function (max) {
       'start': new Date()
     };
 
-    self.insteon.ping(self).then(function (result) {
+    var cmd = new Message();
+
+    cmd.to = self.config.address;
+    cmd.command = 'PING';
+    cmd.retries = 1;
+
+    cmd.send(self.insteon.modem).then(function (result) {
       report.end = new Date();
       report.status = 'success';
       report.attempts = result.attempt;
@@ -78,15 +89,9 @@ Device.prototype.ping = function (max) {
   return defer.promise;
 };
 
-Device.prototype.beep = function () {
-  return this.insteon.beep(this);
-};
-
-Device.prototype.id_request = function () {
-  return this.insteon.id_request(this);
-};
-
 Device.prototype.load_database = function () {
+  'use strict';
+
   var delta,
     db = {},
     self = this,
@@ -180,15 +185,26 @@ Device.prototype.load_database = function () {
 };
 
 Device.prototype.get_delta = Device.prototype.get_all_link_database_delta = function () {
-  var self = this,
-    defer = Q.defer();
+  'use strict';
 
-  log.debug('Getting database delta for device: %s', self.config.address);
-  this.insteon.get_all_link_database_delta(self).then(function (response) {
-    defer.resolve({'database_delta': response.database_delta});
-  }, function (err) {
-    defer.reject(err);
-  });
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.get_all_link_database_delta(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'GET_ALL_LINK_DATABASE_DELTA';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent GET_ALL_LINK_DATABASE_DELTA command to %s', self.name || self.config.address);
+      defer.resolve({'database_delta': result.database_delta});
+    })
+    .fail(function (err) {
+      log.info('Failed to sent GET_ALL_LINK_DATABASE_DELTA command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
 
   return defer.promise;
 };
@@ -456,6 +472,710 @@ Device.prototype.skip_command = function (command) {
   self.last_command = command;
 
   return false;
+};
+
+Device.prototype.set_button_tap = function (taps) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.set_button_tap(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'SET_BUTTON_TAP';
+  cmd.cmd_2 = taps || 1;
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent SET_BUTTON_TAP command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent SET_BUTTON_TAP command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.id_request = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.id_request(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'ID_REQUEST';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+
+      self.config.device_cat = result.devcat;
+      self.config.device_subcat = result.subcat;
+      self.config.firmware = result.firmware;
+
+      self.update();
+
+      log.info('Successuflly sent ID_REQUEST command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent ID_REQUEST command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.product_data_request = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.product_data_request(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'PRODUCT_DATA_REQUEST';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent PRODUCT_DATA_REQUEST command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent ID_REQUEST command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.device_text_string_request = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.device_text_string_request(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'DEVICE_TEXT_STRING_REQUEST';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+
+      log.info('Successuflly sent DEVICE_TEXT_STRING_REQUEST command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent DEVICE_TEXT_STRING_REQUEST command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.read_operating_flags = function (flag) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.read_operating_flags(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'READ_OPERATING_FLAGS';
+  cmd.cmd_2 = flag || 0x00;
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+
+      log.info('Successuflly sent READ_OPERATING_FLAGS command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent READ_OPERATING_FLAGS command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.get_extended_data = function (group) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.get_extended_data(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'GET_SET_EXTENDED_DATA';
+  cmd.d1 = group || 0x00;
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+
+      log.info('Successuflly sent GET_SET_EXTENDED_DATA command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.set_heartbeat_interval = function (interval) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.set_heartbeat_interval(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'GET_SET_EXTENDED_DATA';
+  cmd.cmd_1 = 0x2e;
+  cmd.d1 = 0x00;
+  cmd.d2 = 0x02;
+  cmd.d3 = interval;
+  cmd.make_crc();
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+
+      log.info('Successuflly sent GET_SET_EXTENDED_DATA command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.set_low_battery_level = function (level) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.set_low_battery_level(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'GET_SET_EXTENDED_DATA';
+  cmd.cmd_1 = 0x2e;
+  cmd.d1 = 0x00;
+  cmd.d2 = 0x03;
+  cmd.d3 = level;
+  cmd.make_crc();
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+
+      log.info('Successuflly sent GET_SET_EXTENDED_DATA command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.beep = function (count) {
+  'use strict';
+
+  var i = 0,
+    self = this,
+    response = {},
+    success = [],
+    errors = [],
+    defer = Q.defer();
+
+  count = count || 1;
+
+  var do_beep = function () {
+
+    log.info('Insteon.beep(%s)', self.name);
+    i += 1;
+
+    if (i > count) {
+      response.errors = errors;
+      response.successes = success;
+      if (response.errors.length === count) {
+        response.response = false;
+        return defer.reject(response);
+      } else {
+        response.response = true;
+        return defer.resolve(response);
+      }
+    }
+
+    var cmd = new Message();
+
+    cmd.to = self.config.address;
+    cmd.command = 'BEEP';
+
+    cmd.send(self.insteon.modem).then(function (result) {
+      success.count = i;
+      success.push(result);
+      setTimeout(do_beep, 500);
+    }, function (err) {
+      err.count = i;
+      errors.push(err);
+      setTimeout(do_beep, 500);
+    });
+  };
+
+  do_beep();
+
+  return defer.promise;
+};
+
+Device.prototype.enter_linking_mode = function (group) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.enter_linking_mode(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'ENTER_LINKING_MODE';
+  cmd.group = group;
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent ENTER_LINKING_MODE command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent ENTER_LINKING_MODE command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.enter_unlinking_mode = function (group) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.enter_unlinking_mode(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'ENTER_UNLINKING_MODE';
+  cmd.group = group;
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent ENTER_UNLINKING_MODE command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent ENTER_UNLINKING_MODE command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.exit_linking_mode = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.exit_linking_mode(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'EXIT_LINKING_MODE';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent EXIT_LINKING_MODE command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent EXIT_LINKING_MODE command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.set_button_tap = function (taps) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.set_button_tap(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'SET_BUTTON_TAP';
+  cmd.cmd_2 = taps || 1;
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent SET_BUTTON_TAP command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent SET_BUTTON_TAP command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.get_status = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.get_status(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'LIGHT_STATUS_REQUEST';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent LIGHT_STATUS_REQUEST command to %s', self.name || self.config.address);
+      result.response = {_on: result.on, _level: result.level};
+      result.update = {_on: result.on, _level: result.level};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent LIGHT_STATUS_REQUEST command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.on = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.on(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'LIGHT_ON';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent ON command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: true, _level: self.config.on_level || 100};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent ON command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.on_fast = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.on_fast(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'LIGHT_ON_FAST';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent ON_FAST command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: true, _level: self.config.on_level || 100};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent ON_FAST command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.start_brighten = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.start_brighten(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'START_BRIGHTEN';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent START_BRIGHTEN command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: true, _level: self.config.on_level || 100};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent START_BRIGHTEN command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.off = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.on(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'LIGHT_OFF';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent OFF command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: true, _level: self.config.on_level || 100};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent OFF command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.off_fast = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.off_fast(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'LIGHT_OFF_FAST';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent OFF_FAST command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: false, _level: 0};;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent OFF_FAST command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.start_dim = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.start_dim(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'START_DIM';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent START_DIM command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: true, _level: self.config.on_level || 100};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent START_DIM command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.stop_change = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.stop_change(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'STOP_CHANGE';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent STOP_CHANGE command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: true, _level: self.config.on_level || 100};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent STOP_CHANGE command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.set_level = function (level, time) {
+  'use strict';
+
+  var rate,
+    cmd_2,
+    brightness,
+    self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.set_level(%s)', self.name);
+
+  cmd.to = self.config.address;
+
+  if (time === undefined) {
+    cmd.command = 'LIGHT_LEVEL';
+    cmd_2 = (level / 100) * 255;
+    cmd_2 = (cmd_2 > 255) ? 255 : cmd_2;
+    cmd_2 = (cmd_2 < 0) ? 0 : cmd_2;
+  } else {
+    cmd.command = 'LIGHT_LEVEL_RATE';
+    brightness = Math.round((15 * (parseInt(level, 10) / 100)));
+    rate = Math.round(15 * (parseInt(time, 10) / 100));
+    cmd_2 = (brightness << 4 | rate);
+  }
+
+  cmd.cmd_2 = parseInt(cmd_2, 10);
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent %s command to %s', cmd.command, self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: (level > 0), _level: level};;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent %s command to %s: %s', cmd.command, self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.unlock = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.unlock(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'LIGHT_LEVEL';
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent UNLOCK command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: false, _level: 0};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent UNLOCK command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Device.prototype.lock = function () {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.lock(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'LIGHT_LEVEL';
+  cmd.cmd_2 = 0xff;
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+      log.info('Successuflly sent LOCK command to %s', self.name || self.config.address);
+      result.response = true;
+      result.update = {_on: false, _level: 0};
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to sent LOCK command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
 };
 
 module.exports = Device;
