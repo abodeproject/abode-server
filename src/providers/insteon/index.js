@@ -290,6 +290,9 @@ Insteon.message_handler = function (msg) {
         log.info('Heartbeat received: %s', device.name);
         state.config = device.config;
         state.config.last_heartbeat = new Date();
+        device.set_state(state);
+
+        return;
       }
 
       if (device.active === false && msg.to === '00.00.03') {
