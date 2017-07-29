@@ -17,6 +17,7 @@ var Message = function (size) {
   this.retries = 3;
   this.attempt = 0;
 
+  this.created = new Date();
   this.insteon = require('../insteon');
 
 };
@@ -267,10 +268,16 @@ Message.prototype.prep = function () {
 };
 
 Message.prototype.rx_message = function () {
-  var str = ['[RX]'],
-    self = this;
+  var str = ['[RX'],
+    self = this,
+    compile_time = (self.compiled - self.created) / 1000,
+    processed_time =  (self.processed - self.created) / 1000;
+
+  str.push(['c:',compile_time].join(''));
+  str.push(['p:',processed_time,']'].join(''));
 
   str.push(['0x', utils.toHex(self.code || 0), ' (', self.command, ')'].join(''));
+
 
   if (self.result.status) {
     str.push(self.result.status);
@@ -337,9 +344,11 @@ Message.prototype.rx_message = function () {
 
 
 Message.prototype.tx_message = function () {
-  var str = ['[TX]'],
-    self = this;
+  var str = ['[TX'],
+    self = this,
+    processed_time =  (self.processed - self.created) / 1000;
 
+  str.push(['p:',processed_time,']'].join(''));
   str.push(['0x', utils.toHex(self.code || 0), ' (', self.command, ')'].join(''));
 
   if (self.to) {
