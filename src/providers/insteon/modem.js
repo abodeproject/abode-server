@@ -34,7 +34,6 @@ var Modem = function (config) {
 
   self.send_queue = [];
   self.read_queue = [];
-  self.read_buffer = [];
   self.expectations = [];
 
   self.polling = false;
@@ -42,7 +41,6 @@ var Modem = function (config) {
 
   self.sending = false;
   self.reading = false;
-  self.processing_buffer = false;
 
   //Set our log level
   if (self.config.modem_debug) {
@@ -79,7 +77,6 @@ Modem.prototype.connect = function () {
 
     self.send_interval = setInterval(self.send.bind(self), self.config.send_interval);
     self.read_interval = setInterval(self.read.bind(self), self.config.read_interval);
-    self.buffer_processor = setInterval(self.process_buffer.bind(self), 1);
     return defer.resolve();
   };
 
@@ -101,7 +98,6 @@ Modem.prototype.disconnect = function () {
 
   clearInterval(self.send_interval);
   clearInterval(self.read_interval);
-  clearInterval(self.buffer_processor);
 
   self.device.close(function (err) {
     if (err) {
@@ -139,30 +135,10 @@ Modem.prototype.on_close = function () {
 };
 
 Modem.prototype.on_data = function (data) {
-  this.read_buffer.push(data);
-  log_message.info(data);
-};
-
-Modem.prototype.process_buffer = function () {
-
-  if (this.processing_buffer !== false) {
-    return;
-  }
-
-  if (this.read_buffer.length === 0) {
-    return;
-  }
 
   var i,
     tmp,
-    self = this,
-    data = this.read_buffer.shift();
-
-  if (data === undefined) {
-    return;
-  }
-
-  self.processing_buffer = new Date();
+    self = this;
 
   for (i = 0; i < data.length; i += 1) {
     //Process message start
@@ -237,7 +213,6 @@ Modem.prototype.process_buffer = function () {
     }
   }
 
-  self.processing_buffer = false;
 };
 
 Modem.prototype.resetMsg = function () {
@@ -378,7 +353,7 @@ Modem.prototype.send = function () {
         expectation.timeout();
       });
 
-    }, self.config.attempt_timeout);
+    }, self.config.attempt_timeout * message.expect.length);
 
     //Send the command
     log.info('Sending command attempt %s: ', message.attempt, message.buffer);
