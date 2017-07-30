@@ -17,8 +17,6 @@ router.get('/', function (req, res) {
     'send_queue': insteon.modem.send_queue.length,
     'reading': insteon.modem.reading,
     'read_queue': insteon.modem.read_queue.length,
-    'read_buffer': insteon.modem.read_buffer.length,
-    'processing_buffer': insteon.modem.processing_buffer,
     'last_sent': insteon.modem.last_sent,
     'expectation_queue': insteon.modem.expectations.length,
     'modem': insteon.modem_info,
