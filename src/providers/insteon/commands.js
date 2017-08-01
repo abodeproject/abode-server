@@ -263,7 +263,8 @@ Commands.BEEP = {
 Commands.READ_OPERATING_FLAGS = {
   'command': 'SEND_INSTEON_STANDARD',
   'cmd_1': 0x1f,
-  'cmd_2': 0x00
+  'cmd_2': 0x00,
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}],
 };
 
 Commands.GET_ALL_LINK_DATABASE_DELTA = {
