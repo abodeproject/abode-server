@@ -170,6 +170,18 @@ router.get('/devices/:device', insteon.is_enabled, insteon.request_device, funct
 
 });
 
+router.post('/devices/:device/status', insteon.is_enabled, insteon.request_device, function (req, res) {
+
+  req.device.get_status()
+  .then(function (result) {
+    res.send(result);
+  })
+  .fail(function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.post('/devices/:device/ping', insteon.is_enabled, insteon.request_device, function (req, res) {
 
   req.device.ping()
