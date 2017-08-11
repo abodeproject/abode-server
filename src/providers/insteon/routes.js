@@ -570,6 +570,18 @@ router.post('/devices/:device/read_operating_flags/:flag', insteon.is_enabled, i
 
 });
 
+router.post('/devices/:device/set_extended_data', insteon.is_enabled, insteon.request_device, function (req, res) {
+
+  req.device.set_extended_data(req.body)
+  .then(function (result) {
+    res.send(result);
+  })
+  .fail(function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.post('/devices/:device/set_heartbeat_interval/:interval', insteon.is_enabled, insteon.request_device, function (req, res) {
 
   req.device.set_heartbeat_interval(parseInt(req.params.interval, 10))

@@ -645,6 +645,48 @@ Device.prototype.get_extended_data = function (group) {
   return defer.promise;
 };
 
+Device.prototype.set_extended_data = function (data) {
+  'use strict';
+
+  var self = this,
+    defer = Q.defer(),
+    cmd = new Message();
+
+  log.info('Insteon.set_extended_data(%s)', self.name);
+
+  cmd.to = self.config.address;
+  cmd.command = 'GET_SET_EXTENDED_DATA';
+  cmd.cmd_1 = 0x2e;
+  cmd.d1 = data.d1 || 0;
+  cmd.d2 = data.d2 || 0;
+  cmd.d3 = data.d3 || 0;
+  cmd.d4 = data.d4 || 0;
+  cmd.d5 = data.d5 || 0;
+  cmd.d6 = data.d6 || 0;
+  cmd.d7 = data.d7 || 0;
+  cmd.d8 = data.d8 || 0;
+  cmd.d9 = data.d9 || 0;
+  cmd.d10 = data.d10 || 0;
+  cmd.d11 = data.d11 || 0;
+  cmd.d12 = data.d12 || 0;
+  cmd.d13 = data.d13 || 0;
+  cmd.make_crc();
+
+  cmd.send(self.insteon.modem)
+    .then(function (result) {
+
+      log.info('Successuflly sent GET_SET_EXTENDED_DATA command to %s', self.name || self.config.address);
+      result.response = true;
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      log.info('Failed to send GET_SET_EXTENDED_DATA command to %s: %s', self.name, err);
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
 Device.prototype.set_heartbeat_interval = function (interval) {
   'use strict';
 
