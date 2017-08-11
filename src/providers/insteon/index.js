@@ -311,7 +311,10 @@ Insteon.message_handler = function (msg) {
 
       if (device.active === false && msg.to === '00.00.04') {
         log.info('Heartbeat received: %s', device.name);
-        state.config = device.config;
+        state = {
+          'last_seen': new Date(),
+          'config': device.config
+        };
         state.config.last_heartbeat = new Date();
         device.set_state(state);
 
@@ -320,6 +323,10 @@ Insteon.message_handler = function (msg) {
 
       if (device.active === false && msg.to === '00.00.03') {
         log.info('Low battery received: %s', device.name);
+        state = {
+          'last_seen': new Date(),
+          'config': device.config
+        };
         state._low_battery = true;
         device.set_state(state);
 
