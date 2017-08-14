@@ -158,7 +158,7 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
     status.update = status.update || {};
 
     // If our status contained an "update" flag, update the device
-    Object.keys(status.update).forEach(function (key) {
+    /*Object.keys(status.update).forEach(function (key) {
       log.debug('Setting device attribute: ' + key + ' = ' + status.update[key]);
       if (JSON.stringify(self[key]) !== JSON.stringify(status.update[key])) {
         changes = true;
@@ -168,9 +168,9 @@ DeviceSchema.methods.send_command = function (cmd, args, cache, key, value) {
 
     // Update the last_seen field
     self.last_seen = new Date();
-
+*/
     // Save the device
-    self._save(changes).then(function () {
+    self.set_state(status.update).then(function () {
       defer.resolve(status.response);
     }, function (err) {
       defer.reject(err);
