@@ -15,6 +15,7 @@ var request = require('request');
 var SSDP = require('node-ssdp').Server;
 var SSDP_Client = require('node-ssdp').Client;
 var exec = require('child_process').exec;
+mongoose.Promise = Q.Promise;
 
 var Abode = function() { };
 
@@ -179,14 +180,15 @@ Abode.init = function (config) {
 
     //Connect to the database
     log.debug('Connecting to DB: mongodb://%s/%s', Abode.config.database.server, Abode.config.database.database);
-    Abode.db = mongoose.connect('mongodb://' + Abode.config.database.server + '/' + Abode.config.database.database).connection;
-
-    //Register our event handlers for the database
-    Abode.db.on('error', function (err) {
-      log.error('Connection error: %s', err.message || err);
-      process.exit(1);
-    });
-    Abode.db.once('open', start);
+    mongoose.connect('mongodb://' + Abode.config.database.server + '/' + Abode.config.database.database, {useMongoClient: true})
+      .then(function (db) {
+        Abode.db = db;
+        start();
+      })
+      .fail(function (err) {
+        log.error('Connection error: %s', err.message || err);
+        process.exit(1);
+      });
 
   } else {
     log.info('Starting Abode in Device mode');
