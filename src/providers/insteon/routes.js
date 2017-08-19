@@ -244,7 +244,7 @@ router.post('/devices/:device/id_request', insteon.is_enabled, insteon.request_d
 
 router.post('/devices/:device/on', insteon.is_enabled, insteon.request_device, function (req, res) {
 
-  req.device.on()
+  req.device.light_off()
   .then(function (result) {
     res.send(result);
   })
@@ -280,7 +280,7 @@ router.post('/devices/:device/start_brighten', insteon.is_enabled, insteon.reque
 
 router.post('/devices/:device/off', insteon.is_enabled, insteon.request_device, function (req, res) {
 
-  req.device.off()
+  req.device.light_off()
   .then(function (result) {
     res.send(result);
   })
