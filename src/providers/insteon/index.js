@@ -967,8 +967,15 @@ Insteon.update = function (device) {
 
 Insteon.post_save = function (record) {
   var defer = Q.defer();
+  var get_func;
 
-  Insteon.get_device(record.config.address).then(function (device) {
+  if (record.config.address.split('.')[0] === '00') {
+    get_func = Insteon.get_scene;
+  } else {
+    get_func = Insteon.get_device;
+  }
+
+  get_func(record.config.address).then(function (device) {
     device.name = record.name;
     defer.resolve();
   }, function (err) {
