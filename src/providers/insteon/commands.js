@@ -140,7 +140,8 @@ Commands.LIGHT_ON = {
     'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED',
     'cmd_1': 0x11
   },
-  'deserialize': deserialize.light_on
+  'deserialize': deserialize.light_on,
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
 };
 
 Commands.LIGHT_ON_FAST = {
@@ -151,12 +152,14 @@ Commands.LIGHT_ON_FAST = {
     'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED',
     'cmd_1': 0x12,
     'cmd_2': 0x01
-  }
+  },
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
 };
 
 Commands.LIGHT_LEVEL = {
   'command': 'SEND_INSTEON_STANDARD',
-  'cmd_1': 0x11
+  'cmd_1': 0x11,
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
 };
 
 Commands.LIGHT_LEVEL_RATE = {
@@ -221,7 +224,8 @@ Commands.LIGHT_OFF = {
     'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED',
     'cmd_1': 0x13
   },
-  'deserialize': deserialize.light_off
+  'deserialize': deserialize.light_off,
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
 };
 
 Commands.LIGHT_OFF_FAST = {
@@ -232,7 +236,8 @@ Commands.LIGHT_OFF_FAST = {
     'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED',
     'cmd_1': 0x14,
     'cmd_2': 0x01
-  }
+  },
+  'expect': [{'command': 'INSTEON_STANDARD_MESSAGE_RECEIVED'}]
 };
 
 Commands.LIGHT_STATUS_REQUEST = {
