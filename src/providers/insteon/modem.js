@@ -296,6 +296,10 @@ Modem.prototype.send = function () {
     // Process our message expectations
     var expect_defers = [];
 
+    if (message.to && message.to.split('.')[0] === '00') {
+      message.expect.splice(message.expect.length - 1, 1);
+    }
+
     // Iterate through each of our expectations
     message.expect.forEach(function (expected) {
       //Build the expectation object
