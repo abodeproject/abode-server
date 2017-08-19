@@ -244,7 +244,7 @@ router.post('/devices/:device/id_request', insteon.is_enabled, insteon.request_d
 
 router.post('/devices/:device/on', insteon.is_enabled, insteon.request_device, function (req, res) {
 
-  req.device.light_off()
+  req.device.light_on()
   .then(function (result) {
     res.send(result);
   })
