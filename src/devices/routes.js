@@ -35,7 +35,7 @@ router.get('/logs', web.isUnlocked, function (req, res) {
 
 router.get('/', function (req, res) {
   res.send(devices.list().map(function (d) {
-    return {'_id': d._id, 'name': d.name, '_rooms': d._rooms, 'capabilities': d.capabilities, 'tags': d.tags, 'icon': d.icon, 'last_seen': d.last_seen};
+    return {'_id': d._id, 'name': d.name, '_rooms': d._rooms, 'capabilities': d.capabilities, 'tags': d.tags, 'icon': d.icon, 'last_seen': d.last_seen, 'active': d.active};
   }));
   res.end();
 });
