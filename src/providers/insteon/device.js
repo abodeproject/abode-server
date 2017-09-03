@@ -465,7 +465,7 @@ Device.prototype.skip_command = function (command) {
     self.cleanup_timer = setTimeout(function () {
       self.last_command = undefined;
       self.cleanup_timer = undefined;
-    }, 5000);
+    }, self.insteon.config.skip_timeout);
 
     return true;
   }

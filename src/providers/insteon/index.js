@@ -32,6 +32,7 @@ var Insteon = function () {
   Insteon.config.polling_enabled = (Insteon.config.polling_enabled!==false);
   Insteon.config.poll_interval = Insteon.config.poll_interval || 5;
   Insteon.config.poll_wait = Insteon.config.poll_wait || 60;
+  Insteon.config.skip_timeout = Insteon.config.skip_timeout || 30000;
 
   Insteon.modem = new Modem(Insteon.config);
   Insteon.modem.on('MESSAGE', Insteon.message_handler);
