@@ -84,6 +84,24 @@ Mock.off = Mock.close = function (device) {
   return defer.promise;
 };
 
+Mock.motion_on = function (device) {
+  var defer = q.defer();
+
+  log.info('Mock.motion_on(%s)', device.name);
+  defer.resolve({'response': true, 'update': {_motion: true}});
+
+  return defer.promise;
+};
+
+Mock.motion_off = function (device) {
+  var defer = q.defer();
+
+  log.info('Mock.motion_off(%s)', device.name);
+  defer.resolve({'response': true, 'update': {_motion: false}});
+
+  return defer.promise;
+};
+
 Mock.set_level = function (device, level) {
   var defer = q.defer();
 
