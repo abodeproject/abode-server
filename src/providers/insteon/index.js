@@ -257,7 +257,7 @@ Insteon.load_scenes = function () {
 };
 
 Insteon.message_handler = function (msg) {
-  var devices, state = {};
+  var devices, responders, insteon_devices, state = {};
 
   if (msg.command.indexOf('STOP_CHANGE') >= 0) {
     log.info('Sending status request due to local level change: %s', msg.from);
@@ -282,20 +282,20 @@ Insteon.message_handler = function (msg) {
   }
 
 
-  Insteon.get_device(msg.from).then(function (device) {
-    if (msg.on !== undefined) { device.on = msg.on; }
-    if (msg.level !== undefined) { device.level = msg.level; }
-    device.last_seen = new Date();
+  Insteon.get_device(msg.from).then(function (insteon_device) {
+    if (msg.on !== undefined) { insteon_device.on = msg.on; }
+    if (msg.level !== undefined) { insteon_device.level = msg.level; }
+    insteon_device.last_seen = new Date();
 
-    if (device.skip_command(msg.command[msg.command.length - 1])) {
-      log.debug('Skipping cleanup command from %s (%s) to %s: %s', device.name, msg.from, msg.to, msg.command);
+    if (insteon_device.skip_command(msg.command[msg.command.length - 1])) {
+      log.debug('Skipping cleanup command from %s (%s) to %s: %s', insteon_device.name, msg.from, msg.to, msg.command);
       return;
     }
 
     // Lookup the device
     log.debug('Looking for Abode device: %s', msg.from);
-    devices = abode.devices.get_by_provider('insteon');
-    devices = devices.filter(function (device) {
+    insteon_devices = abode.devices.get_by_provider('insteon');
+    devices = insteon_devices.filter(function (device) {
       return (device.config && device.config.address === msg.from);
     });
 
@@ -304,7 +304,7 @@ Insteon.message_handler = function (msg) {
       return;
     }
 
-    log.info('Message received: %s from %s (%s) for %s', msg.command, device.name, msg.from, msg.to);
+    log.info('Message received: %s from %s (%s) for %s', msg.command, insteon_device.name, msg.from, msg.to);
 
     state.last_seen = new Date();
 
@@ -334,6 +334,9 @@ Insteon.message_handler = function (msg) {
         return;
       }
 
+      // Get our list of responders so we can set their state
+      Insteon.process_responders(insteon_device, state);
+
       if (device.capabilities.indexOf('motion_sensor') >= 0) {
         state = {
           '_motion': state._on,
@@ -359,6 +362,50 @@ Insteon.message_handler = function (msg) {
       }
     });
   });
+};
+
+Insteon.process_responders = function (device, state) {
+  var defer = Q.defer(),
+    devices = abode.devices.get_by_provider('insteon');
+
+  device.responders().then(function (responders) {
+
+    responders.forEach(function (responder) {
+      // Look for our link entry in the responders database
+      var db_entry = responder.config.database.filter(function (link) {
+        return (link.address === device.config.address && !link.controller)
+      });
+
+      // If for some reason we don't have a match, move along
+      if (db_entry.length === 0) {
+        return;
+      }
+
+      // Get our Abode device
+      var linked_device = devices.filter(function (device) {
+        return (device.config && device.config.address === responder.config.address);
+      });
+
+      // If no Abode device found, skip device
+      if (linked_device.length === 0) {
+        return;
+      }
+
+      log.info('Setting state for responder: %s (%s)', linked_device[0].name, linked_device[0].config.address);
+      linked_device[0].set_state({
+        '_on': state._on,
+        '_level': (state._on) ? parseInt(db_entry[0].on_level / 255 * 100, 10) : 0
+      });
+
+    });
+
+    defer.resolve();
+
+  }, function () {
+    defer.reject();
+  });
+
+  return defer.promise;
 };
 
 Insteon.disable = function () {

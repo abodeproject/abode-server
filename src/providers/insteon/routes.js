@@ -151,13 +151,13 @@ router.post('/led_off', insteon.is_enabled, function (req, res) {
 
 });
 
-router.get('/devices', insteon.is_enabled, function (req, res) {
+router.get('/devices', function (req, res) {
 
   res.send(insteon.devices);
 
 });
 
-router.get('/devices/:device', insteon.is_enabled, insteon.request_device, function (req, res) {
+router.get('/devices/:device', insteon.request_device, function (req, res) {
 
     res.status(200).send({
       'name': req.device.name,
@@ -166,6 +166,16 @@ router.get('/devices/:device', insteon.is_enabled, insteon.request_device, funct
       'last_command': req.device.last_command,
       'last_seen': req.device.last_seen,
       'config': req.device.config
+    });
+
+});
+
+router.get('/devices/:device/responders', insteon.request_device, function (req, res) {
+
+    req.device.responders().then(function (results) {
+      res.status(200).send(results);
+    }, function (err) {
+      res.status(400).send(err);
     });
 
 });

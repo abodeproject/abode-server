@@ -301,6 +301,34 @@ Device.prototype.create_record = function (config) {
   return defer.promise;
 };
 
+Device.prototype.responders = function () {
+  var devices,
+    self = this,
+    defer = Q.defer();
+
+  devices = self.insteon.devices.filter(function (device) {
+    var matches;
+
+    if (!device.config || !device.config.database) {
+      return false;
+    }
+
+    if (!Array.isArray(device.config.database)) {
+      return false;
+    }
+
+    matches = device.config.database.filter(function (link) {
+      return (link.address === self.config.address && !link.controller);
+    });
+
+    return (matches.length > 0);
+  });
+
+  defer.resolve(devices);
+
+  return defer.promise;
+};
+
 Device.prototype.get_record = function (offset) {
   var self = this,
     defer = Q.defer();
