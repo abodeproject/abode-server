@@ -304,7 +304,10 @@ Device.prototype.create_record = function (config) {
 Device.prototype.responders = function () {
   var devices,
     self = this,
-    defer = Q.defer();
+    defer = Q.defer(),
+    addr_split = self.config.address.split('.'),
+    group = (addr_split[0] === '00') ? parseInt(addr_split[2], 16) : 1,
+    address = (addr_split[0] === '00') ? self.insteon.modem_info.address : self.config.address;
 
   devices = self.insteon.devices.filter(function (device) {
     var matches;
@@ -318,7 +321,7 @@ Device.prototype.responders = function () {
     }
 
     matches = device.config.database.filter(function (link) {
-      return (link.address === self.config.address && !link.controller);
+      return (link.address === address && !link.controller && link.group === group);
     });
 
     return (matches.length > 0);
@@ -980,6 +983,11 @@ Device.prototype.light_on = function () {
       log.info('Successuflly sent ON command to %s', self.name || self.config.address);
       result.response = true;
       result.update = {_on: true, _level: self.config.on_level || 100};
+
+      if (self.config.address.split('.')[0] === '00') {
+        self.insteon.process_responders(self, {'_on': true});
+      }
+
       defer.resolve(result);
     })
     .fail(function (err) {
@@ -1061,6 +1069,11 @@ Device.prototype.light_off = function () {
       log.info('Successuflly sent OFF command to %s', self.name || self.config.address);
       result.response = true;
       result.update = {_on: false, _level: 0};
+
+      if (self.config.address.split('.')[0] === '00') {
+        self.insteon.process_responders(self, {'_on': false});
+      }
+
       defer.resolve(result);
     })
     .fail(function (err) {

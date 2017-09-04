@@ -170,7 +170,7 @@ router.get('/devices/:device', insteon.request_device, function (req, res) {
 
 });
 
-router.get('/devices/:device/responders', insteon.request_device, function (req, res) {
+router.get('/devices/:device/responders', insteon.is_enabled, insteon.request_device, function (req, res) {
 
     req.device.responders().then(function (results) {
       res.status(200).send(results);

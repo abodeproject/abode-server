@@ -257,7 +257,7 @@ Insteon.load_scenes = function () {
 };
 
 Insteon.message_handler = function (msg) {
-  var devices, responders, insteon_devices, state = {};
+  var devices, insteon_devices, state = {};
 
   if (msg.command.indexOf('STOP_CHANGE') >= 0) {
     log.info('Sending status request due to local level change: %s', msg.from);
@@ -366,14 +366,17 @@ Insteon.message_handler = function (msg) {
 
 Insteon.process_responders = function (device, state) {
   var defer = Q.defer(),
-    devices = abode.devices.get_by_provider('insteon');
+    addr_split = device.config.address.split('.'),
+    devices = abode.devices.get_by_provider('insteon'),
+    group = (addr_split[0] === '00') ? parseInt(addr_split[2], 16) : 1,
+    address = (addr_split[0] === '00') ? device.insteon.modem_info.address : device.config.address;
 
   device.responders().then(function (responders) {
 
     responders.forEach(function (responder) {
       // Look for our link entry in the responders database
       var db_entry = responder.config.database.filter(function (link) {
-        return (link.address === device.config.address && !link.controller)
+        return (link.address === address && !link.controller && link.group === group);
       });
 
       // If for some reason we don't have a match, move along
