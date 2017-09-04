@@ -302,32 +302,42 @@ Device.prototype.create_record = function (config) {
 };
 
 Device.prototype.responders = function () {
-  var devices,
-    self = this,
+  var self = this,
+    links = [],
     defer = Q.defer(),
     addr_split = self.config.address.split('.'),
     group = (addr_split[0] === '00') ? parseInt(addr_split[2], 16) : 1,
     address = (addr_split[0] === '00') ? self.insteon.modem_info.address : self.config.address;
 
-  devices = self.insteon.devices.filter(function (device) {
-    var matches;
+  self.insteon.devices.forEach(function (device) {
 
-    if (!device.config || !device.config.database) {
-      return false;
+    // Check that we have a database
+    if (!device.config || !device.config.database || !Array.isArray(device.config.database)) {
+      return;
     }
 
-    if (!Array.isArray(device.config.database)) {
-      return false;
-    }
-
-    matches = device.config.database.filter(function (link) {
+    // Filter device links that match self
+    var db_entry = device.config.database.filter(function (link) {
       return (link.address === address && !link.controller && link.group === group);
     });
 
-    return (matches.length > 0);
+    // If no link found, skip
+    if (db_entry.length === 0) {
+      return;
+    }
+
+    links.push({
+      'name': device.name,
+      'address': device.config.address,
+      'group': group,
+      'on_level': db_entry[0].on_level,
+      'ramp_rate': db_entry[0].ramp_rate,
+      'button': db_entry[0].button
+    });
+
   });
 
-  defer.resolve(devices);
+  defer.resolve(links);
 
   return defer.promise;
 };

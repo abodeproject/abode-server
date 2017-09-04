@@ -374,19 +374,9 @@ Insteon.process_responders = function (device, state) {
   device.responders().then(function (responders) {
 
     responders.forEach(function (responder) {
-      // Look for our link entry in the responders database
-      var db_entry = responder.config.database.filter(function (link) {
-        return (link.address === address && !link.controller && link.group === group);
-      });
-
-      // If for some reason we don't have a match, move along
-      if (db_entry.length === 0) {
-        return;
-      }
-
       // Get our Abode device
       var linked_device = devices.filter(function (device) {
-        return (device.config && device.config.address === responder.config.address);
+        return (device.config && device.config.address === responder.address);
       });
 
       // If no Abode device found, skip device
@@ -396,8 +386,8 @@ Insteon.process_responders = function (device, state) {
 
       log.info('Setting state for responder: %s (%s)', linked_device[0].name, linked_device[0].config.address);
       linked_device[0].set_state({
-        '_on': (db_entry[0].on_level > 0),
-        '_level': (state._on) ? parseInt(db_entry[0].on_level / 255 * 100, 10) : 0
+        '_on': (responder.on_level > 0),
+        '_level': (state._on) ? parseInt(responder.on_level / 255 * 100, 10) : 0
       });
 
     });
