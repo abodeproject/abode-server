@@ -534,6 +534,16 @@ router.put('/devices/:device/database/:offset', insteon.is_enabled, insteon.requ
 
 });
 
+router.post('/devices/:device/database/:offset', insteon.is_enabled, insteon.request_device, function (req, res) {
+
+  req.device.read_all_link_database(req.params.offset).then(function (result) {
+    res.send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+
+});
+
 router.delete('/devices/:device/database/:offset', insteon.is_enabled, insteon.request_device, function (req, res) {
 
   req.device.delete_record(req.params.offset).then(function (result) {
