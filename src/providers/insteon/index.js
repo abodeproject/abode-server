@@ -396,7 +396,7 @@ Insteon.process_responders = function (device, state) {
 
       log.info('Setting state for responder: %s (%s)', linked_device[0].name, linked_device[0].config.address);
       linked_device[0].set_state({
-        '_on': state._on,
+        '_on': (db_entry[0].on_level > 0),
         '_level': (state._on) ? parseInt(db_entry[0].on_level / 255 * 100, 10) : 0
       });
 
