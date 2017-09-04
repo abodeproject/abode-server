@@ -1081,7 +1081,7 @@ Device.prototype.light_off = function () {
       result.update = {_on: false, _level: 0};
 
       if (self.config.address.split('.')[0] === '00') {
-        self.insteon.process_responders(self, {'_on': false});
+        self.insteon.process_responders(self, {'_on': false, '_level': 0});
       }
 
       defer.resolve(result);
