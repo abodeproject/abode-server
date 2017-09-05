@@ -329,10 +329,11 @@ Device.prototype.responders = function () {
     links.push({
       'name': device.name,
       'address': device.config.address,
+      'id': db_entry[0].id,
       'group': group,
+      'button': db_entry[0].button,
       'on_level': db_entry[0].on_level,
-      'ramp_rate': db_entry[0].ramp_rate,
-      'button': db_entry[0].button
+      'ramp_rate': db_entry[0].ramp_rate
     });
 
   });
