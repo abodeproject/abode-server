@@ -16,8 +16,8 @@ var config = {
     'database': process.env.ABODE_DB_DATABASE
   },
   'web': {
-    'address': process.env.ABODE_WEB_ADDRESS,
-    'port': process.env.ABODE_WEB_PORT,
+    'address': process.env.IP || process.env.ABODE_WEB_ADDRESS,
+    'port': process.env.PORT || process.env.ABODE_WEB_PORT,
     'access_log': process.env.ABODE_ACCESS_LOGS
   }
 };
