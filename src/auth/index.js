@@ -32,14 +32,15 @@ var Auth = function () {
   Auth.list({'user': 'admin'}).then(function (results) {
     if (results.length === 0) {
       log.warn('No admin user defined, creating one');
-
+      var passwd = hat(128, 16);
+      
       Auth.create({
         'name': 'admin',
         'user': 'admin',
         'email': 'admin@localhost',
-        'password': 'changeme'
+        'password':passwd
       }).then(function () {
-          log.info('Created admin user: admin');
+          log.info('Created admin user: admin:' + passwd);
           defer.resolve(Auth);
         }, function (err) {
           log.error('Unable to create admin account:', err);
@@ -646,7 +647,7 @@ Auth.gen_token = function (user, expires, status, device, ip, agent_raw) {
   var geo = geoip.lookup(ip);
   geo = geo || {};
 
-  expires = expires || 1;
+  expires = expires || abode.config.expire_logins || 1;
   token_expiration.setDate(token_expiration.getDate() + expires);
 
   token = new Auth.tokens({
@@ -726,7 +727,11 @@ Auth.password = function (config) {
       log.info('Password authentication successful: %s', config.user);
       defer.resolve(results[0]);
     } else {
-      log.warning('Password authentication successful: %s', config.user);
+      try {
+      log.warn('Password authentication unsuccessful: %s', config.user);
+      } catch (e) {
+        console.log(e);
+      }
       defer.reject();
     }
   }, function (err) {
@@ -793,6 +798,7 @@ Auth.new_login = function (data, methods) {
 
     //Build an auth token
     Auth.gen_token(user, undefined, status, identity.device, data.ip, data.agent).then(function (token) {
+      log.debug(token);
       defer.resolve({'status': status, 'token': token, 'identity': identity});
     }, function (err) {
       defer.reject(err);
@@ -836,8 +842,7 @@ Auth.new_login = function (data, methods) {
       if (response !== undefined) {
         identity = response;
       }
-
-
+      
       //If the method is sufficient, complete authentication
       if (method.usage === 'sufficient') {
         authenticated = config.min_auth;
