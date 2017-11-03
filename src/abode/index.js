@@ -56,13 +56,14 @@ Abode.init = function (config) {
   config.providers = config.providers || ['rad','browser', 'time'];
   config.fail_on_provider = config.fail_on_provider || true;
   config.hearbeat_interval = config.hearbeat_interval || 10;
-  config.event_cache_size = 100;
+  config.event_cache_size = config.event_cache_size || 100;
   config.disable_upnp = (config.disable_upnp === undefined) ? false : config.disable_upnp;
   config.debug = (config.debug === undefined) ? false : config.debug;
   config.upnp_client_timeout = config.upnp_client_timeout || 2;
   config.mode = config.mode || 'device';
   config.name = config.name || 'Local';
   config.url = config.url || 'http://' + Abode.get_ip() + ':8080';
+  config.expire_logins = config.expire_logins || 1;
 
   Abode.config = config;
   Abode.save_needed = false;
@@ -109,7 +110,7 @@ Abode.init = function (config) {
       log.debug('Setting log level: ' + mod);
 
       //Set our log level
-      if (Abode.config[mod] && Abode.config[mod].debug) {
+      if (Abode.config[mod] && Abode.config[mod].debug || Abode.config.debug) {
         mod_log.setLevel('DEBUG');
 
       } else {
@@ -145,6 +146,7 @@ Abode.init = function (config) {
     Abode.interfaces = require('../interfaces');
     Abode.notifications = require('../notifications');
     Abode.eventfeed = require('../eventfeed');
+    Abode.history = require('../history');
     Abode.web = require('../web');
     Abode.web.init();
 
@@ -163,6 +165,7 @@ Abode.init = function (config) {
     .then(loadModule('interfaces'))
     .then(loadModule('notifications'))
     .then(loadModule('eventfeed'))
+    .then(loadModule('history'))
     .then(function() {
       Abode.events.emit('ABODE_STARTED');
       if (!config.disable_upnp) {
