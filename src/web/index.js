@@ -30,6 +30,7 @@ var Web = function () {
   Web.config.ciphers = Web.config.ciphers || 'AES128-GCM-SHA256:HIGH:!RC4:!MD5:!aNULL:!EDH';
   Web.config.access_log = Web.config.access_log || 'console';
   Web.config.cors_origins = Web.config.cors_origins || ['http://localhost'];
+  Web.config.return_stack = (!Web.config.return_stack) ? false : Web.config.return_stack;
 
   if (Web.config.access_log !== 'console') {
     logger.addAppender(logger.appenders.file(Web.config.access_log, logger.layouts.messagePassThroughLayout, 4194304, 4), 'http_access');
@@ -77,6 +78,10 @@ var Web = function () {
 
   return defer.promise;
 
+};
+
+Web.show_stack = function (stack) {
+    return (Web.config.return_stack) ? stack : undefined;
 };
 
 Web.check_auth = function (ip, uri) {
