@@ -123,15 +123,16 @@ Web.init = function () {
 
   Web.server.use(function (req, res, next) {
     var trusted = false;
+    var origin = req.headers.origin || req.headers.referer;
 
-    if (req.headers.origin) {
+    if (origin) {
       Web.config.cors_origins.forEach(function (trust) {
-        trusted = (req.headers.origin.indexOf(trust) === 0) ? trust : trusted;
+        trusted = (origin.indexOf(trust) === 0) ? trust : trusted;
       });
 
       if (trusted !== false) {
-        res.set('Access-Control-Allow-Origin', req.headers.origin);
-        res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token');
+        res.set('Access-Control-Allow-Origin', origin);
+        res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token, total-pages, total-count');
         res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
       }
     }

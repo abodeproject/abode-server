@@ -18,7 +18,8 @@ var config = {
   'web': {
     'address': process.env.IP || process.env.ABODE_WEB_ADDRESS,
     'port': process.env.PORT || process.env.ABODE_WEB_PORT,
-    'access_log': process.env.ABODE_ACCESS_LOGS
+    'access_log': process.env.ABODE_ACCESS_LOGS,
+    'cors_origins': process.env.ABODE_CORS_ORIGINS.split(',') || ['http://localhost']
   }
 };
 
