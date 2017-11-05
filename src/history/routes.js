@@ -38,7 +38,9 @@ router.post('/disable', web.isUnlocked, function (req, res) {
 router.get('/:type/:name', function (req, res) {
   abode.history.get(req.params.type, req.params.name, undefined, undefined, req.query.limit, req.query.page)
   .then(function (response) {
-    res.status(200).send(response);
+    res.set('total-count', response.count);
+    res.set('total-pages', response.pages);
+    res.status(200).send(response.records);
   })
   .fail(function (err) {
     res.status(err.http_code || 400).send(err);
@@ -49,7 +51,9 @@ router.get('/:type/:name/:start', function (req, res) {
   
   abode.history.get(req.params.type, req.params.name, req.params.start, undefined, req.query.limit, req.query.page)
   .then(function (response) {
-    res.status(200).send(response);
+    res.set('total-count', response.count);
+    res.set('total-pages', response.pages);
+    res.status(200).send(response.records);
   })
   .fail(function (err) {
     res.status(err.http_code || 400).send(err);
@@ -61,7 +65,9 @@ router.get('/:type/:name/:start/:end', function (req, res) {
   
   abode.history.get(req.params.type, req.params.name, req.params.start, req.params.end, req.query.limit, req.query.page)
   .then(function (response) {
-    res.status(200).send(response);
+    res.set('total-count', response.count);
+    res.set('total-pages', response.pages);
+    res.status(200).send(response.records);
   })
   .fail(function (err) {
     res.status(err.http_code || 400).send(err);

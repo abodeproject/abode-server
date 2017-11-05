@@ -403,8 +403,23 @@ History.get = function (type, name, start, end, limit, page) {
       log.error(err);
       return defer.reject({'message': err.message, 'stack': abode.web.show_stack(err.stack)});
     }
-
-    defer.resolve(records);
+    
+    if (records.length === 0) {
+      return defer.resolve({'records': records});
+    }
+    
+    History.model.find(search).count(function (err, count) {
+      if (err) {
+        log.error(err);
+        return defer.reject({'message': err.message, 'stack': abode.web.show_stack(err.stack)});
+      }
+      
+      defer.resolve({
+        'records': records,
+        'count': count,
+        'pages': parseInt(count / limit, 10)
+      });
+    });
   });
 
   return defer.promise;
