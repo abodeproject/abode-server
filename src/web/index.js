@@ -134,6 +134,7 @@ Web.init = function () {
         res.set('Access-Control-Allow-Origin', origin);
         res.set('Access-Control-Allow-Headers','content-type, client_token, auth_token, total-pages, total-count');
         res.set('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, OPTIONS');
+        res.set('Access-Control-Expose-Headers','content-type, client_token, auth_token, total-pages, total-count');
       }
     }
     next();

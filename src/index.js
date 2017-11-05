@@ -19,9 +19,13 @@ var config = {
     'address': process.env.IP || process.env.ABODE_WEB_ADDRESS,
     'port': process.env.PORT || process.env.ABODE_WEB_PORT,
     'access_log': process.env.ABODE_ACCESS_LOGS,
-    'cors_origins': process.env.ABODE_CORS_ORIGINS.split(',') || ['http://localhost']
+    'cors_origins': ['http://localhost']
   }
 };
+
+if (process.env.ABODE_CORS_ORIGINS) {
+  config.web.cors_origins = process.env.ABODE_CORS_ORIGINS.split(',');
+}
 
 var fork = function () {
   log.info('Starting Abode process');
