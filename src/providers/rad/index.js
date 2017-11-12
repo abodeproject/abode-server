@@ -198,6 +198,8 @@ Rad.get_status = function (device) {
 
         log.debug('Received display config for Rad', device.name);
         update.config.display = config.display;
+        update.last_seen = new Date();
+        
         defer.resolve({'update': update});
       } else {
         log.error('Failed get Rad config for %s: %s', device.name, String(error));
