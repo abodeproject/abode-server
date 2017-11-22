@@ -215,7 +215,7 @@ DeviceSchema.methods.get_age = function (key, status, date_field) {
 };
 
 // Define the standard methods for a device
-DeviceSchema.methods.on = function () { return this.send_command('on', undefined, false); };
+DeviceSchema.methods.on = function () { if (typeof arguments[1] === 'function') { return; } return this.send_command('on', undefined, false); };
 DeviceSchema.methods.off = function () { return this.send_command('off', undefined, false); };
 DeviceSchema.methods.motion_on = function () { return this.send_command('motion_on', undefined, false); };
 DeviceSchema.methods.motion_off = function () { return this.send_command('motion_off', undefined, false); };
@@ -671,65 +671,65 @@ DeviceSchema.methods.remove_room = function (room) {
 DeviceSchema.methods.create_issue = function (issue) {
   var self = this,
     defer = q.defer();
-  
+
   self.get_issue_by_errno(issue.errno).then(function () {
     defer.reject({'message': 'Issue already exists'});
   }, function () {
     self.issues.push(issue);
-    
+
     self._save().then(function () {
       defer.resolve();
     }, function (err) {
       defer.reject(err);
     });
   });
-  
+
   return defer.promise;
 };
 
 DeviceSchema.methods.get_issue = function (id) {
   var self = this,
     defer = q.defer();
-  
+
   var issue = self.issues.filter(function (issue) {
     return (String(issue._id) === id);
   });
-  
+
   if (issue.length > 0) {
     defer.resolve(issue[0]);
   } else {
     defer.reject({'message': 'Not Found'});
   }
-  
+
   return defer.promise;
 };
 
 DeviceSchema.methods.get_issue_by_errno = function (errno) {
   var self = this,
     defer = q.defer();
-  
+
   var issue = self.issues.filter(function (issue) {
     return (issue.errno === errno);
   });
-  
+
   if (issue.length > 0) {
     defer.resolve(issue[0]);
   } else {
     defer.reject({'message': 'Not Found'});
   }
-  
+
   return defer.promise;
 };
 
 DeviceSchema.methods.delete_issue = function (id) {
   var self = this,
     defer = q.defer();
-  
+
   self.get_issue(id).then(function (issue) {
     self.issues = self.issues.filter(function (issue) {
       return (String(issue._id) !== id);
     });
-    
+
     self._save().then(function () {
       defer.resolve();
     }, function (err) {
@@ -738,7 +738,7 @@ DeviceSchema.methods.delete_issue = function (id) {
   }, function (err) {
     defer.reject(err);
   });
-  
+
   return defer.promise;
 };
 
