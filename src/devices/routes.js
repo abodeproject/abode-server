@@ -49,6 +49,8 @@ devices.capabilities.forEach(function (capability) {
 });
 
 router.post('/', web.isUnlocked, web.isJson, function (req, res) {
+  delete req.body.issues;
+  
   devices.create(req.body).then(function () {
     res.status(201).send({'status': 'success'});
   }, function (err) {
@@ -243,6 +245,7 @@ router.put('/:id', web.isUnlocked, web.isJson, function (req, res) {
   }
 
   delete req.body.rooms;
+  delete req.body.issues;
 
   //That way it will trigger events on changes
   device.set_state(req.body).then(function () {
@@ -260,6 +263,59 @@ router.delete('/:id', web.isUnlocked, function (req, res) {
   }
   device.delete().then(function () {
     res.send({'status': 'success'});
+  }, function (err) {
+    res.status(400).send(err);
+  });
+});
+
+router.get('/:id/issues', function (req, res) {
+  var device = devices.get(req.params.id);
+  if (!device) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  
+  res.status(200).send(device.issues || []);
+});
+
+router.post('/:id/issues', web.isJson, function (req, res) {
+  var device = devices.get(req.params.id);
+  if (!device) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  
+  device.create_issue(req.body).then(function () {
+    res.status(201).send({'status': 'success'});
+  }, function (err) {
+    res.status(400).send(err);
+  });
+  
+});
+
+router.get('/:id/issues/:issue', function (req, res) {
+  var device = devices.get(req.params.id);
+  if (!device) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  
+  device.get_issue(req.params.issue).then(function (data) {
+    res.status(200).send(data);
+  }, function (err) {
+    res.status(404).send(err);
+  });
+});
+
+router.delete('/:id/issues/:issue', function (req, res) {
+  var device = devices.get(req.params.id);
+  if (!device) {
+    res.status(404).send({'status': 'failed', 'message': 'Record not found'});
+    return;
+  }
+  
+  device.delete_issue(req.params.issue).then(function () {
+    res.send(204).send({'status': 'success'});
   }, function (err) {
     res.status(400).send(err);
   });

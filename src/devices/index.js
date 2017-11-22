@@ -112,6 +112,23 @@ var DeviceSchema = mongoose.Schema({
   '_hourly': Array,
   '_alerts': Array,
   'locked': {'type': Boolean, 'default': false},
+  'issues': [
+    {
+      'errno': {'type': String, required: true},
+      'level': {
+        'type': String,
+        required: true,
+        'validate': {
+          validator: function(v) {
+            return (['warn', 'crit'].indexOf(v) !== -1);
+          },
+          message: '{VALUE} is not a valid issue level'
+        }
+      },
+      'message': {'type': String, required: true},
+      'created': {'type': Date, 'default': Date.now}
+    }
+  ],
   'config': Object,
   'last_seen': Date,
 });
@@ -651,6 +668,79 @@ DeviceSchema.methods.remove_room = function (room) {
   return defer.promise;
 };
 
+DeviceSchema.methods.create_issue = function (issue) {
+  var self = this,
+    defer = q.defer();
+  
+  self.get_issue_by_errno(issue.errno).then(function () {
+    defer.reject({'message': 'Issue already exists'});
+  }, function () {
+    self.issues.push(issue);
+    
+    self._save().then(function () {
+      defer.resolve();
+    }, function (err) {
+      defer.reject(err);
+    });
+  });
+  
+  return defer.promise;
+};
+
+DeviceSchema.methods.get_issue = function (id) {
+  var self = this,
+    defer = q.defer();
+  
+  var issue = self.issues.filter(function (issue) {
+    return (String(issue._id) === id);
+  });
+  
+  if (issue.length > 0) {
+    defer.resolve(issue[0]);
+  } else {
+    defer.reject({'message': 'Not Found'});
+  }
+  
+  return defer.promise;
+};
+
+DeviceSchema.methods.get_issue_by_errno = function (errno) {
+  var self = this,
+    defer = q.defer();
+  
+  var issue = self.issues.filter(function (issue) {
+    return (issue.errno === errno);
+  });
+  
+  if (issue.length > 0) {
+    defer.resolve(issue[0]);
+  } else {
+    defer.reject({'message': 'Not Found'});
+  }
+  
+  return defer.promise;
+};
+
+DeviceSchema.methods.delete_issue = function (id) {
+  var self = this,
+    defer = q.defer();
+  
+  self.get_issue(id).then(function (issue) {
+    self.issues = self.issues.filter(function (issue) {
+      return (String(issue._id) !== id);
+    });
+    
+    self._save().then(function () {
+      defer.resolve();
+    }, function (err) {
+      defer.reject(err);
+    });
+  }, function (err) {
+    defer.reject(err);
+  });
+  
+  return defer.promise;
+};
 
 Devices.model = mongoose.model('Devices', DeviceSchema);
 
