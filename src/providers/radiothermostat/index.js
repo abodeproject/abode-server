@@ -198,7 +198,7 @@ Radiothermostat.get_status = function (device) {
 
     defer.resolve({'update': {
         _on: (data.tstate > 0),
-        _temperature: data.temp,
+        _temperature: (data.temp > 0) ? data.temp : undefined,
         _mode: modes[data.tmode],
         _set_point: data.t_heat || data.t_cool || 0
       }});
