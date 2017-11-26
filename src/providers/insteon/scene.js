@@ -99,7 +99,7 @@ Scene.prototype.add_member = function (member, config) {
     setTimeout(function () {
       clearTimeout(link_timer);
       success();
-    }, 2000);
+    }, 8000);
   };
 
   var device_linking = function () {
