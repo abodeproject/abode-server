@@ -827,7 +827,7 @@ Devices.load = function () {
 //Given a name, return the device
 Devices.get_by_name = function (name) {
   var devices = this.list();
-  var device = devices.filter(function (item) { return (item.name === name); });
+  var device = devices.filter(function (item) { return (item.name.toUpperCase() === name.toUpperCase()); });
 
   if (device.length === 0) {
     return false;

@@ -593,7 +593,7 @@ Scenes.load = function () {
 //Given a name, return the scene
 Scenes.get_by_name = function (name) {
   var scenes = this.list();
-  var scene = scenes.filter(function (item) { return (item.name === name); });
+  var scene = scenes.filter(function (item) { return (item.name.toUpperCase() === name.toUpperCase()); });
 
   if (scene.length === 0) {
     return false;

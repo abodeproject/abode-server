@@ -936,7 +936,7 @@ Rooms.load = function () {
 //Given a name, return the room
 Rooms.get_by_name = function (name) {
   var rooms = this.list();
-  var room = rooms.filter(function (item) { return (item.name === name); });
+  var room = rooms.filter(function (item) { return (item.name.toUpperCase() === name.toUpperCase()); });
 
   if (room.length === 0) {
     return false;
