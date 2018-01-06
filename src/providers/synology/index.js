@@ -19,10 +19,12 @@ var Synology = function () {
   config.enabled = config.enabled || true;
   config.interval = config.interval || 10;
   config.image_path = config.image_path || 'public/synology';
+  config.snapshot_interval = config.snapshot_interval || 1;
 
   abode.web.server.use('/api/synology', routes);
   Synology.enabled = false;
   Synology.cameras = [];
+  Synology.last_image_poll = false;
 
   abode.events.on('ABODE_STARTED', function () {
     if (config.enabled === false) {
@@ -72,11 +74,29 @@ Synology.poll = function () {
   Synology.polling = new Date();
 
   var defers = []
+  var no_image = true;
   var devices = abode.devices.get_by_provider('synology');
 
-  log.debug('Polling cameras');
+
+  if (!Synology.last_image_poll || (new Date - Synology.last_image_poll) > (config.snapshot_interval * 60000)) {
+    no_image = false;
+    Synology.last_image_poll = new Date();
+
+    log.debug('Polling cameras + snapshots');
+  } else {
+    log.debug('Polling cameras');
+  }
+
   devices.forEach(function (device) {
-    defers.push(device.status());
+    var defer = Q.defer();
+    defers.push(defer.promise);
+
+    Synology.get_status(device, no_image).then(function (result) {
+      device.set_state(result.update);
+      defer.resolve();
+    }, function () {
+      defer.resolve();
+    });
   });
 
   Q.allSettled(defers).then(function () {
@@ -266,7 +286,6 @@ Synology.getSnapshot = function (id) {
   }, true)
   .then(function (response) {
 
-    console.log(response.pipe);
     var image_path = Synology.image_path + '/' + id + '.jpg';
     response.pipe(fs.createWriteStream(image_path));
 
@@ -389,17 +408,25 @@ Synology.get_video = function (device) {
   return Synology.getLiveStream(device.config.id);
 };
 
-Synology.get_status = function (device) {
+Synology.get_status = function (device, no_image) {
   var defer = Q.defer();
   var defers = [];
 
   defers.push(Synology.getLiveUrls(device.config.id));
   defers.push(Synology.getInfo(device.config.id));
+  if (!no_image) {
+    log.info('Updating local snapshot: %s', device.name);
+    defers.push(Synology.getSnapshot(device.config.id));
+  }
 
   Q.allSettled(defers)
     .then(function (results) {
-      var urls = (results[0].state === 'fulfilled') ? results[0].value[0] : {};
-      var info = (results[0].state === 'fulfilled') ? results[1].value[0] : {};
+      var urls = (results[0].state === 'fulfilled') ? results[0].value[0] : undefined;
+      var info = (results[0].state === 'fulfilled') ? results[1].value[0] : undefined;
+
+      if (!urls || !info) {
+        return defer.reject({'message': 'Failed to get status on camera'});
+      }
 
       var status = {
         '_motion': info.recStatus > 0,
@@ -446,7 +473,7 @@ var base_args = {
     'api': 'SYNO.SurveillanceStation.Camera',
     'method': 'GetSnapshot',
     'json': true,
-    'version': 8,
+    'version': 9,
     'url': '/webapi/entry.cgi'
   },
   'SYNO.SurveillanceStation.Camera.GetInfo': {
