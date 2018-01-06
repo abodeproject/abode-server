@@ -742,6 +742,27 @@ DeviceSchema.methods.delete_issue = function (id) {
   return defer.promise;
 };
 
+DeviceSchema.methods.delete_issue_by_errno = function (errno) {
+  var self = this,
+    defer = q.defer();
+
+  self.get_issue_by_errno(errno).then(function (issue) {
+    self.issues = self.issues.filter(function (issue) {
+      return (String(issue._id) !== errno);
+    });
+
+    self._save().then(function () {
+      defer.resolve();
+    }, function (err) {
+      defer.reject(err);
+    });
+  }, function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
 Devices.model = mongoose.model('Devices', DeviceSchema);
 
 // Return all devices
