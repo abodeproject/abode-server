@@ -187,10 +187,13 @@ Abode.init = function (config) {
       .then(function (db) {
         Abode.db = db;
         start();
-      })
-      .fail(function (err) {
+      }, function (err) {
         log.error('Connection error: %s', err.message || err);
         process.exit(1);
+      })
+      .fail(function (err) {
+        log.error('Abode crashed: %s', err.message);
+        log.error(err.stack);
       });
 
   } else {
