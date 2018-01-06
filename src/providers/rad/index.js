@@ -199,7 +199,7 @@ Rad.get_status = function (device) {
         log.debug('Received display config for Rad', device.name);
         update.config.display = config.display;
         update.last_seen = new Date();
-        
+
         defer.resolve({'update': update});
       } else {
         log.error('Failed get Rad config for %s: %s', device.name, String(error));
@@ -221,35 +221,35 @@ Rad.get_status = function (device) {
         log.debug('Received status for Rad', device.name);
 
         update = body;
-        
-        if (device.capabiliteis.indexOf('temperature_sensor') !== -1 && update._temperature === undefined) {
+
+        if (device.capabilities.indexOf('temperature_sensor') !== -1 && update._temperature === undefined) {
           //TODO: throw issue if we are a temperature sensor but no _temperature was received
           // device.add_issue({'errno': 'RAD001-TEMP001', 'message': 'Rad has temperature sensor but no data was found', 'level': 'warn'});
         } else {
           // device.delete_issue_by_errno('RAD001-TEMP001')
         }
-        
-        if (device.capabiliteis.indexOf('humidity_sensor') !== -1 && update._humidity === undefined) {
+
+        if (device.capabilities.indexOf('humidity_sensor') !== -1 && update._humidity === undefined) {
           //TODO: throw issue if we are a humidity_sensor but no _humidity was received
           // device.add_issue({'errno': 'RAD001-HUM001', 'message': 'humidity_sensor configured but no data was found', 'level': 'warn'});
         } else {
           // device.delete_issue_by_errno('RAD001-HUM001')
         }
-        
-        if (device.capabiliteis.indexOf('light_sensor') !== -1 && update._lumens === undefined) {
+
+        if (device.capabilities.indexOf('light_sensor') !== -1 && update._lumens === undefined) {
           //TODO: throw issue if we are a light_sensor but no _lumens was received
           // device.add_issue({'errno': 'RAD001-LIGHT001', 'message': 'light_sensor configured but no data was found', 'level': 'warn'});
         } else {
           // device.delete_issue_by_errno('RAD001-LIGHT001')
         }
-        
-        if (device.capabiliteis.indexOf('motion_sensor') !== -1 && update._motion === undefined) {
-          //TODO: throw issue if we are a motion_sensor but no _motion was 
+
+        if (device.capabilities.indexOf('motion_sensor') !== -1 && update._motion === undefined) {
+          //TODO: throw issue if we are a motion_sensor but no _motion was
           // device.add_issue({'errno': 'RAD001-MOTION001', 'message': 'motion_sensor configured but no data was found', 'level': 'warn'});
         } else {
           // device.delete_issue_by_errno('RAD001-MOTION001')
         }
-        
+
         delete update.name;
 
         getConfig();
