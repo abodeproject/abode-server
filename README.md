@@ -24,14 +24,12 @@ $ npm install
 ```
 Npm will install node modules and also bower components.
 ## Configuration
-Within the root of the application folder, create `config.ini` file.  Specify the database configuration and it's also a good idea to specify your local network for easier access within your network:
+Within the `src/` of the application folder, create a `config.yaml` file.  Set the mode to `server` and setup the database configuration:
 ```
-allow_networks[] = 127.0.0.1
-allow_networks[] = 192.168.0.0/24
-
-[database]
-database = abode
-server = localhost
+mode: server
+database:
+  server: localhost
+  database: abode-dev
 ```
 
 ## Development
