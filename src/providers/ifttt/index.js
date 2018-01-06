@@ -28,8 +28,8 @@ var IFTTT = function () {
 
   abode.web.server.use('/api/ifttt', routes);
 
-  if (abode.config.allow_uris.indexOf('/api/ifttt/trigger/*/*') === -1) {
-    abode.config.allow_uris.push('/api/ifttt/trigger/*/*');
+  if (abode.config.allow_uris.indexOf('/api/ifttt/actions/*/*') === -1) {
+    abode.config.allow_uris.push('/api/ifttt/actions/*/*');
   }
 
   abode.config.ifttt.enabled = (abode.config.ifttt.enabled !== false);
@@ -41,6 +41,7 @@ var IFTTT = function () {
     IFTTT.enabled = false;
   }
   config = abode.config.ifttt || {};
+  this.log = log;
 
   return IFTTT.load();
 };

@@ -6,6 +6,8 @@ var ifttt = require('../ifttt'),
   web = require('../../web'),
   express = require('express'),
   router = express.Router();
+var logger = require('log4js'),
+  log = logger.getLogger('ifttt');
 
 router.get('/', function (req, res) {
 
@@ -198,6 +200,48 @@ router.get('/trigger/:key/:trigger', function (req, res) {
   triggers.trigger_duration(trigger.duration);
 
   res.send({'status': 'success'});
+
+});
+
+router.post('/actions/:key/:action', function (req, res) {
+  var item;
+  var key = ifttt.get(req.params.key);
+  var name = req.body.name.replace('the ', '');
+  var action = req.params.action
+  var level = req.body.level;
+
+  if (!key) {
+    res.status(403).send({'status': 'failed', 'message': 'Key not found'});
+    return;
+  }
+
+  log.info('Received %s action for %s', action, name);
+
+  var device = abode.devices.get(name);
+  var scene = abode.scenes.get(name);
+  var room = abode.rooms.get(name);
+
+  if (device && typeof(device[action]) === 'function') {
+    device[action](level).then(function () {
+      res.send({'message': 'success'});
+    }, function (err) {
+      res.status(400).send(err);
+    });
+  } else if (scene && typeof(scene[action]) === 'function') {
+    scene[action](level).then(function () {
+      res.send({'message': 'success'});
+    }, function (err) {
+      res.status(400).send(err);
+    });
+  } else if (room && typeof(room[action]) === 'function') {
+    room[action](level).then(function () {
+      res.send({'message': 'success'});
+    }, function (err) {
+      res.status(400).send(err);
+    });
+  } else {
+    res.status(404).send({'message': 'Not Found'});
+  }
 
 });
 
