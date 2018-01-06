@@ -6,6 +6,11 @@ Abode is a home automation controller primarily focusing on Insteon technology b
 The Abode software can run on Raspberry Pi's with Pi Displays or any computer that can run NodeJS applications.  Additionally, it currently supports the following home automation technologies and other services.
 * Insteon (PLM)
 * Insteon (Hub cloud api)
+* Z-Wave (work in progress)
+* Synology Surveillance Station (work in progress)
+* Lutron Caseta
+* MQTT
+* SSDP
 * IFTTT
 * RadioThermostat
 * Wunderground
@@ -16,20 +21,33 @@ The Abode software can run on Raspberry Pi's with Pi Displays or any computer th
 * NodeJS
 
 ## Installation
-Clone the Git repo locall and install using npm:
+Clone this repo and then follow the below intructions
 ```
-$ git clone https://gitlab.com/sneel/abode.git
-$ cd abode
+$ cd abode-server
 $ npm install
 ```
-Npm will install node modules and also bower components.
-## Configuration
-Within the `src/` of the application folder, create a `config.yaml` file.  Set the mode to `server` and setup the database configuration:
+Npm will install node modules.  Some development libraries may be required to successfully install some modules like Z-Wave or SSDP.
+## Configuration as a Server
+Within the `src/` of the application folder, create a `config.yaml` file.  Set the `mode` to `server` and setup the database configuration:
 ```
 mode: server
 database:
   server: localhost
   database: abode-dev
+```
+
+## Configuration as a Device
+The default behavior of abode-server is to start as a device so no special configuration is needed.  A device can be configured with various sensors and be added to an existing Abode server like any other smart home device.  These configurations should be done through the server portion.
+
+## Authenticating
+The default behavior is to allow requests from localhost.  This should get you up and running quickly.  This can be disabled by setting the following in the configuration file:
+```
+allow_networks:
+  -
+```
+Additionally, during the first start of the application a new `admin` user will be created.  You will see in the logs a messages similar to the following:
+```
+[2018-01-06 08:37:35.159] [INFO] auth - Created admin user: admin:0387391caf30ea13a078186008ed7898
 ```
 
 ## Development
