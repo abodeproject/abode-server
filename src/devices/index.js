@@ -763,6 +763,48 @@ DeviceSchema.methods.delete_issue_by_errno = function (errno) {
   return defer.promise;
 };
 
+DeviceSchema.methods.get_image = function () {
+  var msg,
+    self = this,
+    defer = q.defer();
+
+  if (!providers[self.provider]) {
+    msg = 'Provider not loaded for device ' + self.name + ': ' + self.provider;
+    log.error(msg);
+    defer.reject({'status': 'failed', 'msg': msg});
+    return defer.promise;
+  }
+  if (providers[self.provider].get_image === undefined) {
+    msg = 'Command not available for device ' + self.name + '.get_image';
+    log.error(msg);
+    defer.reject({'status': 'failed', 'msg': msg});
+    return defer.promise;
+  }
+
+  return providers[self.provider].get_image(self);
+};
+
+DeviceSchema.methods.get_video = function () {
+  var msg,
+    self = this,
+    defer = q.defer();
+
+  if (!providers[self.provider]) {
+    msg = 'Provider not loaded for device ' + self.name + ': ' + self.provider;
+    log.error(msg);
+    defer.reject({'status': 'failed', 'msg': msg});
+    return defer.promise;
+  }
+  if (providers[self.provider].get_video === undefined) {
+    msg = 'Command not available for device ' + self.name + '.get_video';
+    log.error(msg);
+    defer.reject({'status': 'failed', 'msg': msg});
+    return defer.promise;
+  }
+
+  return providers[self.provider].get_video(self);
+};
+
 Devices.model = mongoose.model('Devices', DeviceSchema);
 
 // Return all devices

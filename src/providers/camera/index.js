@@ -177,6 +177,46 @@ Camera.load = function () {
 
 };
 
+Camera.get_image = function (device) {
+  var auth,
+    defer = q.defer();
+
+  if (device.config.username) {
+    auth = {
+      auth: {
+        user: device.config.username,
+        pass: device.config.password,
+      }
+    };
+  }
+
+  var stream = request.get(device.config.image_url, auth);
+  defer.resolve(stream);
+
+  return defer.promise;
+};
+
+Camera.get_video = function (device) {
+  var auth,
+    defer = q.defer();
+
+  if (device.config.username) {
+    auth = {
+      auth: {
+        user: device.config.username,
+        pass: device.config.password,
+      }
+    };
+  }
+
+  var stream = request.get(device.config.video_url, auth);
+  stream.on('error', function () {
+    log.error('Error with camera stream');
+  });
+  defer.resolve(stream);
+
+  return defer.promise;
+};
 
 // Return all keys
 Camera.list = function () { return abode.devices.get_by_provider('camera'); };

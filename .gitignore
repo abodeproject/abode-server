@@ -7,6 +7,7 @@ config.ini
 config.yaml
 logs/*
 public/*
+src/public/*
 npm-debug.log
 .idea/*
 .vscode/*

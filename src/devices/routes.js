@@ -1,6 +1,7 @@
 'use strict';
 
 var fs = require('fs'),
+  path = require('path'),
   abode = require('../abode'),
   devices = abode.devices,
   rooms = abode.rooms,
@@ -50,7 +51,7 @@ devices.capabilities.forEach(function (capability) {
 
 router.post('/', web.isUnlocked, web.isJson, function (req, res) {
   delete req.body.issues;
-  
+
   devices.create(req.body).then(function () {
     res.status(201).send({'status': 'success'});
   }, function (err) {
@@ -84,29 +85,41 @@ router.get('/:id/image', function (req, res) {
 
   if (req.query.live) {
 
-    if (device.config.username) {
-      auth = {
-        auth: {
-          user: device.config.username,
-          pass: device.config.password,
-        }
-      };
-    }
-
-    request.get(device.config.image_url, auth)
-    .on('error', function (err) {
-      log.debug('Error proxying connection to device:', device.name);
-      try {
-        res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
-      } catch (e) {
-        res.end();
-      }
-    })
-    .pipe(res);
+    device.get_image()
+      .then(function (image) {
+        image.on('error', function () {
+          try {
+            res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
+          } catch (e) {
+            res.end();
+          }
+        });
+        image.pipe(res);
+      })
+      .fail(function (err) {
+        res.status(400).send(err);
+      })
 
   } else {
-    var path = fs.realpathSync(device._image);
-    res.sendFile(path);
+    var image_path = path.join(process.cwd(), device._image);
+    if (fs.existsSync(image_path)) {
+      res.sendFile(image_path);
+    } else {
+      device.get_image()
+      .then(function (image) {
+        image.on('error', function () {
+          try {
+            res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
+          } catch (e) {
+            res.end();
+          }
+        });
+        image.pipe(res);
+      })
+      .fail(function (err) {
+        res.status(400).send(err);
+      });
+    }
   }
 
 });
@@ -126,26 +139,21 @@ router.get('/:id/video', function (req, res) {
     return;
   }
 
-  if (device.config.username) {
-    auth = {
-      auth: {
-        user: device.config.username,
-        pass: device.config.password,
-      }
-    };
-  }
-
   try {
-    request.get(device.config.video_url, auth)
-    .on('error', function (err) {
-      log.debug('Error proxying connection to device:', device.name);
-      try {
-        res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
-      } catch (e) {
-        res.end();
-      }
-    })
-    .pipe(res);
+    device.get_video()
+      .then(function (stream) {
+        stream.on('error', function () {
+          try {
+            res.status(502).send({'status': 'failed', 'message': 'Error connecting to device', 'details': err});
+          } catch (e) {
+            res.end();
+          }
+        });
+        stream.pipe(res);
+      })
+      .fail(function () {
+        res.status(400).send(err);
+      });
   } catch (e) {
     log.error('Video proxy died:', e);
   }
@@ -274,7 +282,7 @@ router.get('/:id/issues', function (req, res) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
     return;
   }
-  
+
   res.status(200).send(device.issues || []);
 });
 
@@ -284,13 +292,13 @@ router.post('/:id/issues', web.isJson, function (req, res) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
     return;
   }
-  
+
   device.create_issue(req.body).then(function () {
     res.status(201).send({'status': 'success'});
   }, function (err) {
     res.status(400).send(err);
   });
-  
+
 });
 
 router.get('/:id/issues/:issue', function (req, res) {
@@ -299,7 +307,7 @@ router.get('/:id/issues/:issue', function (req, res) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
     return;
   }
-  
+
   device.get_issue(req.params.issue).then(function (data) {
     res.status(200).send(data);
   }, function (err) {
@@ -313,7 +321,7 @@ router.delete('/:id/issues/:issue', function (req, res) {
     res.status(404).send({'status': 'failed', 'message': 'Record not found'});
     return;
   }
-  
+
   device.delete_issue(req.params.issue).then(function () {
     res.send(204).send({'status': 'success'});
   }, function (err) {
