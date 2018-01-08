@@ -17,7 +17,7 @@ var Synology = function () {
   events = abode.events;
 
   config = abode.config.synology = abode.config.synology || {};
-  config.enabled = config.enabled || true;
+  config.enabled = (config.enabled) ? true : false;
   config.interval = config.interval || 10;
   config.image_path = config.image_path || 'public/synology';
   config.snapshot_interval = config.snapshot_interval || 1;
@@ -30,7 +30,7 @@ var Synology = function () {
   Synology.image_path = path.join(process.cwd(), config.image_path);
 
   abode.events.on('ABODE_STARTED', function () {
-    if (config.enabled === false) {
+    if (!config.enabled) {
       Synology.status = 'Not enabled';
       log.warn('Not starting Synology.  Not enabled');
       return;
