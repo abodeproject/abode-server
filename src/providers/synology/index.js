@@ -172,9 +172,11 @@ Synology.poll = function () {
   devices.forEach(function (device) {
     var defer = Q.defer();
     defers.push(defer.promise);
+    log.debug('Polling camera: %s', device.name);
 
     Synology.get_status(device, no_image)
       .then(function (result) {
+        log.debug('Successfully polled camera: %s', device.name);
         device.set_state(result.update);
         defer.resolve();
       })
@@ -186,6 +188,7 @@ Synology.poll = function () {
 
   Q.allSettled(defers)
     .then(function () {
+      log.debug('Finished polling cameras');
       Synology.last_polled = new Date();
       Synology.polling = undefined;
     });
@@ -243,6 +246,7 @@ Synology.getInfo = function (ids) {
     return defer.promise;
   }
 
+  log.debug('Getting camera info: %s', ids);
   Synology.req('SYNO.SurveillanceStation.Camera.GetInfo', {
     'cameraIds': ids,
     'blIncludeDeletedCam': 'false',
@@ -274,7 +278,8 @@ Synology.getInfo = function (ids) {
       defer.resolve(info.cameras);
     })
     .fail(function (err) {
-      defer.reject(info);
+      log.error('Failed to get camera info %s: %s', ids, err);
+      defer.reject(err);
     });
 
   return defer.promise;
@@ -283,19 +288,30 @@ Synology.getInfo = function (ids) {
 Synology.getSnapshot = function (id) {
   var defer = Q.defer();
 
+  log.debug('Getting camera snapshot: %s', id);
   Synology.req('SYNO.SurveillanceStation.Camera.GetSnapshot', {
     'profileType': '0',
     'id': id
   }, true)
     .then(function (response) {
+      response.on('error', function (err) {
+        log.error('Camera pipe failed %s: %s', id, err);
+        defer.reject(err);
+      });
+
+      response.on('response', function () {
+        log.debug('Received camera snapshot: %s', id);
+        defer.resolve(response);
+      });
+
       if (Synology.can_write) {
         var image_path = Synology.image_path + '/' + id + '.jpg';
         response.pipe(fs.createWriteStream(image_path));
       }
 
-      defer.resolve(response);
     })
     .fail(function (err) {
+      log.error('Failed to get camera snapshot %s: %s', id, err);
       defer.reject(err);
     });
 
