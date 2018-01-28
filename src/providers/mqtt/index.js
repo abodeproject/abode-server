@@ -94,21 +94,21 @@ Mqtt.connect = function () {
 
     value = (isNaN(value)) ? value : parseFloat(value);
 
-    log.debug('Message received for %s: %s = %s', name, key, value);
+    log.debug('Message received for %s: %s = %s', topic, key, value);
 
-    if (!Mqtt.cache[name]) {
-      Mqtt.cache[name] = {
+    if (!Mqtt.cache[topic]) {
+      Mqtt.cache[topic] = {
         'obj': {},
         'last_save': 0,
       };
     } else {
-      clearTimeout(Mqtt.cache[name].wait_timer);
-      clearTimeout(Mqtt.cache[name].save_timer);
+      clearTimeout(Mqtt.cache[topic].wait_timer);
+      clearTimeout(Mqtt.cache[topic].save_timer);
     }
 
-    Mqtt.cache[name].obj[key] = value;
-    Mqtt.cache[name].wait_timer = setTimeout(function () { Mqtt.save_cache(name); }, Mqtt.config.save_wait);
-    Mqtt.cache[name].save_timer = setTimeout(function () { Mqtt.save_cache(name); }, Mqtt.config.min_save_age);
+    Mqtt.cache[topic].obj = message;
+    Mqtt.cache[topic].wait_timer = setTimeout(function () { Mqtt.save_cache(topic); }, Mqtt.config.save_wait);
+    Mqtt.cache[topic].save_timer = setTimeout(function () { Mqtt.save_cache(topic); }, Mqtt.config.min_save_age);
 
   });
 
@@ -118,6 +118,7 @@ Mqtt.connect = function () {
 Mqtt.parsers = {
   'weewx': function (data) {
     var now = new Date().getTime() / 1000;
+    data = JSON.parse(data);
 
     if ((now - data.dateTime) > (1000 * 60 * 5)) {
       log.warning('Weewx parser reports stale weather, skipping');
@@ -125,44 +126,60 @@ Mqtt.parsers = {
     }
 
     return {
-      '_temperature': data.outTemp_F.toFixed(2),
-      '_humidity': data.outHumidity.toFixed(2),
+      '_temperature': parseFloat(data.outTemp_F, 2).toFixed(2),
+      '_humidity': parseFloat(data.outHumidity, 2).toFixed(2),
       '_weather': {
-        'rain_total': data.rain24_in,
-        'rain_1hr': data.hourRain_in,
-        'dewpoint': data.dewpoint_F.toFixed(2),
-        'pressure': data.pressure_inHg.toFixed(2),
+        'rain_total': parseFloat(data.rain24_in, 2).toFixed(2),
+        'rain_1hr': parseFloat(data.hourRain_in, 2).toFixed(2),
+        'dewpoint': parseFloat(data.dewpoint_F, 2).toFixed(2),
+        'pressure': parseFloat(data.pressure_inHg, 2).toFixed(2),
         'gusts': data.windGust_mph,
         'wind': data.windSpeed_mph,
         'wind_degrees': data.windDir,
-        'humidity': data.outHumidity.toFixed(2),
-        'temp': data.outTemp_F.toFixed(2)
+        'humidity': parseFloat(data.outHumidity, 2).toFixed(2),
+        'temp': parseFloat(data.outTemp_F, 2).toFixed(2)
       }
     };
+  },
+  'sensor': function (data) {
+    data = JSON.parse(data);
+
+    return {
+      '_temperature': data.temperature,
+      '_humidity': data.humidity,
+      '_lumens': data.lux,
+      '_motion': (data.motion == 1)
+    }
   }
 };
 
-Mqtt.save_cache = function (name) {
+Mqtt.save_cache = function (topic) {
   var now = new Date().getTime(),
-    age = now - Mqtt.cache[name].last_save;
+    age = now - Mqtt.cache[topic].last_save;
 
   if (age >= Mqtt.config.min_save_age) {
 
-    clearTimeout(Mqtt.cache[name].save_timer);
-    Mqtt.cache[name].last_save = now;
+    clearTimeout(Mqtt.cache[topic].save_timer);
+    Mqtt.cache[topic].last_save = now;
 
-    abode.devices.model.findOne({'config.topic': name, 'provider': 'mqtt'}).then(function (device) {
+    abode.devices.model.findOne({'config.topic': topic, 'provider': 'mqtt'}).then(function (device) {
       if (!device) {
-        log.warn('Device not found:', name);
+        //log.warn('Device not found:', topic);
         return;
       }
 
-      device.config.raw = Mqtt.cache[name].obj;
+      device.config.raw = Mqtt.cache[topic].obj;
 
       if (device.config.parser && Mqtt.parsers[device.config.parser]) {
+        log.info('Found device: ', device.name, topic);
         var abode_device = abode.devices.get(device.name);
 
-        var data = Mqtt.parsers[device.config.parser](device.config.raw);
+        try {
+          var data = Mqtt.parsers[device.config.parser](device.config.raw);
+        } catch (e) {
+          log.error(e);
+          return
+        }
         if (!data) {
           return;
         }
@@ -178,7 +195,7 @@ Mqtt.save_cache = function (name) {
     });
 
   } else {
-    log.debug('Data not old enough for device:', name);
+    log.debug('Data not old enough for device:', topic);
   }
 
 };
