@@ -608,6 +608,15 @@ Notifications.activate = function (id, body) {
       }
     }
 
+    if (record.active) {
+      log.debug('Notification already activated: ', record.name);
+      defer.reject({
+        'status': 'failed',
+        'message': 'Notification already activated'
+      });
+      return;
+    }
+
     data.active = true;
     data.check_count = 0;
     data.message_vars = body.message_vars;
