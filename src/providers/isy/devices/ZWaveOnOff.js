@@ -4,7 +4,7 @@ var q = require('q'),
 
 var ZWaveOnOff = function () {
 
-  Isy.ZWaveDevice.apply(this, arguments);
+  ZWaveDevice.apply(this, arguments);
 };
 Object.assign(ZWaveOnOff, ZWaveDevice);
 Object.assign(ZWaveOnOff.prototype, ZWaveDevice.prototype);

@@ -9,6 +9,7 @@ var InsteonDimmer = require('./InsteonDimmer');
 var InsteonKeyPadDimmer = require('./InsteonKeyPadDimmer');
 var InsteonLock = require('./InsteonLock');
 var InsteonMotion = require('./InsteonMotion');
+var InsteonIO = require('./InsteonIO');
 var InsteonOnOff = require('./InsteonOnOff');
 var InsteonKeyPadOnOff = require('./InsteonKeyPadOnOff');
 var InsteonOpenClose = require('./InsteonOpenClose');
@@ -35,10 +36,11 @@ var get_constructor = function (device) {
     '2.56.67.0': InsteonOnOff,
     '4.16.1.0': ZWaveOnOff,
     '4.33.1.0': ZWaveTemperature,
-    '7.0.65.0': InsteonOpenClose,
+    '7.0.65.0': InsteonIO,
     '15.10.67.0': InsteonLock,
     '16.1.0.0': InsteonMotion,
     '16.1.65.0': InsteonMotion,
+    '16.1.68.0': InsteonMotion,
     '16.2.64.0': InsteonOpenClose,
     '16.2.67.0': InsteonOpenClose,
     '16.17.67.0': InsteonOpenClose,
@@ -46,7 +48,7 @@ var get_constructor = function (device) {
   };
 
   if (!types[device.type]) {
-    log.warn('Unknown device type: ', device.type);
+    log.warn('Unknown device type: ', device.type, device.name);
     return InsteonDevice;
   }
 
@@ -122,19 +124,5 @@ var parseDevices = function (devices) {
 module.exports = {
   parseDevices: parseDevices,
   parseDevice: parseDevice,
-  get_constructor: get_constructor,
-  IsyDevice: IsyDevice,
-  InsteonDevice: InsteonDevice,
-  InsteonDimmer: InsteonDimmer,
-  InsteonKeyPadDimmer: InsteonKeyPadDimmer,
-  InsteonLock: InsteonLock,
-  InsteonMotion: InsteonMotion,
-  InsteonOnOff: InsteonOnOff,
-  InsteonKeyPadOnOff: InsteonKeyPadOnOff,
-  InsteonOpenClose: InsteonOpenClose,
-  ZWaveDevice: ZWaveDevice,
-  ZWaveDimmer: ZWaveDimmer,
-  ZWaveMultiSensor: ZWaveMultiSensor,
-  ZWaveOnOff: ZWaveOnOff,
-  ZWaveTemperature: ZWaveTemperature
+  IsyDevice: IsyDevice
 };

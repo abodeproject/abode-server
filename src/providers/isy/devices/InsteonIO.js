@@ -2,7 +2,7 @@ var q = require('q'),
   Isy = require('../index'),
   InsteonDevice = require('./InsteonDevice');
 
-var InsteonOnOff = function () {
+var InsteonIO = function () {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
@@ -45,10 +45,10 @@ var InsteonOnOff = function () {
     }
   });
 };
-Object.assign(InsteonOnOff, InsteonDevice);
-Object.assign(InsteonOnOff.prototype, InsteonDevice.prototype);
-InsteonOnOff.prototype.capabilities = ['light', 'onoff'];
-InsteonOnOff.prototype.build_state = function () {
+Object.assign(InsteonIO, InsteonDevice);
+Object.assign(InsteonIO.prototype, InsteonDevice.prototype);
+InsteonIO.prototype.capabilities = ['light', 'onoff'];
+InsteonIO.prototype.build_state = function () {
   return {
     '_on': this._on,
     'last_seen': this.last_seen,
@@ -57,4 +57,4 @@ InsteonOnOff.prototype.build_state = function () {
   };
 };
 
-module.exports = InsteonOnOff;
+module.exports = InsteonIO;

@@ -4,7 +4,7 @@ var q = require('q'),
 
 var ZWaveDimmer = function () {
 
-  Isy.ZWaveDevice.apply(this, arguments);
+  ZWaveDevice.apply(this, arguments);
 };
 Object.assign(ZWaveDimmer, ZWaveDevice);
 Object.assign(ZWaveDimmer.prototype, ZWaveDevice.prototype);

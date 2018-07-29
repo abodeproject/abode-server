@@ -4,7 +4,7 @@ var q = require('q'),
 
 var ZWaveTemperature = function () {
 
-  Isy.ZWaveDevice.apply(this, arguments);
+  ZWaveDevice.apply(this, arguments);
 };
 Object.assign(ZWaveTemperature, ZWaveDevice);
 Object.assign(ZWaveTemperature.prototype, ZWaveDevice.prototype);

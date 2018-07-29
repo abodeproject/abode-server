@@ -81,4 +81,4 @@ InsteonOpenClose.prototype.off_command = function () {
   return defer.promise;
 };
 
-module.exports = InsteonOnOff;
+module.exports = InsteonOpenClose;

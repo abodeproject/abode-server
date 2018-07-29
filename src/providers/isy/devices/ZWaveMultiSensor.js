@@ -4,7 +4,7 @@ var q = require('q'),
 
 var ZWaveMultiSensor = function () {
 
-  Isy.ZWaveDevice.apply(this, arguments);
+  ZWaveDevice.apply(this, arguments);
 };
 Object.assign(ZWaveMultiSensor, ZWaveDevice);
 Object.assign(ZWaveMultiSensor.prototype, ZWaveDevice.prototype);
