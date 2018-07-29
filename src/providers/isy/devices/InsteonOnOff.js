@@ -6,6 +6,7 @@ var InsteonOnOff = function () {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
+  self.capabilities = ['light', 'onoff'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -47,7 +48,6 @@ var InsteonOnOff = function () {
 };
 Object.assign(InsteonOnOff, InsteonDevice);
 Object.assign(InsteonOnOff.prototype, InsteonDevice.prototype);
-InsteonOnOff.prototype.capabilities = ['light', 'onoff'];
 InsteonOnOff.prototype.build_state = function () {
   return {
     '_on': this._on,

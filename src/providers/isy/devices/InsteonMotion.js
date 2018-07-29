@@ -6,6 +6,7 @@ var InsteonMotion = function () {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
+  self.capabilities = ['motionsensor', 'battery_sensor'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -61,7 +62,6 @@ var InsteonMotion = function () {
 };
 Object.assign(InsteonMotion, InsteonDevice);
 Object.assign(InsteonMotion.prototype, InsteonDevice.prototype);
-InsteonMotion.prototype.capabilities = ['motionsensor', 'battery_sensor'];
 InsteonMotion.prototype.build_state = function () {
   return {
     '_motion': this._motion,

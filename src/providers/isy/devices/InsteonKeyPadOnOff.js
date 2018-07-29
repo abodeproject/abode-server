@@ -6,6 +6,7 @@ var InsteonKeyPadOnOff = function () {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
+  self.capabilities = ['light', 'onoff'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -47,7 +48,6 @@ var InsteonKeyPadOnOff = function () {
 };
 Object.assign(InsteonKeyPadOnOff, InsteonDevice);
 Object.assign(InsteonKeyPadOnOff.prototype, InsteonDevice.prototype);
-InsteonKeyPadOnOff.prototype.capabilities = ['light', 'onoff'];
 InsteonKeyPadOnOff.prototype.build_state = function () {
   return {
     '_on': this._on,

@@ -6,6 +6,7 @@ var InsteonDimmer = function (config) {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
+  self.capabilities = ['light', 'dimmer'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -50,7 +51,6 @@ var InsteonDimmer = function (config) {
 };
 Object.assign(InsteonDimmer, InsteonDevice);
 Object.assign(InsteonDimmer.prototype, InsteonDevice.prototype);
-InsteonDimmer.prototype.capabilities = ['light', 'dimmer'];
 InsteonDimmer.prototype.build_state = function () {
   return {
     '_on': this._on,

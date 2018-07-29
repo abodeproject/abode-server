@@ -6,6 +6,7 @@ var InsteonOpenClose = function () {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
+  self.capabilities = ['openclose', 'battery_sensor'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -55,7 +56,6 @@ var InsteonOpenClose = function () {
 };
 Object.assign(InsteonOpenClose, InsteonDevice);
 Object.assign(InsteonOpenClose.prototype, InsteonDevice.prototype);
-InsteonOpenClose.prototype.capabilities = ['openclose', 'battery_sensor'];
 InsteonOpenClose.prototype.build_state = function () {
   return {
     '_on': this._on,

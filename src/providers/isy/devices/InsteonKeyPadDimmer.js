@@ -6,6 +6,7 @@ var InsteonKeyPadDimmer = function (config) {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
+  self.capabilities = ['light', 'dimmer'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -50,7 +51,6 @@ var InsteonKeyPadDimmer = function (config) {
 };
 Object.assign(InsteonKeyPadDimmer, InsteonDevice);
 Object.assign(InsteonKeyPadDimmer.prototype, InsteonDevice.prototype);
-InsteonKeyPadDimmer.prototype.capabilities = ['light', 'dimmer'];
 InsteonKeyPadDimmer.prototype.build_state = function () {
   return {
     '_on': this._on,

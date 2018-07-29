@@ -6,6 +6,7 @@ var InsteonLock = function () {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
+  self.capabilities = ['lock'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -47,7 +48,6 @@ var InsteonLock = function () {
 };
 Object.assign(InsteonLock, InsteonDevice);
 Object.assign(InsteonLock.prototype, InsteonDevice.prototype);
-InsteonLock.prototype.capabilities = ['lock'];
 InsteonLock.prototype.build_state = function () {
   return {
     '_on': this._on,
