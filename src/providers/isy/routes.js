@@ -41,6 +41,7 @@ router.get('/devices/:id', function (req, res) {
 
   var device = isy.IsyDevice.find(req.params.id);
   if (device) {
+    device.config.is_abode = (device.get_abode_device() !== undefined);
     res.send(device);
   } else {
     res.status(404).send();
@@ -103,6 +104,26 @@ router.get('/folders', function (req, res) {
 router.get('/groups', function (req, res) {
 
   res.send(isy.IsyGroup.groups);
+
+});
+
+router.post('/groups/:group/on', function (req, res) {
+
+  isy.on({'config': {'type': 'group', 'address': req.params.group}}).then(function (response) {
+  	res.send(response);
+  }, function (err) {
+  	res.status(400).send(err);
+  });
+
+});
+
+router.post('/groups/:group/off', function (req, res) {
+
+  isy.off({'config': {'type': 'group', 'address': req.params.group}}).then(function (response) {
+  	res.send(response);
+  }, function (err) {
+  	res.status(400).send(err);
+  });
 
 });
 
