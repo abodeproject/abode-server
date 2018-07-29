@@ -188,7 +188,7 @@ Isy.get_nodes = function () {
 Isy.lookup = function (type) {
   switch (type) {
     case 'group':
-      return IsyGroup;
+      return Isy.IsyGroup;
     default:
       return Isy.IsyDevice;
   }
