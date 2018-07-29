@@ -107,6 +107,18 @@ router.get('/groups', function (req, res) {
 
 });
 
+router.get('/groups/:id', function (req, res) {
+
+  var group = isy.IsyGroup.find(req.params.id);
+  if (group) {
+    group.config.is_abode = (group.get_abode_device() !== undefined);
+    res.send(group);
+  } else {
+    res.status(404).send();
+  }
+
+});
+
 router.post('/groups/:group/on', function (req, res) {
 
   isy.on({'config': {'type': 'group', 'address': req.params.group}}).then(function (response) {
