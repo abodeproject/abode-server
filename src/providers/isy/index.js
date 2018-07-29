@@ -491,7 +491,7 @@ Isy.controls = {
   }
 };
 
-Isy.on = function (device) {
+Isy.on = Isy.open = Isy.lock = function (device) {
   var defer = q.defer();
   var address = device.address || device.config.address;
   var isy_node = Isy.lookup(device.config.type).find(address);
@@ -512,7 +512,7 @@ Isy.on = function (device) {
   return defer.promise;
 };
 
-Isy.off = function (device) {
+Isy.off = Isy.close = Isy.unlock = function (device) {
   var defer = q.defer();
   var address = device.address || device.config.address;
   var isy_node = Isy.lookup(device.config.type).find(address);
@@ -569,6 +569,30 @@ Isy.get_status = function (device) {
   }).fail(function (err) {
     defer.reject(err);
   });
+
+  return defer.promise;
+};
+
+Isy.is_open = Isy.is_on = function (device) {
+  var defer = q.defer();
+
+  defer.resolve({'update': {'_on': device._on}, 'response': device._on});
+
+  return defer.promise;
+};
+
+Isy.is_closed = Isy.is_off = function (device) {
+  var defer = q.defer();
+
+  defer.resolve({'update': {'_on': device._on}, 'response': (!device._on)});
+
+  return defer.promise;
+};
+
+Isy.has_motion = function (device) {
+  var defer = q.defer();
+
+  defer.resolve({'update': {'_motion': device._motion}, 'response': device._motion});
 
   return defer.promise;
 };
