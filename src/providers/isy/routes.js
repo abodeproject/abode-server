@@ -50,7 +50,7 @@ router.get('/devices/:id', function (req, res) {
 
 router.post('/devices/:device/on', function (req, res) {
 
-  isy.on({'address': req.params.device}).then(function (response) {
+  isy.on({'config': {'address': req.params.device}}).then(function (response) {
   	res.send(response);
   }, function (err) {
   	res.status(400).send(err);
@@ -60,7 +60,7 @@ router.post('/devices/:device/on', function (req, res) {
 
 router.post('/devices/:device/off', function (req, res) {
 
-  isy.off({'address': req.params.device}).then(function (response) {
+  isy.off({'config': {'address': req.params.device}}).then(function (response) {
   	res.send(response);
   }, function (err) {
   	res.status(400).send(err);
@@ -70,7 +70,7 @@ router.post('/devices/:device/off', function (req, res) {
 
 router.post('/devices/:device/set_level/:level', function (req, res) {
 
-  isy.set_level({'address': req.params.device}, req.params.level).then(function (response) {
+  isy.set_level({'config': {'address': req.params.device}}, req.params.level).then(function (response) {
   	res.send(response);
   }, function (err) {
   	res.status(400).send(err);
@@ -80,7 +80,7 @@ router.post('/devices/:device/set_level/:level', function (req, res) {
 
 router.post('/devices/:device/status', function (req, res) {
 
-  isy.get_status({'address': req.params.device}).then(function (response) {
+  isy.get_status({'config': {'address': req.params.device}}).then(function (response) {
   	res.send(response);
   }, function (err) {
   	res.status(400).send(err);
