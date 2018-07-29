@@ -8,6 +8,6 @@ var ZWaveMultiSensor = function () {
 };
 Object.assign(ZWaveMultiSensor, ZWaveDevice);
 Object.assign(ZWaveMultiSensor.prototype, ZWaveDevice.prototype);
-Isy.ZWaveMultiSensor.prototype.capabilities = ['sensor'];
+ZWaveMultiSensor.prototype.capabilities = ['sensor'];
 
 module.exports = ZWaveMultiSensor;

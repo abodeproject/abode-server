@@ -90,7 +90,7 @@ router.post('/devices/:device/status', function (req, res) {
 
 router.get('/devices', function (req, res) {
 
-  res.send(isy.devices);
+  res.send(isy.IsyDevice.devices);
 
 });
 
@@ -102,7 +102,7 @@ router.get('/folders', function (req, res) {
 
 router.get('/groups', function (req, res) {
 
-  res.send(isy.groups);
+  res.send(isy.IsyGroup.groups);
 
 });
 

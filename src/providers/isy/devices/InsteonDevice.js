@@ -22,7 +22,7 @@ var InsteonDevice = function (config) {
 Object.assign(InsteonDevice, IsyDevice);
 Object.assign(InsteonDevice.prototype, IsyDevice.prototype);
 InsteonDevice.find = function (address) {
-  var matches = Isy.devices.filter(function (device) {
+  var matches = IsyDevice.devices.filter(function (device) {
     return (address.split(' ').slice(0, 3).join(' ') === device.config.address);
   });
 
