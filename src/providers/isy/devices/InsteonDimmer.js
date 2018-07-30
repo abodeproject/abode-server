@@ -88,7 +88,7 @@ InsteonDimmer.prototype.off_command = function () {
 
   return defer.promise;
 };
-InsteonDevice.prototype.status_command = function () {
+InsteonDimmer.prototype.status_command = function () {
   var self = this,
     defer = q.defer();
 

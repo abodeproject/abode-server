@@ -13,7 +13,7 @@ var InsteonIO = function () {
     self.last_seen = new Date();
 
     switch (group) {
-      case '1':
+      case '1': //Sensor
         if (self._on !== (parseInt(msg.action, 10) > 0) && self._on) {
           self.last_off = self.last_seen;
         } else if (self._on !== (parseInt(msg.action, 10) > 0) && !self._on) {
@@ -21,6 +21,8 @@ var InsteonIO = function () {
         }
         self._on = (parseInt(msg.action, 10) > 0);
         break;
+      case '2': //Relay
+        break
       default:
         break;
     }
@@ -32,7 +34,7 @@ var InsteonIO = function () {
 
     if (msg.properties.ST) {
       switch (group) {
-        case '1':
+        case '1': //Sensor
           if (self._on !== (parseInt(msg.properties.ST.value, 10) > 0) && self._on) {
             self.last_off = self.last_seen;
           } else if (self._on !== (parseInt(msg.properties.ST.value, 10) > 0) && !self._on) {
@@ -40,6 +42,7 @@ var InsteonIO = function () {
           }
           self._on = (parseInt(msg.properties.ST.value, 10) > 0);
           break;
+        case '2': //Relay
         default:
           break;
       }
@@ -55,6 +58,34 @@ InsteonIO.prototype.build_state = function () {
     'last_on': this.last_on,
     'last_off': this.last_off
   };
+};
+InsteonIO.prototype.on_command = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.DON(self.config.address + ' 2')
+    .then(function (result) {
+      defer.resolve({'response': true, 'update': {_on: true}, 'result': result});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+InsteonIO.prototype.off_command = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.DOF(self.config.address + ' 2')
+    .then(function (result) {
+      defer.resolve({'response': true, 'update': {_on: false}, 'result': result});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
 };
 
 module.exports = InsteonIO;
