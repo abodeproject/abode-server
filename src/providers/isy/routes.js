@@ -143,14 +143,11 @@ router.post('/get_nodes', function (req, res) {
 
   isy.get_nodes()
     .then(function () {
-      res.send({
-        'devices': isy.devices,
-        'groups': isy.groups,
-        'folders': isy.folders
-      });
+      res.send({'message': 'success'});
     })
     .fail(function (err) {
-      res.status(400).send(err);
+      console.log(err);
+      res.status(400).send({'message': err.message});
     });
 
 });

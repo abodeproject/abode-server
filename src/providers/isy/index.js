@@ -176,7 +176,11 @@ Isy.get_nodes = function () {
       Isy.parseGroups(results.nodes.group);
       log.info('Finished getting nodes. Folders: %s, Devices: %s, Groups: %s', Isy.folders.length, Isy.IsyDevice.devices.length, Isy.IsyGroup.groups.length);
 
-      defer.resolve();
+      defer.resolve({
+        'devices': Isy.IsyDevice.devices,
+        'groups': Isy.IsyGroup.groups,
+        'programs': []
+      });
     })
     .fail(function (err) {
       defer.reject(err);

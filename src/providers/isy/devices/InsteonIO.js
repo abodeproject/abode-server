@@ -22,7 +22,7 @@ var InsteonIO = function () {
         self._on = (parseInt(msg.action, 10) > 0);
         break;
       case '2': //Relay
-        break
+        break;
       default:
         break;
     }
