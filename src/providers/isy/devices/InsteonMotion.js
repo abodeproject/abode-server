@@ -6,7 +6,7 @@ var InsteonMotion = function () {
   var self = this;
 
   InsteonDevice.apply(this, arguments);
-  self.capabilities = ['motionsensor', 'battery_sensor'];
+  self.capabilities = ['motion_sensor', 'battery_sensor'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split(' ')[3];
@@ -37,7 +37,7 @@ var InsteonMotion = function () {
     var group = msg.address.split(' ')[3];
     self.last_seen = new Date();
 
-    if (msg.properties.ST) {
+    if (msg.properties.ST && msg.properties.ST.value !== " ") {
       switch (group) {
         case '1':
           if (self._motion !== (parseInt(msg.properties.ST, 10) > 0) && self._motion) {
@@ -48,7 +48,7 @@ var InsteonMotion = function () {
           self._motion = (parseInt(msg.properties.ST.value, 10) > 0);
           break;
         case '2':
-          self._lumens = (parseInt(msg.properties.ST.value, 10) / 255);
+          self._lumens = ((parseInt(msg.properties.ST.value, 10)) / 255 * 100);
           break;
         case '3':
           self.low_battery = (parseInt(msg.properties.ST.value, 10) > 0);
