@@ -125,6 +125,7 @@ Triggers.types = [
   {'name': 'UPDATED'},
   {'name': 'NOTIFICATION_ACTIVATED'},
   {'name': 'NOTIFICATION_DEACTIVATED'},
+  {'name': 'LOW_BATTERY'}
 ];
 
 Triggers.lookupAction = function (key) {
