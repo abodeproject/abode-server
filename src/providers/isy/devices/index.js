@@ -35,7 +35,7 @@ var get_constructor = function (device) {
     '2.55.72.0': InsteonOnOff,
     '2.56.67.0': InsteonOnOff,
     '4.16.1.0': ZWaveOnOff,
-    '4.33.1.0': ZWaveTemperature,
+    '4.33.1.0': ZWaveMultiSensor,
     '7.0.65.0': InsteonIO,
     '15.10.67.0': InsteonLock,
     '16.1.0.0': InsteonMotion,

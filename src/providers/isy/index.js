@@ -446,31 +446,86 @@ Isy.controls = {
   'CLIHUM': {
     'name': 'Climate Humidity',
     'handler': function (msg) {
-      log.debug('HUMIDITY:', msg.node, msg.action);
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.emit('changed', msg);
+      }
     }
   },
   'CLITEMP': {
     'name': 'Climate Temperature',
     'handler': function (msg) {
-      log.debug('TEMP:', msg.node, msg.action);
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.emit('changed', msg);
+      }
     }
   },
   'BATLVL': {
     'name': 'Battery Level',
     'handler': function (msg) {
-      log.debug('BATTERY:', msg.node, msg.action);
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.emit('changed', msg);
+      }
     }
   },
   'LUMIN': {
     'name': 'Luminance',
     'handler': function (msg) {
-      log.debug('LUMENS:', msg.node, msg.action);
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.emit('changed', msg);
+      }
     }
   },
   'UV': {
     'name': 'Ultraviolet',
     'handler': function (msg) {
-      log.debug('UV:', msg.node, msg.action);
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.emit('changed', msg);
+      }
+    }
+  },
+  'TPW': {
+    'name': 'Total Power Wattage',
+    'handler': function (msg) {
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.config.on_level = parseInt(msg.action, 10);
+        device.emit('changed', msg);
+      }
+    }
+  },
+  'ERR': {
+    'name': 'Error',
+    'handler': function (msg) {
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.config.on_level = parseInt(msg.action, 10);
+        device.emit('changed', msg);
+      }
+    }
+  },
+  'CC': {
+    'name': 'Current Current',
+    'handler': function (msg) {
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.config.on_level = parseInt(msg.action, 10);
+        device.emit('changed', msg);
+      }
+    }
+  },
+  'CV': {
+    'name': 'Current Voltage',
+    'handler': function (msg) {
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.config.on_level = parseInt(msg.action, 10);
+        device.emit('changed', msg);
+      }
     }
   },
   'OL': {
