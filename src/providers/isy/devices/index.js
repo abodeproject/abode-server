@@ -83,7 +83,6 @@ var parseDevice = function (node, properties) {
       'formatted': parsed.property.$.formatted,
       'uom': parsed.property.$.uom
     };
-
     delete parsed.property;
   }
 
@@ -92,7 +91,7 @@ var parseDevice = function (node, properties) {
       var item = property.$;
       parsed.properties[item.id] = {
         'id': item.id,
-        'value': item.value,
+        'value': item.value._,
         'formatted': item.formatted,
         'uom': item.uom
       };

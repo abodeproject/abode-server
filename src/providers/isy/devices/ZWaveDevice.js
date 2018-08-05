@@ -10,7 +10,7 @@ var ZWaveDevice = function () {
   self.config.address = self.config.address.split('_').slice(0, 1).join('_');
 
   self.on('state-change', function (msg) {
-    self.config.properties.ST.value = msg.action;
+    self.config.properties.ST.value = msg.action._;
   });
 
   self.on('update', function (msg) {
