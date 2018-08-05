@@ -44,6 +44,9 @@ var ZWaveOnOff = function () {
     }
     switch (msg.control) {
       case 'TPW':
+        if (self.capabilities.indexOf('power_sensor') === -1) {
+          self.capabilities.push('power_sensor');
+        }
         if (msg.action.$.uom === '33') {
           var value = msg.action._.split('');
           value.splice(msg.action._.length - 2, 0, '.');

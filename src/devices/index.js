@@ -63,6 +63,7 @@ Devices.capabilities = [
   'siren',
   'lock',
   'battery_sensor',
+  'power_sensor',
 ];
 Devices._devices = [];
 Devices.logs = mongoose.model('DeviceLogs', DeviceLogSchema);
