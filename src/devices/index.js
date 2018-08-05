@@ -111,6 +111,7 @@ var DeviceSchema = mongoose.Schema({
   '_forecast': Array,
   '_hourly': Array,
   '_alerts': Array,
+  '_power': Number,
   'locked': {'type': Boolean, 'default': false},
   'issues': [
     {
