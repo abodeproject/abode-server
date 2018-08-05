@@ -16,6 +16,11 @@ var ZWaveOnOff = function () {
 
     switch (group) {
       case '1':
+        if (self._on !== (parseInt(msg.action._, 10) > 0) && self._on) {
+          self.last_off = self.last_seen;
+        } else if (self._on !== (parseInt(msg.action._, 10) > 0) && !self._on) {
+          self.last_on = self.last_seen;
+        }
         self._on = parseInt(msg.action._, 10) > 0;
         break;
       case '119':
@@ -69,6 +74,12 @@ var ZWaveOnOff = function () {
 };
 Object.assign(ZWaveOnOff, ZWaveDevice);
 Object.assign(ZWaveOnOff.prototype, ZWaveDevice.prototype);
-ZWaveOnOff.prototype.capabilities = ['appliance', 'onoff'];
+ZWaveOnOff.prototype.build_state = function () {
+  return {
+    '_on': this._on,
+    '_power': this._power,
+    'last_seen': this.last_seen,
+  };
+};
 
 module.exports = ZWaveOnOff;

@@ -21,11 +21,19 @@ var ZWaveMultiSensor = function () {
   });
 
   self.on('device-on', function (msg) {
+    self.last_seen = new Date();
+    if (self._motion !== true) {
+      self.last_off = self.last_seen;
+    }
     self._motion = true;
     self.emit('changed');
   });
 
   self.on('device-off', function (msg) {
+    self.last_seen = new Date();
+    if (self._motion === true) {
+      self.last_on = self.last_seen;
+    }
     self._motion = false;
     self.emit('changed');
   });
@@ -133,6 +141,19 @@ var ZWaveMultiSensor = function () {
 };
 Object.assign(ZWaveMultiSensor, ZWaveDevice);
 Object.assign(ZWaveMultiSensor.prototype, ZWaveDevice.prototype);
-ZWaveMultiSensor.prototype.capabilities = ['sensor'];
+ZWaveMultiSensor.prototype.build_state = function () {
+  return {
+    '_motion': this._motion,
+    '_lumens': this._lumens,
+    '_battery': this._battery,
+    '_uv': this._uv,
+    '_temperature': this._temperature,
+    '_humidity': this._humidity,
+    'low_battery': this.low_battery,
+    'last_seen': this.last_seen,
+    'last_on': this.last_on,
+    'last_off': this.last_off
+  };
+};
 
 module.exports = ZWaveMultiSensor;
