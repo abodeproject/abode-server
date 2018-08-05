@@ -8,6 +8,7 @@ var ZWaveMultiSensor = function () {
   var self = this;
 
   ZWaveDevice.apply(this, arguments);
+  self.capabilities = ['motion_sensor'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split('_')[1];
@@ -35,6 +36,9 @@ var ZWaveMultiSensor = function () {
     }
     switch(msg.control) {
       case 'CLITEMP':
+        if (self.capabilities.indexOf('temperature_sensor') === -1) {
+          self.capabilities.push('temperature_sensor');
+        }
         if (msg.action.$.uom === '17') {
           var value = msg.action._.split('');
           value.splice(msg.action._.length - 2, 0, '.');
@@ -44,6 +48,9 @@ var ZWaveMultiSensor = function () {
         }
         break;
       case 'CLIHUM':
+        if (self.capabilities.indexOf('humidity_sensor') === -1) {
+          self.capabilities.push('humidity_sensor');
+        }
         if (msg.action.$.uom === '22') {
         self._humidity = parseInt(msg.action._, 10);
         } else {
@@ -51,6 +58,9 @@ var ZWaveMultiSensor = function () {
         }
         break;
       case 'UV':
+        if (self.capabilities.indexOf('uv_sensor') === -1) {
+          self.capabilities.push('uv_sensor');
+        }
         if (msg.action.$.uom === '71') {
           var value = msg.action._.split('');
           value.splice(msg.action._.length - 2, 0, '.');
@@ -60,6 +70,9 @@ var ZWaveMultiSensor = function () {
         }
         break;
       case 'BATLVL':
+        if (self.capabilities.indexOf('battery_sensor') === -1) {
+          self.capabilities.push('battery_sensor');
+        }
         if (msg.action.$.uom === '51') {
           self._battery = parseInt(msg.action._, 10);
         } else {
@@ -67,6 +80,9 @@ var ZWaveMultiSensor = function () {
         }
         break;
       case 'LUMIN':
+        if (self.capabilities.indexOf('light_sensor') === -1) {
+          self.capabilities.push('light_sensor');
+        }
         if (msg.action.$.uom === '36') {
           var value = msg.action._.split('');
           value.splice(msg.action._.length - 2, 0, '.');

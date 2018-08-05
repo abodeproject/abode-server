@@ -30,5 +30,46 @@ ZWaveDevice.find = function (address) {
     return matches[0];
   }
 };
+ZWaveDevice.prototype.on_command = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.DON(self.config.address + '_1')
+    .then(function (result) {
+      defer.resolve({'response': true, 'update': {_on: true}, 'result': result});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+ZWaveDevice.prototype.off_command = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.DOF(self.config.address + '_1')
+    .then(function (result) {
+      defer.resolve({'response': true, 'update': {_on: false}, 'result': result});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+ZWaveDevice.prototype.status_command = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.STATUS(self.config.address + '_1').then(function (result) {
+      defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
 
 module.exports = ZWaveDevice;

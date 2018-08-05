@@ -8,6 +8,7 @@ var ZWaveOnOff = function () {
   var self = this;
 
   ZWaveDevice.apply(this, arguments);
+  self.capabilities = ['appliance', 'onoff'];
 
   self.on('state-change', function (msg) {
     var group = msg.node.split('_')[1];
