@@ -88,7 +88,9 @@ var RoomSchema = mongoose.Schema({
   '_scene_off_count': Number,
   '_mode_off_count': Number,
   '_mode_heat_count': Number,
-  '_mode_cool_count': Number
+  '_mode_cool_count': Number,
+  '_last_motion_on': Date,
+  '_last_motion_off': Date,
 });
 
 Rooms._rooms = [];
@@ -720,6 +722,11 @@ var counts = [
   'shade'
 ];
 
+var ages = [
+  'motion_on',
+  'motion_off'
+]
+
 RoomSchema.methods.status = function (cache) {
   var update = {},
     self = this,
@@ -761,6 +768,13 @@ RoomSchema.methods.status = function (cache) {
     update['_' + type + '_on_count'] = on_count.length;
     update['_' + type + '_off_count'] = off_count.length;
   });
+
+  var motion_devices = self.get_motion_sensors(),
+    motion_on = motion_devices.sort(function (a,b) {  return new Date(b.last_on) - new Date(a.last_on); })[0],
+    motion_off = motion_devices.sort(function (a,b) {  return new Date(b.last_off) - new Date(a.last_off); })[0];
+
+  update._last_motion_on = (motion_on) ? motion_on.last_on : undefined;
+  update._last_motion_off = (motion_off) ? motion_on.last_off : undefined;
 
   update._motion_sensor_off_count = motions.filter( function (child) { return (child._motion === false); }).length;
   update._motion_sensor_on_count = motions.filter( function (child) { return (child._motion === true); }).length;
