@@ -136,6 +136,19 @@ IsyDevice.prototype.DOF = function (address) {
 
   return defer.promise;
 };
+IsyDevice.prototype.SECMD = function (address, state) {
+  var defer = q.defer();
+
+  Isy.req('/rest/nodes/' + address + '/cmd/SECMD/' + state)
+    .then(function (result) {
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
 IsyDevice.prototype.STATUS = function (address) {
   var defer = q.defer();
 

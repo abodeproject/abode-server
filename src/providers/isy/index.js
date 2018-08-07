@@ -349,7 +349,7 @@ Isy.message_handler = function (data) {
 
         control = Isy.controls[parsed_event.control];
         if (!control) {
-          log.debug('Unknown control code: %s\n', parsed_event.control, parsed_event);
+          log.warn('Unknown control code: %s\n', parsed_event.control, parsed_event);
           return;
         }
 
@@ -394,11 +394,24 @@ Isy.controls = {
       log.debug('System Configuration Updated: %s', msg.action);
     }
   },
-  '_23': {
+  '_5': {
+    'name': '',
+    'handler': function () {
+    }
+  },
+  '_19': {
+    'name': '',
+    'handler': function () {}
+  },
+  '_21': {
     'name': '',
     'handler': function () {}
   },
   '_22': {
+    'name': '',
+    'handler': function () {}
+  },
+  '_23': {
     'name': '',
     'handler': function () {}
   },
@@ -493,7 +506,24 @@ Isy.controls = {
     'handler': function (msg) {
       var device = Isy.IsyDevice.find(msg.node);
       if (device && device.emit) {
-        device.config.on_level = parseInt(msg.action, 10);
+        device.emit('changed', msg);
+      }
+    }
+  },
+  'USRNUM': {
+    'name': 'User Number',
+    'handler': function (msg) {
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
+        device.emit('changed', msg);
+      }
+    }
+  },
+  'ALARM': {
+    'name': 'ALARM',
+    'handler': function (msg) {
+      var device = Isy.IsyDevice.find(msg.node);
+      if (device && device.emit) {
         device.emit('changed', msg);
       }
     }
@@ -503,7 +533,6 @@ Isy.controls = {
     'handler': function (msg) {
       var device = Isy.IsyDevice.find(msg.node);
       if (device && device.emit) {
-        device.config.on_level = parseInt(msg.action, 10);
         device.emit('changed', msg);
       }
     }
@@ -513,7 +542,6 @@ Isy.controls = {
     'handler': function (msg) {
       var device = Isy.IsyDevice.find(msg.node);
       if (device && device.emit) {
-        device.config.on_level = parseInt(msg.action, 10);
         device.emit('changed', msg);
       }
     }
@@ -523,7 +551,6 @@ Isy.controls = {
     'handler': function (msg) {
       var device = Isy.IsyDevice.find(msg.node);
       if (device && device.emit) {
-        device.config.on_level = parseInt(msg.action, 10);
         device.emit('changed', msg);
       }
     }
