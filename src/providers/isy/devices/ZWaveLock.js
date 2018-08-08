@@ -5,38 +5,42 @@ var q = require('q'),
   ZWaveDevice = require('./ZWaveDevice');
 
 var alarms = {
-  '1': 'Master Code Changed',
-  '2': 'Tamper Code Entry Limit',
-  '3': 'Escutcheon Removed',
-  '4': 'Key/Manually Locked',
-  '5': 'Locked by Touch',
-  '6': 'Key/Manually Unlocked',
-  '7': 'Remote Locking Jammed Bolt',
-  '8': 'Remotely Locked',
-  '9': 'Remotely Unlocked',
-  '10': 'Deadbolt Jammed',
-  '11': 'Battery Too Low to Operate',
-  '12': 'Critical Low Battery',
-  '13': 'Low Battery',
-  '14': 'Automatically Locked',
-  '15': 'Automatic Locking Jammed Bolt',
-  '16': 'Remotely Power Cycled',
-  '17': 'Lock Handling Completed',
-  '19': 'User Deleted',
-  '20': 'User Added',
-  '21': 'Duplicate PIN',
-  '22': 'Jammed Bolt by Locking with Keypad',
-  '23': 'Locked by Keypad',
-  '24': 'Unlocked by Keypad',
-  '25': 'Keypad Attempt outside Schedule',
-  '26': 'Hardware Failure',
-  '27': 'Factory Reset'
+  '1': {'message': 'Master Code Changed', 'icon': 'icon-password', 'type': 'info'},
+  '2': {'message': 'Tamper Code Entry Limit', 'icon': 'icon-password', 'type': 'danger'},
+  '3': {'message': 'Escutcheon Removed', 'icon': 'icon-warning-sign', 'type': 'warn'},
+  '4': {'message': 'Key/Manually Locked', 'icon': 'icon-lock', 'type': 'info'},
+  '5': {'message': 'Locked by Touch', 'icon': 'icon-lock', 'type': 'info'},
+  '6': {'message': 'Key/Manually Unlocked', 'icon': 'icon-unlock', 'type': 'info'},
+  '7': {'message': 'Remote Locking Jammed Bolt', 'icon': 'icon-lock', 'type': 'danger'},
+  '8': {'message': 'Remotely Locked', 'icon': 'icon-lock', 'type': 'info'},
+  '9': {'message': 'Remotely Unlocked', 'icon': 'icon-unlock', 'type': 'info'},
+  '10': {'message': 'Deadbolt Jammed', 'icon': 'icon-warning-sign', 'type': 'danger'},
+  '11': {'message': 'Battery Too Low to Operate', 'icon': 'icon-batteryempty', 'type': 'danger'},
+  '12': {'message': 'Critical Low Battery', 'icon': 'icon-batteryempty', 'type': 'danger'},
+  '13': {'message': 'Low Battery', 'icon': 'icon-batteryempty', 'type': 'warn'},
+  '14': {'message': 'Automatically Locked', 'icon': 'icon-lock', 'type': 'info'},
+  '15': {'message': 'Automatic Locking Jammed Bolt', 'icon': '', 'type': 'danger'},
+  '16': {'message': 'Remotely Power Cycled', 'icon': 'icon-warning-sign', 'type': 'warn'},
+  '17': {'message': 'Lock Handling Completed', 'icon': 'icon-warning-sign', 'type': 'info'},
+  '19': {'message': 'User Deleted', 'icon': 'icon-removeuseralt', 'type': 'info'},
+  '20': {'message': 'User Added', 'icon': 'icon-adduseralt', 'type': 'info'},
+  '21': {'message': 'Duplicate PIN', 'icon': 'icon-password', 'type': 'warn'},
+  '22': {'message': 'Jammed Bolt by Locking with Keypad', 'icon': '', 'type': 'danger'},
+  '23': {'message': 'Locked by Keypad', 'icon': 'icon-lock', 'type': 'info'},
+  '24': {'message': 'Unlocked by Keypad', 'icon': 'icon-lock', 'type': 'info'},
+  '25': {'message': 'Keypad Attempt outside Schedule', 'icon': 'icon-warning-sign', 'type': 'danger'},
+  '26': {'message': 'Hardware Failure', 'icon': 'icon-warning-sign', 'type': 'danger'},
+  '27': {'message': 'Factory Reset', 'icon': 'icon-warning-sign', 'type': 'warn'}
 };
 var ZWaveLock = function () {
   var self = this;
 
   ZWaveDevice.apply(this, arguments);
   self.capabilities = ['lock'];
+
+  self.on('update', function (msg) {
+  //    console.log(msg);
+  });
 
   self.on('state-change', function (msg) {
     var group = msg.node.split('_')[1];
@@ -86,7 +90,17 @@ var ZWaveLock = function () {
       case 'ALARM':
         var alarm = msg.action._;
         if (alarms[alarm]) {
-          self._alerts = [{'message': alarms[alarm], 'date': new Date()}];
+          if (self._alerts && self._alerts[0] && self._alerts[0].message === alarms[alarm].message) {
+            break;
+          }
+          self._alerts = self._alerts || [];
+          alarm = Object.assign({}, alarms[alarm]);
+          alarm.date = new Date();
+          self._alerts.unshift(alarm);
+
+          if (self._alerts.length > 100) {
+            self._alerts.splice(100, self._alerts.length - 100);
+          }
         } else {
           log.warn('Unknown alarm code recieved for %s: %s', self.name, alarm);
         }
