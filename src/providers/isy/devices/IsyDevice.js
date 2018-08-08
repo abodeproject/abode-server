@@ -18,7 +18,7 @@ var IsyDevice = function (config) {
 
   self.on('update', function (msg) {
 
-    if (msg.properties && msg.properties.BATLVL) {
+    if (msg.properties && msg.properties.BATLVL && msg.properties.BATLVL.value) {
       self._battery = parseInt(msg.properties.BATLVL.value, 10);
     }
 

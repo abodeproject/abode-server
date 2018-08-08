@@ -9,6 +9,11 @@ var InsteonDevice = function (config) {
 
   self.config.address = self.config.address.split(' ').slice(0, 3).join(' ');
 
+  var abode_device = InsteonDevice.find(self.config.address);
+  if (abode_device) {
+    Object.assign(self, abode_device);
+  }
+
   self.on('state-change', function (msg) {
     self.config.properties.ST.value = msg.action;
   });

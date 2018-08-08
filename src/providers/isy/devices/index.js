@@ -93,7 +93,7 @@ var parseDevice = function (node, properties) {
       var item = property.$;
       parsed.properties[item.id] = {
         'id': item.id,
-        'value': item.value._,
+        'value': item.value._ || item.value,
         'formatted': item.formatted,
         'uom': item.uom
       };
