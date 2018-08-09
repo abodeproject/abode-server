@@ -89,6 +89,16 @@ router.post('/devices/:device/status', function (req, res) {
 
 });
 
+router.post('/devices/:device/status', function (req, res) {
+
+  isy.query_device({'config': {'address': req.params.device}}).then(function (response) {
+  	res.send(response);
+  }, function (err) {
+  	res.status(400).send(err);
+  });
+
+});
+
 router.get('/devices', function (req, res) {
 
   res.send(isy.IsyDevice.devices);
