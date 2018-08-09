@@ -163,5 +163,19 @@ IsyDevice.prototype.STATUS = function (address) {
 
   return defer.promise;
 };
+IsyDevice.prototype.QUERY = function (address) {
+  var defer = q.defer();
+
+  Isy.req('/rest/query/' + address)
+    .then(function (result) {
+      var parsed = Isy.parseDevice(result.nodeInfo.node[0], result.nodeInfo.properties[0]);
+      defer.resolve(parsed);
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
 
 module.exports = IsyDevice;
