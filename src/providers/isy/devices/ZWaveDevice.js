@@ -9,13 +9,13 @@ var ZWaveDevice = function () {
 
   self.config.address = self.config.address.split('_').slice(0, 1).join('_');
 
-  var abode_device = ZWaveDevice.find(self.config.address);
+  var abode_device = self.get_abode_device(self.config.address);
   if (abode_device) {
-    Object.assign(self, abode_device);
+    Object.assign(self, abode_device.toObject());
   }
 
   self.on('state-change', function (msg) {
-    self.config.properties.ST.value = msg.action._;
+    self.config.properties.ST.value = msg.action;
   });
 
   self.on('update', function (msg) {

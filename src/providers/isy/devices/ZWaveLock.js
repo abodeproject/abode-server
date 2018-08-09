@@ -106,6 +106,12 @@ var ZWaveLock = function () {
         }
         break;
       case 'USRNUM':
+        if (self.capabilities.indexOf('user_codes') === -1) {
+          self.capabilities.push('user_codes');
+        }
+        break;
+      case 'ERR':
+        log.error(msg);
         break;
       default:
         log.warn('Unknown control received for %s: %s', self.name, msg.control);
