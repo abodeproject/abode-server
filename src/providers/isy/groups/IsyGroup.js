@@ -50,10 +50,12 @@ var IsyGroup = function (config) {
   });
 
   self.on('device-on', function () {
+      self._on = true;
     self.emit('changed');
   });
 
   self.on('device-off', function () {
+    self._on = false;
     self.emit('changed');
   });
 
