@@ -659,6 +659,26 @@ Isy.get_status = function (device) {
   return defer.promise;
 };
 
+Isy.query_device = function (device) {
+  var defer = q.defer(),
+    address = device.address || device.config.address;
+  var isy_node = Isy.lookup(device.config.type).find(address);
+
+  if (!isy_node) {
+    defer.reject({'response': false, 'message': 'Isy Device Not Found'});
+    return defer.promise;
+  }
+
+  isy_node.query_command().then(function (state) {
+    defer.resolve({'response': true, 'update': state})
+  }).fail(function (err) {
+    defer.reject(err);
+  });
+
+  return defer.promise;
+};
+
+
 Isy.is_open = Isy.is_on = function (device) {
   var defer = q.defer();
 
