@@ -295,9 +295,10 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
       case '_on':
         if (config[key] === true && self[key] !== true) {
           changes = true;
-          self[key] = config[key];
+          if (self.capabilities.indexOf('scene') === -1) {
+            self[key] = config[key];
+          }
 
-          self.last_on = new Date();
           if (self.capabilities.indexOf('motion_sensor') !== -1 && config._motion === undefined) {
             abode.events.emit('MOTION_ON', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting MOTION_ON for', {'type': 'device', 'name': self.name});
@@ -311,7 +312,9 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
         }
         if (config[key] === false && self[key] !== false) {
           changes = true;
-          self[key] = config[key];
+          if (self.capabilities.indexOf('scene') === -1) {
+            self[key] = config[key];
+          }
 
           self.last_off = new Date();
           if (self.capabilities.indexOf('motion_sensor') !== -1 && config._motion === undefined) {
