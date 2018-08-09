@@ -68,6 +68,7 @@ Isy.start = function () {
       'Origin': 'com.universal-devices.websockets.isy'
     }
   };
+  
 
   Isy.get_nodes()
     .then(function () {
@@ -79,14 +80,32 @@ Isy.start = function () {
         Isy.connected = true;
         Isy.enabled = true;
         Isy.attempt_reconnect = true;
+        
+
+        Isy.heartbeat_checker = setInterval(function () {
+          var now = new Date(),
+            heartbeat_age = (now - Isy.last_heartbeat) / 1000;
+          
+          if (heartbeat_age > 30) {
+            clearInterval(Isy.heartbeat_checker);
+            Isy.socket.close();
+          }
+        });
+      
         defer.resolve(true);
       });
 
       Isy.socket.on('error', function error(error) {
+        if (Isy.heartbeat_checker) {
+          clearTimeout(Isy.heartbeat_checker);
+        }
         log.error(error.message, arguments);
       });
 
       Isy.socket.on('close', function close() {
+        if (Isy.heartbeat_checker) {
+          clearTimeout(Isy.heartbeat_checker);
+        }
         if (Isy.attempt_reconnect) {
           log.info('Disconnected.  Reconnecting in %s seconds', Isy.config.reconnect_timeout);
           setTimeout(function () {
@@ -101,7 +120,7 @@ Isy.start = function () {
       });
 
       Isy.socket.on('message', Isy.message_handler);
-
+      
       Isy.poll();
     })
     .fail(function (err) {
@@ -373,6 +392,7 @@ Isy.controls = {
   '_0': {
     'name': 'Heartbeat',
     'handler': function (msg) {
+      Isy.last_heartbeat = new Date();
       log.debug('Heartbeat received: %s', msg.action);
     }
   },
