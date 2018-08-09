@@ -76,6 +76,19 @@ InsteonDevice.prototype.status_command = function () {
 
   return defer.promise;
 };
+InsteonDevice.prototype.query_command = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.QUERY(self.config.address + ' 1').then(function (result) {
+      defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
 
 module.exports = InsteonDevice;
 
