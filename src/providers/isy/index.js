@@ -133,7 +133,16 @@ Isy.start = function () {
       Isy.poll();
     })
     .fail(function (err) {
+      if (Isy.socket && Isy.socket.close) {
+        Isy.socket.close();
+      }
       log.error(err);
+      if (Isy.attempt_reconnect) {
+        log.info('Event feed error.  Reconnecting in %s seconds', Isy.config.reconnect_timeout);
+        setTimeout(function () {
+          Isy.start();
+        }, 1000 * Isy.config.reconnect_timeout);
+      }
       defer.reject(err);
     });
 
