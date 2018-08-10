@@ -1,5 +1,7 @@
 var q = require('q'),
   Isy = require('../index'),
+  logger = require('log4js'),
+  log = logger.getLogger('isy'),
   InsteonDevice = require('./InsteonDevice');
 
 var InsteonKeyPadDimmer = function (config) {
@@ -23,6 +25,15 @@ var InsteonKeyPadDimmer = function (config) {
         self._on = (self._level > 0);
         break;
       default:
+        log.debug('KeyPad Button Changed for %s: %s %s', self.name, group, (parseInt(msg.action, 10) > 0) ? 'on': 'off');
+        var groups = Isy.findGroupsByMember(self.config.address + ' ' + group, 16);
+        groups.forEach(function (group) {
+          if (parseInt(msg.action, 10) > 0) {
+            group.emit('device-on');
+          } else {
+            group.emit('device-off');
+          }
+        });
         break;
     }
   });

@@ -50,11 +50,13 @@ var IsyGroup = function (config) {
   });
 
   self.on('device-on', function () {
-      self._on = true;
+    log.info('Group turned on: %s', self.name);
+    self._on = true;
     self.emit('changed');
   });
 
   self.on('device-off', function () {
+    log.info('Group turned off: %s', self.name);
     self._on = false;
     self.emit('changed');
   });
