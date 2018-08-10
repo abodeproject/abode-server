@@ -30,6 +30,7 @@ var Isy = function () {
   Isy.config.message_time = Isy.config.message_time || 2;
   Isy.config.queue_interval = Isy.config.queue_interval || 100;
   Isy.config.poll_interval = Isy.config.poll_interval || 60;
+  Isy.config.min_heartbeat_interval = Isy.config.heartbeat_interval || 45;
 
   // Set some defaults
   Isy.connected = false;
@@ -68,7 +69,7 @@ Isy.start = function () {
       'Origin': 'com.universal-devices.websockets.isy'
     }
   };
-  
+
 
   Isy.get_nodes()
     .then(function () {
@@ -80,19 +81,19 @@ Isy.start = function () {
         Isy.connected = true;
         Isy.enabled = true;
         Isy.attempt_reconnect = true;
-        
+
 
         Isy.heartbeat_checker = setInterval(function () {
           var now = new Date(),
             heartbeat_age = (now - Isy.last_heartbeat) / 1000;
-          
-          if (heartbeat_age > 30) {
+
+          if (heartbeat_age > Isy.config.min_heartbeat_interval) {
             log.warn('Heartbeat not received in 30s, reconnecting event feed');
             clearInterval(Isy.heartbeat_checker);
             Isy.socket.close();
           }
         }, 1000);
-      
+
         defer.resolve(true);
       });
 
@@ -101,7 +102,13 @@ Isy.start = function () {
           clearTimeout(Isy.heartbeat_checker);
         }
         Isy.socket.close();
-        log.error(error.message, arguments);
+        log.error('Socket Error:', error.message, arguments);
+        if (Isy.attempt_reconnect) {
+          log.info('Disconnected due to Error.  Reconnecting in %s seconds', Isy.config.reconnect_timeout);
+          setTimeout(function () {
+            Isy.start();
+          }, 1000 * Isy.config.reconnect_timeout);
+        }
       });
 
       Isy.socket.on('close', function close() {
@@ -122,7 +129,7 @@ Isy.start = function () {
       });
 
       Isy.socket.on('message', Isy.message_handler);
-      
+
       Isy.poll();
     })
     .fail(function (err) {

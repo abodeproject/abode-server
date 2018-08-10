@@ -9,6 +9,7 @@ router.get('/', function (req, res) {
   res.send({
     'enabled': isy.enabled,
     'connected': isy.connected,
+    'last_heartbeat': isy.last_heartbeat,
     'queue': isy.queue.length,
     'devices': isy.devices,
     'folders': isy.folders,
