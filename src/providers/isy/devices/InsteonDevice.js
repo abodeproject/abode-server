@@ -67,12 +67,16 @@ InsteonDevice.prototype.status_command = function () {
   var self = this,
     defer = q.defer();
 
-  self.STATUS(self.config.address + ' 1').then(function (result) {
-      defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0});
-    })
-    .fail(function (err) {
-      defer.reject(err);
-    });
+  self.query_command().then(function () {
+    self.STATUS(self.config.address + ' 1').then(function (result) {
+        defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0});
+      })
+      .fail(function (err) {
+        defer.reject(err);
+      });
+  }).fail(function (err) {
+    defer.reject(err);
+  });
 
   return defer.promise;
 };
@@ -80,8 +84,8 @@ InsteonDevice.prototype.query_command = function () {
   var self = this,
     defer = q.defer();
 
-  self.QUERY(self.config.address + ' 1').then(function (result) {
-      defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0});
+  self.QUERY(self.config.address + ' 1').then(function () {
+      defer.resolve();
     })
     .fail(function (err) {
       defer.reject(err);

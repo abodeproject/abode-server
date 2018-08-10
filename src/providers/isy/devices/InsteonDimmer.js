@@ -92,25 +92,19 @@ InsteonDimmer.prototype.status_command = function () {
   var self = this,
     defer = q.defer();
 
-  self.STATUS(self.config.address + ' 1').then(function (result) {
-      defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0, _level: Math.round((parseInt(result.properties.ST.value, 10)/ 255) * 100)});
+  self.query_command().then(function () {
+    self.STATUS(self.config.address + ' 1').then(function (result) {
+      defer.resolve({
+        _on: parseInt(result.properties.ST.value, 10) > 0,
+        _level: Math.round((parseInt(result.properties.ST.value, 10) / 255) * 100)
+      });
     })
-    .fail(function (err) {
-      defer.reject(err);
-    });
-
-  return defer.promise;
-};
-InsteonDimmer.prototype.query_command = function () {
-  var self = this,
-    defer = q.defer();
-
-  self.QUERY(self.config.address + ' 1').then(function (result) {
-      defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0, _level: Math.round((parseInt(result.properties.ST.value, 10)/ 255) * 100)});
-    })
-    .fail(function (err) {
-      defer.reject(err);
-    });
+      .fail(function (err) {
+        defer.reject(err);
+      });
+  }).fail(function (err) {
+    defer.reject(err);
+  });
 
   return defer.promise;
 };

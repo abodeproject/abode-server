@@ -87,10 +87,11 @@ Isy.start = function () {
             heartbeat_age = (now - Isy.last_heartbeat) / 1000;
           
           if (heartbeat_age > 30) {
+            log.warn('Heartbeat not received in 30s, reconnecting event feed');
             clearInterval(Isy.heartbeat_checker);
             Isy.socket.close();
           }
-        });
+        }, 1000);
       
         defer.resolve(true);
       });
@@ -99,6 +100,7 @@ Isy.start = function () {
         if (Isy.heartbeat_checker) {
           clearTimeout(Isy.heartbeat_checker);
         }
+        Isy.socket.close();
         log.error(error.message, arguments);
       });
 
@@ -393,7 +395,7 @@ Isy.controls = {
     'name': 'Heartbeat',
     'handler': function (msg) {
       Isy.last_heartbeat = new Date();
-      log.debug('Heartbeat received: %s', msg.action);
+      log.info('Heartbeat received: %s', msg.action);
     }
   },
   '_1': {

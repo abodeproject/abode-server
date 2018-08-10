@@ -66,6 +66,19 @@ InsteonOpenClose.prototype.build_state = function () {
     'last_off': this.last_off
   };
 };
+InsteonOpenClose.prototype.status_command = function () {
+  var self = this,
+    defer = q.defer();
+
+  self.STATUS(self.config.address + ' 1').then(function (result) {
+      defer.resolve({_on: parseInt(result.properties.ST.value, 10)  > 0});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
 InsteonOpenClose.prototype.on_command = function () {
   var defer = q.defer();
 
