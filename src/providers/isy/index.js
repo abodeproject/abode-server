@@ -678,6 +678,58 @@ Isy.set_level = function (device, level) {
   return defer.promise;
 };
 
+Isy.set_code = function (device, user, code) {
+  var defer = q.defer();
+  var address = device.address || device.config.address;
+  var isy_node = Isy.lookup(device.config.type).find(address);
+
+  if (!isy_node) {
+    defer.reject({'response': false, 'message': 'Isy Device Not Found'});
+    return defer.promise;
+  }
+
+  if (!isy_node.set_code) {
+    defer.reject({'response': false, 'message': 'Command not supported by device'});
+    return defer.promise;
+  }
+
+  isy_node.set_code(user, code)
+    .then(function (result) {
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+Isy.delete_code = function (device, user) {
+  var defer = q.defer();
+  var address = device.address || device.config.address;
+  var isy_node = Isy.lookup(device.config.type).find(address);
+
+  if (!isy_node) {
+    defer.reject({'response': false, 'message': 'Isy Device Not Found'});
+    return defer.promise;
+  }
+
+  if (!isy_node.delete_code) {
+    defer.reject({'response': false, 'message': 'Command not supported by device'});
+    return defer.promise;
+  }
+
+  isy_node.delete_code(user)
+    .then(function (result) {
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
 Isy.get_status = function (device) {
   var defer = q.defer(),
     address = device.address || device.config.address;

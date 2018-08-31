@@ -109,6 +109,7 @@ var ZWaveLock = function () {
         if (self.capabilities.indexOf('user_codes') === -1) {
           self.capabilities.push('user_codes');
         }
+        self.config.user_codes = parseInt(msg.action._, 10);
         break;
       case 'ERR':
         log.error(msg);
@@ -150,6 +151,35 @@ ZWaveLock.prototype.off_command = function () {
   self.SECMD(self.config.address + '_1', 0)
     .then(function (result) {
       defer.resolve({'response': true, 'update': {_on: false}, 'result': result});
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+ZWaveLock.prototype.set_code = function (user, code) {
+  var self = this,
+    defer = q.defer();
+
+  Isy.req('/rest/zwave/node/' + self.config.address + '_1', 0 + '/security/user/' + user + '/set/code/' + code)
+    .then(function (result) {
+      defer.resolve(result);
+    })
+    .fail(function (err) {
+      defer.reject(err);
+    });
+
+  return defer.promise;
+};
+
+ZWaveLock.prototype.delete_code = function (user) {
+  var self = this,
+    defer = q.defer();
+
+  Isy.req('/rest/zwave/node/' + self.config.address + '_1', 0 + '/security/user/' + user + '/delete')
+    .then(function (result) {
+      defer.resolve(result);
     })
     .fail(function (err) {
       defer.reject(err);
