@@ -165,8 +165,12 @@ router.post('/get_nodes', function (req, res) {
 
 router.post('/devices/:device/code/:user/:code', function (req, res) {
 
-  isy.set_code({'config': {'type': 'group', 'address': req.params.group}}, req.params.user, req.params.code).then(function (response) {
-  	res.send(response);
+  isy.set_code({'config': {'address': req.params.device}}, req.params.user, req.params.code).then(function (response) {
+  	isy.get_status({'config': {'address': req.params.device}}).then(function () {
+      res.send(response);
+    }, function (err) {
+      res.status(400).send(err);
+    });
   }, function (err) {
   	res.status(400).send(err);
   });
@@ -175,8 +179,12 @@ router.post('/devices/:device/code/:user/:code', function (req, res) {
 
 router.delete('/devices/:device/code/:user', function (req, res) {
 
-  isy.delete_code({'config': {'type': 'group', 'address': req.params.group}}, req.params.user, req.params.code).then(function (response) {
-  	res.send(response);
+  isy.delete_code({'config': {'address': req.params.device}}, req.params.user, req.params.code).then(function (response) {
+  	isy.get_status({'config': {'address': req.params.device}}).then(function () {
+      res.send(response);
+    }, function (err) {
+      res.status(400).send(err);
+    });
   }, function (err) {
   	res.status(400).send(err);
   });

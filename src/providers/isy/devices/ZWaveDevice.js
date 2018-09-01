@@ -15,7 +15,7 @@ var ZWaveDevice = function () {
   }
 
   self.on('state-change', function (msg) {
-    self.config.properties.ST.value = msg.action;
+    self.config.properties.ST.value = parseInt(msg.action._, 10);
   });
 
   self.on('update', function (msg) {

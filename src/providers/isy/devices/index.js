@@ -84,6 +84,9 @@ var parseDevice = function (node, properties) {
       'value': parsed.property.$.value,
       'formatted': parsed.property.$.formatted,
       'uom': parsed.property.$.uom
+    }
+    if (parsed.name === 'Front Door Lock') {
+      console.log('here');
     };
     delete parsed.property;
   }

@@ -127,7 +127,8 @@ ZWaveLock.prototype.build_state = function () {
     '_on': this._on,
     '_battery': this._battery,
     '_alerts': this._alerts,
-    'last_seen': this.last_seen
+    'last_seen': this.last_seen,
+    'config': this.config
   };
 };
 ZWaveLock.prototype.on_command = function () {
@@ -162,7 +163,7 @@ ZWaveLock.prototype.set_code = function (user, code) {
   var self = this,
     defer = q.defer();
 
-  Isy.req('/rest/zwave/node/' + self.config.address + '_1', 0 + '/security/user/' + user + '/set/code/' + code)
+  Isy.req('/rest/zwave/node/' + self.config.address + '_1/security/user/' + user + '/set/code/' + code)
     .then(function (result) {
       defer.resolve(result);
     })
@@ -177,7 +178,7 @@ ZWaveLock.prototype.delete_code = function (user) {
   var self = this,
     defer = q.defer();
 
-  Isy.req('/rest/zwave/node/' + self.config.address + '_1', 0 + '/security/user/' + user + '/delete')
+  Isy.req('/rest/zwave/node/' + self.config.address + '_1/security/user/' + user + '/delete')
     .then(function (result) {
       defer.resolve(result);
     })
