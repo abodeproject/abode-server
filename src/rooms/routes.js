@@ -238,6 +238,8 @@ var actions = [
   'off',
   'open',
   'close',
+  'lock',
+  'unlock',
   'set_level',
   'set_mode',
   'set_humidity',
@@ -267,6 +269,8 @@ var statuses = [
   'fans_off',
   'scenes_on',
   'scenes_off',
+  'locked',
+  'unlocked'
 ];
 
 var ages = [
@@ -282,6 +286,8 @@ var ages = [
   'fan_off_age',
   'conditioner_on_age',
   'conditioner_off_age',
+  'locked_age',
+  'unlocked_age'
 ];
 
 actions.forEach(function (action) {

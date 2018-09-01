@@ -49,6 +49,10 @@ var RoomSchema = mongoose.Schema({
   '_set_point': Number,
   '_motion_on': Boolean,
   '_motion_off': Boolean,
+  '_unlocked': Boolean,
+  '_unlocked_count': Number,
+  '_locked': Boolean,
+  '_locked_count': Number,
   '_doors_open': Boolean,
   '_doors_closed': Boolean,
   '_windows_open': Boolean,
@@ -554,8 +558,8 @@ RoomSchema.methods.conditioning_on = getStatuses( {'type': 'conditioners', 'key'
 RoomSchema.methods.conditioning_off = getStatuses( {'type': 'conditioners', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.lights_on = getStatuses( {'type': 'lights', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.lights_off = getStatuses( {'type': 'lights', 'key': 'is_off', 'filter': true} );
-RoomSchema.methods.locked = getStatuses( {'type': 'lock', 'key': 'is_locked', 'filter': true} );
-RoomSchema.methods.unlocked = getStatuses( {'type': 'lock', 'key': 'is_unlocked', 'filter': true} );
+RoomSchema.methods.locked = getStatuses( {'type': 'locks', 'key': 'is_locked', 'filter': true} );
+RoomSchema.methods.unlocked = getStatuses( {'type': 'locks', 'key': 'is_unlocked', 'filter': true} );
 RoomSchema.methods.fans_on = getStatuses( {'type': 'fans', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.fans_off = getStatuses( {'type': 'fans', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.appliances_on = getStatuses( {'type': 'appliances', 'key': 'is_on', 'filter': true} );
@@ -613,6 +617,11 @@ RoomSchema.methods.set_state = function (config, log_msg) {
     '_appliances_on': 'APPLIANCES'
   };
 
+  var lock_events = {
+    '_locked': 'LOCKED',
+    '_unlocked': 'UNLOCKED'
+  };
+
   var openclose_events = {
     '_doors_open': 'DOORS',
     '_windows_open': 'WINDOWS',
@@ -627,6 +636,17 @@ RoomSchema.methods.set_state = function (config, log_msg) {
   };
 
   Object.keys(config).forEach(function (key) {
+
+    if (lock_events[key]) {
+      if (config[key] === true && self[key] !== config[key]) {
+        abode.events.emit(lock_events[key], {'name': self.name, 'type': 'room', 'object': self});
+        log.debug('Emitting ' + lock_events[key] + ' for', {'name': self.name, 'type': 'room'});
+      }
+      if (config[key] === false && self[key] !== config[key]) {
+        abode.events.emit(lock_events[key], {'name': self.name, 'type': 'room', 'object': self});
+        log.debug('Emitting ' + lock_events[key] + ' for', {'name': self.name, 'type': 'room'});
+      }
+    }
 
     if (onoff_events[key]) {
       if (config[key] === true && self[key] !== config[key]) {
@@ -687,6 +707,8 @@ var statuses = {
   'doors_closed': '_doors_closed',
   'windows_open': '_windows_open',
   'windows_closed': '_windows_closed',
+  'locked': '_locked',
+  'unlocked': '_unlocked',
   'shades_open': '_shades_open',
   'shades_closed': '_shades_closed',
   'conditioning_on': '_conditioning_on',
@@ -704,6 +726,7 @@ var statuses = {
 };
 
 RoomSchema.methods.get_lights = filterDevices('light');
+RoomSchema.methods.get_locks = filterDevices('lock');
 RoomSchema.methods.get_appliances = filterDevices('appliance');
 RoomSchema.methods.get_fans = filterDevices('fan');
 RoomSchema.methods.get_conditioners = filterDevices('conditioner');
@@ -719,6 +742,7 @@ RoomSchema.methods.get_scenes = filterDevices('scene');
 
 var counts = [
   'light',
+  'lock',
   'appliance',
   'fan',
   'conditioner',
@@ -729,7 +753,9 @@ var counts = [
 
 var ages = [
   'motion_on',
-  'motion_off'
+  'motion_off',
+  'locked',
+  'unlocked'
 ]
 
 RoomSchema.methods.status = function (cache) {
@@ -770,8 +796,13 @@ RoomSchema.methods.status = function (cache) {
       on_count = children.filter( function (child) { return (child._on === true); } ),
       off_count = children.filter( function (child) { return (child._on === false); } );
 
-    update['_' + type + '_on_count'] = on_count.length;
-    update['_' + type + '_off_count'] = off_count.length;
+    if (type === 'lock') {
+      update['_unlocked_count'] = off_count.length;
+      update['_locked_count'] = on_count.length;
+    } else {
+      update['_' + type + '_on_count'] = on_count.length;
+      update['_' + type + '_off_count'] = off_count.length;
+    }
   });
 
   var motion_devices = self.get_motion_sensors(),
@@ -855,6 +886,26 @@ RoomSchema.methods.on = function () {
 };
 
 // Expand each device into it's object and return a list of objects
+RoomSchema.methods.lock = function () {
+  var devices,
+    cmd_defers = [],
+    defer = q.defer();
+
+  devices = this.get_devices();
+
+  devices.forEach(function (d) {
+    cmd_defers.push(d.lock());
+  });
+
+  q.allSettled(cmd_defers).then(function () {
+    defer.resolve();
+  });
+
+  return defer.promise;
+};
+
+
+// Expand each device into it's object and return a list of objects
 RoomSchema.methods.off = function () {
   var devices,
     scenes,
@@ -870,6 +921,25 @@ RoomSchema.methods.off = function () {
 
   scenes.forEach(function (s) {
     cmd_defers.push(s.on());
+  });
+
+  q.allSettled(cmd_defers).then(function () {
+    defer.resolve();
+  });
+
+  return defer.promise;
+};
+
+// Expand each device into it's object and return a list of objects
+RoomSchema.methods.unlock = function () {
+  var devices,
+    cmd_defers = [],
+    defer = q.defer();
+
+  devices = this.get_devices();
+
+  devices.forEach(function (d) {
+    cmd_defers.push(d.unlock());
   });
 
   q.allSettled(cmd_defers).then(function () {
