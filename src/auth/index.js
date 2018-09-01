@@ -98,6 +98,7 @@ Auth.statuses = [
 ];
 
 var PinSchema = mongoose.Schema({
+  'enabled': {'type': Boolean, 'default': true},
   'name': {
     'type': String,
     'required': true,
