@@ -97,6 +97,8 @@ Triggers.types = [
   {'name': 'OFF'},
   {'name': 'OPEN'},
   {'name': 'CLOSE'},
+  {'name': 'LOCKED'},
+  {'name': 'UNLOCKED'},
   {'name': 'LIGHTS_ON'},
   {'name': 'LIGHTS_OFF'},
   {'name': 'FANS_ON'},

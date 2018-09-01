@@ -769,7 +769,7 @@ Isy.query_device = function (device) {
 };
 
 
-Isy.is_open = Isy.is_on = function (device) {
+Isy.is_open = Isy.is_on = Isy.is_locked = function (device) {
   var defer = q.defer();
 
   defer.resolve({'update': {'_on': device._on}, 'response': device._on});
@@ -777,7 +777,7 @@ Isy.is_open = Isy.is_on = function (device) {
   return defer.promise;
 };
 
-Isy.is_closed = Isy.is_off = function (device) {
+Isy.is_closed = Isy.is_off = Isy.is_unlocked = function (device) {
   var defer = q.defer();
 
   defer.resolve({'update': {'_on': device._on}, 'response': (!device._on)});

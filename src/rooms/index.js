@@ -554,6 +554,8 @@ RoomSchema.methods.conditioning_on = getStatuses( {'type': 'conditioners', 'key'
 RoomSchema.methods.conditioning_off = getStatuses( {'type': 'conditioners', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.lights_on = getStatuses( {'type': 'lights', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.lights_off = getStatuses( {'type': 'lights', 'key': 'is_off', 'filter': true} );
+RoomSchema.methods.locked = getStatuses( {'type': 'lock', 'key': 'is_locked', 'filter': true} );
+RoomSchema.methods.unlocked = getStatuses( {'type': 'lock', 'key': 'is_unlocked', 'filter': true} );
 RoomSchema.methods.fans_on = getStatuses( {'type': 'fans', 'key': 'is_on', 'filter': true} );
 RoomSchema.methods.fans_off = getStatuses( {'type': 'fans', 'key': 'is_off', 'filter': true} );
 RoomSchema.methods.appliances_on = getStatuses( {'type': 'appliances', 'key': 'is_on', 'filter': true} );
@@ -565,6 +567,7 @@ RoomSchema.methods.mode_cool = getStatuses( {'type': 'conditioners', 'key': 'mod
 
 // Add the various device filtering methods for the room schema
 RoomSchema.methods.get_lights = filterDevices('light');
+RoomSchema.methods.get_lockes = filterDevices('lock');
 RoomSchema.methods.get_appliances = filterDevices('appliance');
 RoomSchema.methods.get_fans = filterDevices('fan');
 RoomSchema.methods.get_conditioners = filterDevices('conditioner');
@@ -581,6 +584,8 @@ RoomSchema.methods.get_scenes = filterDevices('scene');
 // Get Ages
 RoomSchema.methods.light_on_age = getAge( {'type': 'light', 'key': 'last_on'} );
 RoomSchema.methods.light_off_age = getAge( {'type': 'light', 'key': 'last_off'} );
+RoomSchema.methods.locked_age = getAge( {'type': 'lock', 'key': 'last_on'} );
+RoomSchema.methods.unlocked_age = getAge( {'type': 'lock', 'key': 'last_off'} );
 RoomSchema.methods.motion_on_age = getAge( {'type': 'motion_sensor', 'key': 'last_on'} );
 RoomSchema.methods.motion_off_age = getAge( {'type': 'motion_sensor', 'key': 'last_off'} );
 RoomSchema.methods.window_open_age = getAge( {'type': 'window', 'key': 'last_on'} );

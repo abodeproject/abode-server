@@ -234,13 +234,16 @@ DeviceSchema.methods.set_humidity = function (level) { return this.send_command(
 DeviceSchema.methods.status = function () { return this.send_command('get_status', undefined, false); };
 DeviceSchema.methods.play = function (url, duration) { return this.send_command('play', [url, duration], false); };
 
-DeviceSchema.methods.is_on = DeviceSchema.methods.is_open = function (cache) { return this.send_command('is_on', undefined, cache, '_on', true); };
-DeviceSchema.methods.is_off = DeviceSchema.methods.is_closed = function (cache) { return this.send_command('is_off', undefined, cache, '_on', false); };
+DeviceSchema.methods.is_on = DeviceSchema.methods.is_open = DeviceSchema.methods.is_locked = function (cache) { return this.send_command('is_on', undefined, cache, '_on', true); };
+DeviceSchema.methods.is_off = DeviceSchema.methods.is_closed = DeviceSchema.methods.is_unlocked = function (cache) { return this.send_command('is_off', undefined, cache, '_on', false); };
 
 DeviceSchema.methods.has_motion = function (cache) { return this.send_command('has_motion', undefined, cache, '_motion', true); };
 
-DeviceSchema.methods.on_time = DeviceSchema.methods.open_time = function () { return this.get_age('_on', true, 'last_on'); };
-DeviceSchema.methods.off_time = DeviceSchema.methods.closed_time = function () { return this.get_age('_on', false, 'last_off'); };
+DeviceSchema.methods.on_time = DeviceSchema.methods.open_time = DeviceSchema.methods.locked_time = function () { return this.get_age('_on', true, 'last_on'); };
+DeviceSchema.methods.off_time = DeviceSchema.methods.closed_time = DeviceSchema.methods.unlocked_time = function () { return this.get_age('_on', false, 'last_off'); };
+
+DeviceSchema.methods.locked_age = function () { return this.get_age('_on', true, 'last_on'); };
+DeviceSchema.methods.unlocked_age = function () { return this.get_age('_on', false, 'last_off'); };
 
 DeviceSchema.methods.level = function (cache) { return this.send_command('level', undefined, cache, '_level'); };
 DeviceSchema.methods.temperature = function (cache) { return this.send_command('temperature', undefined, cache, '_temperature'); };
@@ -305,6 +308,9 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
           } else if (self.capabilities.indexOf('openclose') !== -1) {
             abode.events.emit('OPEN', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting OPEN for', {'type': 'device', 'name': self.name});
+          } else if (self.capabilities.indexOf('lock') !== -1) {
+            abode.events.emit('LOCKED', {'type': 'device', 'name': self.name, 'object': self});
+            log.debug('Emitting LOCKED for', {'type': 'device', 'name': self.name});
           } else {
             abode.events.emit('ON', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting ON for', {'type': 'device', 'name': self.name});
@@ -323,6 +329,9 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
           } else if (self.capabilities.indexOf('openclose') !== -1) {
             abode.events.emit('CLOSE', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting CLOSE for', {'type': 'device', 'name': self.name});
+          } else if (self.capabilities.indexOf('lock') !== -1) {
+            abode.events.emit('UNLOCKED', {'type': 'device', 'name': self.name, 'object': self});
+            log.debug('Emitting UNLOCKED for', {'type': 'device', 'name': self.name});
           } else {
             abode.events.emit('OFF', {'type': 'device', 'name': self.name, 'object': self});
             log.debug('Emitting OFF for', {'type': 'device', 'name': self.name});
