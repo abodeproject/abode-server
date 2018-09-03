@@ -54,6 +54,9 @@ var lookupValue = function (type, object, key) {
     case 'scenes':
       lookupObj = abode.scenes.by_name();
       break;
+    case 'pins':
+      lookupObj = abode.auth.pins_by_name();
+      break;
     case 'timeofday':
       return Number(key);
     case 'string':

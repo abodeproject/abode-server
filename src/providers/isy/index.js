@@ -678,7 +678,7 @@ Isy.set_level = function (device, level) {
   return defer.promise;
 };
 
-Isy.set_code = function (device, user, code) {
+Isy.set_code = Isy.enable_code = function (device, user, code) {
   var defer = q.defer();
   var address = device.address || device.config.address;
   var isy_node = Isy.lookup(device.config.type).find(address);
@@ -704,7 +704,7 @@ Isy.set_code = function (device, user, code) {
   return defer.promise;
 };
 
-Isy.delete_code = function (device, user) {
+Isy.delete_code = Isy.disable_code = function (device, user) {
   var defer = q.defer();
   var address = device.address || device.config.address;
   var isy_node = Isy.lookup(device.config.type).find(address);

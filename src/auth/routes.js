@@ -388,6 +388,38 @@ router.delete('/pins/:id', web.isUnlocked, function (req, res) {
 
 });
 
+/**
+ * @api {post} /auth/pins/:pin/enable Get Pins
+ * @apiGroup Auth
+ */
+router.post('/pins/:id/enable', web.isUnlocked, function (req, res) {
+
+  auth.enable_pin(req.params.id).then(function (response) {
+
+    res.status(200).send(response);
+
+  }, function (err) {
+    res.status(err.code || 400).send(err);
+  });
+
+});
+
+/**
+ * @api {post} /auth/pins/:pin/disable Get Pins
+ * @apiGroup Auth
+ */
+router.post('/pins/:id/disable', web.isUnlocked, function (req, res) {
+
+  auth.disable_pin(req.params.id).then(function (response) {
+
+    res.status(200).send(response);
+
+  }, function (err) {
+    res.status(err.code || 400).send(err);
+  });
+
+});
+
 router.get('/users', web.isUnlocked, function (req, res) {
 
   auth.list().then(function (results) {

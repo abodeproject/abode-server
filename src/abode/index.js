@@ -52,6 +52,7 @@ Abode.init = function (config) {
   config.allow_uris = config.allow_uris || ['/','/api/notifications/action/*', '/api/auth/login', '/scripts/*', '/css/*', '/images/*', '/views/*', '/fonts/*', '/webcam/*', 'favicon.ico', '/font/*', '/api/events/feed/*'];
   config.database = config.database || {};
   config.database.server = config.database.server || 'localhost';
+  config.database.port = config.database.port || '27017';
   config.database.database = config.database.database || 'abode';
   config.providers = config.providers || ['rad','browser', 'time'];
   config.fail_on_provider = config.fail_on_provider || true;
@@ -183,7 +184,7 @@ Abode.init = function (config) {
 
     //Connect to the database
     log.debug('Connecting to DB: mongodb://%s/%s', Abode.config.database.server, Abode.config.database.database);
-    mongoose.connect('mongodb://' + Abode.config.database.server + '/' + Abode.config.database.database, {useMongoClient: true})
+    mongoose.connect('mongodb://' + Abode.config.database.server + ':' + Abode.config.database.port + '/' + Abode.config.database.database, { useNewUrlParser: true })
       .then(function (db) {
         Abode.db = db;
         start();

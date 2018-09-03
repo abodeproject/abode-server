@@ -256,6 +256,11 @@ DeviceSchema.methods.forecast = function (cache) { return this.send_command('for
 DeviceSchema.methods.moon = function (cache) { return this.send_command('moon', undefined, cache, '_moon'); };
 DeviceSchema.methods.alerts = function (cache) { return this.send_command('alerts', undefined, cache, '_alerts'); };
 
+DeviceSchema.methods.set_code = function (user, code) { return this.send_command('set_code', [user, code], false); };
+DeviceSchema.methods.delete_code = function (user) { return this.send_command('delete_code', [user], false); };
+DeviceSchema.methods.enable_code = function (user, code) { return this.send_command('enable_code', [user, code], false); };
+DeviceSchema.methods.disable_code = function (user) { return this.send_command('disable_code', [user], false); };
+
 // Define the function that resolves all rooms to room objects
 DeviceSchema.methods.set_state = function (config, log_msg, options) {
   var self = this,

@@ -127,7 +127,9 @@ Triggers.types = [
   {'name': 'UPDATED'},
   {'name': 'NOTIFICATION_ACTIVATED'},
   {'name': 'NOTIFICATION_DEACTIVATED'},
-  {'name': 'LOW_BATTERY'}
+  {'name': 'LOW_BATTERY'},
+  {'name': 'ENABLED'},
+  {'name': 'DISABLED'}
 ];
 
 Triggers.lookupAction = function (key) {
@@ -160,6 +162,10 @@ Triggers.lookupAction = function (key) {
     case 'scenes':
       is_scene = true;
       lookupObj = abode.scenes.by_name();
+      break;
+    case 'pins':
+      is_scene = false;
+      lookupObj = abode.auth.pins_by_name();
       break;
     default:
       return;

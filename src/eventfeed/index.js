@@ -44,10 +44,10 @@ EventFeed.event_cleaner = function () {
       return;
     }
 
-    if (results.result.n === 0) {
+    if (results.n === 0) {
       log.debug('No events removed');
     } else {
-      log.info('Removed %s stale events', results.result.n);
+      log.info('Removed %s stale events', results.n);
     }
   });
 };

@@ -250,7 +250,7 @@ History.state_cleaner = function () {
       return defer.reject(err);
     }
     
-    log.debug('Cleaned %s old records', docs.result.n || 0);
+    log.debug('Cleaned %s old records', docs.n || 0);
     History.cleaning = false;
     
   });

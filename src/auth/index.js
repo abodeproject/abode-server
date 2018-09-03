@@ -77,6 +77,7 @@ var Auth = function () {
 
   setInterval(Auth.token_cleaner, 1000 * 60);
   Auth.token_cleaner();
+  Auth.update_pin_cache();
   defer.resolve();
 
   return defer.promise;
@@ -119,7 +120,7 @@ var PinSchema = mongoose.Schema({
           return;
         }
 
-        return Auth.crypt_password(String(v));
+        return String(v);
     }
   },
   'devices': { 'type': Array },
@@ -178,13 +179,29 @@ Auth.token_cleaner = function () {
       return;
     }
 
-    if (results.result.n === 0) {
+    if (results.n === 0) {
       log.debug('No tokens removed');
     } else {
       log.info('Removed %s expired tokens', results.result.n);
     }
   });
 
+};
+
+Auth.update_pin_cache = function () {
+  Auth.query_pins().then(function (pins) {
+    Auth.pin_cache = pins;
+  });
+};
+
+Auth.pins_by_name = function () {
+  var result = {};
+
+  Auth.pin_cache.forEach(function (pin) {
+    result[pin.name] = pin;
+  });
+
+  return result;
 };
 
 Auth.query_pins = function (filter, options) {
@@ -232,6 +249,7 @@ Auth.create_pin = function (data) {
 
     log.debug('Pin created: ', pin._id);
     defer.resolve(pin);
+    Auth.update_pin_cache();
   });
 
   return defer.promise;
@@ -241,7 +259,6 @@ Auth.get_pin = function (id) {
   var defer = q.defer();
 
   Auth.pins.findOne({'_id': id})
-  .select('-pin')
   .exec(function (err, pin) {
     if (err) {
       defer.reject(err);
@@ -260,23 +277,11 @@ Auth.get_pin = function (id) {
   return defer.promise;
 };
 
-Auth.check_pin = function (pin, device) {
+Auth.check_pin = function (pin) {
   var defer = q.defer();
   var query = {
-    '$or': [
-      {
-        'pin': Auth.crypt_password(String(pin)),
-        'devices': []
-      }
-    ]
+    'pin': String(pin)
   };
-
-  if (device) {
-    query.$or[1] = {
-      'pin': Auth.crypt_password(String(pin)),
-      'devices': device._id || device
-    };
-  }
 
   Auth.pins.findOne(query, function (err, pin) {
     if (err) {
@@ -301,10 +306,33 @@ Auth.check_pin = function (pin, device) {
   return defer.promise;
 };
 
+PinSchema.methods.enable = function () {
+  return Auth.enable_pin(this._id);
+};
+
+PinSchema.methods.is_enabled = function () {
+  return (this._enabled === true);
+};
+
+PinSchema.methods.is_disabled = function () {
+  return (this._enabled === false);
+};
+
+Auth.enable_pin = function (id) {
+  return Auth.update_pin(id, {'enabled': true});
+};
+
+Auth.disable_pin = function (id) {
+  return Auth.update_pin(id, {'enabled': false});
+};
+
 Auth.update_pin = function (id, data) {
   var defer = q.defer();
 
   Auth.get_pin({'_id': id}).then(function (pin) {
+    var old_devices = JSON.parse(JSON.stringify(pin.devices));
+    var old_pin = JSON.parse(JSON.stringify(pin));
+
     Object.keys(data).forEach(function (key) {
       pin[key] = data[key];
     });
@@ -326,9 +354,21 @@ Auth.update_pin = function (id, data) {
         return defer.promise;
       }
 
-      log.debug('Pin saved: ', pin._id);
-      delete pin.pin;
-      defer.resolve(pin);
+      if (old_pin.enabled !== pin.enabled && pin.enabled) {
+        abode.events.emit('ENABLED', {'type': 'pin', 'name': pin.name, 'object': pin});
+      } else if (old_pin.enabled !== pin.enabled && !pin.enabled) {
+        abode.events.emit('DISABLED', {'type': 'pin', 'name': pin.name, 'object': pin});
+      }
+
+      Auth.update_pin_cache();
+
+      Auth.update_pin_devices(pin, old_devices, pin.devices).then(function () {
+        delete pin.pin;
+        defer.resolve(pin);
+        log.debug('Pin saved: ', pin._id);
+      }).fail(function (err) {
+        defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
+      });
     });
 
   }, function () {
@@ -341,18 +381,89 @@ Auth.update_pin = function (id, data) {
 Auth.delete_pin = function (id) {
   var defer = q.defer();
 
-  Auth.pins.remove({'_id': id}, function (err, report) {
-    if (err) {
-      defer.reject({'status': 'failed', 'message': err.message});
-      return defer.promise;
-    }
+  // Lookup the pin
+  Auth.get_pin({'_id': id}).then(function (pin) {
 
-    if (report.result.n === 0) {
-      defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
-      return;
-    }
+    // Remove the pin from any associated devices
+    Auth.update_pin_devices(pin, pin.devices, []).then(function () {
 
-    defer.resolve(report);
+      // Finally remove the pin
+      Auth.pins.remove({'_id': id}, function (err, report) {
+        if (err) {
+          defer.reject({'status': 'failed', 'message': err.message});
+          return defer.promise;
+        }
+
+        if (report.result.n === 0) {
+          defer.reject({'code': 404, 'status': 'failed', 'message': 'Record not found'});
+          return;
+        }
+
+        defer.resolve(report);
+        Auth.update_pin_cache();
+      });
+
+    }).fail(function (err) {
+      defer.reject({'status': 'failed', 'message': err.message, 'fields': err.fields});
+    });
+
+  }, function () {
+    defer.reject({'code': 404, 'message': 'Record not found'});
+  });
+
+  return defer.promise;
+};
+
+Auth.update_pin_devices = function (pin, old_devices, new_devices) {
+  var deletes = [],
+    defer = q.defer();
+
+  // Determine where we need to delete pins
+  old_devices.forEach(function (old_device) {
+    // Look for a new device that matches this old device
+    var matches = new_devices.filter(function (new_device) {
+      return (old_device.device._id === new_device.device._id && old_device.user === new_device.user);
+    });
+
+    // If no matches found, add to our delete list
+    if (matches.length === 0) {
+      deletes.push(old_device);
+    }
+  });
+
+  // Get the actual devices for objects to be deleted
+  deletes = deletes.map(function (device) {
+    return {'user': device.user, 'device': abode.devices.get(device.device._id)};
+  });
+
+  // Filter out any missing devices
+  deletes = deletes.filter(function (device) {
+    return (device.device);
+  });
+
+  // Delete pin from old devices
+  deletes = deletes.map(function (device) {
+    return device.device.delete_code(device.user);
+  });
+
+  // Wait for the deletes to complete
+  q.allSettled(deletes).then(function () {
+    // Get the actual devices for objects to be updated
+    var updates = new_devices.map(function (device) {
+      return {'user': device.user, 'device': abode.devices.get(device.device._id)};
+    });
+
+    updates = updates.map(function (device) {
+      if (pin.enabled) {
+        return device.device.enable_code(device.user, pin.pin);
+      } else {
+        return device.device.disable_code(device.user);
+      }
+    });
+
+    q.allSettled(updates).then(function () {
+      defer.resolve();
+    });
   });
 
   return defer.promise;

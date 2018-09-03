@@ -98,6 +98,7 @@ var SceneSchema = mongoose.Schema({
           '_mode': {'type': String},
           '_set_point': {'type': Number},
           'locked': {'type': Boolean},
+          '_enabled': {'type': Boolean},
         }
       ],
       'delay': {'type': Number, 'default': 0},
@@ -397,49 +398,69 @@ SceneSchema.methods.start = function () {
       case 'rooms':
         object = rooms.get(action.object_id);
         break;
+      case 'pins':
+        object = abode.auth.get_pin(action.object_id);
+        break;
     }
 
-    log.debug('Processing action: %s', action.name);
+    var continue_action = function (object) {
+      log.debug('Processing action: %s', action.name);
 
-    if (!object) {
-      log.error('Could not find object: ', action.name);
-      defer.reject('Could not find object: ' + action.object_type + '.' + action.object);
-      return defer.promise;
-    }
+      if (!object) {
+        log.error('Could not find object: ', action.name);
+        return defer.reject('Could not find object: ' + action.object_type + '.' + action.object);
+      }
 
-    if (action._on === true && action._level === undefined) {
-      log.debug('Sending ON to object:', object.name);
-      return (action.object_type === 'scenes') ? object.start() : object.on();
-    }
-    if (action.locked === true) {
-      log.debug('Sending Display Lock to object:', object.name);
-      return object.lock();
-    }
-    if (action.locked === false) {
-      log.debug('Sending Display Unlock to object:', object.name);
-      return object.unlock();
-    }
-    if (action._on === false && action._level === undefined) {
-      log.debug('Sending OFF to object:', object.name);
-      return (action.object_type === 'scenes') ? object.stop() : object.off();
-    }
-    if (action._on !== undefined && action._level !== undefined) {
-      log.debug('Sending set level to object:', object.name, action._level);
-      return object.set_level(action._level);
-    }
-    if (action._mode !== undefined) {
-      log.debug('Setting mode for object: ', action.name, action._mode);
-      object.set_mode(action._mode).then(function () {
-        setTimeout(function () {
-          log.debug('Setting set_point for object: ', action.name, action._set_point);
-          object.set_point(action._set_point).then(defer.resolve, defer.reject);
+      if (action._enabled === true) {
+        log.debug('Sending ENABLE to object:', object.name);
+        return object.enable().then(defer.resolve, defer.reject);
+      }
+
+      if (action._enabled === false) {
+        log.debug('Sending DISABLE to object:', object.name);
+        return object.disable().then(defer.resolve, defer.reject);
+      }
+
+      if (action._on === true && action._level === undefined) {
+        log.debug('Sending ON to object:', object.name);
+        return (action.object_type === 'scenes') ? object.start().then(defer.resolve, defer.reject) : object.on().then(defer.resolve, defer.reject);
+      }
+      if (action.locked === true) {
+        log.debug('Sending Display Lock to object:', object.name);
+        return object.lock().then(defer.resolve, defer.reject);
+      }
+      if (action.locked === false) {
+        log.debug('Sending Display Unlock to object:', object.name);
+        return object.unlock().then(defer.resolve, defer.reject);
+      }
+      if (action._on === false && (action._level === undefined || action._level === 0)) {
+        log.debug('Sending OFF to object:', object.name);
+        return (action.object_type === 'scenes') ? object.stop().then(defer.resolve, defer.reject) : object.off().then(defer.resolve, defer.reject);
+      }
+      if (action._on !== undefined && action._level !== undefined) {
+        log.debug('Sending set level to object:', object.name, action._level);
+        return object.set_level(action._level).then(defer.resolve, defer.reject);
+      }
+      if (action._mode !== undefined) {
+        log.debug('Setting mode for object: ', action.name, action._mode);
+        object.set_mode(action._mode).then(function () {
+          setTimeout(function () {
+            log.debug('Setting set_point for object: ', action.name, action._set_point);
+            object.set_point(action._set_point).then(defer.resolve, defer.reject);
+          });
+        }, function (err) {
+          defer.reject(err);
         });
-      }, function (err) {
-        defer.reject(err);
-      });
-    }
+      }
 
-    defer.resolve();
+      defer.resolve();
+    };
+
+    if (object.then) {
+      object.then(continue_action);
+    } else {
+      continue_action(object);
+    }
 
     return defer.promise;
   };
