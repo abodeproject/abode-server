@@ -34,6 +34,7 @@ var updateDetails = function (date) {
   current = date;
   current.setSeconds(0);
   current.setMilliseconds(0);
+
   Time.current = current.getTime();
 
   //Get the day of the week
@@ -62,7 +63,9 @@ var updateDetails = function (date) {
   Time.moon_phase = parseInt(moon_illumination.phase * 100, 10);
 
   Time.sunrise = Time.getTime(suncalc.sunrise);
+  Time.sunriseEnd = Time.getTime(suncalc.sunriseEnd);
   Time.sunset = Time.getTime(suncalc.sunset);
+  Time.sunsetStart = Time.getTime(suncalc.sunsetStart);
   Time.solar_noon = Time.getTime(suncalc.solarNoon);
   Time.goldenHourEvening = Time.getTime(suncalc.goldenHour);
   Time.goldenHourMorning = Time.getTime(suncalc.goldenHourEnd);
@@ -80,13 +83,15 @@ var updateDetails = function (date) {
   Time.is.saturday = (day_int === 6);
   Time.is.dawn = (Time.time === Time.dawn);
   Time.is.sunrise = (Time.time === Time.sunrise);
+  Time.is.sunriseend = (Time.time === Time.sunriseend);
   Time.is.goldenHourMorning = (Time.time === Time.goldenHourMorning);
   Time.is.solar_noon = (Time.time === Time.solar_noon);
   Time.is.goldenHourEvening = (Time.time === Time.goldenHourEvening);
   Time.is.sunset = (Time.time === Time.sunset);
+  Time.is.sunsetstart = (Time.time === Time.sunsetstart);
   Time.is.dusk = (Time.time === Time.dusk);
   Time.is.day = (Time.time > Time.sunrise && Time.time < Time.sunset);
-  Time.is.night = (Time.time > Time.sunset || Time.time < Time.sunrise);
+  Time.is.night = (Time.time > Time.sunset && Time.time < Time.sunrise);
 };
 
 //Primary function to fire events and update times
@@ -110,9 +115,18 @@ var processTime = function () {
       log.debug('sunset');
       events.emit('SUNSET', {'type': 'time', 'name': 'Sunset', 'object': Time.toJSON()});
     }
+
+    if (Time.time === Time.sunsetStart) {
+      log.debug('sunsetstart');
+      events.emit('SUNSET_START', {'type': 'time', 'name': 'Sunset Start', 'object': Time.toJSON()});
+    }
     if (Time.time === Time.sunrise) {
       log.debug('sunrise');
       events.emit('SUNRISE', {'type': 'time', 'name': 'Sunset', 'object': Time.toJSON()});
+    }
+    if (Time.time === Time.sunriseEnd) {
+      log.debug('sunriseend');
+      events.emit('SUNRISE_END', {'type': 'time', 'name': 'Sunset End', 'object': Time.toJSON()});
     }
     if (Time.time === Time.solar_noon) {
       log.debug('solar_noon');
@@ -201,7 +215,9 @@ Time.triggers = [
   {'name': 'TIME_CHANGE'},
   {'name': 'DAY_CHANGE'},
   {'name': 'SUNSET'},
+  {'name': 'SUNSET_START'},
   {'name': 'SUNRISE'},
+  {'name': 'SUNRISE_END'},
   {'name': 'SOLAR_NOON'},
   {'name': 'GOLDEN_HOUR_MORNING'},
   {'name': 'GOLDEN_HOUR_EVENING'},
@@ -216,12 +232,15 @@ Time.toJSON = function () {
     'time': Time.time,
     'dawn': Time.dawn,
     'sunrise': Time.sunrise,
+    'sunriseEnd': Time.sunriseEnd,
     'goldenHourMorning': Time.goldenHourMorning,
     'solarNoon': Time.solarNoon,
     'goldenHourEvening': Time.goldenHourEvening,
     'sunset': Time.sunset,
+    'sunsetStart': Time.sunsetStart,
     'dusk': Time.dusk,
     'night': Time.night,
+    'nightEnd': Time.nightEnd,
     'day': Time.day,
     'sun_azimuth': Time.sun_azimuth,
     'sun_altitude': Time.sun_altitude,
