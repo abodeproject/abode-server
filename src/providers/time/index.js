@@ -91,7 +91,7 @@ var updateDetails = function (date) {
   Time.is.sunsetstart = (Time.time === Time.sunsetstart);
   Time.is.dusk = (Time.time === Time.dusk);
   Time.is.day = (Time.time > Time.sunrise && Time.time < Time.sunset);
-  Time.is.night = (Time.time > Time.sunset && Time.time < Time.sunrise);
+  Time.is.night = (Time.time > Time.sunset || Time.time < Time.sunrise);
 };
 
 //Primary function to fire events and update times
