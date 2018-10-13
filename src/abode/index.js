@@ -12,6 +12,7 @@ var events = require('events');
 var logger = require('log4js'),
   log = logger.getLogger('abode');
 var request = require('request');
+var mdns = require('mdns');
 var SSDP = require('node-ssdp').Server;
 var SSDP_Client = require('node-ssdp').Client;
 var exec = require('child_process').exec;
@@ -58,9 +59,9 @@ Abode.init = function (config) {
   config.fail_on_provider = config.fail_on_provider || true;
   config.hearbeat_interval = config.hearbeat_interval || 10;
   config.event_cache_size = config.event_cache_size || 100;
-  config.disable_upnp = (config.disable_upnp === undefined) ? false : config.disable_upnp;
+  config.disable_mdns = (config.disable_mdns === undefined) ? false : config.disable_mdns;
   config.debug = (config.debug === undefined) ? false : config.debug;
-  config.upnp_client_timeout = config.upnp_client_timeout || 2;
+  config.mdns_client_timeout = config.mdns_client_timeout || 2;
   config.mode = config.mode || 'device';
   config.name = config.name || 'Local';
   config.url = config.url || 'http://' + Abode.get_ip() + ':8080';
@@ -170,7 +171,7 @@ Abode.init = function (config) {
     .then(function() {
       Abode.events.emit('ABODE_STARTED');
       if (!config.disable_upnp) {
-        Abode.start_upnp();
+        Abode.start_mdns();
       }
       defer.resolve();
     }, function (err) {
@@ -210,8 +211,8 @@ Abode.init = function (config) {
     .then(loadModule('network'))
     .then(function () {
       Abode.events.emit('ABODE_STARTED');
-      if (!config.disable_upnp) {
-        Abode.start_upnp();
+      if (!config.disable_mdns) {
+        Abode.start_mdns();
       }
       defer.resolve();
     }, function (err) {
@@ -223,59 +224,66 @@ Abode.init = function (config) {
   return defer.promise;
 };
 
-Abode.start_upnp = function () {
-  Abode.upnp = new SSDP({'udn': Abode.config.name, 'location': Abode.config.url});
+Abode.start_mdns = function () {
+  var mdns_advert,
+    mdns_config = JSON.stringify({'name': Abode.config.name, 'url': Abode.config.url}),
+    mdns_buffer = new Buffer(mdns_config),
+    mdns_base64 ={'base64': mdns_buffer.toString('base64')};
+
   if (Abode.config.mode === 'server') {
-    Abode.upnp.addUSN('abode:server');
+    mdns_advert = mdns.createAdvertisement(mdns.tcp('abode-server'), 80, {txtRecord: mdns_base64});
   } else {
-    Abode.upnp.addUSN('abode:device');
+    mdns_advert = mdns.createAdvertisement(mdns.tcp('abode-device'), 80, {txtRecord: mdns_base64});
   }
-  Abode.upnp.start();
-  log.info('UPNP Server Started');
+
+  mdns_advert.start();
+  log.info('mDNS Advertisement Started');
 };
 
-Abode.detect_upnp = function (type) {
-  var results = [],
+Abode.detect_mdns = function (type) {
+  var browser,
+    results = [],
     defer = Q.defer(),
-    client = new SSDP_Client();
+    sequence = [
+      mdns.rst.DNSServiceResolve()
+    ];
 
-  type = type || 'abode:server';
+  type = type || 'abode-server';
+  browser  = mdns.createBrowser(mdns.tcp(type), {resolverSequence: sequence});
 
   //Set our response handler
-  client.on('response', function (headers) {
-    var name = headers.USN.split('::')[0];
-    var matches = results.filter(function (item) { return (item.url === headers.LOCATION); });
+  browser.on('serviceUp', function (service) {
 
-    //If we have an existing entry, skip it
+    if (!service.txtRecord || !service.txtRecord.base64) {
+      return;
+    }
+
+    var config = new Buffer(service.txtRecord.base64, 'base64');
+    config = config.toString('ascii');
+    config = JSON.parse(config);
+
+    var matches = results.filter(function (service) {
+      return (service.url === config.url);
+    });
+
     if (matches.length > 0) {
       return;
     }
 
-    //Do not return our self
-    if (headers.LOCATION === Abode.config.url) {
-      return;
-    }
-
-    //If a client returns localhost we won't be able to connect so ignore it
-    if (headers.LOCATION.indexOf('localhost') !== -1) {
-      return;
-    }
-
-
     //Add response to our results array
     results.push({
-      'name': name,
-      'url': headers.LOCATION
+      'name': config.name,
+      'url': config.url
     });
   });
 
   //Search for abode servers
-  client.search(type);
+  browser.start();
 
   //Timeout
   setTimeout(function () {
     defer.resolve(results);
-  }, Abode.config.upnp_client_timeout * 1000);
+  }, Abode.config.mdns_client_timeout * 1000);
 
   return defer.promise;
 };

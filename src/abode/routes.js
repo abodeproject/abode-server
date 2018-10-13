@@ -10,14 +10,6 @@ var fs = require('fs'),
   exec = require('child_process').exec,
   router = express.Router();
 
-router.get('/upnp', function (req, res) {
-  abode.detect_upnp('abode:server').then(function (result) {
-    res.status(200).send(result);
-  }, function (err) {
-    res.status(400).send(err);
-  });
-});
-
 router.post('/import_ca', web.isUnlocked, function (req, res) {
   abode.import_ca(req.body.url).then(function (response) {
     res.status(200).send(response);
@@ -26,8 +18,24 @@ router.post('/import_ca', web.isUnlocked, function (req, res) {
   });
 });
 
+router.get('/upnp', function (req, res) {
+  abode.detect_mdns('abode-server').then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+});
+
+router.get('/mdns', function (req, res) {
+  abode.detect_mdns('abode-server').then(function (result) {
+    res.status(200).send(result);
+  }, function (err) {
+    res.status(400).send(err);
+  });
+});
+
 router.get('/detect_devices', function (req, res) {
-  abode.detect_upnp('abode:device').then(function (result) {
+  abode.detect_mdns('abode-device').then(function (result) {
     res.status(200).send(result);
   }, function (err) {
     res.status(400).send(err);
