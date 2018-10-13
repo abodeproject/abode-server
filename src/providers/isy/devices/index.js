@@ -17,6 +17,7 @@ var ZWaveDevice = require('./ZWaveDevice');
 var ZWaveDimmer = require('./ZWaveDimmer');
 var ZWaveMultiSensor = require('./ZWaveMultiSensor');
 var ZWaveOnOff = require('./ZWaveOnOff');
+var ZWaveOpenClose = require('./ZWaveOpenClose');
 var ZWaveTemperature = require('./ZWaveTemperature');
 var ZWaveLock = require('./ZWaveLock');
 
@@ -35,6 +36,7 @@ var get_constructor = function (device) {
     '2.42.69.0': InsteonOnOff,
     '2.55.72.0': InsteonOnOff,
     '2.56.67.0': InsteonOnOff,
+    '4.7.1.0': ZWaveOpenClose,
     '4.16.1.0': ZWaveOnOff,
     '4.33.1.0': ZWaveMultiSensor,
     '4.64.3.0': ZWaveLock,
@@ -85,9 +87,6 @@ var parseDevice = function (node, properties) {
       'formatted': parsed.property.$.formatted,
       'uom': parsed.property.$.uom
     }
-    if (parsed.name === 'Front Door Lock') {
-      console.log('here');
-    };
     delete parsed.property;
   }
 
