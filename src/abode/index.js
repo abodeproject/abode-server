@@ -13,8 +13,6 @@ var logger = require('log4js'),
   log = logger.getLogger('abode');
 var request = require('request');
 var mdns = require('mdns');
-var SSDP = require('node-ssdp').Server;
-var SSDP_Client = require('node-ssdp').Client;
 var exec = require('child_process').exec;
 mongoose.Promise = Q.Promise;
 
