@@ -39,7 +39,7 @@ var ZWaveLock = function () {
   self.capabilities = ['lock'];
 
   self.on('update', function (msg) {
-      console.log(msg);
+      //console.log(msg);
   });
 
   self.on('state-change', function (msg) {
