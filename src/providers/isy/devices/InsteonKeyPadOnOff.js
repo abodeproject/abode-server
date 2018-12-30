@@ -16,12 +16,13 @@ var InsteonKeyPadOnOff = function () {
 
     switch (group) {
       case '1':
-        if (self._on !== (parseInt(msg.action, 10) > 0) && self._on) {
+        var value = (msg.action && msg.action._) ? msg.action._ : msg.action;
+        if (self._on !== (parseInt(value, 10) > 0) && self._on) {
           self.last_off = self.last_seen;
-        } else if (self._on !== (parseInt(msg.action, 10) > 0) && !self._on) {
+        } else if (self._on !== (parseInt(value, 10) > 0) && !self._on) {
           self.last_on = self.last_seen;
         }
-        self._on = (parseInt(msg.action, 10) > 0);
+        self._on = (parseInt(value, 10) > 0);
         break;
       default:
         log.debug('KeyPad Button Changed for %s: %s %s', self.name, group, (parseInt(msg.action, 10) > 0) ? 'on': 'off');

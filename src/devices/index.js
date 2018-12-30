@@ -279,9 +279,12 @@ DeviceSchema.methods.set_state = function (config, log_msg, options) {
   };
 
   Object.keys(config).forEach(function (key) {
+      if (config[key] == NaN) {
+      return;
+  }
 
     if (int_events[key]) {
-      if (Math.floor(self[key]) !== Math.floor(config[key])) {
+      if (!isNaN(config[key]) && Math.floor(self[key]) !== Math.floor(config[key])) {
         changes = true;
         self[key] = config[key];
 

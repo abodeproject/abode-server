@@ -14,15 +14,18 @@ var InsteonMotion = function () {
 
     switch (group) {
       case '1':
-        if (self._motion !== (parseInt(msg.action, 10) > 0) && self._motion) {
+        var value = (msg.action && msg.action._) ? msg.action._ : msg.action;
+        if (self._motion !== (parseInt(value, 10) > 0) && self._motion) {
           self.last_off = self.last_seen;
-        } else if (self._motion !== (parseInt(msg.action, 10) > 0) && !self._motion) {
+        } else if (self._motion !== (parseInt(value, 10) > 0) && !self._motion) {
           self.last_on = self.last_seen;
         }
-        self._motion = (parseInt(msg.action, 10) > 0);
+        self._motion = (parseInt(value, 10) > 0);
         break;
       case '2':
-        self._lumens = (parseInt(msg.action, 10) / 255);
+        if (!isNaN(parseInt(msg.action))) {
+          self._lumens = (parseInt(msg.action, 10) / 255);
+        }
         break;
       case '3':
         self.low_battery = (parseInt(msg.actione, 10) > 0);
@@ -48,7 +51,9 @@ var InsteonMotion = function () {
           self._motion = (parseInt(msg.properties.ST.value, 10) > 0);
           break;
         case '2':
-          self._lumens = ((parseInt(msg.properties.ST.value, 10)) / 255 * 100);
+          if (!isNaN(parseInt(msg.properties.ST.value))) {
+            self._lumens = ((parseInt(msg.properties.ST.value, 10)) / 255 * 100);
+          }
           break;
         case '3':
           self.low_battery = (parseInt(msg.properties.ST.value, 10) > 0);

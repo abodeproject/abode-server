@@ -16,12 +16,13 @@ var InsteonKeyPadDimmer = function (config) {
 
     switch (group) {
       case '1':
-        if (self._on !== (parseInt(msg.action, 10) > 0) && self._on) {
+        var value = (msg.action && msg.action._) ? msg.action._ : msg.action;
+        if (self._on !== (parseInt(value, 10) > 0) && self._on) {
           self.last_off = self.last_seen;
-        } else if (self._on !== (parseInt(msg.action, 10) > 0) && !self._on) {
+        } else if (self._on !== (parseInt(value, 10) > 0) && !self._on) {
           self.last_on = self.last_seen;
         }
-        self._level = Math.round((parseInt(msg.action, 10) / 255) * 100);
+        self._level = Math.round((parseInt(value, 10) / 255) * 100);
         self._on = (self._level > 0);
         break;
       default:

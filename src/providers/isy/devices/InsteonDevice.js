@@ -15,7 +15,8 @@ var InsteonDevice = function (config) {
   }
 
   self.on('state-change', function (msg) {
-    self.config.properties.ST.value = msg.action;
+    var value = (msg.action && msg.action._) ? msg.action._ : msg.action;
+    self.config.properties.ST.value = value;
   });
 
   self.on('update', function (msg) {

@@ -110,7 +110,7 @@ var ZWaveMultiSensor = function () {
     var group = msg.address.split('_')[1];
     self.last_seen = new Date();
 
-    if (msg.properties.ST && msg.properties.ST.value !== " ") {
+    if (msg.properties && msg.properties.ST && msg.properties.ST.value !== " ") {
       switch (group) {
         case '1':
           if (self._motion !== (parseInt(msg.properties.ST, 10) > 0) && self._motion) {
